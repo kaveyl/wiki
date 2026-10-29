@@ -96,7 +96,7 @@ export function ShareDialog({ mountId, target, path, title, more = [], onClose }
                 <Input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
               </Field>
               <Field label={t('Name (optional)')}>
-                <Input value={name} onChange={(e) => setName(e.target.value)} />
+                <Input maxLength={100} value={name} onChange={(e) => setName(e.target.value)} />
               </Field>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1" role="radiogroup" aria-label={t('Recht')}>

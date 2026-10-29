@@ -3,6 +3,25 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.9 (Beta) – 2026-10-30
+
+**Security update – please update.** GitHub code scanning (CodeQL), switched on with the publication, found ways to
+keep the server busy for a long time with specially crafted input. All of them are fixed in this release.
+
+### Upgrade notes
+- **From 0.2.3 to 0.2.8:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+
+### Security
+- **Crafted input could stall the server:** a custom icon, the text of a note (also when it arrives by `git push` into
+  a mounted source) or a display name (also through an invitation link) could make Kaveyl Wiki spend seconds to hours
+  on a single check, during which it answered nobody. These checks now take one pass over the input.
+
+### Changed
+- **Display names** are limited to 100 characters.
+- **Note titles from a heading** follow CommonMark more closely: `# C#` gives the title “C#” (before: “C”), and an
+  empty heading no longer counts as title.
+
 ## 0.2.8 (Beta) – 2026-10-29
 
 The first release published on GitHub: source code under the AGPL-3.0 and the image `ghcr.io/kaveyl/wiki`. To install,

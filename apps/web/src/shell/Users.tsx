@@ -225,7 +225,7 @@ function NewUserForm({ mail, onDone, onCancel }: { mail: boolean; onDone: (text:
           <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} autoComplete="off" autoFocus />
         </Field>
         <Field label={t('Name (Commit-Autor)')}>
-          <Input value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} />
+          <Input maxLength={100} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} />
         </Field>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1" role="radiogroup" aria-label={t('Rolle')}>
@@ -303,7 +303,7 @@ function EditUserDialog({ user, isMe, mail, onClose, onDone }: { user: User; isM
     <Modal help="konten-einladungen-und-teilen-per-e-mail" open onOpenChange={(o) => !o && onClose()} title={t('{name} bearbeiten', { name: user.displayName })}>
       <form className="space-y-3 text-sm" onSubmit={save}>
         <Field label={t('Name (Commit-Autor)')}>
-          <Input value={f.displayName} onChange={(e) => setF({ ...f, displayName: e.target.value })} />
+          <Input maxLength={100} value={f.displayName} onChange={(e) => setF({ ...f, displayName: e.target.value })} />
         </Field>
         <Field label={t('E-Mail (Anmeldung)')}>
           <Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />

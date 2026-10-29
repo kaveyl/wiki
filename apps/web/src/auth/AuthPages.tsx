@@ -503,7 +503,7 @@ function NewAdminForm({ needsCode, code, onCode, onRestore }: { needsCode: boole
       <form className="space-y-4" onSubmit={submit}>
         {needsCode && <SetupCodeField code={code} onCode={onCode} autoFocus />}
         <AuthField label={t('Name')}>
-          <TextInput autoFocus={!needsCode} autoComplete="name" value={f.displayName} onChange={(e) => setF({ ...f, displayName: e.target.value })} placeholder={t('z. B. Alex Muster')} />
+          <TextInput autoFocus={!needsCode} autoComplete="name" maxLength={100} value={f.displayName} onChange={(e) => setF({ ...f, displayName: e.target.value })} placeholder={t('z. B. Alex Muster')} />
         </AuthField>
         <AuthField label={t('E-Mail')}>
           <TextInput type="email" autoComplete="username" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
@@ -639,7 +639,7 @@ function InviteForm({ token, info, onDone, back }: { token: string; info: MailTo
       <form className="space-y-4" onSubmit={submit}>
         <input type="email" autoComplete="username" value={info.email} readOnly hidden />
         <AuthField label={t('Dein Name')}>
-          <TextInput autoFocus autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+          <TextInput autoFocus autoComplete="name" maxLength={100} value={name} onChange={(e) => setName(e.target.value)} />
         </AuthField>
         <NewPassword label={t('Passwort')} value={pw} repeat={repeat} onValue={setPw} onRepeat={setRepeat} context={[info.email, name]} />
         <SubmitButton busy={busy} error={error} missing={[!name.trim() && t('Dein Name'), ...passwordMissing(pw, repeat, t('Passwort'), [info.email, name])]}>

@@ -157,12 +157,19 @@ export function commitAuthor(user: Pick<User, 'id' | 'displayName' | 'username'>
  * – the name ends up in commit trailers, mails and push messages, where a line break starts a new line of its own.
  * Invisible format characters go too (bidi overrides, zero-width spaces): they would make a name look like another one.
  * Kept: the zero-width (non-)joiner, which emoji and some scripts need.
+ * At most {@link DISPLAY_NAME_MAX} characters: the name comes in without a limit, also through an invitation link.
+ * One pass over runs of white space and control characters – a pattern with `[\s…]*` on both sides took quadratic
+ * time on a name of many spaces (CodeQL js/polynomial-redos; 2 MB held the server for minutes).
  */
+export const DISPLAY_NAME_MAX = 100;
+
 export function cleanDisplayName(name: string | undefined): string {
-  return (name ?? '')
-    .replace(/[\s\p{Cc}]*[\p{Cc}\p{Zl}\p{Zp}][\s\p{Cc}]*/gu, ' ')
+  const clean = (name ?? '')
+    .slice(0, DISPLAY_NAME_MAX * 4)
+    .replace(/[\s\p{Cc}]+/gu, (run) => (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(run) ? ' ' : run))
     .replace(/(?![\u200c\u200d])\p{Cf}/gu, '')
     .trim();
+  return Array.from(clean).slice(0, DISPLAY_NAME_MAX).join('').trim();
 }
 
 export class AuthService {

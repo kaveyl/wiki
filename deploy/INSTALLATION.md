@@ -12,16 +12,16 @@ Kaveyl Wiki under **Help** (key F1), in English and German.
 ## 1. Get the image
 
 The image is published on the GitHub Container Registry. In `docker-compose.yml`, `image:` already names it, e.g.
-`ghcr.io/kaveyl/wiki:0.2.8`; `docker compose up -d` (or `docker compose pull`) downloads it.
+`ghcr.io/kaveyl/wiki:0.2.9`; `docker compose up -d` (or `docker compose pull`) downloads it.
 
 Alternatively, each release on GitHub carries the file `kaveyl-wiki-<version>.tar.gz`:
 
 ```sh
 sha256sum -c --ignore-missing SHA256SUMS   # optional: check the downloaded files
-docker load -i kaveyl-wiki-0.2.8.tar.gz
+docker load -i kaveyl-wiki-0.2.9.tar.gz
 ```
 
-Then set `image: kaveyl-wiki:0.2.8` in `docker-compose.yml` – a name without a registry is only looked up on your own
+Then set `image: kaveyl-wiki:0.2.9` in `docker-compose.yml` – a name without a registry is only looked up on your own
 machine.
 
 ## 2. Create the folders and start

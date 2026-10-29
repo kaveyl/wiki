@@ -24,9 +24,39 @@ export function sniffIcon(data: Buffer): string | null {
   if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg';
   if (data.subarray(0, 4).toString('latin1') === 'GIF8') return 'image/gif';
   // SVG: text with an <svg> root (after optional BOM, XML declaration, comments, doctype).
-  const head = data.subarray(0, 4096).toString('utf8').replace(/^﻿/, '');
-  if (/^\s*(<\?xml[^>]*\?>\s*)?(<!--[\s\S]*?-->\s*|<!DOCTYPE[^>]*>\s*)*<svg[\s>]/i.test(head)) return 'image/svg+xml';
-  return null;
+  return isSvgStart(data.subarray(0, 4096).toString('utf8').replace(/^﻿/, '')) ? 'image/svg+xml' : null;
+}
+
+/**
+ * Skips the prolog step by step with indexOf – one pass, no backtracking. A single regular expression with a repeated
+ * group of comments took exponential time on many `<!---->` before a wrong character (CodeQL js/redos): any account
+ * could stop the server with a 4 KB upload.
+ */
+function isSvgStart(head: string): boolean {
+  let i = 0;
+  const skipSpace = () => {
+    while (i < head.length && /\s/.test(head[i]!)) i++;
+  };
+  const startsHere = (s: string) => head.slice(i, i + s.length).toLowerCase() === s;
+  skipSpace();
+  if (startsHere('<?xml')) {
+    const end = head.indexOf('?>', i);
+    if (end < 0) return false;
+    i = end + 2;
+  }
+  for (;;) {
+    skipSpace();
+    if (startsHere('<!--')) {
+      const end = head.indexOf('-->', i + 4);
+      if (end < 0) return false;
+      i = end + 3;
+    } else if (startsHere('<!doctype')) {
+      const end = head.indexOf('>', i);
+      if (end < 0) return false;
+      i = end + 1;
+    } else break;
+  }
+  return startsHere('<svg') && /[\s>]/.test(head[i + 4] ?? '');
 }
 
 /** Display name from the upload's file name: no extension, no path, at most 60 characters. */
