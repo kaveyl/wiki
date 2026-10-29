@@ -1,0 +1,12 @@
+// Type check for the scripts (npm run typecheck). They are plain JS: every file is parsed,
+// one is type-checked once it starts with `// @ts-check` (no checkJs, so existing scripts stay green).
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "declaration": false,
+    "types": ["node"]
+  },
+  "include": ["*.mjs"]
+}

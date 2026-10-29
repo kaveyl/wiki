@@ -1,0 +1,5 @@
+# Kaveyl Wiki is a private wiki behind a login. Every answer carries "X-Robots-Tag: noindex, nofollow"
+# (and the page a robots meta tag). Crawlers must be allowed to fetch it to see that – a
+# "Disallow: /" would hide the noindex and still let bare addresses into an index.
+User-agent: *
+Disallow:

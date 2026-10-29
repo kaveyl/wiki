@@ -1,0 +1,13 @@
+// Type check for the E2E specs and helpers (npm run typecheck); Playwright itself only strips types.
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["**/*.ts"]
+}

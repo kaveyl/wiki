@@ -1,0 +1,18 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.local
+spikes
+e2e
+docs
+*.md
+.env
+.env.*
+# The user manual is built into the app as its help (apps/web/vite.config.ts).
+!docs/BENUTZERHANDBUCH.md
+!docs/API.md
+!docs/handbuch
+!docs/i18n
+# The example agent goes into the help as a download (apps/web/vite.config.ts).
+!examples/incident-agent/README.md

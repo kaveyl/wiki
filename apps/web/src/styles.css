@@ -1,0 +1,741 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens: neutral, Notion-like surfaces with one accent. Dark mode via .dark on <html>. */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f7f7f5;
+  --bg-muted: #efefec;
+  /* Light enough that --fg-muted keeps 4.5:1 on hover/active rows, also over --bg-subtle (AD-048). */
+  --bg-hover: rgba(55, 53, 47, 0.035);
+  --bg-active: rgba(55, 53, 47, 0.06);
+  --scrollbar: rgba(55, 53, 47, 0.1);
+  --fg: #2f2f2c;
+  --fg-muted: #6b6b66;
+  --fg-faint: #72716e;
+  --border: #e6e6e3;
+  --border-control: #8f8f8c;
+  --accent: #4f46e5;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --danger: #dc2626;
+  --warn: #b45309;
+  --ok: #15803d;
+  --mark: rgba(250, 204, 21, 0.45);
+  --code-bg: rgba(135, 131, 120, 0.15);
+  --shadow: 0 8px 30px rgba(15, 15, 15, 0.12), 0 0 0 1px rgba(15, 15, 15, 0.06);
+}
+
+.dark {
+  --bg: #191919;
+  --bg-subtle: #202020;
+  --bg-muted: #2a2a2a;
+  --bg-hover: rgba(255, 255, 255, 0.055);
+  --bg-active: rgba(255, 255, 255, 0.09);
+  --scrollbar: rgba(255, 255, 255, 0.09);
+  --fg: #e6e6e3;
+  --fg-muted: #a3a29e;
+  --fg-faint: #888782;
+  --border: #2f2f2f;
+  --border-control: #6a6a6a;
+  --accent: #818cf8;
+  --accent-fg: #0b0b12;
+  --accent-soft: rgba(129, 140, 248, 0.16);
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --ok: #4ade80;
+  --mark: rgba(250, 204, 21, 0.3);
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Sign-in pages (login, setup, reset, invitation): the brand look of the login design. The
+   tokens are overridden only inside .auth, so Input/Button keep working unchanged. */
+.auth {
+  --auth-card: #ffffff;
+  --auth-shadow: 0 1px 2px rgba(30, 27, 75, 0.04), 0 12px 40px rgba(30, 27, 75, 0.08);
+  --auth-link: #4f46e5;
+  --border: #e3e4ee;
+  --border-control: #93949e;
+}
+.dark .auth {
+  --auth-card: #16153a;
+  --auth-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 48px rgba(0, 0, 0, 0.45);
+  /* Links need more light than the button colour on the dark panel (WCAG AA). */
+  --auth-link: #a5b4fc;
+  --bg: #100f29;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --border: #2c2a5a;
+  --border-control: #636191;
+  --fg-muted: #a9a8c9;
+  --fg-faint: #7c7aa3;
+  /* The brand indigo with white text, as in the light theme. */
+  --accent: #6366f1;
+  --accent-fg: #ffffff;
+  --accent-soft: rgba(99, 102, 241, 0.25);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-subtle: var(--bg-subtle);
+  --color-muted: var(--bg-muted);
+  --color-hover: var(--bg-hover);
+  --color-active: var(--bg-active);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-line: var(--border);
+  --color-line-control: var(--border-control);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --color-ok: var(--ok);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --shadow-pop: var(--shadow);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Font sizes (Einstellungen → Darstellung → Schriftgröße, prefs.ts): factors set on <html>.
+   The interface scales through rem (Tailwind text and spacing), the sidebar, the note and code each on their own. */
+html {
+  font-size: calc(16px * var(--fs-ui, 1));
+}
+.text-tree {
+  font-size: calc(0.8125rem * var(--fs-tree, 1));
+}
+.text-code {
+  font-size: calc(13px * var(--fs-mono, 1));
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+/* Hover and selection rows (tree, lists, menu entries, search hits): --fg-faint reaches 4.5:1 only on resting
+   surfaces, so grey helper text on a hover/active tint switches to --fg-muted (AD-048). Matches the classes
+   that lay the tint, in the state where they do; contrast.test.ts checks that every such class is listed. */
+[class~='bg-hover'],
+[class~='bg-active'],
+[class~='data-[highlighted]:bg-hover'][data-highlighted],
+[class~='data-[state=open]:bg-hover'][data-state='open'] {
+  --fg-faint: var(--fg-muted);
+}
+@media (hover: hover) {
+  [class~='hover:bg-hover']:hover,
+  [class~='hover:bg-active']:hover,
+  [class~='group/x']:hover [class~='group-hover/x:bg-active'] {
+    --fg-faint: var(--fg-muted);
+  }
+}
+
+/* Sideways scrolling rows (scrollHint.ts): fade the edge where more entries hide, so a cut-off entry
+   reads as "continues". The 1 px band at the bottom keeps a bottom border unfaded; scroll-padding keeps
+   a focused entry out of the faded edge. */
+.scroll-hint {
+  --hint-start: #000;
+  --hint-end: #000;
+  scroll-padding-inline: 1.5rem;
+}
+.scroll-hint[data-more-start] {
+  --hint-start: transparent;
+}
+.scroll-hint[data-more-end] {
+  --hint-end: transparent;
+}
+.scroll-hint[data-more-start],
+.scroll-hint[data-more-end] {
+  -webkit-mask:
+    linear-gradient(to right, var(--hint-start), #000 1.5rem, #000 calc(100% - 1.5rem), var(--hint-end)),
+    linear-gradient(#000, #000) bottom / 100% 1px no-repeat;
+  mask:
+    linear-gradient(to right, var(--hint-start), #000 1.5rem, #000 calc(100% - 1.5rem), var(--hint-end)),
+    linear-gradient(#000, #000) bottom / 100% 1px no-repeat;
+}
+
+/* Fields show their shape only through the border: border-line on them uses the stronger control
+   border (WCAG 1.4.11, 3:1). Separators and cards keep --border. */
+input,
+select,
+textarea {
+  --border: var(--border-control);
+}
+
+/* A field marked invalid (Field/AuthField error) shows it in its own border and focus ring, not
+   only in the text below (design-012). --danger keeps 3:1 against the surroundings (WCAG 1.4.11). */
+:is(input, select, textarea)[aria-invalid='true'] {
+  --border: var(--danger);
+  --accent: var(--danger);
+  --accent-soft: color-mix(in srgb, var(--danger) 20%, transparent);
+}
+
+mark.hit {
+  background: var(--mark);
+  color: inherit;
+  border-radius: 2px;
+}
+
+/* ── Editor content ─────────────────────────────────────────────────────────── */
+.prose-note {
+  font-size: calc(16px * var(--fs-doc, 1));
+  line-height: 1.65;
+  outline: none;
+  color: var(--fg);
+}
+.prose-note > * + * {
+  margin-top: 0.6em;
+}
+.prose-note h1 {
+  font-size: 1.9em;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.4em;
+}
+.prose-note h2 {
+  font-size: 1.45em;
+  font-weight: 650;
+  line-height: 1.3;
+  margin-top: 1.3em;
+}
+.prose-note h3 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-top: 1.2em;
+}
+.prose-note h4,
+.prose-note h5,
+.prose-note h6 {
+  font-weight: 600;
+  margin-top: 1em;
+}
+.prose-note > :first-child {
+  margin-top: 0;
+}
+.prose-note a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.prose-note code {
+  font-family: var(--font-mono);
+  font-size: calc(0.86em * var(--fs-mono, 1));
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: 0.15em 0.35em;
+}
+.prose-note pre {
+  font-family: var(--font-mono);
+  font-size: calc(13px * var(--fs-mono, 1));
+  line-height: 1.55;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+.prose-note pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+.prose-note blockquote {
+  border-left: 3px solid var(--fg);
+  padding-left: 14px;
+  color: var(--fg);
+}
+/* A link that leads nowhere (BrokenLinks.ts): red and dashed, the whole link including its icon. */
+.prose-note a:has(.link-broken) {
+  color: var(--danger);
+  text-decoration-style: dashed;
+  text-decoration-color: color-mix(in srgb, var(--danger) 70%, transparent);
+}
+/* Link mentions: links to notes and attachments get a small icon (the file keeps a plain link); a link to a spot in
+   the help (`/?hilfe=…`, help.ts) is no note. */
+.prose-note a[href$='.md']::before,
+.prose-note a[href*='.md#']::before,
+.prose-note a[href^='/']:not([href^='//']):not([href^='/?hilfe='])::before,
+.prose-note a[href^='assets/']::before,
+.prose-note a[href*='/assets/']::before {
+  content: '';
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.2em;
+  vertical-align: -0.08em;
+  background: currentColor;
+  opacity: 0.7;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z'/%3E%3Cpath d='M14 2v4a2 2 0 0 0 2 2h4'/%3E%3Cpath d='M10 9H8M16 13H8M16 17H8'/%3E%3C/svg%3E");
+}
+.prose-note a[href^='assets/']::before,
+.prose-note a[href*='/assets/']::before {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E");
+}
+/* GitHub alerts (> [!NOTE] …) — same colours as GitHub/Gitea. */
+.prose-note .callout {
+  --c: #0969da;
+  border-left: 3px solid var(--c);
+  padding: 2px 14px;
+  margin: 0.8em 0;
+}
+.prose-note .callout::before {
+  display: block;
+  margin: 4px 0 2px;
+  font-size: 0.8125em;
+  font-weight: 600;
+  color: var(--c);
+}
+.prose-note .callout[data-callout='NOTE']::before { content: var(--callout-note, 'ℹ︎  Hinweis'); }
+.prose-note .callout[data-callout='TIP'] { --c: #1a7f37; }
+.prose-note .callout[data-callout='TIP']::before { content: var(--callout-tip, '💡 Tipp'); }
+.prose-note .callout[data-callout='IMPORTANT'] { --c: #8250df; }
+.prose-note .callout[data-callout='IMPORTANT']::before { content: var(--callout-important, '❗ Wichtig'); }
+.prose-note .callout[data-callout='WARNING'] { --c: #9a6700; }
+.prose-note .callout[data-callout='WARNING']::before { content: var(--callout-warning, '⚠︎  Warnung'); }
+.prose-note .callout[data-callout='CAUTION'] { --c: #cf222e; }
+.prose-note .callout[data-callout='CAUTION']::before { content: var(--callout-caution, '⛔ Vorsicht'); }
+.dark .prose-note .callout { --c: #4493f8; }
+.dark .prose-note .callout[data-callout='TIP'] { --c: #3fb950; }
+.dark .prose-note .callout[data-callout='IMPORTANT'] { --c: #ab7df8; }
+.dark .prose-note .callout[data-callout='WARNING'] { --c: #d29922; }
+.dark .prose-note .callout[data-callout='CAUTION'] { --c: #f85149; }
+.prose-note .callout > :first-child { margin-top: 0.2em; }
+/* Collapsible blocks (<details>): toggle button + summary line + foldable content. */
+.prose-note [data-type='details'] {
+  display: flex;
+  gap: 4px;
+  margin: 0.6em 0;
+  padding: 4px 8px 4px 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.prose-note [data-type='details'] > button {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: 4px;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prose-note [data-type='details'] > button:hover { background: var(--bg-hover); }
+.prose-note [data-type='details'] > button::before {
+  content: '▸';
+  display: inline-block;
+  transition: transform 0.15s;
+}
+.prose-note [data-type='details'].is-open > button::before { transform: rotate(90deg); }
+.prose-note [data-type='details'] > div { flex: 1; min-width: 0; }
+.prose-note [data-type='details'] summary {
+  display: block;
+  font-weight: 600;
+  list-style: none;
+  padding: 1px 0;
+}
+.prose-note [data-type='details'] summary::-webkit-details-marker { display: none; }
+.prose-note [data-type='detailsContent'] > :first-child { margin-top: 0.3em; }
+/* Code highlighting (lowlight / highlight.js classes), GitHub-like palette. */
+.prose-note .hljs-comment, .prose-note .hljs-quote { color: #6e7781; font-style: italic; }
+.prose-note .hljs-keyword, .prose-note .hljs-selector-tag, .prose-note .hljs-built_in, .prose-note .hljs-meta .hljs-keyword { color: #cf222e; }
+.prose-note .hljs-string, .prose-note .hljs-regexp, .prose-note .hljs-addition, .prose-note .hljs-meta .hljs-string { color: #0a3069; }
+.prose-note .hljs-number, .prose-note .hljs-literal, .prose-note .hljs-variable, .prose-note .hljs-template-variable, .prose-note .hljs-attr, .prose-note .hljs-attribute { color: #0550ae; }
+.prose-note .hljs-title, .prose-note .hljs-section, .prose-note .hljs-title.function_ { color: #8250df; }
+.prose-note .hljs-type, .prose-note .hljs-title.class_, .prose-note .hljs-symbol, .prose-note .hljs-name, .prose-note .hljs-selector-id, .prose-note .hljs-selector-class { color: #953800; }
+.prose-note .hljs-deletion { color: #82071e; }
+.prose-note .hljs-meta { color: #6e7781; }
+.dark .prose-note .hljs-comment, .dark .prose-note .hljs-quote, .dark .prose-note .hljs-meta { color: #8b949e; }
+.dark .prose-note .hljs-keyword, .dark .prose-note .hljs-selector-tag, .dark .prose-note .hljs-built_in, .dark .prose-note .hljs-meta .hljs-keyword { color: #ff7b72; }
+.dark .prose-note .hljs-string, .dark .prose-note .hljs-regexp, .dark .prose-note .hljs-addition, .dark .prose-note .hljs-meta .hljs-string { color: #a5d6ff; }
+.dark .prose-note .hljs-number, .dark .prose-note .hljs-literal, .dark .prose-note .hljs-variable, .dark .prose-note .hljs-template-variable, .dark .prose-note .hljs-attr, .dark .prose-note .hljs-attribute { color: #79c0ff; }
+.dark .prose-note .hljs-title, .dark .prose-note .hljs-section, .dark .prose-note .hljs-title.function_ { color: #d2a8ff; }
+.dark .prose-note .hljs-type, .dark .prose-note .hljs-title.class_, .dark .prose-note .hljs-symbol, .dark .prose-note .hljs-name, .dark .prose-note .hljs-selector-id, .dark .prose-note .hljs-selector-class { color: #ffa657; }
+.dark .prose-note .hljs-deletion { color: #ffdcd7; }
+.prose-note ul,
+.prose-note ol {
+  padding-left: 1.5em;
+}
+.prose-note ul {
+  list-style: disc;
+}
+.prose-note ol {
+  list-style: decimal;
+}
+.prose-note li > p {
+  margin: 0.15em 0;
+}
+.prose-note ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.2em;
+}
+.prose-note ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5em;
+  /* The box sits on the baseline of the first text line – the same for every font (line boxes of e.g. Segoe UI
+     place the letters higher than those of other fonts, so an offset from the top did not fit everywhere). */
+  align-items: baseline;
+}
+.prose-note ul[data-type='taskList'] li > label {
+  display: inline-flex;
+  user-select: none;
+}
+.prose-note ul[data-type='taskList'] li > label input {
+  accent-color: var(--accent);
+  width: 0.95em;
+  height: 0.95em;
+  margin: 0;
+  /* Centre of the box at half the height of capitals and digits above the baseline. */
+  position: relative;
+  top: 0.125em;
+}
+.prose-note ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--fg-faint);
+  text-decoration: line-through;
+}
+.prose-note ul[data-type='taskList'] li > div {
+  flex: 1;
+}
+.prose-note hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.4em 0;
+}
+.prose-note table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875em;
+  overflow: hidden;
+}
+.prose-note th,
+.prose-note td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  vertical-align: top;
+  position: relative;
+}
+.prose-note th {
+  background: var(--bg-subtle);
+  font-weight: 600;
+  text-align: left;
+}
+.prose-note td > p,
+.prose-note th > p {
+  margin: 0;
+}
+.prose-note .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-soft);
+  pointer-events: none;
+}
+.prose-note img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+/* Images in the editor: the wrapper carries the width (AD-019), a corner handle drags it. */
+.prose-note .note-image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: bottom;
+  line-height: 0;
+}
+.prose-note .note-image.has-width img {
+  width: 100%;
+}
+/* Not loaded yet: some room, so lazy loading only fetches what is near (NoteView). */
+.prose-note .note-image.is-pending img {
+  min-width: 6em;
+  min-height: 6em;
+}
+/* Large images (owner 2026-10-11): without an own width an image takes at most about two
+   thirds of the window height, so it never fills the whole screen; the magnifier shows it big. */
+.prose-note .note-image:not(.has-width) img {
+  max-height: min(65vh, 720px);
+  width: auto;
+}
+.prose-note .note-image-zoom {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  color: var(--fg);
+  opacity: 0;
+  cursor: zoom-in;
+  line-height: 0;
+  transition: opacity 0.15s;
+}
+.prose-note .note-image:hover .note-image-zoom,
+.prose-note .note-image.ProseMirror-selectednode .note-image-zoom,
+.prose-note .note-image-zoom:focus-visible {
+  opacity: 1;
+}
+/* Touch devices have no hover: the magnifier stays visible (small and translucent). */
+@media (hover: none) {
+  .prose-note .note-image-zoom {
+    opacity: 0.8;
+  }
+}
+.ProseMirror[contenteditable='false'] .note-image img {
+  cursor: zoom-in;
+}
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.85);
+  cursor: zoom-out;
+}
+.lightbox::backdrop {
+  background: transparent;
+}
+.lightbox img {
+  max-width: 100%;
+  max-height: calc(100% - 32px);
+  object-fit: contain;
+  border-radius: 4px;
+}
+.lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  background: rgb(255 255 255 / 0.12);
+}
+.lightbox-caption {
+  max-width: 100%;
+  color: #ddd;
+  font-size: 13px;
+  text-align: center;
+}
+.prose-note .note-image.ProseMirror-selectednode img {
+  outline: 2px solid var(--accent);
+}
+.prose-note .note-image-handle {
+  display: none;
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.prose-note[contenteditable='true'] .note-image.ProseMirror-selectednode .note-image-handle,
+.prose-note[contenteditable='true'] .note-image:hover .note-image-handle {
+  display: block;
+}
+.prose-note [data-raw-block] {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  padding: 8px 12px;
+}
+.prose-note [data-raw-block] pre {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  white-space: pre-wrap;
+  color: var(--fg-muted);
+}
+.prose-note [data-raw-block].ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+.prose-note [data-raw-inline] {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--fg-muted);
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: 0 0.25em;
+}
+.prose-note p.is-editor-empty:first-child::before,
+.prose-note .is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--fg-faint);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.prose-note ::selection {
+  background: var(--accent-soft);
+}
+
+/* Format painter armed: brush cursor over the text. */
+.prose-note.format-painter,
+.format-painter.ProseMirror {
+  cursor: copy;
+}
+
+/* Math (KaTeX) and Mermaid previews. */
+.prose-note .math-block {
+  margin: 0.8em 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  cursor: pointer;
+}
+.prose-note .math-block:hover,
+.prose-note .math-inline:hover {
+  background: var(--bg-hover);
+}
+.prose-note .math-inline {
+  border-radius: 4px;
+  padding: 0 2px;
+  cursor: pointer;
+}
+.prose-note .math-block.is-selected,
+.prose-note .math-inline.is-selected {
+  outline: 2px solid var(--accent);
+}
+.prose-note .code-block pre {
+  margin: 0;
+}
+.prose-note .code-block {
+  margin: 0.8em 0;
+}
+.prose-note .mermaid-preview {
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+  text-align: center;
+  background: var(--bg);
+}
+.prose-note .mermaid-preview svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose-note [data-raw-inline][data-plain] {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+}
+
+/* Tree drag & drop: a line above/below the row, or the folder highlighted. */
+[data-node][data-drop='before'] { box-shadow: inset 0 2px 0 var(--accent); }
+[data-node][data-drop='after'] { box-shadow: inset 0 -2px 0 var(--accent); }
+[data-node][data-drop='into'] { background: var(--accent-soft); }
+[data-mount][data-drop='before'] { box-shadow: inset 0 2px 0 var(--accent); }
+[data-mount][data-drop='after'] { box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* The browser's print command in the app (and encrypted notes, which only exist in plain text
+   here): just the note. „Drucken / als PDF“ prints the server's clean export instead (Phase 6). */
+@media print {
+  .note-image-zoom,
+  .lightbox {
+    display: none !important;
+  }
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  aside,
+  [role='toolbar'],
+  [data-print='hide'],
+  .note-image-handle {
+    display: none !important;
+  }
+  main,
+  main * {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  /* The app frame around main (full-height flex boxes with overflow hidden) would clip it to nothing. */
+  #root div:has(main) {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .prose-note {
+    font-size: 11pt;
+  }
+  .prose-note pre,
+  .prose-note blockquote,
+  .prose-note table,
+  .prose-note img {
+    break-inside: avoid;
+  }
+}
+
+
+/* AI answers and suggestions rendered like a note, but at chat size. */
+.prose-note.prose-compact {
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.prose-compact h1 {
+  font-size: 1.35em;
+  margin-top: 0.9em;
+}
+.prose-compact h2 {
+  font-size: 1.2em;
+  margin-top: 0.9em;
+}
+.prose-compact h3 {
+  font-size: 1.08em;
+  margin-top: 0.8em;
+}
+.prose-compact table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}

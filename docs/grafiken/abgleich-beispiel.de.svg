@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 960" width="1400" height="960" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <style>
+    .time{font-size:20px;font-weight:800;fill:#0f172a}
+    .h{font-size:18px;font-weight:700;fill:#0f172a}
+    .l{font-size:15px;fill:#334155}
+    .s{font-size:14px;fill:#64748b}
+    .chip{font-size:13px;font-weight:700;fill:#fff}
+  </style>
+  <rect width="1400" height="960" fill="#f8fafc"/>
+  <text x="40" y="44" font-size="26" font-weight="800" fill="#0f172a">Beispiel: Anna schreibt, ein Agent antwortet, eine Kollegin pusht</text>
+  <text x="40" y="72" class="s">Team-Wiki als Git-Quelle mit Push-Webhook · Tom hat die Notiz offen · Lena beobachtet den Ordner (E-Mail „gebündelt“) · ein Agent hört per Ereignis-Webhook zu</text>
+
+  <line x1="200" y1="110" x2="200" y2="900" stroke="#cbd5e1" stroke-width="3"/>
+
+  <!-- 1 -->
+  <text x="176" y="130" text-anchor="end" class="time">10:00:00</text>
+  <circle cx="200" cy="124" r="9" fill="#4f46e5"/>
+  <rect x="230" y="104" width="1130" height="58" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="250" y="129" class="h">👩 Anna tippt einen Absatz in „Projektplan“ und hört auf.</text>
+  <text x="250" y="150" class="s">im Browser</text>
+
+  <!-- 2 -->
+  <text x="176" y="206" text-anchor="end" class="time">+0,7 s</text>
+  <circle cx="200" cy="200" r="9" fill="#4f46e5"/>
+  <rect x="230" y="178" width="1130" height="82" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="250" y="203" class="h">📄 Gespeichert – die Datei auf dem Server ist neu.</text>
+  <text x="250" y="226" class="l">👨 Tom sieht den Absatz sofort in seiner offenen Notiz (sein Cursor bleibt, wo er war).</text>
+  <text x="250" y="247" class="l">🔵 Bei Lena erscheint sofort ein Punkt im Baum.</text>
+
+  <!-- 3 -->
+  <text x="176" y="302" text-anchor="end" class="time">+1 s</text>
+  <circle cx="200" cy="296" r="9" fill="#ea580c"/>
+  <rect x="230" y="276" width="1130" height="58" rx="10" fill="#fff" stroke="#fed7aa"/>
+  <text x="250" y="301" class="h">⚡ Ereignis-Webhook: der Agent bekommt „Projektplan geändert, von Anna“.</text>
+  <text x="250" y="322" class="s">Kaveyl Wiki bündelt, was innerhalb einer Sekunde passiert, und ruft dann die Adresse des Agenten auf.</text>
+
+  <!-- 4 -->
+  <text x="176" y="376" text-anchor="end" class="time">+5 s</text>
+  <circle cx="200" cy="370" r="9" fill="#4f46e5"/>
+  <rect x="230" y="350" width="1130" height="58" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="250" y="375" class="h">🤖 Der Agent schreibt seine Antwort über MCP in die Notiz – Anna und Tom sehen sie sofort.</text>
+  <text x="250" y="396" class="s">Wie lange der Agent braucht, hängt vom Agenten ab. Seine eigene Änderung meldet ihm der Webhook nicht zurück.</text>
+
+  <!-- 5 -->
+  <text x="176" y="450" text-anchor="end" class="time">10:02:00</text>
+  <circle cx="200" cy="444" r="9" fill="#4f46e5"/>
+  <rect x="230" y="424" width="1130" height="58" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="250" y="449" class="h">✉️ Lena bekommt eine E-Mail mit beiden Änderungen (Anna und Agent).</text>
+  <text x="250" y="470" class="s">„Gebündelt“ = 2 Minuten nach der ersten Änderung. Bei „stündlich“ oder „täglich“ käme sie später.</text>
+
+  <!-- 6 -->
+  <text x="176" y="524" text-anchor="end" class="time">~10:02</text>
+  <circle cx="200" cy="518" r="9" fill="#059669"/>
+  <rect x="230" y="498" width="1130" height="82" rx="10" fill="#fff" stroke="#a7f3d0"/>
+  <text x="250" y="523" class="h">⬆ 2 Minuten Pause: Commit + Push nach Gitea – ein Commit für Anna, einer für den Agenten.</text>
+  <text x="250" y="546" class="l">Hätte Anna die Notiz verlassen oder Strg+S gedrückt, wäre das schon um 10:00 passiert.</text>
+  <text x="250" y="567" class="s">Schreibt jemand am Stück ohne Pause, überträgt Kaveyl Wiki spätestens alle 10 Minuten.</text>
+
+  <!-- 7 -->
+  <text x="176" y="622" text-anchor="end" class="time">10:03:00</text>
+  <circle cx="200" cy="616" r="9" fill="#64748b"/>
+  <rect x="230" y="596" width="1130" height="58" rx="10" fill="#fff" stroke="#e2e8f0"/>
+  <text x="250" y="621" class="h">🧑‍💻 Die Kollegin ändert dieselbe Notiz in VS Code und macht git push.</text>
+  <text x="250" y="642" class="s">Sie arbeitet in ihrer eigenen Kopie des Repositorys; vorher holt sie sich mit git pull den Stand von 10:02.</text>
+
+  <!-- 8 -->
+  <text x="176" y="696" text-anchor="end" class="time">+1 s</text>
+  <circle cx="200" cy="690" r="9" fill="#ea580c"/>
+  <rect x="230" y="670" width="1130" height="104" rx="10" fill="#fff" stroke="#fed7aa"/>
+  <text x="250" y="695" class="h">⚡ Gitea meldet den Push per Webhook – Kaveyl Wiki holt die Änderung sofort.</text>
+  <text x="250" y="718" class="l">👨 Tom und 👩 Anna sehen sie in der offenen Notiz, 🔵 Lena bekommt einen Punkt,</text>
+  <text x="250" y="739" class="l">⚡ der Agent seinen Ereignis-Webhook („von außen“), und ✉️ Lenas nächste E-Mail folgt 2 Minuten später.</text>
+  <text x="250" y="760" class="s">Ohne Push-Webhook passiert das beim nächsten Abgleich – spätestens 5 Minuten später (hier bis 10:08).</text>
+
+  <!-- legend -->
+  <rect x="40" y="800" width="1320" height="132" rx="12" fill="#fff" stroke="#e2e8f0"/>
+  <text x="62" y="832" class="h">Merksätze</text>
+  <circle cx="70" cy="858" r="7" fill="#4f46e5"/><text x="86" y="863" class="l">In Kaveyl Wiki (App, API, MCP) ist alles sofort da – für alle, die es sehen dürfen.</text>
+  <circle cx="70" cy="884" r="7" fill="#059669"/><text x="86" y="889" class="l">Nach Git geht es gebündelt: Notiz verlassen / Strg+S sofort, sonst nach der Pause (Standard 2 Min, je Quelle einstellbar), spätestens 10 Min.</text>
+  <circle cx="70" cy="910" r="7" fill="#ea580c"/><text x="86" y="915" class="l">Aus Git kommt es alle 5 Minuten – mit Push-Webhook nach ~1 Sekunde. Ereignis-Webhooks melden jede Änderung nach ~1 Sekunde weiter.</text>
+</svg>

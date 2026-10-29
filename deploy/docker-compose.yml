@@ -1,0 +1,44 @@
+# Kaveyl Wiki – template for your own server. Guide: INSTALLATION.md
+# All data lives in the folders under ./kaveyl-wiki next to this file.
+# Fixed project name (otherwise Docker takes the folder name).
+name: kaveyl-wiki
+services:
+  kaveyl-wiki:
+    # From the GitHub Container Registry. For a file loaded with “docker load”: kaveyl-wiki:<version> (no registry).
+    # From your own registry, e.g. gitea.example.org/releases/kaveyl-wiki:<version>.
+    image: ghcr.io/kaveyl/wiki:0.2.8
+    container_name: kaveyl-wiki
+    restart: unless-stopped
+    # Runs as user 1000, group 1000. Do the folders below ./kaveyl-wiki belong to another user (e.g. yours on a NAS)?
+    # Then enter that user's numbers – shown by: id <user> – for example:
+    # user: "1000:100"
+    # Time to save and push pending changes when stopping.
+    stop_grace_period: 30s
+    ports:
+      # Reachable in your network at http://<IP of this server>:8093.
+      # Reverse proxy on this same Docker host? Then "127.0.0.1:8093:8000" (only reachable on this machine).
+      - "8093:8000"
+    environment:
+      # Time zone for the nightly run and the backup schedules, e.g. Europe/Vienna, Europe/Berlin, America/New_York.
+      TZ: Europe/Berlin
+      LOG_LEVEL: info
+      # Behind a reverse proxy: its address, so Kaveyl Wiki sees the real visitor address – one address per line,
+      # # to the end of the line is a comment. The addresses below are examples: uncomment the lines and enter the
+      # addresses of your own proxies (see INSTALLATION.md).
+      # TRUST_PROXY: |
+      #   192.168.1.10   # Nginx Proxy Manager
+      #   172.18.0.5     # Pangolin/Newt
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+    volumes:
+      # Database, key and backups – be sure to back these up.
+      - ./kaveyl-wiki/config:/config
+      # Working copies of the repositories (can be fetched again).
+      - ./kaveyl-wiki/data:/data
+      # Optional: folders for notes on this server only (each subfolder can be added as “Local folder”, with versions).
+      - ./kaveyl-wiki/docs:/docs
+      # Target for local backups (better on another disk).
+      - ./kaveyl-wiki/backup:/backup

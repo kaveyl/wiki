@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1010" width="1400" height="1010" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a-ind" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4f46e5"/></marker>
+    <marker id="a-grn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#059669"/></marker>
+    <marker id="a-blu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0284c7"/></marker>
+    <marker id="a-org" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker>
+    <marker id="a-gry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker>
+    <style>
+      .box{fill:#fff;stroke:#cbd5e1;stroke-width:1.5}
+      .t{font-size:17px;font-weight:700;fill:#0f172a}
+      .s{font-size:14px;fill:#475569}
+      .l{font-size:14px;fill:#0f172a}
+      .lb{font-size:14px;font-weight:700}
+      .chip{font-size:13px;font-weight:700;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1400" height="1010" fill="#f8fafc"/>
+  <text x="40" y="44" font-size="26" font-weight="800" fill="#0f172a">Wer schickt was wohin – und wann</text>
+  <text x="40" y="72" class="s">Zeiten ab Werk. Die Pause vor dem Übertragen stellst du je Quelle ein, den Rhythmus der E-Mails je Person.</text>
+
+  <!-- ── Left: people and agents ─────────────────────────── -->
+  <rect class="box" x="40" y="110" width="270" height="92" rx="12"/>
+  <text x="62" y="142" class="t">👩 Du im Browser</text>
+  <text x="62" y="166" class="s">schreibst in einer Notiz</text>
+  <text x="62" y="186" class="s">(PC, Tablet, Handy)</text>
+
+  <rect class="box" x="40" y="300" width="270" height="92" rx="12"/>
+  <text x="62" y="332" class="t">👨 Andere im Browser</text>
+  <text x="62" y="356" class="s">haben dieselbe Notiz offen</text>
+  <text x="62" y="376" class="s">oder sehen den Baum</text>
+
+  <rect class="box" x="40" y="490" width="270" height="92" rx="12"/>
+  <text x="62" y="522" class="t">🤖 KI-Agent / Programm</text>
+  <text x="62" y="546" class="s">schreibt über MCP oder die API</text>
+  <text x="62" y="566" class="s">(mit eigenem Token)</text>
+
+  <!-- ── Center: Kaveyl Wiki ─────────────────────────────── -->
+  <rect x="520" y="250" width="340" height="300" rx="16" fill="#eef2ff" stroke="#4f46e5" stroke-width="2.5"/>
+  <text x="690" y="290" text-anchor="middle" font-size="22" font-weight="800" fill="#312e81">Kaveyl Wiki</text>
+  <text x="690" y="312" text-anchor="middle" class="s">auf deinem Server</text>
+  <rect x="548" y="332" width="284" height="56" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="690" y="356" text-anchor="middle" class="l" font-weight="700">📄 Notiz als .md-Datei</text>
+  <text x="690" y="376" text-anchor="middle" class="s">jede Änderung landet sofort hier</text>
+  <rect x="548" y="400" width="284" height="56" rx="10" fill="#fff" stroke="#c7d2fe"/>
+  <text x="690" y="424" text-anchor="middle" class="l" font-weight="700">🌿 Git-Kopie der Quelle</text>
+  <text x="690" y="444" text-anchor="middle" class="s">Commit je Person, dann Push</text>
+  <text x="690" y="482" text-anchor="middle" class="s">Was es merkt, meldet es weiter:</text>
+  <text x="690" y="502" text-anchor="middle" class="s">live an Offene, Punkte, E-Mails,</text>
+  <text x="690" y="522" text-anchor="middle" class="s">Ereignis-Webhooks</text>
+
+  <!-- ── Right: Git server, colleague, folder ─────────────── -->
+  <rect class="box" x="1090" y="110" width="270" height="92" rx="12"/>
+  <text x="1112" y="142" class="t">🧑‍💻 Kollegin mit VS Code</text>
+  <text x="1112" y="166" class="s">eigene Kopie des Repos,</text>
+  <text x="1112" y="186" class="s">arbeitet mit git push / pull</text>
+
+  <rect class="box" x="1090" y="300" width="270" height="110" rx="12" stroke="#059669" stroke-width="2"/>
+  <text x="1112" y="332" class="t">🗄️ Git-Server</text>
+  <text x="1112" y="356" class="s">Gitea, GitHub oder GitLab</text>
+  <text x="1112" y="376" class="s">das Repository der Quelle</text>
+  <text x="1112" y="396" class="s">(Branch, z. B. main)</text>
+
+  <rect class="box" x="1090" y="530" width="270" height="92" rx="12"/>
+  <text x="1112" y="562" class="t">📁 Eingehängter Ordner</text>
+  <text x="1112" y="586" class="s">Quelle ohne Git (/docs) –</text>
+  <text x="1112" y="606" class="s">andere Programme schreiben dort</text>
+
+  <!-- arrows left -->
+  <path d="M310,160 C420,160 430,300 518,320" fill="none" stroke="#4f46e5" stroke-width="2.5" marker-end="url(#a-ind)"/>
+  <rect x="330" y="104" width="166" height="44" rx="8" fill="#fff" stroke="#c7d2fe"/>
+  <text x="413" y="122" text-anchor="middle" class="lb" fill="#4f46e5">gespeichert</text>
+  <text x="413" y="140" text-anchor="middle" class="l">0,7 s nach dem Tippen</text>
+
+  <path d="M518,375 L314,350" fill="none" stroke="#4f46e5" stroke-width="2.5" marker-end="url(#a-ind)"/>
+  <rect x="356" y="384" width="140" height="44" rx="8" fill="#fff" stroke="#c7d2fe"/>
+  <text x="426" y="402" text-anchor="middle" class="lb" fill="#4f46e5">live, sofort</text>
+  <text x="426" y="420" text-anchor="middle" class="l">mit Cursor-Erhalt</text>
+
+  <path d="M310,536 C420,536 430,470 518,460" fill="none" stroke="#4f46e5" stroke-width="2.5" marker-end="url(#a-ind)"/>
+  <rect x="340" y="540" width="160" height="44" rx="8" fill="#fff" stroke="#c7d2fe"/>
+  <text x="420" y="558" text-anchor="middle" class="lb" fill="#4f46e5">geschrieben</text>
+  <text x="420" y="576" text-anchor="middle" class="l">sofort (wie Speichern)</text>
+
+  <!-- to git server (outbound) -->
+  <path d="M862,330 L1088,330" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#a-grn)"/>
+  <rect x="868" y="196" width="214" height="124" rx="8" fill="#fff" stroke="#a7f3d0"/>
+  <text x="880" y="216" class="lb" fill="#059669">⬆ Commit + Push</text>
+  <text x="880" y="236" class="l">Notiz verlassen, Strg+S: sofort</text>
+  <text x="880" y="255" class="l">sonst nach 2 Min Pause</text>
+  <text x="880" y="274" class="l">am Stück: spätestens 10 Min</text>
+  <text x="880" y="293" class="s">ein Commit je Person,</text>
+  <text x="880" y="311" class="s">auch für Agenten</text>
+
+  <!-- from git server (inbound) -->
+  <path d="M1088,375 L862,375" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#a-blu)"/>
+  <path d="M1088,398 L862,420" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#a-org)"/>
+  <rect x="876" y="430" width="200" height="88" rx="8" fill="#fff" stroke="#bae6fd"/>
+  <text x="888" y="450" class="lb" fill="#0284c7">⬇ Abgleich (holen)</text>
+  <text x="888" y="470" class="l">alle 5 Minuten</text>
+  <text x="888" y="491" class="lb" fill="#ea580c">⚡ mit Push-Webhook</text>
+  <text x="888" y="510" class="l">sofort, ~1 Sekunde</text>
+
+  <!-- colleague -->
+  <path d="M1225,204 L1225,298" fill="none" stroke="#64748b" stroke-width="2.5" marker-end="url(#a-gry)" marker-start="url(#a-gry)"/>
+  <text x="1236" y="250" class="l">git push / pull</text>
+  <text x="1236" y="268" class="s">wann sie will</text>
+
+  <!-- folder -->
+  <path d="M1088,575 C980,575 940,540 862,520" fill="none" stroke="#64748b" stroke-width="2.5" marker-end="url(#a-gry)" marker-start="url(#a-gry)"/>
+  <rect x="922" y="580" width="150" height="44" rx="8" fill="#fff" stroke="#cbd5e1"/>
+  <text x="997" y="598" text-anchor="middle" class="lb" fill="#475569">~1 Sekunde</text>
+  <text x="997" y="616" text-anchor="middle" class="l">beide Richtungen</text>
+
+  <!-- ── Bottom: what goes out ────────────────────────────── -->
+  <path d="M600,552 L410,688" fill="none" stroke="#ea580c" stroke-width="2.5" marker-end="url(#a-org)"/>
+  <path d="M690,552 L690,688" fill="none" stroke="#4f46e5" stroke-width="2.5" marker-end="url(#a-ind)"/>
+  <path d="M780,552 L1000,688" fill="none" stroke="#4f46e5" stroke-width="2.5" marker-end="url(#a-ind)"/>
+
+  <rect class="box" x="40" y="690" width="440" height="200" rx="12" stroke="#ea580c" stroke-width="2"/>
+  <text x="62" y="722" class="t">⚡ Ereignis-Webhook → Agent / System</text>
+  <text x="62" y="750" class="l">• Kaveyl Wiki ruft die Adresse des Empfängers auf:</text>
+  <text x="62" y="771" class="l">  <tspan font-weight="700">nach ~1 Sekunde</tspan> (Änderungen 1 s gebündelt)</text>
+  <text x="62" y="794" class="l">• misslungen? Neuer Versuch nach 10 s, 1 Min, 5 Min</text>
+  <text x="62" y="817" class="l">• oder der Agent fragt selbst: /api/v1/changes</text>
+  <text x="62" y="838" class="l">  bzw. MCP list_changes (wartet bis 50 s auf Neues)</text>
+  <text x="62" y="866" class="s">Admin legt ihn an · nur, was das Konto lesen darf</text>
+
+  <rect class="box" x="520" y="690" width="340" height="200" rx="12"/>
+  <text x="542" y="722" class="t">🔵 Punkte im Baum</text>
+  <text x="542" y="750" class="l">• bei allem, was du beobachtest:</text>
+  <text x="542" y="771" class="l">  <tspan font-weight="700">sofort</tspan>, ohne neu zu laden</text>
+  <text x="542" y="794" class="l">• „Neu für dich“ listet alles</text>
+  <text x="542" y="866" class="s">nur Änderungen anderer</text>
+
+  <rect class="box" x="900" y="690" width="460" height="200" rx="12"/>
+  <text x="922" y="722" class="t">✉️ E-Mail / 📱 Pushover</text>
+  <text x="922" y="750" class="l">„Wie oft?“ wählt jede Person selbst:</text>
+  <text x="922" y="773" class="l">• <tspan font-weight="700">gebündelt</tspan>: 2 Min nach der ersten Änderung</text>
+  <text x="922" y="796" class="l">• <tspan font-weight="700">stündlich</tspan>: höchstens eine pro Stunde</text>
+  <text x="922" y="819" class="l">• <tspan font-weight="700">täglich</tspan>: um 7:00 (Uhrzeit wählbar)</text>
+  <text x="922" y="845" class="s">Grenzen: 20 pro Stunde, 100 pro Tag (Admin) –</text>
+  <text x="922" y="865" class="s">dann wartet die Nachricht, es geht nichts verloren</text>
+
+  <!-- footer -->
+  <text x="40" y="930" class="l"><tspan font-weight="700">Von außen</tspan> (Kollegin, anderes Programm) zählt eine Änderung, sobald Kaveyl Wiki sie sieht:</text>
+  <text x="40" y="952" class="l">im eingehängten Ordner nach ~1 s, aus Git beim nächsten Abgleich – mit Push-Webhook nach ~1 s, ohne nach höchstens 5 Minuten.</text>
+  <text x="40" y="980" class="s">Wer die Notiz offen hat, sieht die neue Fassung sofort; hat man selbst gerade Ungespeichertes, kommt ein Hinweis zum Zusammenführen.</text>
+</svg>

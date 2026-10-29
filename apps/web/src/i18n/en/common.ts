@@ -1,0 +1,46 @@
+// English – common: shared building blocks (i18n helpers, switches). Keys = German text (AD-046).
+import type { Dictionary } from '@kaveyl-wiki/core';
+
+export default {
+  'gerade eben': 'just now',
+  'vor {n} Min.': '{n} min ago',
+  'vor {n} Std.': '{n} h ago',
+  Hell: 'Light',
+  Dunkel: 'Dark',
+  System: 'System',
+  'Stimmt nicht überein': 'Does not match',
+  'Farbschema wechseln': 'Change colour scheme',
+  'Farbschema: {now} – Klick: {next}': 'Colour scheme: {now} – click for {next}',
+  Sprache: 'Language',
+  'Sprache der Oberfläche': 'Interface language',
+  'Sprache auf {name} umstellen? Die Seite lädt dafür kurz neu.': 'Switch the language to {name}? The page reloads briefly.',
+  Umstellen: 'Switch',
+  'Notizen werden nie übersetzt.': 'Notes are never translated.',
+  'Gilt für dein Konto auf allen Geräten, auch für E-Mails an dich. Die Seite lädt dafür kurz neu.':
+    'Applies to your account on all devices, including e-mails to you. The page reloads briefly.',
+  'Das Handbuch gibt es bisher nur auf Deutsch.': 'The manual is currently available in German only.',
+  'ℹ︎  Hinweis': 'ℹ︎  Note',
+  '💡 Tipp': '💡 Tip',
+  '❗ Wichtig': '❗ Important',
+  '⚠︎  Warnung': '⚠︎  Warning',
+  '⛔ Vorsicht': '⛔ Caution',
+  // Tag colours and password rules come from @kaveyl-wiki/core and are shown through t(name).
+  Rot: 'Red',
+  Orange: 'Orange',
+  Gelb: 'Yellow',
+  Hellgrün: 'Lime',
+  Grün: 'Green',
+  Türkis: 'Teal',
+  Himmelblau: 'Sky blue',
+  Blau: 'Blue',
+  Violett: 'Violet',
+  Magenta: 'Magenta',
+  Rosa: 'Pink',
+  Schiefergrau: 'Slate grey',
+  'mindestens 15 Zeichen': 'at least 15 characters',
+  'höchstens 256 Zeichen': 'at most 256 characters',
+  'nicht leicht zu erraten (z. B. kein bekanntes Passwort, keine Folge wie 123456 oder qwertz, nicht die eigene E-Mail-Adresse)': 'not easy to guess (e.g. no well-known password, no sequence like 123456 or qwerty, not your own e-mail address)',
+  // Failures without a message from Kaveyl Wiki (api.ts).
+  'Zu groß für den Server': 'Too large for the server',
+  'Unerwartete Antwort vom Server (HTTP {status})': 'Unexpected response from the server (HTTP {status})',
+} satisfies Dictionary;

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/kaveyl/wiki/security/advisories/new
+    about: Please report vulnerabilities privately, not in a public issue.
+  - name: Manual
+    url: https://github.com/kaveyl/wiki/blob/main/docs/i18n/en/BENUTZERHANDBUCH.md
+    about: How things work – also built into the app (F1).

@@ -1,0 +1,57 @@
+name: Bug report
+description: Something does not work as described in the manual.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time! Please do not post passwords, tokens or private note contents.
+        Security issues: use **Security → Report a vulnerability** instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings → Help shows it.
+      placeholder: 0.2.8
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Kind of source
+      multiple: true
+      options:
+        - Gitea
+        - GitHub
+        - GitLab
+        - Other Git URL
+        - Folder on the server
+        - Not related to a source
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 140 on Windows, Safari on iPhone, …
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output
+      description: From `docker logs kaveyl-wiki` or Settings → Tools → Log, if it helps. Remove anything private.
+      render: text

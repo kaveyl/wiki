@@ -1,0 +1,44 @@
+{
+  "name": "kaveyl-wiki",
+  "version": "0.2.8",
+  "stage": "beta",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p packages/core --noEmit && tsc -p apps/server --noEmit && tsc -p apps/web && tsc -p e2e && tsc -p scripts",
+    "lint": "oxlint apps packages e2e scripts examples",
+    "build": "npm run build -w @kaveyl-wiki/web && npm run build -w @kaveyl-wiki/server && node scripts/third-party-notices.mjs apps/web/dist/THIRD-PARTY-NOTICES.txt",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "dev:server": "PORT=8093 HOST=127.0.0.1 node --watch apps/server/dist/server.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.2",
+    "esbuild": "^0.28.2",
+    "oxlint": "1.89.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "overrides": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "lodash-es": "^4.18.1",
+    "katex": "^0.19.0",
+    "sass": "^1.105.1",
+    "@excalidraw/excalidraw": {
+      "nanoid": "^3.3.20"
+    },
+    "@excalidraw/mermaid-to-excalidraw": {
+      "nanoid": "^5.1.16"
+    }
+  }
+}

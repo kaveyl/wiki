@@ -1,0 +1,35 @@
+{
+  "name": "@kaveyl-wiki/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fastify/compress": "^9.2.2",
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/static": "^10.1.5",
+    "@fastify/websocket": "^11.3.3",
+    "@kaveyl-wiki/core": "*",
+    "@parcel/watcher": "^2.6.0",
+    "@zip.js/zip.js": "^2.23.0",
+    "better-sqlite3": "^13.0.3",
+    "fastify": "^5.12.5",
+    "fflate": "^0.8.3",
+    "hast-util-to-html": "^9.0.5",
+    "mdast-util-to-hast": "^13.2.1",
+    "node-html-markdown": "2.0.0",
+    "nodemailer": "^10.1.0",
+    "picomatch": "^4.0.7",
+    "ulid": "^3.0.2",
+    "yaml": "^2.9.1"
+  },
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/server.mjs --external:better-sqlite3 --external:@parcel/watcher --banner:js=\"import { createRequire as __kaveylCreateRequire } from 'node:module'; const require = __kaveylCreateRequire(import.meta.url);\" && esbuild src/mounts/watchChild.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/watcher.mjs --external:@parcel/watcher && esbuild src/import/worker.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/import-worker.mjs --external:better-sqlite3 --external:@parcel/watcher --banner:js=\"import { createRequire as __kaveylCreateRequire } from 'node:module'; const require = __kaveylCreateRequire(import.meta.url);\" && esbuild src/markdown/worker.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/markdown-worker.mjs --banner:js=\"import { createRequire as __kaveylCreateRequire } from 'node:module'; const require = __kaveylCreateRequire(import.meta.url);\"",
+    "start": "node dist/server.mjs"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/picomatch": "^4.0.3",
+    "@types/ws": "^8.18.2"
+  }
+}

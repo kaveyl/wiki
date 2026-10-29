@@ -1,0 +1,4 @@
+#!/bin/sh
+# Test stand-in for smbclient (AD-038): runs it inside the Samba test container, so the VM needs
+# no Samba packages. File data flows through stdin/stdout, the password through PASSWD.
+exec docker exec -i -e PASSWD "${SMBTEST_CONTAINER:-kaveyl-wiki-smbtest}" smbclient "$@"
