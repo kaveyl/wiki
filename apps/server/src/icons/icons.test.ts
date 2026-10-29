@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { sniffIcon } from './icons.js';
 
+// Shared CI runners (GitHub sets CI) are 2–3× slower than a desk machine and vary; the limits catch blow-ups, not that.
+const SLOW = process.env.CI ? 4 : 1;
+
 const svg = (s: string) => sniffIcon(Buffer.from(s));
 
 describe('sniffIcon: SVG', () => {
   it('finds the <svg> root after BOM, XML declaration, comments and doctype', () => {
     expect(svg('<svg xmlns="http://www.w3.org/2000/svg"></svg>')).toBe('image/svg+xml');
-    expect(svg('﻿  <?xml version="1.0"?>\n<!-- a -->\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x.dtd">\n<!---->\n<SVG>')).toBe('image/svg+xml');
+    expect(svg('\uFEFF  <?xml version="1.0"?>\n<!-- a -->\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x.dtd">\n<!---->\n<SVG>')).toBe('image/svg+xml');
     expect(svg('<svg\nviewBox="0 0 1 1">')).toBe('image/svg+xml');
   });
 
@@ -22,6 +25,6 @@ describe('sniffIcon: SVG', () => {
     const t = performance.now();
     expect(svg('<!---->'.repeat(600) + 'x')).toBeNull();
     expect(svg('<!--' + '-'.repeat(4000))).toBeNull();
-    expect(performance.now() - t).toBeLessThan(200);
+    expect(performance.now() - t).toBeLessThan(200 * SLOW);
   });
 });

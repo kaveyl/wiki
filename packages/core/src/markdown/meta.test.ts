@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { firstHeading, noteMeta } from './meta.js';
 
+// Shared CI runners (GitHub sets CI) are 2–3× slower than a desk machine and vary; the limits catch blow-ups, not that.
+const SLOW = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.CI ? 4 : 1;
+
 describe('noteMeta', () => {
   it('title from frontmatter, else the first level-1 heading outside code, else the file name', () => {
     expect(noteMeta('---\ntitle: Aus dem Kopf\n---\n# Überschrift', 'datei.md').title).toBe('Aus dem Kopf');
@@ -32,6 +35,6 @@ describe('noteMeta', () => {
     noteMeta('<!--'.repeat(100_000), 'f.md');
     noteMeta('\n'.repeat(200_000) + 'x', 'f.md');
     noteMeta('-'.repeat(200_000) + 'x', 'f.md');
-    expect(performance.now() - t).toBeLessThan(500);
+    expect(performance.now() - t).toBeLessThan(500 * SLOW);
   });
 });

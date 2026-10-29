@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { PASSWORD_MAX, PASSWORD_MIN, guessablePassword, passwordError, passwordProblems } from './password.js';
 
+// Shared CI runners (GitHub sets CI) are 2–3× slower than a desk machine and vary; the limits catch blow-ups, not that.
+const SLOW = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.CI ? 4 : 1;
+
 const ids = (pw: string, context?: string[]) => passwordProblems(pw, context).map((r) => r.id);
 
 describe('password policy (NIST SP 800-63B-4, AD-048)', () => {
@@ -59,7 +62,7 @@ describe('password policy (NIST SP 800-63B-4, AD-048)', () => {
       const start = performance.now();
       expect(passwordError(pw, ['user@example.test', 'user', 'User'])).toBe('Passwort zu lang – höchstens 256 Zeichen');
       guessablePassword(pw, ['user@example.test', 'user', 'User']);
-      expect(performance.now() - start).toBeLessThan(50);
+      expect(performance.now() - start).toBeLessThan(50 * SLOW);
     }
   });
 

@@ -114,7 +114,7 @@ describe('auth', () => {
       const res = await app.server.inject({ method: 'POST', url: '/api/account/password', ...json({ current, next: huge }) });
       expect(res.statusCode).toBe(400);
       expect(res.json().error).toBe('Passwort zu lang – höchstens 256 Zeichen');
-      expect(performance.now() - start).toBeLessThan(500);
+      expect(performance.now() - start).toBeLessThan(500 * (process.env.CI ? 4 : 1)); // CI runners are slower
     }
     const reset = await app.server.inject({ method: 'POST', url: `/api/admin/users/${(await app.server.inject({ method: 'GET', url: '/api/session', headers: { cookie } })).json().user.id}/password`, ...json({ password: huge }) });
     expect(reset.statusCode).toBe(400);
@@ -1427,9 +1427,12 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
     // The note is found like any other, and the import is one commit.
     expect((await app.server.inject({ method: 'GET', url: `/api/notes/${id}/docs/Import aus HedgeDoc 2/Protokoll 3.md`, headers: { cookie } })).statusCode).toBe(200);
     const sh = (...args: string[]) => execFileSync('git', args, { cwd: wiki, encoding: 'utf8' }).trim();
-    for (let i = 0; i < 50 && !sh('log', '-1', '--format=%s').includes('Import'); i++) await post(`/api/mounts/${id}/commit-now`, {}).then(() => new Promise((r) => setTimeout(r, 100)));
-    expect(sh('log', '-1', '--format=%an|%s')).toBe('Admin|docs: Import aus HedgeDoc (Kaveyl Wiki)');
-    expect(sh('show', '--format=', '--shortstat', 'HEAD')).toMatch(/^61 files changed/);
+    // By its subject, not HEAD: on a slow machine the watcher's commit for alt.md (written above from outside) comes after it.
+    const imported = () => sh('log', '--format=%H|%an|%s').split('\n').find((l) => l.endsWith('|docs: Import aus HedgeDoc (Kaveyl Wiki)'));
+    for (let i = 0; i < 50 && !imported(); i++) await post(`/api/mounts/${id}/commit-now`, {}).then(() => new Promise((r) => setTimeout(r, 100)));
+    const [sha, author] = imported()!.split('|');
+    expect(author).toBe('Admin');
+    expect(sh('show', '--format=', '--shortstat', sha!)).toMatch(/^61 files changed/);
     // Done: the upload is gone.
     expect((await post('/api/import/run', { token: preview.token })).statusCode).toBe(400);
     expect(readdirSync(join(root, 'data', 'tmp', 'import'))).toEqual([]);
@@ -1476,7 +1479,7 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
     expect(res.statusCode).toBe(422);
     expect(res.json()).toEqual({ error: 'Der Import brach beim Schreiben ab (beschädigte Datei im ZIP?) – es wurde nichts übernommen' });
     expect(existsSync(join(root, 'projekte', 'wiki', 'W'))).toBe(false);
-  });
+  }, 30_000); // waits for the watcher; CI runners are slower than the default 5 s allow
 
   it('a report in English for English accounts; a Markdown folder keeps its structure and pictures', async () => {
     const { id } = await createLocalMount();

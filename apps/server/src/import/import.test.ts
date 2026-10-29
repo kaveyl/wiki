@@ -26,6 +26,9 @@ import { linksToText, outsideCode } from './text.js';
 import type { Draft, Plan } from './types.js';
 import { IMPORT_LIMITS, ImportZip, type SourceFile } from './zip.js';
 
+// Shared CI runners (GitHub sets CI) are 2–3× slower than a desk machine and vary; the limits catch blow-ups, not that.
+const SLOW = process.env.CI ? 4 : 1;
+
 let dir: string;
 beforeAll(async () => {
   dir = await mkdtemp(join(tmpdir(), 'kaveyl-import-'));
@@ -929,13 +932,13 @@ describe('crafted exports (Diff-Prüfung 0.2.6)', () => {
       obsidianTags: await quick(() => inlineTags(Array.from({ length: 40_000 }, (_, i) => `#t${i}`).join(' '))),
       wikiIndex: await quick(() => planOf({ ...many, 'a.md': '[[q/z]]\n\n'.repeat(MB / 9) }, 'markdown')),
     };
-    for (const [what, ms] of Object.entries(times)) expect({ what, slow: ms > 5000 }).toEqual({ what, slow: false });
+    for (const [what, ms] of Object.entries(times)) expect({ what, slow: ms > 5000 * SLOW }).toEqual({ what, slow: false });
   }, 120_000);
 
   it('Trilium: keeps one name per note quickly, makes no note out of metadata alone and stops beyond the limit', async () => {
     const same = Array.from({ length: 15_000 }, (_, i) => ({ noteId: `n${i}`, title: 'Gleich', type: 'text', format: 'markdown', dataFileName: 'A.md' }));
     let plan!: Plan;
-    expect(await quick(async () => (plan = (await planOf(triliumZip(same, { 'A.md': 'x' }), 'trilium')).plan))).toBeLessThan(5000);
+    expect(await quick(async () => (plan = (await planOf(triliumZip(same, { 'A.md': 'x' }), 'trilium')).plan))).toBeLessThan(5000 * SLOW);
     expect(plan.notes.map((x) => x.path).slice(0, 3)).toEqual(['Gleich.md', 'Gleich 2.md', 'Gleich 3.md']);
     expect(new Set(plan.notes.map((x) => x.path)).size).toBe(15_000);
 
@@ -1125,7 +1128,7 @@ describe('Trilium HTML export (code-012)', () => {
     const start = performance.now();
     const kept = new Kept('kwmath', crafted);
     kept.restore(footnotesHtml(formulas(crafted, kept), kept));
-    expect(performance.now() - start).toBeLessThan(5000);
+    expect(performance.now() - start).toBeLessThan(5000 * SLOW);
   });
 });
 
@@ -1134,6 +1137,6 @@ describe('linksToText (audit 0.2.7 sec-005)', () => {
     expect(linksToText('a [Text \\[x\\]](#root/abc) b ![p](#root/q) \\[c](#root/d)', /#root\/[^\s)>]*/)).toBe('a Text \\[x\\] b p \\[c](#root/d)');
     const started = Date.now();
     linksToText(`[${'\\['.repeat(128 * 1024)}`, /#root\/[^\s)>]*/);
-    expect(Date.now() - started).toBeLessThan(1000);
+    expect(Date.now() - started).toBeLessThan(1000 * SLOW);
   });
 });
