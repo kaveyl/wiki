@@ -650,9 +650,14 @@ describe('browser session', () => {
       }
     }
     expect(wrong).toEqual([]);
-    const state = await inject({ method: 'PUT', url: '/api/state/probe', headers: { cookie: admin, 'content-type': 'application/json' }, payload: '[1,2]' });
+    const state = await inject({ method: 'PUT', url: '/api/state/personal', headers: { cookie: admin, 'content-type': 'application/json' }, payload: '[1,2]' });
     expect(state.statusCode).toBe(200);
-    expect((await inject({ method: 'GET', url: '/api/state/probe', headers: { cookie: admin } })).json()).toEqual([1, 2]);
+    expect((await inject({ method: 'GET', url: '/api/state/personal', headers: { cookie: admin } })).json()).toEqual([1, 2]);
+    // Only the keys the web app keeps, each at most 1 MB (CodeQL triage #24/#25).
+    expect((await inject({ method: 'PUT', url: '/api/state/probe', headers: { cookie: admin, 'content-type': 'application/json' }, payload: '{}' })).statusCode).toBe(400);
+    expect((await inject({ method: 'GET', url: '/api/state/probe', headers: { cookie: admin } })).json()).toBeNull();
+    const big = JSON.stringify({ x: 'a'.repeat(1024 * 1024) });
+    expect((await inject({ method: 'PUT', url: '/api/state/prefs', headers: { cookie: admin, 'content-type': 'application/json' }, payload: big })).statusCode).toBe(413);
   });
 
   it('MCP never takes the session cookie and refuses foreign pages', async () => {

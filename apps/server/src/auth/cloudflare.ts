@@ -26,7 +26,9 @@ export class CloudflareAccess {
   }
 
   static normalizeTeam(domain: string): string {
-    return domain.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase();
+    const host = domain.trim().replace(/^https?:\/\//, '');
+    const slash = host.indexOf('/');
+    return (slash < 0 ? host : host.slice(0, slash)).toLowerCase();
   }
 
   private async key(team: string, kid: string): Promise<KeyObject | null> {

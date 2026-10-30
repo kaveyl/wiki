@@ -3,6 +3,23 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.10 (Beta) – 2026-10-30
+
+Smaller hardening from the same code scan as 0.2.9 – nothing urgent, but worth taking along.
+
+### Upgrade notes
+- **From 0.2.3 or newer:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+
+### Changed
+- **Stored interface state** (tabs, settings, personal lists): only the keys the app uses, each at most 1 MB.
+- **Admin settings** that take addresses (AI provider, mail sender, public address, event webhooks, Cloudflare team)
+  check long input in one pass; a mail sender address has at most 254 characters.
+
+### Fixed
+- **Import:** a backslash at the end of a link text or picture caption no longer breaks the link; `&amp;quot;` in a
+  picture's address or caption stays as written.
+
 ## 0.2.9 (Beta) – 2026-10-30
 
 **Security update – please update.** GitHub code scanning (CodeQL), switched on with the publication, found ways to

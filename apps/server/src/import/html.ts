@@ -24,5 +24,6 @@ export function imgTagsToMarkdown(text: string): string {
 function attr(tag: string, name: string): string | null {
   const m = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i').exec(tag);
   const v = m ? (m[1] ?? m[2] ?? m[3] ?? '') : null;
-  return v === null ? null : v.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+  // One pass: `&amp;quot;` stays `&quot;` (one after the other turned it into `"`, CodeQL js/double-escaping).
+  return v === null ? null : v.replace(/&(amp|quot|#39);/g, (_, e: string) => (e === 'amp' ? '&' : e === 'quot' ? '"' : "'")).trim();
 }

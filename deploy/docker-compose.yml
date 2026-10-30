@@ -6,7 +6,7 @@ services:
   kaveyl-wiki:
     # From the GitHub Container Registry. For a file loaded with “docker load”: kaveyl-wiki:<version> (no registry).
     # From your own registry, e.g. gitea.example.org/releases/kaveyl-wiki:<version>.
-    image: ghcr.io/kaveyl/wiki:0.2.9
+    image: ghcr.io/kaveyl/wiki:0.2.10
     container_name: kaveyl-wiki
     restart: unless-stopped
     # Runs as user 1000, group 1000. Do the folders below ./kaveyl-wiki belong to another user (e.g. yours on a NAS)?

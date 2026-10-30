@@ -179,6 +179,19 @@ describe('names, files and links (all formats)', () => {
     expect(plan.warnings).toEqual([]);
   });
 
+  it('escapes a backslash at the end of the link text, also in a picture alias (CodeQL js/incomplete-sanitization)', () => {
+    const plan = build({
+      notes: [
+        { from: 'Home.md', dir: [], name: 'Home', content: '[[Ziel|Ende\\]] ![[foto.png|Bild\\]]\n' },
+        { from: 'Ziel.md', dir: [], name: 'Ziel', content: '' },
+      ],
+      files: [{ from: 'foto.png', dir: [], name: 'foto.png', source: src('foto.png') }],
+      warnings: [],
+      wikiLinks: true,
+    });
+    expect(note(plan, 'Home.md')).toBe('[Ende\\\\](Ziel.md) ![Bild\\\\](foto.png)\n');
+  });
+
   it('turns [[wiki links]] into Markdown links: alias, heading, picture, nearest of several, missing ones stay', () => {
     const plan = build({
       notes: [
@@ -460,6 +473,8 @@ describe('Joplin', () => {
     const md = htmlToMarkdown('<h2>T</h2><script>alert(1)</script><style>p{}</style><form><input value="x"></form><table><tr><td>A</td><td>B|x</td></tr><tr><td>1</td><td>2</td></tr></table><ul><li>a<ul><li>b</li></ul></li></ul>');
     expect(md).toBe('## T\n\n| A | B\\|x |\n| - | ---- |\n| 1 | 2    |\n\n- a\n  - b');
     expect(imgTagsToMarkdown(`<img src=":/abc" alt="Gipfel [1]" width="120"> <img alt='x' src='a b.png'/> <img width=3>`)).toBe('![Gipfel \\[1\\]](:/abc) ![x](<a b.png>) <img width=3>');
+    // Entities decoded in one pass: `&amp;quot;` is the text `&quot;`, not a quote (CodeQL js/double-escaping).
+    expect(imgTagsToMarkdown('<img src="a.png?x=1&amp;amp;y=2" alt="a&amp;quot;b &amp; c">')).toBe('![a&quot;b & c](a.png?x=1&amp;y=2)');
   });
 
   it('is recognised by its resources folder or its own frontmatter', async () => {

@@ -8,6 +8,7 @@ import type { DB } from './db/db.js';
 import type { Change } from './changes.js';
 import type { SecretStore } from './secrets.js';
 import { PathError } from './mounts/model.js';
+import { trimSlashes } from './text.js';
 
 export interface EventHook {
   id: string;
@@ -277,7 +278,7 @@ export class EventHooks {
     const url = (input.url ?? old?.url ?? '').trim();
     const userId = input.userId ?? old?.userId ?? '';
     const mountId = input.mountId !== undefined ? input.mountId || null : (old?.mountId ?? null);
-    const path = (input.path ?? old?.path ?? '').replace(/^\/+|\/+$/g, '');
+    const path = trimSlashes(input.path ?? old?.path ?? '', true);
     if (!name) throw new PathError('Name fehlt');
     let u: URL;
     try {

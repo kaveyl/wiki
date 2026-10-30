@@ -172,7 +172,7 @@ export function buildPlan(draft: Draft, opts: BuildOptions): Plan {
           const shown = heading && !heading.startsWith('^') && note ? (name ? `${label} – ${heading}` : heading) : label || posix.basename(hit.path, '.md');
           const text = (alias ?? shown).trim() || shown;
           // An embedded picture stays a picture; an embedded note or PDF becomes a link to it.
-          return bang && /\.(png|jpe?g|gif|webp|avif|bmp|svg)$/i.test(hit.path) ? `![${alias && !/^\d+(x\d+)?$/.test(alias) ? alias : ''}](${href})` : `[${text.replace(/[[\]]/g, '\\$&')}](${href})`;
+          return bang && /\.(png|jpe?g|gif|webp|avif|bmp|svg)$/i.test(hit.path) ? `![${alias && !/^\d+(x\d+)?$/.test(alias) ? linkText(alias) : ''}](${href})` : `[${linkText(text)}](${href})`;
         }),
       );
     }
@@ -274,4 +274,10 @@ class WikiIndex {
     const best = [...list].sort((a, b) => Number(posix.dirname(b) === dir) - Number(posix.dirname(a) === dir) || a.split('/').length - b.split('/').length || a.localeCompare(b))[0]!;
     return { path: best, ambiguous: true };
   }
+}
+
+/** Text between `[` and `]` of a Markdown link: brackets and the backslash escaped (CodeQL js/incomplete-sanitization – an
+ * unescaped `\` before `]` broke the link). */
+function linkText(s: string): string {
+  return s.replace(/[[\]\\]/g, '\\$&');
 }

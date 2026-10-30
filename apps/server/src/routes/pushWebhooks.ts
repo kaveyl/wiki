@@ -6,6 +6,7 @@ import { type Connection } from '../mounts/connections.js';
 import { HOST_LABEL, installWebhooks, isHostKind, removeWebhooks, webhookStatus, type HookChanges } from '../mounts/hosts.js';
 import { isLocalAddress } from '../ai/providers.js';
 import type { AppContext } from './context.js';
+import { trimSlashes } from '../text.js';
 
 export function registerPushWebhookRoutes(server: FastifyInstance, ctx: AppContext) {
   const { audit, connectionOr404, connections, db, hostedRepoOf, mailer, manager, requireAdmin, settings, webhookSeen } = ctx;
@@ -17,7 +18,7 @@ export function registerPushWebhookRoutes(server: FastifyInstance, ctx: AppConte
   const webhookSource = (): 'webhook' | 'public' | 'browser' => (settings.get(BASE_KEY) ? 'webhook' : mailer.settings().publicUrl ? 'public' : 'browser');
   const webhookUrl = (req: FastifyRequest) => {
     const base = settings.get(BASE_KEY) || mailer.settings().publicUrl || `${req.protocol}://${req.headers.host ?? 'localhost'}`;
-    return `${base.replace(/\/+$/, '')}/api/webhooks/git`;
+    return `${trimSlashes(base)}/api/webhooks/git`;
   };
   /** „http://192.168.1.20:8093/“ → its origin; anything with a path, query, credentials or another scheme is refused. */
   const cleanBase = (input: string): string => {

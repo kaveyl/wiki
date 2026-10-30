@@ -7,6 +7,7 @@ import type { SecretStore } from '../secrets.js';
 import { SOURCE_LANG, type Lang } from '@kaveyl-wiki/core';
 import { fallbackLang, tr, translateLines, translateMessage } from '../i18n/index.js';
 import { MAIL_LOGO_PNG } from './logo.js';
+import { trimSlashes } from '../text.js';
 
 const SECRET_ID = 'smtp';
 
@@ -118,7 +119,7 @@ export class Mailer {
     if (input.user !== undefined) k.set('smtp_user', input.user.trim());
     if (input.fromAddress !== undefined) {
       const a = input.fromAddress.trim();
-      if (a && !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(a)) throw new MailError('Absender: bitte eine gültige E-Mail-Adresse');
+      if (a && (a.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(a))) throw new MailError('Absender: bitte eine gültige E-Mail-Adresse');
       k.set('smtp_from', a);
     }
     if (input.fromName !== undefined) k.set('smtp_from_name', input.fromName.replace(/[\r\n"<>]/g, '').trim().slice(0, 80));
@@ -191,7 +192,7 @@ function defaultTransport(s: MailSettings, password: string | null): object {
 
 /** „wiki.example.org/“ → „https://wiki.example.org“; only http(s), no path tricks, no credentials. */
 export function cleanPublicUrl(raw: string): string {
-  const v = raw.trim().replace(/\/+$/, '');
+  const v = trimSlashes(raw.trim());
   if (!v) return '';
   let u: URL;
   try {

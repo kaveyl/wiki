@@ -4,6 +4,7 @@
 // are in the encrypted SecretStore and never leave the server.
 import { ulid } from 'ulid';
 import type { SecretStore } from '../secrets.js';
+import { trimSlashes } from '../text.js';
 
 export type ProviderKind = 'ollama' | 'ollama-cloud' | 'anthropic' | 'openrouter' | 'openai';
 export const PROVIDER_KINDS: ProviderKind[] = ['ollama', 'ollama-cloud', 'anthropic', 'openrouter', 'openai'];
@@ -142,7 +143,7 @@ interface SettingsLike {
   set(key: string, value: string): void;
 }
 
-const trimSlash = (u: string) => u.replace(/\/+$/, '');
+const trimSlash = (u: string) => trimSlashes(u);
 
 /** Base URL of the OpenAI-compatible API: Ollama and others serve it under /v1. */
 const openaiBase = (p: ProviderConfig) => {

@@ -8,6 +8,7 @@ export default {
   '{request}: Interner Fehler': '{request}: Internal error',
   'Fehler': 'Error',
   'JSON-Objekt erwartet': 'JSON object expected',
+  'Unbekannter Schlüssel': 'Unknown key',
 
   // ── app.ts: sign-in, API tokens, access checks ──────────────────────────────────────
   'Token ungültig oder abgelaufen': 'Token invalid or expired',
