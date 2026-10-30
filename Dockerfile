@@ -2,7 +2,7 @@
 # Multi-stage build: install + build web and server, then a small runtime with git and only
 # the native modules the server bundle keeps external (better-sqlite3, @parcel/watcher).
 
-FROM node:24-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS build
+FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
@@ -28,7 +28,7 @@ COPY scripts/runtime-lock.mjs scripts/
 RUN npm run build \
  && node scripts/runtime-lock.mjs /src/runtime better-sqlite3 @parcel/watcher
 
-FROM node:24-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS runtime
+FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS runtime
 ARG KAVEYL_WIKI_VERSION=dev
 ARG BUILD_DATE=
 # No source URL on purpose: the image may be passed on (AD-043).
@@ -49,8 +49,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /src/runtime/package.json /src/runtime/package-lock.json ./
-# npm ci: exactly the lockfile (integrity checked); prebuilt binaries ship in the packages.
-RUN npm ci --omit=dev --no-audit --no-fund --ignore-scripts && npm cache clean --force
+# npm ci: exactly the lockfile (integrity checked); prebuilt binaries ship in the packages. Then the package managers
+# of the base image go: nothing runs them at runtime, and their bundled modules only add known vulnerabilities.
+RUN npm ci --omit=dev --no-audit --no-fund --ignore-scripts && npm cache clean --force \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-v* \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+           /root/.npm
 COPY --from=build /src/apps/server/dist/server.mjs ./server.mjs
 # The file watcher runs in a process of its own (AD-054), started by the server from next to it.
 COPY --from=build /src/apps/server/dist/watcher.mjs ./watcher.mjs

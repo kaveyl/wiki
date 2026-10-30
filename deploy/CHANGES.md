@@ -3,6 +3,23 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.11 (Beta) – 2026-10-30
+
+A hardened image and a bill of materials (SBOM) with every release.
+
+### Upgrade notes
+- **From 0.2.3 or newer:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+
+### Security
+- **Fewer known vulnerabilities:** npm, npx, corepack and yarn are removed from the container's file system. Kaveyl Wiki
+  never runs them, and the modules they bundle carried known vulnerabilities (6 high, 10 medium).
+- **Base image** updated to the current `node:24-bookworm-slim` (Node.js 24.22.2).
+
+### Added
+- **Bill of materials:** every release carries `sbom.cdx.json` (CycloneDX) listing everything in the image, including
+  the system packages.
+
 ## 0.2.10 (Beta) – 2026-10-30
 
 Smaller hardening from the same code scan as 0.2.9 – nothing urgent, but worth taking along.

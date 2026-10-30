@@ -29,7 +29,7 @@ body:
     attributes:
       label: Version
       description: Settings → Help shows it.
-      placeholder: 0.2.10
+      placeholder: 0.2.11
     validations:
       required: true
   - type: dropdown
