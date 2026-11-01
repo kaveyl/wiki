@@ -427,8 +427,15 @@ test('templates: save a note as template, create a new note from it with variabl
   const dialog = page.getByRole('dialog', { name: 'Neue Notiz' });
   await dialog.getByLabel('Titel').fill('Tag eins');
   await dialog.getByLabel('Vorlage').selectOption({ label: 'Tagebuch' }); // by file name (AD-022)
+  // The icon right away (Owner 30.10.); the title keeps its text.
+  await dialog.getByRole('button', { name: 'Icon wählen (optional)' }).click();
+  await page.getByRole('tab', { name: 'Emoji' }).click();
+  await page.getByRole('button', { name: 'Emoji 📝' }).click();
+  await expect(dialog.getByRole('button', { name: 'Icon ändern' })).toContainText('📝');
+  await expect(dialog.getByLabel('Titel')).toHaveValue('Tag eins');
   await shot(page, '40-vorlage');
   await dialog.getByRole('button', { name: 'Anlegen' }).click();
+  await expect(page.getByRole('button', { name: 'Icon der Notiz' }).filter({ visible: true })).toContainText('📝');
   const today = new Date();
   const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   await expect(editor().getByRole('heading', { level: 1 })).toContainText(`Tag eins – `);

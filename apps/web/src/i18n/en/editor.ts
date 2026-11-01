@@ -383,6 +383,10 @@ export default {
   'Umbenennen / verschieben': 'Rename / move',
   'Geteilte Ansicht schließen': 'Close split view',
   'Inhaltsverzeichnis ein-/ausblenden': 'Show/hide table of contents',
+  'Große Notiz: ohne Hervorhebung und Inhaltsverzeichnis, damit die Ansicht flüssig bleibt.': 'Large note: no highlighting and no table of contents, so the view stays smooth.',
+  '← Kennung der Notiz – nicht ändern oder löschen': '← ID of the note – do not change or delete',
+  'Daran erkennt Kaveyl Wiki die Notiz wieder, auch wenn sie außerhalb umbenannt oder verschoben wird. Rechte und KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.':
+    'Kaveyl Wiki recognises the note by it, even when it is renamed or moved elsewhere. Permissions and AI approvals set on this very note depend on it.',
   'Normale Breite': 'Normal width',
   'Volle Breite': 'Full width',
   'Normale Breite (Breite in Einstellungen → Darstellung)': 'Normal width (width in Settings → Appearance)',

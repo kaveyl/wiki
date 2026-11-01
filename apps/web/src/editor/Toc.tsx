@@ -1,5 +1,5 @@
-// Table of contents to the right of the note: headings from the editor document, click to
-// jump, the heading currently in view is highlighted. SEE-DOC: docs/PLAN.md §3a
+// Table of contents to the right of the note: headings from the editor document (or, in the Markdown view, from the
+// source – sourceToc.ts), click to jump, the heading currently in view is highlighted. SEE-DOC: docs/PLAN.md §3a
 import { useEffect, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/react';
 import { cx } from '../ui';
@@ -38,9 +38,25 @@ export function useHeadings(editor: Editor | null): Heading[] {
   return headings;
 }
 
-export function Toc({ editor, headings, scroller }: { editor: Editor; headings: Heading[]; scroller: HTMLElement | null }) {
+/**
+ * The list itself, for both views: `topOf(i)` is where heading i is now (screen y, null when unknown), `scrollTo(i)`
+ * brings it to the top. The rich editor gives the headings' DOM, the Markdown view (CodeMirror) its line positions.
+ */
+export function Toc({
+  headings,
+  scroller,
+  topOf,
+  scrollTo,
+}: {
+  headings: { level: number; text: string; pos: number }[];
+  scroller: HTMLElement | null;
+  topOf: (i: number) => number | null;
+  scrollTo: (i: number) => void;
+}) {
   const [active, setActive] = useState(0);
   const pinnedUntil = useRef(0);
+  const place = useRef({ topOf, scrollTo });
+  place.current = { topOf, scrollTo };
   const minLevel = Math.min(...headings.map((h) => h.level));
 
   useEffect(() => {
@@ -52,22 +68,21 @@ export function Toc({ editor, headings, scroller }: { editor: Editor; headings: 
       if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4) return setActive(headings.length - 1);
       const top = scroller.getBoundingClientRect().top + 90;
       let current = 0;
-      headings.forEach((h, i) => {
-        const dom = editor.view.nodeDOM(h.pos);
-        if (dom instanceof HTMLElement && dom.getBoundingClientRect().top <= top) current = i;
+      headings.forEach((_, i) => {
+        const y = place.current.topOf(i);
+        if (y !== null && y <= top) current = i;
       });
       setActive(current);
     };
     onScroll();
     scroller.addEventListener('scroll', onScroll, { passive: true });
     return () => scroller.removeEventListener('scroll', onScroll);
-  }, [scroller, headings, editor]);
+  }, [scroller, headings]);
 
-  const jump = (h: Heading, i: number) => {
+  const jump = (i: number) => {
     setActive(i);
     pinnedUntil.current = Date.now() + 900;
-    const dom = editor.view.nodeDOM(h.pos);
-    if (dom instanceof HTMLElement) dom.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    place.current.scrollTo(i);
   };
 
   return (
@@ -82,7 +97,7 @@ export function Toc({ editor, headings, scroller }: { editor: Editor; headings: 
                 i === active ? 'border-accent text-fg' : 'border-transparent text-fg-muted hover:text-fg',
               )}
               style={{ paddingLeft: 10 + (h.level - minLevel) * 12 }}
-              onClick={() => jump(h, i)}
+              onClick={() => jump(i)}
               title={h.text}
             >
               {h.text}

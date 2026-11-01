@@ -363,6 +363,28 @@ describe('NoteService with a local mount', () => {
     expect(indexer.get(mount.id, 'src/Ideen')?.kind).toBe('dir');
   });
 
+  it('stores an icon chosen when creating (Owner 30.10.): note, folder note, encrypted folder', async () => {
+    expect(readFileSync(join(dir, await notes.create(mount, '', 'Mit Icon', 'file', USER, { icon: 'lucide:rocket' })), 'utf8')).toMatch(
+      /^---\nid: [0-9A-Z]{26}\nicon: lucide:rocket\n---\n# Mit Icon\n$/,
+    );
+    await notes.create(mount, '', 'Ordner mit Icon', 'dir', USER, { icon: 'emoji:📦' });
+    expect(readFileSync(join(dir, 'Ordner mit Icon/index.md'), 'utf8')).toContain('icon: emoji:📦\n');
+    expect(indexer.get(mount.id, 'Ordner mit Icon/index.md')?.icon).toBe('emoji:📦');
+    // Line separators and control characters never reach the frontmatter (sec-002, also „Icon ändern“).
+    const odd = await notes.create(mount, '', 'Trenner', 'file', USER, { icon: 'emoji:\u2028---\nx\u0000' });
+    expect(readFileSync(join(dir, odd), 'utf8')).toMatch(/\nicon: ['"]?emoji:---x['"]?\n---\n# Trenner\n$/);
+    await notes.setMeta(mount, odd, { icon: 'lucide:a\u2029b' }, (await notes.read(mount, odd)).hash, USER);
+    expect(readFileSync(join(dir, odd), 'utf8')).toContain('icon: lucide:ab\n');
+    // Blank means none; an encrypted folder keeps only the marker and the icon in plain text, as „Icon ändern“ does.
+    expect(readFileSync(join(dir, await notes.create(mount, '', 'Ohne Icon', 'file', USER, { icon: '  ' })), 'utf8')).not.toContain('icon:');
+    mkdirSync(join(dir, 'tresor'));
+    writeFileSync(join(dir, 'tresor/.kaveyl-wiki.yml'), 'encrypted: age\n');
+    const sealed = readFileSync(join(dir, await notes.create(mount, 'tresor', 'Geheim', 'file', USER, { icon: 'lucide:lock' })), 'utf8');
+    expect(sealed).toContain('encrypted: age');
+    expect(sealed).toContain('icon: lucide:lock');
+    expect(sealed).not.toContain('Geheim');
+  });
+
   it('moves notes and deletes folders without touching code files', async () => {
     expect(await notes.move(mount, 'src/NOTES.md', 'archiv/NOTES.md', USER)).toBe('archiv/NOTES.md');
     expect(indexer.get(mount.id, 'archiv/NOTES.md')).not.toBeNull();
@@ -605,7 +627,7 @@ describe('history and trash', () => {
   it('a note deleted with auto-commit is in the trash at once – even one created moments before (owner 27.10.)', async () => {
     const auto = await manager.update(mount.id, { options: { autoCommit: true } });
     // Created and deleted within the commit pause: never committed before, its content must still come back.
-    const neu = await notes.create(auto, '', 'Gleich weg', 'file', USER, undefined, 'wichtiger Text');
+    const neu = await notes.create(auto, '', 'Gleich weg', 'file', USER, { body: 'wichtiger Text' });
     await notes.delete(auto, neu, USER);
     const ordner = await notes.create(auto, '', 'test', 'dir', USER);
     await notes.delete(auto, ordner, USER);
@@ -622,7 +644,7 @@ describe('history and trash', () => {
     const slow = new MountManager({ ...config, commitDelaySec: 3600 }, new MountStore(db), indexer, SecretStore.open(db, config.configPath), new EventBus(), silent);
     const slowNotes = new NoteService(slow, config.dataPath, indexer);
     const auto = await slow.update(mount.id, { options: { autoCommit: true } });
-    const neu = await slowNotes.create(auto, '', 'Entwurf', 'file', USER, undefined, 'erst eben geschrieben');
+    const neu = await slowNotes.create(auto, '', 'Entwurf', 'file', USER, { body: 'erst eben geschrieben' });
     expect((await slow.status(auto)).pending).toBe(1);
     await slowNotes.delete(auto, neu, USER);
     expect((await slow.status(auto)).pending).toBe(0);

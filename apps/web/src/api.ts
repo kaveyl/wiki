@@ -1038,8 +1038,8 @@ export const api = {
   /** Speichern als (AD-039): the editor's text of a note gone outside meanwhile as a new note. */
   saveNoteAs: (mountId: string, b: { from: string; raw: string; to: string; toMountId?: string }) =>
     request<{ mountId: string; path: string; warnings: string[] }>('POST', `/api/notes/${mountId}/save-as`, b),
-  createNote: (mountId: string, parent: string, title: string, kind: 'file' | 'dir', template?: string, body?: string) =>
-    request<{ path: string }>('POST', `/api/notes/${mountId}`, { parent, title, kind, template, body }),
+  createNote: (mountId: string, parent: string, title: string, kind: 'file' | 'dir', more: { template?: string; body?: string; icon?: string } = {}) =>
+    request<{ path: string }>('POST', `/api/notes/${mountId}`, { parent, title, kind, ...more }),
   templates: (mountId: string) => request<{ name: string; title: string }[]>('GET', `/api/templates/${mountId}`),
   saveTemplate: (mountId: string, from: string, title: string) => request<{ name: string; title: string }>('POST', `/api/templates/${mountId}`, { from, title }),
   moveNote: (mountId: string, from: string, to: string, toMountId?: string) =>

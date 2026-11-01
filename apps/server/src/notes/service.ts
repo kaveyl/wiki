@@ -73,6 +73,15 @@ export interface NoteDocument {
 /** How long an editor's save to a just-moved path still lands at the new place. */
 const FOLLOW_MOVE_MS = 10 * 60_000;
 
+/**
+ * An icon value for the frontmatter: one line, at most 100 characters. Line and paragraph separators (U+2028/2029)
+ * and control characters go – a JavaScript regex counts U+2028 as a line end, YAML does not, so it could end the
+ * frontmatter early (security review 0.2.12, sec-002).
+ */
+export function cleanIcon(icon: string | null | undefined): string | undefined {
+  return icon?.replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, '').trim().slice(0, 100) || undefined;
+}
+
 export class NoteService {
   /** Recent moves within a source (`mountId\0from` → to): an open editor keeps saving to the old path for a moment. */
   private readonly moved = new Map<string, { to: string; at: number }>();
@@ -186,7 +195,7 @@ export class NoteService {
       const tags = [...new Set(changes.tags.map((t) => t.trim().replace(/^#/, '').replace(/,/g, ' ')).filter(Boolean))].slice(0, 50);
       keys.tags = !tags.length ? undefined : Array.isArray(fm.tags) ? tags : tags.join(', ');
     }
-    if (changes.icon !== undefined) keys.icon = changes.icon?.trim().slice(0, 100) || undefined;
+    if (changes.icon !== undefined) keys.icon = cleanIcon(changes.icon);
     if (changes.readonly !== undefined) keys.readonly = changes.readonly ? true : undefined;
     if (!Object.keys(keys).length) return { hash: sha1(current), changed: false };
     return this.writeIfChanged(mount, rel, current, setFrontmatterKeys(current, keys), author);
@@ -221,7 +230,14 @@ export class NoteService {
 
   /** Creates a note (or a folder with its folder note) below `parent`. Returns the new path. */
   /** `body`: Markdown below the heading (e.g. an AI answer saved as a note); not in encrypted folders. */
-  async create(mount: Mount, parent: string, title: string, kind: 'file' | 'dir', author: Author, template?: string, body?: string): Promise<string> {
+  async create(
+    mount: Mount,
+    parent: string,
+    title: string,
+    kind: 'file' | 'dir',
+    author: Author,
+    { template, body, icon }: { template?: string; body?: string; icon?: string } = {},
+  ): Promise<string> {
     this.assertWritable(mount);
     const base = fileNameFor(title);
     const parentRel = cleanRelPath(parent);
@@ -238,7 +254,10 @@ export class NoteService {
     if (encrypted && body?.trim()) throw new ForbiddenError('In einem verschlüsselten Ordner lässt sich kein Klartext ablegen – Antwort kopieren und in eine Notiz einfügen');
     // Notes created in the app carry their id from the start (rename-safe, docs/PLAN.md §2.2).
     // A template's own id (if any) is replaced, so every note gets a fresh one.
-    const content = mount.options.writeMetadata ? setFrontmatterKeys(heading, { id: ulid() }) : template && !encrypted ? setFrontmatterKeys(heading, { id: undefined }) : heading;
+    const plain = mount.options.writeMetadata ? setFrontmatterKeys(heading, { id: ulid() }) : template && !encrypted ? setFrontmatterKeys(heading, { id: undefined }) : heading;
+    // An icon chosen in the „Neu“ dialog (Owner 30.10.), stored like „Icon ändern“ does (setMeta).
+    const chosen = cleanIcon(icon);
+    const content = chosen ? setFrontmatterKeys(plain, { icon: chosen }) : plain;
     let rel: string;
     if (kind === 'dir') {
       const dirRel = await uniquePath(mount, this.dataPath, parentRel, base, '');

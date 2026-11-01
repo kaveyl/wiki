@@ -785,7 +785,6 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             {picking && <input type="checkbox" readOnly checked={marked} tabIndex={-1} aria-hidden="true" className="pointer-events-none mr-0.5" />}
             <EntryIcon icon={icon} isDir={isDir} open={expanded} />
             <span className="flex-1 truncate">{title}</span>
-            <WatchMark unread={unreadIn(watchData, mount.id, entry.path, isDir)} watched={!!watchOf(watchData, mount.id, entry.path)} />
             {isDir && (
               <RowActions
                 allOpen={allOpen}
@@ -795,6 +794,8 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
                 touch={selected}
               />
             )}
+            {/* after the hover buttons: they appear to its left and do not push it (Owner 30.10.) */}
+            <WatchMark unread={unreadIn(watchData, mount.id, entry.path, isDir)} watched={!!watchOf(watchData, mount.id, entry.path)} />
             {isDir && index.encrypted.has(entry.path) && <Lock className="mx-0.5 h-3 w-3 shrink-0 text-fg-faint" aria-label={t('verschlüsselt')} />}
             {aiRule && (
               <AiMark

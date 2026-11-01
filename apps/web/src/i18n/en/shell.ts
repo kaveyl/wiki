@@ -458,6 +458,7 @@ export default {
   'in {folder}/': 'in {folder}/',
   'auf oberster Ebene': 'at the top level',
   'Titel der Notiz': 'Title of the note',
+  'Icon wählen (optional)': 'Choose icon (optional)',
   Vorlage: 'Template',
   'Vorlagen liegen in .kaveyl-wiki/templates/ der Quelle': 'Templates are kept in .kaveyl-wiki/templates/ of the source',
   'Leer (nur Überschrift)': 'Empty (heading only)',

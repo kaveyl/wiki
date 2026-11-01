@@ -494,7 +494,7 @@ Public repositories and local folders do not need a connection.
 ![Menu in the favourites](handbuch/51-favoriten-menue.webp)
 
 - **Icons:** click the symbol to the left of the path (or right-click in the tree → “Change icon
-  …”). Three tabs:
+  …”; when creating, right in the “New note”/“New folder” window). Three tabs:
   - **Symbols** – “Common” shows a selection; the list next to it gives all roughly 1,900
     Lucide symbols by **Category** (files, development, finance, weather …) or “All”.
     The search field searches names, keywords and categories (names and keywords in English,
@@ -578,9 +578,17 @@ Public repositories and local folders do not need a connection.
 
 ![Table of contents](handbuch/07-inhaltsverzeichnis.webp)
 
-- **Markdown view:** shows and edits the source text directly.
+- **Markdown view:** shows and edits the source text directly. The table of contents is on the right here as well
+  (same switch); a click jumps to the heading's line. The `id:` line at the top is dimmed: it is the note's ID. Kaveyl
+  Wiki recognises the note by it when it is renamed or moved elsewhere (e.g. in VS Code or via Git), and permissions or
+  AI approvals set on this very note depend on it. Do not change or delete it – without it, Kaveyl Wiki only knows the
+  note by its path.
+  Very large notes (over 100,000 characters) appear as plain text in the Markdown view – without highlighting and
+  table of contents, so it stays smooth.
 
 ![Markdown view](handbuch/08-markdown-ansicht.webp)
+
+![Markdown view with table of contents and the hint on the id line](handbuch/13b-markdown-toc.webp)
 
 - On a **phone** the interface is usable (sidebar can be shown/hidden); for longer
   writing, the desktop is more comfortable.
@@ -945,7 +953,8 @@ Everything by **right-click** in the tree (or in the note menu “…”):
 
 - **New note / New folder** – also via the **“+”** that appears when you hover over a source or
   a folder (choice of “New note” or “New folder”). The file name is formed from the
-  title (special characters such as `:` are replaced).
+  title (special characters such as `:` are replaced). The field to the left of the title picks an **icon** right
+  away (optional, the same choice as “Change icon”).
 
 ![“+” on a folder](handbuch/59-ordner-neu.webp)
 - **Rename / move:** type the file name, **choose the target from the list** (all
@@ -3124,7 +3133,7 @@ package names and the licence.
 | Component | Used for | Packages | Licence |
 |---|---|---|---|
 | TipTap / ProseMirror | editor with visible formatting | `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-code`, `@tiptap/extension-code-block-lowlight`, `@tiptap/extension-details`, `@tiptap/extension-image`, `@tiptap/extension-list`, `@tiptap/extension-table`, `@tiptap/suggestion` | MIT |
-| CodeMirror 6 | Markdown source | `@codemirror/view`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
+| CodeMirror 6 | Markdown source | `@codemirror/view`, `@codemirror/state`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
 | unified / remark | reading and writing Markdown (tables, tasks, formulas, front matter) | `unified`, `remark-parse`, `remark-stringify`, `remark-gfm`, `remark-math`, `remark-frontmatter`, `mdast-util-gfm`, `mdast-util-math`, `mdast-util-frontmatter`, `mdast-util-to-markdown` | MIT |
 | lowlight / highlight.js | colours in code blocks | `lowlight` | MIT / BSD-3-Clause |
 | KaTeX | formulas | `katex` | MIT |

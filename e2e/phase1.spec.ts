@@ -2,9 +2,10 @@
 // minimal diff), links, search with context actions, external edits, dark mode — and, when a
 // Gitea token is available, a remote mount on the branch `e2e` of the test repository `<owner>/kaveyl-wiki-test` (never `main`).
 import { expect, test, type Page } from '@playwright/test';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { waitIndexed } from './indexed';
 import { openSettingsPage } from './settings-nav';
 import { shot } from './shots';
 
@@ -289,6 +290,55 @@ test('table of contents on the right jumps to headings', async () => {
   await page.getByRole('button', { name: 'Inhaltsverzeichnis ein-/ausblenden' }).filter({ visible: true }).click();
   await expect(toc).toHaveCount(0);
   await page.getByRole('button', { name: 'Inhaltsverzeichnis ein-/ausblenden' }).filter({ visible: true }).click();
+});
+
+test('Markdown view: table of contents from the source, a hint on the id line (Owner 30.10.)', async () => {
+  const fill = (word: string) => `${word}. `.repeat(400);
+  writeFileSync(
+    join(NOTES, 'quelle-toc.md'),
+    `---\nid: 01J0QUELLETOC0000000000000\n---\n# Quelle\n\n${fill('Quellwort')}\n\n\`\`\`sh\n# kein Titel\n\`\`\`\n\n## Mitte\n\n${fill('Mittelwort')}\n\n## Ende\n\nSchluss.\n`,
+  );
+  await waitIndexed(page, 'Notizen', ['quelle-toc.md']);
+  await page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-toc', { exact: true }).click();
+  await page.getByTitle('Markdown-Quelltext').filter({ visible: true }).click();
+  const toc = page.getByRole('navigation', { name: 'Inhaltsverzeichnis' });
+  await expect(toc.getByRole('button')).toHaveText(['Quelle', 'Mitte', 'Ende']);
+  await toc.getByRole('button', { name: 'Ende' }).click();
+  await expect(page.locator('.cm-line', { hasText: '## Ende' })).toBeInViewport();
+  await expect(toc.getByRole('button', { name: 'Ende' })).toHaveClass(/border-accent/);
+  // The id line is dimmed and says what it is for (back at the top: CodeMirror draws only the lines near the view).
+  await page.waitForTimeout(1000); // let the click pin expire
+  await page.locator('.cm-editor').filter({ visible: true }).evaluate((el) => el.closest('.overflow-y-auto')!.scrollTo({ top: 0 }));
+  await expect(page.locator('.cm-line', { hasText: 'id: 01J0QUELLETOC' })).toBeInViewport();
+  // Scrolling by hand moves the mark in the list as well.
+  await expect(toc.getByRole('button', { name: 'Quelle' })).toHaveClass(/border-accent/, { timeout: 3000 });
+  await expect(page.locator('.cm-note-id .cm-note-id-hint')).toHaveText('← Kennung der Notiz – nicht ändern oder löschen');
+  await shot(page, '13b-markdown-toc');
+  // Hidden with the same switch as in the editor.
+  await page.getByRole('button', { name: 'Inhaltsverzeichnis ein-/ausblenden' }).filter({ visible: true }).click();
+  await expect(toc).toHaveCount(0);
+  await page.getByRole('button', { name: 'Inhaltsverzeichnis ein-/ausblenden' }).filter({ visible: true }).click();
+  await page.getByTitle('Visueller Editor').filter({ visible: true }).click();
+  // Back to the note the next tests expect (a click in the tree replaces the tab's note).
+  await page.locator('aside nav[aria-label="Quellen"]').getByText('handbuch', { exact: true }).click();
+  await expect(page.locator('.prose-note h2', { hasText: 'Betrieb' })).toHaveCount(1);
+  unlinkSync(join(NOTES, 'quelle-toc.md'));
+  await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-toc', { exact: true })).toHaveCount(0, { timeout: 45_000 });
+});
+
+test('Markdown view: a very large note is plain text, without table of contents (security review 0.2.12)', async () => {
+  writeFileSync(join(NOTES, 'quelle-gross.md'), `# Gross\n\n## Teil\n\n${'Langwort. '.repeat(12_000)}\n`);
+  await waitIndexed(page, 'Notizen', ['quelle-gross.md']);
+  await page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-gross', { exact: true }).click();
+  await page.getByTitle('Markdown-Quelltext').filter({ visible: true }).click();
+  await expect(page.getByText('Große Notiz: ohne Hervorhebung und Inhaltsverzeichnis', { exact: false })).toBeVisible();
+  await expect(page.locator('.cm-line', { hasText: '## Teil' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Inhaltsverzeichnis' })).toHaveCount(0);
+  await page.getByTitle('Visueller Editor').filter({ visible: true }).click();
+  await page.locator('aside nav[aria-label="Quellen"]').getByText('handbuch', { exact: true }).click();
+  await expect(page.locator('.prose-note h2', { hasText: 'Betrieb' })).toHaveCount(1);
+  unlinkSync(join(NOTES, 'quelle-gross.md'));
+  await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-gross', { exact: true })).toHaveCount(0, { timeout: 45_000 });
 });
 
 test('editor width: full width toggle and percent setting', async () => {

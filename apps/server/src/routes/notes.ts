@@ -146,11 +146,12 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
     },
   );
 
-  server.post<{ Params: { mountId: string }; Body: { parent?: string; title: string; kind?: 'file' | 'dir'; template?: string; body?: string } }>('/api/notes/:mountId', async (req) => {
+  server.post<{ Params: { mountId: string }; Body: { parent?: string; title: string; kind?: 'file' | 'dir'; template?: string; body?: string; icon?: string } }>('/api/notes/:mountId', async (req) => {
     const mount = access(req, req.params.mountId, String(req.body.parent ?? ''), 'write', true);
     const template = typeof req.body.template === 'string' && req.body.template ? req.body.template : undefined;
     const body = typeof req.body.body === 'string' ? req.body.body.slice(0, 500_000) : undefined;
-    const path = await notes.create(mount, req.body.parent ?? '', String(req.body.title ?? ''), req.body.kind === 'dir' ? 'dir' : 'file', author(req), template, body);
+    const icon = typeof req.body.icon === 'string' ? req.body.icon : undefined;
+    const path = await notes.create(mount, req.body.parent ?? '', String(req.body.title ?? ''), req.body.kind === 'dir' ? 'dir' : 'file', author(req), { template, body, icon });
     return { path };
   });
 

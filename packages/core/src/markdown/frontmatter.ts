@@ -13,7 +13,16 @@ export interface SplitFile {
 }
 
 const FENCE = /^---[ \t]*\r?\n/;
-const CLOSE = /^(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/m;
+// Without the `m` flag on purpose: with it, JavaScript also ends a line at U+2028/U+2029, YAML does not – a value
+// holding one could close the block early (security review 0.2.12). Lines end at \r\n, \n or \r as in YAML; `$` is
+// the end of the text.
+const CLOSE = /(^|\r\n|\n|\r)(?:---|\.\.\.)[ \t]*(?:\r\n|\n|\r|$)/;
+
+/** Where the closing fence starts in `rest` (after the opening one), and where the block ends; null without one. */
+function closeOf(rest: string): { at: number; end: number } | null {
+  const m = CLOSE.exec(rest);
+  return m ? { at: m.index + m[1]!.length, end: m.index + m[0].length } : null;
+}
 
 export function splitFrontmatter(raw: string): SplitFile {
   const bom = raw.startsWith('﻿') ? '﻿' : '';
@@ -21,9 +30,9 @@ export function splitFrontmatter(raw: string): SplitFile {
   const open = FENCE.exec(text);
   if (!open) return { frontmatter: '', body: raw };
   const rest = text.slice(open[0].length);
-  const close = CLOSE.exec(rest);
+  const close = closeOf(rest);
   if (!close) return { frontmatter: '', body: raw };
-  const end = open[0].length + close.index + close[0].length;
+  const end = open[0].length + close.end;
   return { frontmatter: bom + text.slice(0, end), body: text.slice(end) };
 }
 
@@ -121,6 +130,6 @@ function frontmatterInner(frontmatter: string): string | null {
   const open = FENCE.exec(text);
   if (!open) return null;
   const rest = text.slice(open[0].length);
-  const close = CLOSE.exec(rest);
-  return close ? rest.slice(0, close.index) : null;
+  const close = closeOf(rest);
+  return close ? rest.slice(0, close.at) : null;
 }

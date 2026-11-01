@@ -4,6 +4,9 @@ import { WatchDialog } from './Watch';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { create } from 'zustand';
 import { IconPicker } from '../editor/IconPicker';
+import { IconGlyph } from '../editor/icons';
+import * as Popover from '@radix-ui/react-popover';
+import { Smile } from 'lucide-react';
 import { focusWhenOpened } from '../editor/focusRequest';
 import { AclDialog } from './Access';
 import { ImportDialog } from './ImportDialog';
@@ -22,7 +25,7 @@ import { ActivityDialog } from './Activity';
 import { RepoDeleteDialog } from './RepoTrash';
 import { nodeKey, useWorkspace } from '../store';
 import { folderNoteOf, noteNameIn } from '../names';
-import { Button, Field, Input, Modal, Spinner, fillNodes, FormError } from '../ui';
+import { Button, Field, Input, Modal, PopoverContent, Spinner, fillNodes, FormError } from '../ui';
 import { FolderPicker, type FolderTarget } from './SaveAs';
 import { notesBelow, trashEntryFor } from './deleted';
 import { rowAfterRemoval, treeItems, treeRow } from './treeKeys';
@@ -122,6 +125,8 @@ function useRun(onDone: () => void) {
 function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'create' }>; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [template, setTemplate] = useState('');
+  const [icon, setIcon] = useState<string | null>(null);
+  const [iconOpen, setIconOpen] = useState(false);
   const missingId = useId();
   const templates = useQuery({ queryKey: ['templates', action.mountId], queryFn: () => api.templates(action.mountId) });
   const qc = useQueryClient();
@@ -131,7 +136,7 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
   const submit = (e: FormEvent) => {
     e.preventDefault();
     void run(async () => {
-      const { path } = await api.createNote(action.mountId, action.parent, title.trim(), action.type, template || undefined);
+      const { path } = await api.createNote(action.mountId, action.parent, title.trim(), action.type, { template: template || undefined, icon: icon ?? undefined });
       await qc.invalidateQueries({ queryKey: ['tree', action.mountId] });
       const notePath = action.type === 'dir' ? `${path}/index.md` : path;
       focusWhenOpened(action.mountId, notePath);
@@ -142,9 +147,38 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
   return (
     <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.type === 'dir' ? t('Neuer Ordner') : t('Neue Notiz')} trackInput>
       <form onSubmit={submit} className="space-y-3">
-        <Field label={t('Titel')} hint={action.parent ? t('in {folder}/', { folder: action.parent }) : t('auf oberster Ebene')}>
-          <Input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={action.type === 'dir' ? t('Ordnername') : t('Titel der Notiz')} />
-        </Field>
+        <div className="flex items-start gap-2">
+          {/* The icon right away (Owner 30.10.) – optional, the same picker as „Icon ändern“. Outside the <label>:
+              it would otherwise name the button instead of the title field. */}
+          <Popover.Root open={iconOpen} onOpenChange={setIconOpen}>
+            <Popover.Trigger asChild>
+              <button
+                type="button"
+                aria-label={icon ? t('Icon ändern') : t('Icon wählen (optional)')}
+                title={icon ? t('Icon ändern') : t('Icon wählen (optional)')}
+                className="mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-control text-fg-muted hover:border-fg-faint hover:bg-hover"
+              >
+                {icon ? <IconGlyph icon={icon} className="h-4 w-4" /> : <Smile className="h-4 w-4 text-fg-faint" />}
+              </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <PopoverContent align="start" sideOffset={4} className="z-[70] p-3">
+                <IconPicker
+                  value={icon}
+                  onPick={(i) => {
+                    setIconOpen(false);
+                    setIcon(i);
+                  }}
+                />
+              </PopoverContent>
+            </Popover.Portal>
+          </Popover.Root>
+          <div className="min-w-0 flex-1">
+            <Field label={t('Titel')} hint={action.parent ? t('in {folder}/', { folder: action.parent }) : t('auf oberster Ebene')}>
+              <Input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={action.type === 'dir' ? t('Ordnername') : t('Titel der Notiz')} />
+            </Field>
+          </div>
+        </div>
         {!!templates.data?.length && (
           <Field label={t('Vorlage')} hint={t('Vorlagen liegen in .kaveyl-wiki/templates/ der Quelle')}>
             <select className="h-9 w-full rounded-md border border-line bg-bg px-2 text-sm" value={template} onChange={(e) => setTemplate(e.target.value)} aria-label={t('Vorlage')}>
@@ -210,7 +244,7 @@ function SaveAnswerDialog({ action, onClose }: { action: Extract<Action, { kind:
     const list = cited.map((src) => `${src.n}. ${src.mountId === current.mountId ? `[${noteNameIn(src.mountId, src.path)}](${relLink(current.folder, src.path)})` : `${noteNameIn(src.mountId, src.path)} (${mountName(src.mountId)} / ${src.path})`}`);
     const body = list.length ? `${action.markdown.trim()}\n\n**Quellen:**\n\n${list.join('\n')}` : action.markdown.trim();
     void run(async () => {
-      const { path } = await api.createNote(current.mountId, current.folder, title.trim(), 'file', undefined, body);
+      const { path } = await api.createNote(current.mountId, current.folder, title.trim(), 'file', { body });
       await qc.invalidateQueries({ queryKey: ['tree', current.mountId] });
       action.onSaved?.();
       openNote(current.mountId, path, title.trim());

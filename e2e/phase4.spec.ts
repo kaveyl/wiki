@@ -232,6 +232,34 @@ test('Beobachten: Maria follows a source – a dot and „Neu für dich“ when 
   const n = (await (await admin.request.get(`/api/notes/${id}/bausteine.md`)).json()) as { hash: string; raw: string };
   expect((await admin.request.put(`/api/notes/${id}/bausteine.md`, { data: { raw: n.raw + '\nNeu vom Admin.\n', baseHash: n.hash } })).status()).toBe(200);
   await expect(source.getByRole('img', { name: 'Neu: geändert von E2E Admin' })).toBeVisible({ timeout: 10_000 });
+  // A folder with news: its number stays in place when the mouse brings the row buttons (Owner 30.10.).
+  expect((await admin.request.post(`/api/notes/${id}`, { data: { parent: '', title: 'Hover-Probe', kind: 'dir' } })).ok()).toBe(true);
+  for (const title of ['Eins', 'Zwei']) expect((await admin.request.post(`/api/notes/${id}`, { data: { parent: 'Hover-Probe', title } })).ok()).toBe(true);
+  if ((await source.getAttribute('aria-expanded')) !== 'true') await source.click();
+  const probe = tree.locator('[data-node$=":Hover-Probe"]');
+  const count = probe.locator('[data-unread]');
+  // Folder note + two notes: a number, not a dot.
+  await expect(count).toHaveAttribute('data-unread', '3', { timeout: 10_000 });
+  await maria.mouse.move(0, 0);
+  const before = await count.boundingBox();
+  await probe.hover();
+  await expect(probe.getByRole('button', { name: 'Neu …' })).toBeVisible();
+  expect((await count.boundingBox())?.x).toBe(before?.x);
+  expect((await admin.request.delete(`/api/notes/${id}/Hover-Probe`, { data: {} })).ok()).toBe(true);
+  await expect(probe).toHaveCount(0);
+  // Out of the trash again: later specs count what is in it.
+  const trash = (await (await admin.request.get(`/api/trash/${id}`)).json()) as { items: { id: string }[] };
+  for (const item of trash.items.filter((i) => JSON.stringify(i).includes('Hover-Probe'))) {
+    expect((await admin.request.post(`/api/trash/${id}/purge`, { data: { id: item.id } })).ok()).toBe(true);
+  }
+  // Its news (created, deleted) counts as read, so only bausteine.md is new below.
+  await expect
+    .poll(async () => {
+      await maria.request.post('/api/watches/read', { data: { mountId: id, path: 'Hover-Probe' } });
+      const w = (await (await maria.request.get('/api/watches')).json()) as { unread: { path: string }[] };
+      return w.unread.filter((u) => u.path.startsWith('Hover-Probe')).length;
+    }, { timeout: 10_000 })
+    .toBe(0);
   const fresh = maria.getByLabel('Neu für dich');
   await expect(fresh.getByRole('button', { name: /^bausteine/ })).toBeVisible();
   if ((await source.getAttribute('aria-expanded')) !== 'true') await source.click();

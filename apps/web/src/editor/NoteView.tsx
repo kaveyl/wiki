@@ -243,6 +243,7 @@ function Loaded({
 }) {
   const inEncryptedFolder = encryptedFolder !== null;
   const [saveState, setSaveState] = useState<SaveState>('saved');
+  const [sourceScroller, setSourceScroller] = useState<HTMLDivElement | null>(null);
   const [failure, setFailure] = useState<SaveFailure | null>(null);
   const [conflict, setConflict] = useState<Conflict | null>(null);
   const [unlocked, setUnlocked] = useState(false);
@@ -836,9 +837,9 @@ function Loaded({
       {mode === 'rich' && note.doc ? (
         <RichEditor mount={mount} note={note} readonly={readonly} encrypted={!!seal} onChange={changed} bind={bind} header={<TagBar mountId={mount.id} tags={tags} readonly={readonly} onChange={(next) => saveMeta({ tags: next })} />} />
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <Suspense fallback={<PartLoading className="p-10" text={t('Markdown-Ansicht wird geladen …')} />}>
-            <SourceEditor note={note} readonly={readonly} onChange={changed} bind={bind} />
+        <div ref={setSourceScroller} className="@container flex min-h-0 flex-1 overflow-y-auto">
+          <Suspense fallback={<PartLoading className="flex-1 p-10" text={t('Markdown-Ansicht wird geladen …')} />}>
+            <SourceEditor note={note} readonly={readonly} onChange={changed} bind={bind} scroller={sourceScroller} />
           </Suspense>
         </div>
       )}
@@ -1087,7 +1088,18 @@ function RichEditor({
         </div>
         {editor && showToc && headings.length >= 2 && (
           <aside className="sticky top-0 hidden w-60 shrink-0 self-start @4xl:block">
-            <Toc editor={editor} headings={headings} scroller={scroller} />
+            <Toc
+              headings={headings}
+              scroller={scroller}
+              topOf={(i) => {
+                const dom = editor.view.nodeDOM(headings[i]!.pos);
+                return dom instanceof HTMLElement ? dom.getBoundingClientRect().top : null;
+              }}
+              scrollTo={(i) => {
+                const dom = editor.view.nodeDOM(headings[i]!.pos);
+                if (dom instanceof HTMLElement) dom.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            />
           </aside>
         )}
       </div>
@@ -1484,7 +1496,7 @@ function NoteHeader({
           <FileCode2 className="h-3.5 w-3.5" /> <span className="hidden @3xl:inline [[data-labels=off]_&]:hidden">{t('Markdown')}</span>
         </button>
       </div>
-      <ViewToggles mode={mode} onDownload={encrypted ? undefined : () => downloadExport(mount.id, note.path, 'md')} />
+      <ViewToggles onDownload={encrypted ? undefined : () => downloadExport(mount.id, note.path, 'md')} />
       <DM.Root>
         <DM.Trigger asChild>
           <button className="flex h-7 w-7 min-w-6 items-center justify-center rounded text-fg-muted hover:bg-hover" aria-label={t('Weitere Aktionen')}>
@@ -1621,22 +1633,20 @@ function NoteHeader({
 }
 
 /** `onDownload`: the note as .md (with its pictures and files as ZIP, owner 28.10.) – not for encrypted notes. */
-function ViewToggles({ mode, onDownload }: { mode: 'rich' | 'source'; onDownload?: () => void }) {
+function ViewToggles({ onDownload }: { onDownload?: () => void }) {
   const { editorWidth, showToc, set } = usePrefs();
   const full = editorWidth === 'full';
   return (
     <div className="flex items-center">
-      {mode === 'rich' && (
-        <button
-          className={cx('flex h-7 w-7 items-center justify-center rounded hover:bg-hover', showToc ? 'text-fg' : 'text-fg-faint')}
-          aria-label={t('Inhaltsverzeichnis ein-/ausblenden')}
-          aria-pressed={showToc}
-          title={t('Inhaltsverzeichnis ein-/ausblenden')}
-          onClick={() => set({ showToc: !showToc })}
-        >
-          <ListTree className="h-4 w-4" />
-        </button>
-      )}
+      <button
+        className={cx('flex h-7 w-7 items-center justify-center rounded hover:bg-hover', showToc ? 'text-fg' : 'text-fg-faint')}
+        aria-label={t('Inhaltsverzeichnis ein-/ausblenden')}
+        aria-pressed={showToc}
+        title={t('Inhaltsverzeichnis ein-/ausblenden')}
+        onClick={() => set({ showToc: !showToc })}
+      >
+        <ListTree className="h-4 w-4" />
+      </button>
       {onDownload && (
         <button
           className="flex h-7 w-7 items-center justify-center rounded text-fg-muted hover:bg-hover hover:text-fg"

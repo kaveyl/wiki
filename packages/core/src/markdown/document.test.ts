@@ -352,6 +352,22 @@ describe('frontmatter', () => {
     expect(readFrontmatter(frontmatter)).toEqual({ title: 'Home', tags: 'home' });
   });
 
+  it('a block ends only at a line of its own: U+2028/U+2029 in a value never close it (security review 0.2.12)', () => {
+    for (const sep of ['\u2028', '\u2029']) {
+      const raw = setFrontmatterKeys('---\nencrypted: age\n---\nAGE\n', { tags: `a${sep}---${sep}b` });
+      const { frontmatter, body } = splitFrontmatter(raw);
+      expect(body).toBe('AGE\n');
+      expect(readFrontmatter(frontmatter)).toMatchObject({ encrypted: 'age', tags: `a${sep}---${sep}b` });
+    }
+    // The usual endings still work: empty block, `...`, CRLF, end of file, BOM.
+    expect(splitFrontmatter('---\n---\nText').body).toBe('Text');
+    expect(splitFrontmatter('---\na: 1\n...\nText').body).toBe('Text');
+    expect(splitFrontmatter('---\r\na: 1\r\n---\r\nText').body).toBe('Text');
+    expect(splitFrontmatter('---\na: 1\n---\rText').body).toBe('Text');
+    expect(readFrontmatter(splitFrontmatter('---\na: 1\n---').frontmatter)).toEqual({ a: 1 });
+    expect(readFrontmatter(splitFrontmatter('\uFEFF---\na: 2\n---\n').frontmatter)).toEqual({ a: 2 });
+  });
+
   it('updates keys textually: every other byte stays, including comment spacing', () => {
     const { frontmatter } = splitFrontmatter(SAMPLE);
     const updated = updateFrontmatter(frontmatter, { id: '01JA0X8Q7Z', tags: undefined });

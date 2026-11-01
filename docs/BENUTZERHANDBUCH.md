@@ -496,7 +496,7 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 ![Menü in den Favoriten](handbuch/51-favoriten-menue.webp)
 
 - **Icons:** Klick auf das Symbol links neben dem Pfad (oder Rechtsklick im Baum → „Icon ändern
-  …“). Drei Reiter:
+  …“; beim Anlegen gleich im Fenster „Neue Notiz“/„Neuer Ordner“). Drei Reiter:
   - **Symbole** – „Häufig“ zeigt eine Auswahl; über die Liste daneben alle rund 1 900
     Lucide-Symbole nach **Kategorie** (Dateien, Entwicklung, Finanzen, Wetter …) oder „Alle“.
     Das Suchfeld durchsucht Namen, Schlagworte und Kategorien (Namen und Schlagworte englisch,
@@ -580,9 +580,17 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 ![Inhaltsverzeichnis](handbuch/07-inhaltsverzeichnis.webp)
 
-- **Markdown-Ansicht:** zeigt und bearbeitet den Quelltext direkt.
+- **Markdown-Ansicht:** zeigt und bearbeitet den Quelltext direkt. Auch hier steht rechts das Inhaltsverzeichnis
+  (derselbe Schalter); ein Klick springt zur Zeile der Überschrift. Die Zeile `id:` ganz oben ist ausgegraut: Das ist
+  die Kennung der Notiz. Daran erkennt Kaveyl Wiki die Notiz wieder, wenn sie außerhalb (z. B. in VS Code oder per Git)
+  umbenannt oder verschoben wird, und Rechte oder KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.
+  Nicht ändern oder löschen – fehlt sie, merkt sich Kaveyl Wiki die Notiz nur noch über ihren Pfad.
+  Sehr große Notizen (über 100 000 Zeichen) zeigt die Markdown-Ansicht als reinen Text – ohne Hervorhebung und
+  Inhaltsverzeichnis, damit sie flüssig bleibt.
 
 ![Markdown-Ansicht](handbuch/08-markdown-ansicht.webp)
+
+![Markdown-Ansicht mit Inhaltsverzeichnis und Hinweis an der id-Zeile](handbuch/13b-markdown-toc.webp)
 
 - Auf dem **Handy** ist die Oberfläche nutzbar (Seitenleiste ein-/ausklappbar); für längeres
   Schreiben ist der Desktop angenehmer.
@@ -949,7 +957,8 @@ Alles per **Rechtsklick** im Baum (oder im Notiz-Menü „…“):
 
 - **Neue Notiz / Neuer Ordner** – auch über das **„+“**, das beim Überfahren einer Quelle oder
   eines Ordners erscheint (Auswahl „Neue Notiz“ oder „Neuer Ordner“). Der Dateiname wird aus dem
-  Titel gebildet (Sonderzeichen wie `:` werden ersetzt).
+  Titel gebildet (Sonderzeichen wie `:` werden ersetzt). Das Feld links neben dem Titel wählt gleich ein
+  **Icon** (freiwillig, dieselbe Auswahl wie bei „Icon ändern“).
 
 ![„+“ an einem Ordner](handbuch/59-ordner-neu.webp)
 - **Umbenennen / verschieben:** Dateiname eintippen, **Ziel aus der Liste wählen** (alle
@@ -3157,7 +3166,7 @@ Paketnamen und die Lizenz.
 | Komponente | Wofür | Pakete | Lizenz |
 |---|---|---|---|
 | TipTap / ProseMirror | Editor mit sichtbarer Formatierung | `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-code`, `@tiptap/extension-code-block-lowlight`, `@tiptap/extension-details`, `@tiptap/extension-image`, `@tiptap/extension-list`, `@tiptap/extension-table`, `@tiptap/suggestion` | MIT |
-| CodeMirror 6 | Markdown-Quelltext | `@codemirror/view`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
+| CodeMirror 6 | Markdown-Quelltext | `@codemirror/view`, `@codemirror/state`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
 | unified / remark | Markdown lesen und schreiben (Tabellen, Aufgaben, Formeln, Frontmatter) | `unified`, `remark-parse`, `remark-stringify`, `remark-gfm`, `remark-math`, `remark-frontmatter`, `mdast-util-gfm`, `mdast-util-math`, `mdast-util-frontmatter`, `mdast-util-to-markdown` | MIT |
 | lowlight / highlight.js | Farben in Codeblöcken | `lowlight` | MIT / BSD-3-Clause |
 | KaTeX | Formeln | `katex` | MIT |

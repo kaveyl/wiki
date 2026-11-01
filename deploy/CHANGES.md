@@ -3,6 +3,46 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.13 (Beta) – 2026-11-01
+
+A maintenance release: current system packages and dependencies. It contains everything from 0.2.12.
+
+### Upgrade notes
+- **From 0.2.3 or newer:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+
+### Security
+- **System package:** the image is built with the fixed `libsasl2` from Debian (CVE-2026-107161, high), which comes
+  with Git and the SMB client.
+- **Dependencies:** `glob` 14.0.3, which brings a fixed `minimatch`, replaces the glob 13 that `@fastify/static`
+  asks for (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249, both moderate). Kaveyl Wiki only lists its own web files with them, with a
+  fixed pattern, so neither could be triggered from outside.
+
+## 0.2.12 (Beta) – 2026-10-30
+
+Small comforts from daily use and one fix in the sidebar.
+
+### Upgrade notes
+- **From 0.2.3 or newer:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+
+### Added
+- **Table of contents in the Markdown view:** the list of headings on the right now also appears while editing the
+  source; a click jumps to the heading's line. Headings inside code blocks and the frontmatter are not listed.
+- **Icon when creating:** the “New note” and “New folder” windows have an icon field next to the title (optional, the
+  same choice as “Change icon”).
+- **The `id:` line explained:** in the Markdown view the note's `id:` line is dimmed and says what it is for – Kaveyl
+  Wiki recognises the note by it when it is renamed or moved outside the app.
+
+### Changed
+- **Very large notes** (over 100,000 characters) appear as plain text in the Markdown view – without highlighting and
+  table of contents, so the view stays responsive.
+
+### Fixed
+- The number of new changes next to a folder no longer jumps aside when the mouse brings up the row's buttons.
+- Icon values are stored on one line, without control characters; a tag or icon containing the Unicode line or
+  paragraph separator no longer ends a note's frontmatter early.
+
 ## 0.2.11 (Beta) – 2026-10-30
 
 A hardened image and a bill of materials (SBOM) with every release.
