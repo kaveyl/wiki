@@ -104,7 +104,7 @@ test('release a folder, rewrite a selection as a suggestion, replace it', async 
   await expect(dialog.getByRole('radio', { name: 'Wie darüber' })).toBeChecked();
   await expect(dialog.getByText('derzeit: nicht freigegeben (Standard)')).toBeVisible();
   // Only a provider in the own network: no question about the cloud.
-  await expect(dialog.getByRole('radio', { name: 'Freigegeben – nur für KI im eigenen Netz' })).toHaveCount(0);
+  await expect(dialog.getByRole('radio', { name: 'Freigegeben – nur private KI' })).toHaveCount(0);
   await dialog.getByRole('radio', { name: 'Freigegeben', exact: true }).check();
   await expect(dialog.getByText('Die Inhalte bleiben im eigenen Netz (Ollama).')).toBeVisible();
   await shot(page, '61-ki-freigabe');
@@ -167,8 +167,8 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   await section.getByRole('button', { name: 'aktiv' }).click();
   await expect(rules.getByRole('listitem')).toHaveCount(1);
   await expect(rules.getByRole('listitem').first()).toContainText('plan (Notizen)');
-  // „nur eigenes Netz“ only matters with cloud providers besides local ones.
-  await expect(section.getByRole('button', { name: 'lokal' })).toHaveCount(0);
+  // „nur private KI“ only matters with providers both with and without the private tick (AD-079).
+  await expect(section.getByRole('button', { name: 'privat' })).toHaveCount(0);
   await section.getByRole('button', { name: 'alle' }).click();
   // Remove from the overview: row and ✦ disappear, the folder rule stays.
   await rules.getByRole('listitem').filter({ hasText: 'nicht freigegeben' }).click({ button: 'right' });
@@ -181,11 +181,11 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   // A cloud provider besides the local one: the folder released while there was none stays in the own network.
   const cloud = (await (await page.request.put('/api/ai/providers', { data: { kind: 'ollama-cloud', name: 'Wolke', apiKey: 'test-key' } })).json()) as { id: string };
   await page.reload();
-  await expect(rules.getByRole('listitem').first()).toContainText('nur eigenes Netz');
+  await expect(rules.getByRole('listitem').first()).toContainText('nur private KI');
   await rules.getByRole('listitem').first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Freigabe bearbeiten …' }).click();
   const dialog = page.getByRole('dialog', { name: 'KI-Freigabe: plan' });
-  await expect(dialog.getByRole('radio', { name: 'Freigegeben – nur für KI im eigenen Netz' })).toBeChecked();
+  await expect(dialog.getByRole('radio', { name: 'Freigegeben – nur private KI' })).toBeChecked();
   await expect(dialog.getByText('Nur Ollama sieht die Inhalte, nie Wolke.')).toBeVisible();
   await dialog.getByRole('button', { name: 'Abbrechen' }).click();
   expect((await page.request.delete(`/api/ai/providers/${cloud.id}`, { data: {} })).ok()).toBe(true);

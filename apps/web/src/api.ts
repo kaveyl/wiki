@@ -118,6 +118,8 @@ export interface MailTokenInfo {
 export type TokenScope = 'read' | 'write' | 'mcp' | 'admin';
 
 export type AiProviderKind = 'ollama' | 'ollama-cloud' | 'anthropic' | 'openrouter' | 'openai';
+/** Anthropic: how thoroughly the model thinks; unset = the model's default. */
+export type AiEffort = 'low' | 'medium' | 'high' | 'xhigh';
 export interface AiProvider {
   id: string;
   kind: AiProviderKind;
@@ -126,6 +128,9 @@ export interface AiProvider {
   model: string;
   cloud: boolean;
   hasKey?: boolean;
+  effort?: AiEffort;
+  /** May see notes released only for private AI (AD-079). */
+  private?: boolean;
 }
 export type AiLevel = 'none' | 'read' | 'suggest';
 export interface AiRule {
@@ -166,13 +171,18 @@ export type AiAgentEvent =
   | { type: 'step'; tool: string; label: string }
   | { type: 'delta'; text: string }
   | { type: 'proposal'; proposal: AiProposal }
-  | { type: 'answer'; chatId: string; answer: string; sources: AiSource[]; provider: string; model: string; mode: 'agent' | 'rag' }
+  | { type: 'answer'; chatId: string; answer: string; sources: AiSource[]; provider: string; model: string; mode: 'agent' | 'rag'; privateSkipped?: AiPrivateSkipped }
   | { type: 'error'; error: string; status: number };
 export interface AiChatMessage {
   role: 'user' | 'assistant';
   content: string;
   sources: AiSource[];
-  meta: { provider?: string; model?: string; mode?: string; steps?: string[]; proposals?: string[] };
+  meta: { provider?: string; model?: string; mode?: string; steps?: string[]; proposals?: string[]; privateSkipped?: AiPrivateSkipped };
+}
+/** Notes an answer left out because only the private AI may see them, and that AI (AD-079). */
+export interface AiPrivateSkipped {
+  count: number;
+  provider: { id: string; name: string };
 }
 
 /** Effective permission of the current user (AD-020). */
@@ -1130,11 +1140,12 @@ export const api = {
   attachmentLimits: () => request<{ maxMb: number; imageMaxPx: number }>('GET', '/api/attachment-settings'),
   saveAttachmentSettings: (b: { maxMb?: number; imageMaxPx?: number; blocked?: string | string[] }) => request<AttachmentAdmin>('PUT', '/api/admin/attachments', b),
   // ── AI assistant (AD-024) ──
-  aiProviders: () => request<{ providers: AiProvider[]; defaultId: string | null; retentionDays: number }>('GET', '/api/ai/providers'),
-  saveAiProvider: (p: Partial<AiProvider> & { kind: AiProviderKind; apiKey?: string | null }) => request<AiProvider>('PUT', '/api/ai/providers', p),
+  aiProviders: () => request<{ providers: AiProvider[]; defaultId: string | null; privateDefaultId: string | null; retentionDays: number }>('GET', '/api/ai/providers'),
+  saveAiProvider: (p: Omit<Partial<AiProvider>, 'effort'> & { kind: AiProviderKind; apiKey?: string | null; effort?: AiEffort | '' }) => request<AiProvider>('PUT', '/api/ai/providers', p),
   removeAiProvider: (id: string) => request('DELETE', `/api/ai/providers/${id}`, {}),
-  aiModels: (id: string) => request<{ models: string[] }>('POST', `/api/ai/providers/${id}/models`, {}),
-  aiSettings: (b: { defaultId?: string | null; retentionDays?: number }) => request('PUT', '/api/ai/settings', b),
+  /** The model list; for Anthropic also the effort levels of the chosen model (`null` = unknown). */
+  aiModels: (id: string) => request<{ models: string[]; efforts?: AiEffort[] | null; warning?: string }>('POST', `/api/ai/providers/${id}/models`, {}),
+  aiSettings: (b: { defaultId?: string | null; privateDefaultId?: string | null; retentionDays?: number }) => request('PUT', '/api/ai/settings', b),
   aiRule: (mountId: string, target: AclTarget, path: string) =>
     request<{
       rule: AiRule | null;
@@ -1155,7 +1166,7 @@ export const api = {
   aiAsk: (b: { question: string; scope: AiScope; chatId?: string }) =>
     request<{ chatId: string; answer: string; sources: AiSource[]; provider: string; model: string }>('POST', '/api/ai/ask', b),
   /** The agent: events arrive while it works (NDJSON). Resolves after the last event. */
-  aiAgent: async (b: { question: string; scope: AiScope; chatId?: string }, onEvent: (e: AiAgentEvent) => void) => {
+  aiAgent: async (b: { question: string; scope: AiScope; chatId?: string; providerId?: string }, onEvent: (e: AiAgentEvent) => void) => {
     const res = await fetch('/api/ai/agent', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', 'x-kaveyl-wiki-lang': lang }, body: JSON.stringify(b) });
     if (!res.ok || !res.body) {
       await readJson(res); // throws for a failure or a body that is not JSON

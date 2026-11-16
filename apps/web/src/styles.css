@@ -433,6 +433,9 @@ mark.hit {
   padding: 6px 10px;
   vertical-align: top;
   position: relative;
+  /* Long words and inline code (paths, file names) break inside the cell: otherwise the table grows wider
+     than the text column and runs under the table of contents (owner 15.11.). */
+  overflow-wrap: anywhere;
 }
 .prose-note th {
   background: var(--bg-subtle);
@@ -738,4 +741,12 @@ mark.hit {
   display: block;
   max-width: 100%;
   overflow-x: auto;
+}
+
+/* Sideways rows that scroll by wheel, swipe and fade (tab bar): no scroll bar taking the room of the text. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

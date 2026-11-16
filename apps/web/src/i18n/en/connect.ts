@@ -119,15 +119,14 @@ export default {
 
   // ── AI rules (ai/rules.tsx, ai/AiRuleDialog.tsx)
   freigegeben: 'allowed',
-  'nur eigenes Netz': 'own network only',
+  'nur private KI': 'private AI only',
   'wirkt nicht': 'no effect',
   'nicht freigegeben': 'not allowed',
   'freigegeben (nur lesen)': 'allowed (read only)',
-  'freigegeben, nur für KI im eigenen Netz ({local}) – nie an {cloud}': 'allowed, only for AI in your own network ({local}) – never to {cloud}',
-  'freigegeben (nur lesen), nur für KI im eigenen Netz ({local}) – nie an {cloud}':
-    'allowed (read only), only for AI in your own network ({local}) – never to {cloud}',
-  'nur für KI im eigenen Netz freigegeben – du hast keine eingerichtet, {cloud} sieht das nicht (wirkt wie nicht freigegeben)':
-    'allowed only for AI in your own network – you have not set one up, {cloud} does not see it (same as not allowed)',
+  'freigegeben, nur für private KI ({local}) – nie an {cloud}': 'allowed, only for private AI ({local}) – never to {cloud}',
+  'freigegeben (nur lesen), nur für private KI ({local}) – nie an {cloud}': 'allowed (read only), only for private AI ({local}) – never to {cloud}',
+  'nur für private KI freigegeben – keine KI ist dafür zugelassen, {cloud} sieht das nicht (wirkt wie nicht freigegeben)':
+    'allowed only for private AI – no AI is allowed for it, {cloud} does not see it (same as not allowed)',
   'KI-Freigabe: {state}': 'AI access: {state}',
   '{text} – klicken für KI fragen': '{text} – click to ask the AI',
   'KI-Freigabe bearbeiten …': 'Edit AI access …',
@@ -152,10 +151,10 @@ export default {
   'Noch kein KI-Anbieter eingerichtet (Einstellungen → KI).': 'No AI provider set up yet (Settings → AI).',
   'Die Inhalte bleiben im eigenen Netz ({local}).': 'The content stays in your own network ({local}).',
   'Die Inhalte gehen dafür an: {all}.': 'For this, the content goes to: {all}.',
-  'Freigegeben – nur für KI im eigenen Netz': 'Allowed – only for AI in your own network',
+  'Freigegeben – nur private KI': 'Allowed – private AI only',
   'Nur {local} sieht die Inhalte, nie {cloud}.': 'Only {local} sees the content, never {cloud}.',
-  'Du hast keine KI im eigenen Netz eingerichtet – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.':
-    'You have not set up an AI in your own network – {cloud} does not see this content, so this rule currently has no effect.',
+  'Keine KI ist für private Notizen zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.':
+    'No AI is allowed for private notes (Settings → AI) – {cloud} does not see this content, so this rule currently has no effect.',
   'Nicht freigegeben': 'Not allowed',
   'Nicht freigegeben (Ausnahme)': 'Not allowed (exception)',
   'Sperrt die ganze Quelle, auch wenn darin etwas freigegeben ist.': 'Blocks the whole source, even if something inside it is allowed.',
@@ -189,8 +188,8 @@ export default {
   'Notizen gehen an den Anbieter': 'notes go to the provider',
   'die Adresse {host} liegt im Internet': 'the address {host} is on the internet',
   '{model} ist ein Cloud-Modell – Ollama leitet es an ollama.com weiter': '{model} is a cloud model – Ollama forwards it to ollama.com',
-  'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, nur lokal oder auch Cloud). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).':
-    'At first the AI sees {nothing}: you give it access to sources, folders or notes with right-click → {menu} (read, or read + suggest; local only or also cloud). Every request is logged (provider, model, notes sent).',
+  'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).':
+    'At first the AI sees {nothing}: you give it access to sources, folders or notes with right-click → {menu} (read, or read + suggest; for every provider or private AI only). Every request is logged (provider, model, notes sent).',
   nichts: 'nothing',
   'KI-Freigabe …': 'AI access …',
   'KI-Anbieter': 'AI provider',
@@ -219,6 +218,32 @@ export default {
   Modell: 'Model',
   'Verbindung testen': 'Test connection',
   'Verbunden – {n} Modelle zur Auswahl.': 'Connected – models available: {n}.',
+  'Darf Notizen sehen, die nur für private KI freigegeben sind.': 'May see notes allowed only for private AI.',
+  privat: 'private',
+  'Wird für private Notizen genommen, wenn der Benutzer nichts anderes gewählt hat.': 'Used for private notes unless the user chose another one.',
+  'Standard privat': 'Default private',
+  'Für private Notizen zulassen': 'Allow for private notes',
+  'Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.':
+    'This AI then also sees notes allowed only for private AI – they go to {host} for that. Kaveyl Wiki cannot check whether nothing is stored there (e.g. zero data retention).',
+  'Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.': 'This AI then also sees notes allowed only for private AI. It runs in your own network.',
+  'Für private Notizen': 'For private notes',
+  'Notizen, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.':
+    'Notes allowed only for private AI always go to this AI – whichever provider is chosen above.',
+  'Meine KI für private Notizen': 'My AI for private notes',
+  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notiz ist nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private note is not included.',
+  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notizen sind nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private notes are not included.',
+  'Mit {name} fragen': 'Ask with {name}',
+  Aufwand: 'Effort',
+  'Aufwand: {level}': 'effort: {level}',
+  'Wie gründlich das Modell nachdenkt. Höher hilft bei schwierigen Fragen, dauert aber länger und kostet mehr.':
+    'How thoroughly the model thinks. Higher helps with hard questions but takes longer and costs more.',
+  'Standard des Modells': 'Model default',
+  Niedrig: 'Low',
+  Mittel: 'Medium',
+  Hoch: 'High',
+  'Sehr hoch': 'Very high',
+  '{model} kennt die Stufe „{level}“ nicht – zurück auf „Standard des Modells“.': '{model} does not know the level “{level}” – back to “Model default”.',
+  'Dieses Modell hat keine Stufen für den Aufwand.': 'This model has no effort levels.',
   'Cloud-Anbieter': 'Cloud provider',
   '{reason}. Die KI sieht hier nur, was du per KI-Freigabe ausdrücklich auch für Cloud-Anbieter freigibst.':
     '{reason}. Here the AI only sees what you explicitly allow for cloud providers in the AI access rules.',

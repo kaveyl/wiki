@@ -637,9 +637,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
   const key = nodeKey(mount.id, entry.path);
   const isDir = entry.kind === 'dir';
   const expanded = useWorkspace((s) => !!s.expanded[key]);
-  const selected = useWorkspace((s) => s.selected === key);
   const watchData = useWatches().data;
-  const reveal = useWorkspace((s) => (s.reveal?.key === key ? s.reveal.nonce : 0));
   const { toggle, openNote, select } = useWorkspace.getState();
   const openAction = useActions((s) => s.open);
   const marked = useMarked((s) => s.mountId === mount.id && s.items.some((i) => i.path === entry.path));
@@ -648,6 +646,10 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
   const session = useQuery({ queryKey: ['session'], queryFn: api.session }).data;
   const folderNote = isDir && index.folderNotes.has(entry.path) ? `${entry.path}/${mount.options.folderNote}` : null;
   const notePath = isDir ? folderNote : entry.path;
+  // A folder stands for its folder note: open in a tab or revealed, the folder row is the one marked (owner 15.11.).
+  const noteKey = notePath ? nodeKey(mount.id, notePath) : key;
+  const selected = useWorkspace((s) => s.selected === key || s.selected === noteKey);
+  const reveal = useWorkspace((s) => (s.reveal?.key === key || s.reveal?.key === noteKey ? s.reveal.nonce : 0));
   // With another folder note (e.g. home.md) an index.md is a normal note named „index“ (checklist 20.10.).
   const title = isDir ? entry.name : noteName(entry.path, mount.options.folderNote);
   // A folder shows the icon of its folder note.

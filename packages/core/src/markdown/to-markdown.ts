@@ -22,10 +22,61 @@ const OPTIONS: Options = {
   resourceLink: false,
 };
 
-export function blockToMarkdown(node: PMNode): string {
-  const md = toMarkdown({ type: 'root', children: [blockToMdast(node)] }, OPTIONS);
+/** Marker of a list: a bullet, or the delimiter after the number of a numbered list. */
+export type ListMarker = '-' | '*' | '+' | '.' | ')';
+
+/** `marker` replaces the house style's for the block's own list (document.ts: two lists in a row). */
+export function blockToMarkdown(node: PMNode, marker?: ListMarker): string {
+  return flowToMarkdown([node], marker);
+}
+
+/**
+ * Blocks one after another, written in one go: a list right after a list of the same kind then gets the other marker
+ * (`*`, `1)`) from the serializer – with the same one, CommonMark would read both as one list.
+ */
+function flowToMarkdown(nodes: PMNode[], marker?: ListMarker): string {
+  const options: Options = !marker ? OPTIONS : marker === '.' || marker === ')' ? { ...OPTIONS, bulletOrdered: marker } : { ...OPTIONS, bullet: marker };
+  const md = toMarkdown({ type: 'root', children: nodes.map(blockToMdast) }, options);
   return md.replace(/\n+$/, '');
 }
+
+const LISTS = new Set(['bulletList', 'orderedList', 'taskList']);
+
+/** Nothing but blank text (like an empty paragraph in saveMarkdown). */
+const isBlank = (n: PMNode | undefined): boolean => n?.type === 'paragraph' && !(n.content ?? []).some((c) => c.type !== 'text' || (c.text ?? '').trim() !== '');
+
+/**
+ * A block as it is written: list items without text left out. Markdown has no form for an empty task (`- [ ]` alone
+ * reads as text, a bare `-` turns the checklist into a mixed list that loads as raw Markdown); in other lists an empty
+ * item is an editor artefact like an empty paragraph. The editor keeps showing them, to type into. An empty item's
+ * sub-items of the same kind take its place. Null when a list is left without items; the same object when nothing
+ * changes. SEE-DOC: HANDBOOK.md#bekannte-besonderheiten--stolperfallen
+ */
+export function withoutEmptyItems(node: PMNode): PMNode | null {
+  const content = node.content;
+  if (!content?.length || node.type === 'paragraph' || node.type === 'heading') return node;
+  if (LISTS.has(node.type)) {
+    const items = content.flatMap((item) => itemsOf(item, node.type));
+    if (!items.length) return null;
+    return same(items, content) ? node : { ...node, content: items };
+  }
+  const kids = content.map(withoutEmptyItems).filter((c): c is PMNode => c !== null);
+  // A container never ends up empty (it would not be valid); then it stays as it was.
+  return !kids.length || same(kids, content) ? node : { ...node, content: kids };
+}
+
+function itemsOf(item: PMNode, listType: string): PMNode[] {
+  const content = item.content ?? [];
+  const kids = content.map(withoutEmptyItems).filter((c): c is PMNode => c !== null);
+  const kept = same(kids, content) ? item : { ...item, content: kids };
+  if (kids.length && !isBlank(kids[0])) return [kept];
+  const rest = kids.slice(1);
+  if (rest.every((r) => r.type === listType)) return rest.flatMap((r) => r.content ?? []);
+  // An empty first line above other blocks: no lossless way to write it without the item.
+  return [kept];
+}
+
+const same = (a: PMNode[], b: PMNode[]) => a.length === b.length && a.every((n, i) => n === b[i]);
 
 function blockToMdast(node: PMNode): RootContent {
   const content = node.content ?? [];
@@ -107,9 +158,10 @@ function blockToMdast(node: PMNode): RootContent {
     }
     case 'details': {
       const summary = (content[0]?.content ?? []).map((t) => t.text ?? '').join('');
-      const inner = (content[1]?.content ?? []).filter((b) => !(b.type === 'paragraph' && !b.content?.length)).map(blockToMarkdown);
+      const inner = (content[1]?.content ?? []).filter((b) => !(b.type === 'paragraph' && !b.content?.length));
       const open = node.attrs?.open ? ' open' : '';
-      return { type: 'html', value: [`<details${open}>\n<summary>${escapeHtml(summary)}</summary>`, ...inner, '</details>'].join('\n\n') };
+      const head = `<details${open}>\n<summary>${escapeHtml(summary)}</summary>`;
+      return { type: 'html', value: [head, ...(inner.length ? [flowToMarkdown(inner)] : []), '</details>'].join('\n\n') };
     }
     case 'mathBlock':
       return { type: 'math', value: String(node.attrs?.latex ?? '') } as RootContent;

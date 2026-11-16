@@ -44,7 +44,9 @@ ENV NODE_ENV=production \
     WEB_ROOT=/app/web \
     LOCAL_ROOTS=/docs \
     BACKUP_ROOT=/backup
+# `upgrade`: the security fixes Debian published after the base image (e.g. apt 2.6.2, CVE-2026-109518 – Prüfstandard 0.2.14).
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends git ca-certificates tini smbclient \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app

@@ -178,8 +178,14 @@ If this is a **new server** for a Kaveyl Wiki instance that existed before, do n
   Recent also Ctrl+click; in the tree Ctrl+click [marks](#mehrere-markieren)). Right-click a tab → **“Pin tab”**: pinned tabs move to the left,
   show a pin instead of ×, are never replaced when you open another note and stay
   open with “Close other tabs” and middle-click. Clicking the pin unpins them again.
+  With many tabs open they get narrower (the name stays readable); if they still do not fit, the mouse wheel
+  scrolls the bar sideways and the button **“All tabs (n)”** (number with an arrow) appears on the right: it lists
+  every open tab – a click switches to it, the × closes it, and the list stays open. The tab of a folder page marks
+  the folder in the tree.
 
 ![Pinned tabs](handbuch/50-angeheftet.webp)
+
+![All tabs](handbuch/tabs-alle.webp)
 - **Middle:** the editor with the formatting toolbar. **Right:** the table of contents (for
   longer notes), can be shown and hidden.
 - At the top right of the note: **Editor / Markdown** (switch view), switch width
@@ -302,7 +308,8 @@ on/off and **“…”** with:
 ### Right-clicking a tab {#rechtsklick-auf-einen-tab}
 
 **Show to the right**, **Show to the left**, **Close split view**, **Pin tab /
-Unpin tab**, **Close tab**, **Close other tabs**. The middle mouse button closes a tab.
+Unpin tab**, **Close tab**, **Close other tabs**. The middle mouse button closes a tab. With many tabs, the button
+**“All tabs (n)”** on the right of the bar lists all open ones.
 
 ### Command palette {#befehlspalette}
 
@@ -625,6 +632,10 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
   in between), Kaveyl Wiki shows it as **one continuous paragraph** – just like Wiki.js, Gitea, GitHub
   and the Markdown standard. The line breaks in the file are kept; in the **Markdown** view
   you can see them.
+- **Lists and checklists:** an empty item (Enter after the last item or between two items) stays in the editor for you
+  to type into, but is not saved – like empty lines. So a checklist stays a checklist in the file, too. Two lists right
+  after each other stay two lists; in the file the second one uses another marker for that (`*` instead of `-`, `1)`
+  instead of `1.`).
 - **Code blocks** are highlighted in colour as soon as a language is chosen (` ```python `).
 - **Selection menu:** select text → a small menu for bold, italic, strikethrough, code, link, **Heading 1–3**
   (turns the whole paragraph into a heading, clicked again back into text; not in lists) and
@@ -634,7 +645,9 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 - **Slash commands:** `/` at the start of a line or after a space opens a menu (heading, list, checklist,
   code, table, quote, callouts, collapsible block, link note, file or image,
-  diagram (Mermaid), divider, link). Typing further filters – several words work too, German or English
+  diagram (Mermaid), divider, link, **Date**, **Time**, **Date and time**). Date and time are the current ones,
+  inserted as text – in English `2026-11-16` and `14:05`, in German `16.11.2026` (`/date`, `/time`, `/datum`,
+  `/uhrzeit`). Typing further filters – several words work too, German or English
   (`/überschrift 2`, `/heading 2`, `/h2`) –, Enter or Tab inserts, Esc closes.
 
 ![Slash menu](handbuch/13-slash-menue.webp)
@@ -2273,19 +2286,22 @@ Everything that lets programs get at the notes: the AI assistant and personal to
 The tab has two sections: **For everyone: providers and retention** (only visible to admins, applies to all
 users) and **My AI assistant** (everyone’s own).
 
-- **AI providers** (admins): list of providers with name, type, model and “☁ Cloud provider”; the
-  **Default** radio button determines which provider applies when someone does not choose their own. “+ Ollama”, “+ Ollama Cloud”, “+ Anthropic”, “+ OpenRouter”,
+- **AI providers** (admins): list of providers with name, type, model, “☁ Cloud provider” and – for providers
+  that may see private notes – **private**; the
+  **Default** radio button determines which provider applies when someone does not choose their own. If several
+  providers are allowed for private notes, **Default private** decides which of them gets them. “+ Ollama”, “+ Ollama Cloud”, “+ Anthropic”, “+ OpenRouter”,
   “+ OpenAI-compatible” open the form: **Name**, **Address**, **API key** (encrypted, never
-  shown again), **Model** – “Test connection” lists the models. Details:
-  [Setting up AI](#ki-einrichten).
+  shown again), **Model** – “Test connection” lists the models –, for Anthropic **Effort**, and the tick
+  **Allow for private notes**. Details: [Setting up AI](#ki-einrichten).
 - **Keep unused chats** (admins): default **90 days** since the last message, 0 = never.
   Different per source: [Edit source](#eine-quelle-bearbeiten) → “Keep AI chats”.
-- **My AI assistant** (everyone): **My provider** (otherwise the default), **Personal instructions**
+- **My AI assistant** (everyone): **My provider** (otherwise the default), with several allowed providers
+  **My AI for private notes** (otherwise “Default private”), **Personal instructions**
   (sent with every request, e.g. “answer briefly, in English”) and **Delete my chat histories**.
 - What the AI may see is not set here but by right-click → **AI access …** –
   see [AI access](#ki-freigaben).
 
-![AI providers](handbuch/60-ki-anbieter.webp)
+![AI providers](handbuch/ki-anbieter-privat.webp)
 
 #### API tokens {#api-tokens}
 
@@ -2672,13 +2688,30 @@ You do not set **local or cloud** – Kaveyl Wiki detects it and shows the notic
 OpenAI-compatible services are local if the address is in your own network (`localhost`,
 `192.168.…`, `10.…`, a Docker name such as `ollama`), otherwise cloud (e.g. `…openai.azure.com`). A
 cloud model in the local Ollama (name ends in `-cloud`, e.g. `gpt-oss:120b-cloud`) also
-counts as cloud, because Ollama forwards it to ollama.com. One provider is the **Default**; every
+counts as cloud, because Ollama forwards it to ollama.com.
+
+**Effort (Anthropic):** Claude models no longer have an adjustable “temperature”, but an **effort** instead –
+**Model default**, **Low**, **Medium**, **High** or **Very high**. More effort means thinking more thoroughly, but
+slower and more expensive. Only the levels the chosen model supports are offered (after “Test connection”); if it
+has none, the form says so. The list shows the level after the model.
+
+**Allow for private notes:** with this tick Kaveyl Wiki treats a provider like an AI in your own network: it may
+see notes that are allowed for **private AI only** ([AI access](#ki-freigaben)). An AI in your own network has the
+tick by itself (it can be removed). For a cloud provider you set it deliberately – for example for a provider with
+Zero Data Retention (ZDR); the form then names where the content goes, because Kaveyl Wiki cannot check whether
+nothing is really stored there. Notes allowed for private AI only **always** go to a private AI – when summarising,
+continuing and asking –, whichever provider is the default: first your own choice (“My AI for private notes”), then
+**Default private**, otherwise the first allowed provider. If a provider without the tick is chosen explicitly
+there, Kaveyl Wiki refuses instead of sending the note. Remove the tick and that provider no longer sees the
+private notes, at once.
+
+One provider is the **Default**; every
 user can choose a different one under Settings → AI and store **personal instructions**
 (sent along with every request). There you can also delete your own chat histories;
 the admin decides how long histories are kept ([Chats and retention](#chats-und-aufbewahrung)).
 Keys are stored encrypted and never shown again.
 
-![AI providers](handbuch/60-ki-anbieter.webp)
+![AI providers](handbuch/ki-anbieter-privat.webp)
 
 ### AI access {#ki-freigaben}
 
@@ -2691,12 +2724,13 @@ a source, a folder or a note → **AI access …**:
 | **Allowed** | The AI may read the content (questions, summarising) and **propose** changes – only what you confirm is applied. The dialogue names which providers the content goes to for this. |
 | **Not allowed (exception)** | Blocks here, even if something above is allowed – e.g. the whole source allowed, only the folder “Tagebuch” not. A block always wins. |
 
-**Local or cloud – only if you have both:** if you only have cloud providers (e.g. only Ollama Cloud),
-“Allowed” means: goes to Ollama Cloud. If you only have an AI in your own network, everything stays in-house.
-Only when **both** kinds are set up is there additionally **“Allowed – only for AI in your own
-network”**: the local AI sees the content, the cloud AI never does (e.g. for a diary). Whatever you allow
-while there is no cloud provider applies to your own network only – if a cloud provider is added
-later, nothing goes to the cloud by itself because of it. In addition: `ai: false` in the front matter blocks
+**Private or not – only if you have both:** “private AI” are the providers with the tick **Allow for private
+notes** ([Setting up AI](#ki-einrichten)) – an AI in your own network by itself, a cloud provider only if you set
+it. If all providers are cloud without the tick (e.g. only Ollama Cloud), “Allowed” means: goes to Ollama Cloud. If
+all are private, that is where it stays. Only when **both** kinds are set up is there additionally **“Allowed –
+private AI only”**: the private providers see the content, the others never do (e.g. for a diary). The dialogue
+names who is on which side. Whatever you allow while there are only private providers applies to private AI only –
+if another one is added later, nothing goes to it by itself because of it. In addition: `ai: false` in the front matter blocks
 a note, encrypted notes are always off-limits, and the AI never gets more than the asking
 user is allowed to read.
 
@@ -2707,10 +2741,10 @@ user is allowed to read.
 **Overview of all access rules (admins):** as soon as there is an access rule, the section **✦ AI access**
 appears in the sidebar under “Recent” (expandable/collapsible like the favourites). Each row is a
 rule: source, folder or note (with the source in brackets), on the right **allowed** or **not allowed**
-(red); with local and cloud AI also **own network only**. An orange **no effect** means: allowed only for your own
-network, but there is no AI in your own network – the cloud AI does not see it (Edit access →
-“Allowed”). At the top you filter by **all**, **active** (allowed), **blocked** and – if there are such rules –
-**local** (a collapsed section expands when you do so). A click shows the place in the tree (a note is opened);
+(red); with private and other AI also **private AI only**. An orange **no effect** means: allowed for private AI
+only, but no provider is allowed for private notes – nobody sees it (set the tick, or Edit access → “Allowed”). At
+the top you filter by **all**, **active** (allowed), **blocked** and – if there are such rules – **private** (a
+collapsed section expands when you do so). A click shows the place in the tree (a note is opened);
 right-click (on a phone: long press): **Edit access …**, **Show in tree**, **Remove
 access**. Rules shown in grey with “orphaned” are rules whose note no longer exists – they apply nowhere and
 can go. In the tree itself, every source, folder and note with its own rule carries a small
@@ -2810,6 +2844,15 @@ With language models this is no guarantee: check important things via the linked
   in front) and closes the window. Notes that are already open do not get a second tab.
 
 ![Ask the knowledge base](handbuch/63-ki-fragen.webp)
+
+**Private notes when asking:** if you ask about an area that also holds notes for “private AI only”, your default
+provider answers – without those notes. If some match, a note below the answer says e.g. “Only what is allowed for
+Claude is found – 2 matching private notes are not included.” with the button **“Ask with …”**: it asks the same
+question in the same chat of the private AI, which then includes the notes. From then on the chat stays with the
+private AI, because its history holds private content; for another provider you start a new chat. If you ask
+directly about a note or folder for “private AI only”, the question goes to the private AI right away.
+
+![Hint about private notes](handbuch/ki-fragen-privat-hinweis.webp)
 
 ### Tasks and proposals {#aufträge-und-vorschläge}
 

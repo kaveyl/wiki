@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { loadLanguage, t } from './i18n';
 import { reloadingOnce } from './loading';
+import { installMiddleClickGuard } from './middleClick';
 import './styles.css';
+
+installMiddleClickGuard();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false, retry: 1 } },

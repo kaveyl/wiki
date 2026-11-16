@@ -19,8 +19,8 @@ import { absPath, cleanRelPath, type Mount } from '../mounts/model.js';
 import { isEncryptedNote } from '../notes/encryption.js';
 import { ConflictError, fileNameFor, type NoteService } from '../notes/service.js';
 import type { Ops } from '../api/ops.js';
-import { AiAccessError, citedSources, GROUNDING, type Assistant, type Scope, type Source } from './assistant.js';
-import { ToolsUnsupportedError, type AgentMessage, type ChatMessage, type Providers, type ToolCall, type ToolDef } from './providers.js';
+import { AiAccessError, citedSources, GROUNDING, placeOf, PRIVATE_ONLY, type Assistant, type Scope, type Source } from './assistant.js';
+import { isPrivate, ToolsUnsupportedError, type AgentMessage, type ChatMessage, type Providers, type ToolCall, type ToolDef } from './providers.js';
 import type { AiRules } from './rules.js';
 import type { Memory } from './memory.js';
 import { publicError } from '../errors.js';
@@ -101,7 +101,17 @@ export type AgentEvent =
   /** Text of the model as it arrives (streaming); a following step discards it. */
   | { type: 'delta'; text: string }
   | { type: 'proposal'; proposal: Proposal }
-  | { type: 'answer'; chatId: string; answer: string; sources: Source[]; provider: string; model: string; mode: 'agent' | 'rag' };
+  | {
+      type: 'answer';
+      chatId: string;
+      answer: string;
+      sources: Source[];
+      provider: string;
+      model: string;
+      mode: 'agent' | 'rag';
+      /** Notes left out because only the private AI may see them, and that AI (AD-079). */
+      privateSkipped?: { count: number; provider: { id: string; name: string } };
+    };
 
 /** Errors with an HTTP status (the app's error handler passes statusCode < 500 on). */
 export class ProposalError extends Error {
@@ -171,7 +181,7 @@ const cut = (t: string, n = MAX_TOOL_CHARS) => (t.length > n ? `${t.slice(0, n)}
 const parentOf = (p: string) => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
 
 export function createAgent(d: AgentDeps) {
-  const { providerFor, blocked, noteFor, system, auditCall } = d.assistant.core;
+  const { providerAt, privateHint, privateGrant, keepChatPrivate, blocked, noteFor, system, auditCall } = d.assistant.core;
 
   const proposalRow = (r: Record<string, unknown>): Proposal => ({
     id: s(r.id),
@@ -224,7 +234,9 @@ export function createAgent(d: AgentDeps) {
       if (!question) throw new AiAccessError('Frage fehlt');
       const scope: Scope = input.scope ?? { kind: 'all' };
       if (!['note', 'folder', 'source', 'all', 'general'].includes(scope.kind)) throw new AiAccessError('Unbekannter Bezug');
-      const p = providerFor(req, input.providerId);
+      // A source one does not see is unknown here too – its name never goes into the task (recheck 0.2.14).
+      if ('mountId' in scope && !d.ops.sources(req).some((m) => m.id === scope.mountId)) throw new AiAccessError('Quelle nicht gefunden');
+      let p = providerAt(req, input.providerId, placeOf(scope));
       // Without wiki content there is nothing to look up: the plain answer.
       if (scope.kind === 'general') {
         await emitRag();
@@ -234,6 +246,12 @@ export function createAgent(d: AgentDeps) {
       let chatId = input.chatId
         ? (d.db.prepare('SELECT id FROM ai_chats WHERE id = ? AND user_id = ?').get(input.chatId, req.user!.id) as { id: string } | undefined)?.id
         : undefined;
+      p = keepChatPrivate(req, p, chatId, !!input.providerId);
+      // Content released for private AI only went to the provider in this run: the chat stays private (AD-079).
+      const seen = { private: false };
+      const touched = (mountId: string, path: string) => {
+        if (privateGrant(mountId, path)) seen.private = true;
+      };
       const history: ChatMessage[] = chatId
         ? (d.db.prepare('SELECT role, content FROM ai_messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 8').all(chatId) as ChatMessage[]).reverse()
         : [];
@@ -249,7 +267,15 @@ export function createAgent(d: AgentDeps) {
       const sourceInScope = (mountId: string) => scope.kind === 'all' || ('mountId' in scope && scope.mountId === mountId);
       const inScope = (mountId: string, path: string) =>
         sourceInScope(mountId) && (scope.kind !== 'folder' || path === scope.path || path.startsWith(`${cleanRelPath(scope.path)}/`));
-      const mayRead = (mountId: string, path: string) => inScope(mountId, path) && !blocked(req, p, mountId, path, 'read');
+      // Notes in the scope only the private AI may see (AD-079): counted for the hint, never shown to this provider.
+      const privateSkipped = new Set<string>();
+      const mayRead = (mountId: string, path: string) => {
+        if (!inScope(mountId, path)) return false;
+        const why = blocked(req, p, mountId, path, 'read');
+        if (why === PRIVATE_ONLY && /\.md$/i.test(path)) privateSkipped.add(`${mountId}:${path}`);
+        if (!why) touched(mountId, path);
+        return !why;
+      };
       // `ai: false` and encrypted notes stay invisible in lists, too (not only when read).
       const fileOk = new Map<string, Promise<boolean>>();
       const allowedFile = (mountId: string, path: string) => {
@@ -363,7 +389,8 @@ export function createAgent(d: AgentDeps) {
             return note + hits.map((h) => `- sourceId=${h.sourceId} (${name(h.sourceId)}) path=${h.path} titel="${h.title}"${h.snippet ? ` … ${h.snippet} …` : ''}`).join('\n');
           }
           case 'list_sources': {
-            const list = d.ops.sources(req).filter((m) => sourceInScope(m.id) && d.rules.anyReleased(m.id));
+            // Only sources with something this provider may see: a source released for private AI only stays unnamed (AD-079).
+            const list = d.ops.sources(req).filter((m) => sourceInScope(m.id) && d.rules.anyReleasedFor(m.id, isPrivate(p)));
             return list.length ? list.map((m) => `- sourceId=${m.id} name="${m.name}"${m.readonly ? ' (schreibgeschützt)' : ''}`).join('\n') : 'Keine freigegebenen Quellen.';
           }
           case 'list_tree': {
@@ -386,6 +413,7 @@ export function createAgent(d: AgentDeps) {
             const path = cleanRelPath(s(a.path));
             if (!inScope(sourceId, path)) return 'Diese Notiz liegt außerhalb des Bezugs.';
             const { mount, note } = await noteFor(req, p, sourceId, path, 'read');
+            touched(mount.id, note.path);
             let n = sources.find((x) => x.mountId === mount.id && x.path === note.path)?.n;
             if (!n) {
               n = sources.length + 1;
@@ -413,6 +441,7 @@ export function createAgent(d: AgentDeps) {
             const path = cleanRelPath(s(a.path));
             const mount = mayPropose(s(a.sourceId), path);
             const { note } = await noteFor(req, p, mount.id, path, 'suggest');
+            touched(mount.id, note.path);
             const folder = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
             const exists = (p: string) => fileIn(mount, p);
             let content = relinkFromRoot(stripCitations(s(a.markdown), note.raw), folder, exists);
@@ -453,15 +482,21 @@ export function createAgent(d: AgentDeps) {
       const preface: string[] = [];
       if (scope.kind === 'note') {
         const { mount, note } = await noteFor(req, p, scope.mountId, scope.path, 'read');
+        touched(mount.id, note.path);
         sources.push({ n: 1, mountId: mount.id, path: note.path, title: note.title });
         read.push({ mountId: mount.id, path: note.path, hash: note.hash });
         preface.push(`Notiz im Fokus – Quelle [1]: ${mount.name} / ${note.path} („${note.title}“)\n\n${cut(note.raw)}`);
       }
-      const instructions = await d.memory.context(req, p, scope, (mountId) => !!d.rules.anyReleased(mountId) && sourceInScope(mountId));
+      const instructions = await d.memory.context(req, p, scope, (mountId) => !!d.rules.anyReleased(mountId) && sourceInScope(mountId), seen);
+      // A source with nothing released for this AI (e.g. only a subfolder „nur private KI“): not even its name or the
+      // folder's goes along (AD-079 c, diff check 0.2.14) – list_sources hides it the same way.
+      const hidden = scope.kind !== 'all' && !d.rules.anyReleasedFor(scope.mountId, isPrivate(p), scope.kind === 'folder' ? cleanRelPath(scope.path) : undefined);
       const where =
         scope.kind === 'all'
           ? 'alle für dich freigegebenen Quellen'
-          : scope.kind === 'source'
+          : hidden
+            ? 'eine Quelle, in der für dich nichts freigegeben ist'
+            : scope.kind === 'source'
             ? `die Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`
             : scope.kind === 'folder'
               ? `den Ordner „${scope.path}“ der Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`
@@ -527,11 +562,21 @@ export function createAgent(d: AgentDeps) {
       d.db.prepare('UPDATE ai_chats SET updated_at = ? WHERE id = ?').run(t, id);
       const add = d.db.prepare('INSERT INTO ai_messages (id, chat_id, role, content, sources_json, meta_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
       add.run(ulid(), id, 'user', question, '[]', '{}', t);
-      add.run(ulid(), id, 'assistant', answer, JSON.stringify(cited), JSON.stringify({ provider: p.name, model, mode: 'agent', steps, proposals }), new Date(Date.now() + 1).toISOString());
+      // Kept with the answer, so the chat shows the hint „Ask with <private AI>“ again later (AD-079).
+      const hint = privateHint(req, p, privateSkipped.size);
+      add.run(
+        ulid(),
+        id,
+        'assistant',
+        answer,
+        JSON.stringify(cited),
+        JSON.stringify({ provider: p.name, model, mode: 'agent', steps, proposals, ...hint, privateContent: !!seen.private }),
+        new Date(Date.now() + 1).toISOString(),
+      );
       // The audit keeps which notes went where, not what was asked: search terms stay in the chat (deletable).
       const audited = steps.map((st) => (st.startsWith('Sucht „') ? 'Sucht (Suchbegriff nur im Chat)' : st));
       auditCall(req, p, model, `Agent (${scope.kind}), ${steps.length} Schritte${proposals.length ? `, ${proposals.length} Vorschläge` : ''}`, read, { chatId: id, steps: audited, proposals });
-      emit({ type: 'answer', chatId: id, answer, sources: cited, provider: p.name, model, mode: 'agent' });
+      emit({ type: 'answer', chatId: id, answer, sources: cited, provider: p.name, model, mode: 'agent', ...hint });
 
       async function emitRag() {
         emit({ type: 'start', mode: 'rag' });

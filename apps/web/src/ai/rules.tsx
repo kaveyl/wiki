@@ -8,10 +8,15 @@ import { DropdownContent, cx } from '../ui';
 import { t } from '../i18n';
 import { useAi } from './aiStore';
 
-/** Names of the set-up AI providers, split by where the notes go (cloud is derived, AD-028). */
+/**
+ * Names of the set-up AI providers, split by whether they may see notes released only for private AI
+ * (AD-079: the tick per provider; before it „own network“ vs. „cloud“, AD-028/031). `local` = private,
+ * `cloud` = the others; `anyCloud`: some provider sends notes off the server at all.
+ */
 export interface ProviderKinds {
   local: string[];
   cloud: string[];
+  anyCloud?: boolean;
   /** The provider list has arrived (before that both lists are empty, not „no providers“). */
   loaded?: boolean;
 }
@@ -19,7 +24,8 @@ export interface ProviderKinds {
 export function useProviderKinds(): ProviderKinds {
   const q = useQuery({ queryKey: ['ai-providers'], queryFn: api.aiProviders, staleTime: 60_000 });
   const list = q.data?.providers ?? [];
-  return { local: list.filter((p) => !p.cloud).map((p) => p.name), cloud: list.filter((p) => p.cloud).map((p) => p.name), loaded: q.isSuccess };
+  const priv = (p: { cloud: boolean; private?: boolean }) => p.private ?? !p.cloud;
+  return { local: list.filter(priv).map((p) => p.name), cloud: list.filter((p) => !priv(p)).map((p) => p.name), anyCloud: list.some((p) => p.cloud), loaded: q.isSuccess };
 }
 
 export type RuleState = 'released' | 'local' | 'ineffective' | 'blocked';
@@ -37,7 +43,7 @@ export function ruleState(r: { level: AiLevel; cloud: boolean }, kinds: Provider
 
 export const STATE_SHORT: Record<RuleState, string> = {
   released: t('freigegeben'),
-  local: t('nur eigenes Netz'),
+  local: t('nur private KI'),
   ineffective: t('wirkt nicht'),
   blocked: t('nicht freigegeben'),
 };
@@ -50,10 +56,10 @@ export function stateText(r: { level: AiLevel; cloud: boolean }, kinds: Provider
   if (state === 'blocked') return t('nicht freigegeben');
   if (state === 'local')
     return readOnly
-      ? t('freigegeben (nur lesen), nur für KI im eigenen Netz ({local}) – nie an {cloud}', vars)
-      : t('freigegeben, nur für KI im eigenen Netz ({local}) – nie an {cloud}', vars);
+      ? t('freigegeben (nur lesen), nur für private KI ({local}) – nie an {cloud}', vars)
+      : t('freigegeben, nur für private KI ({local}) – nie an {cloud}', vars);
   if (state === 'ineffective')
-    return t('nur für KI im eigenen Netz freigegeben – du hast keine eingerichtet, {cloud} sieht das nicht (wirkt wie nicht freigegeben)', vars);
+    return t('nur für private KI freigegeben – keine KI ist dafür zugelassen, {cloud} sieht das nicht (wirkt wie nicht freigegeben)', vars);
   return readOnly ? t('freigegeben (nur lesen)') : t('freigegeben');
 }
 

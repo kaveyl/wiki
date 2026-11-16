@@ -52,6 +52,46 @@ export interface ProviderConfig {
   /** Data leaves the server (cloud) — only notes released for cloud providers may be sent. */
   cloud: boolean;
   secretId: string | null;
+  /** Anthropic only: how thoroughly the model thinks (`output_config.effort`); unset = the model's default. */
+  effort?: Effort;
+  /**
+   * May see notes released „only for private AI“ (AD-079). Set by the admin; unset (entries before AD-079) =
+   * derived as before: in the own network yes, cloud no. `list()` always fills it in.
+   */
+  private?: boolean;
+}
+
+/** May this provider see notes released only for private AI (AD-079)? */
+export const isPrivate = (p: Pick<ProviderConfig, 'cloud' | 'private'>) => p.private ?? !p.cloud;
+
+/**
+ * Effort levels offered for Anthropic (owner 15.11.: model + effort instead of temperature, which the
+ * current models reject). `max` is left out on purpose: very slow and costly for wiki questions.
+ */
+export const EFFORTS = ['low', 'medium', 'high', 'xhigh'] as const;
+export type Effort = (typeof EFFORTS)[number];
+const isEffort = (v: unknown): v is Effort => (EFFORTS as readonly unknown[]).includes(v);
+
+/**
+ * Anthropic: room for the answer and the thinking before it (both count towards `max_tokens`). Thinking
+ * is on by default on the current models, so the 2048 of the plain chat would cut answers off.
+ */
+const ANTHROPIC_MAX_TOKENS = 16_000;
+/** Anthropic answers with thinking take longer than a plain completion. */
+const ANTHROPIC_TIMEOUT_MS = 300_000;
+
+/**
+ * Body fields every Anthropic request shares. No `temperature`: the current models (Sonnet 5.5, Opus 4.7
+ * and later, Haiku 5.5, Fable) answer 400 „temperature is deprecated for this model“ (owner 15.11.).
+ */
+const anthropicBody = (p: ProviderConfig) => ({ max_tokens: ANTHROPIC_MAX_TOKENS, ...(p.effort ? { output_config: { effort: p.effort } } : {}) });
+
+/** A refusal or a cut-off answer would otherwise come back as an empty text without a word why. */
+function anthropicStop(j: { stop_reason?: string | null; stop_details?: { category?: string | null } | null }, hasText: boolean) {
+  if (j.stop_reason === 'refusal') {
+    throw new AiProviderError(`Anthropic hat die Anfrage abgelehnt${j.stop_details?.category ? ` (${j.stop_details.category})` : ''}`);
+  }
+  if (j.stop_reason === 'max_tokens' && !hasText) throw new AiProviderError('Die Antwort war zu lang und wurde abgeschnitten – Aufwand niedriger stellen');
 }
 
 /** What the browser sees: no key, only whether one is set. */
@@ -165,8 +205,11 @@ export class Providers {
     } catch {
       return [];
     }
-    // Always derived, also for providers saved before AD-028.
-    return list.map((p) => ({ ...p, cloud: isCloud(p) }));
+    // Always derived, also for providers saved before AD-028; `private` as before AD-079 when unset.
+    return list.map((p) => {
+      const cloud = isCloud(p);
+      return { ...p, cloud, private: p.private ?? !cloud };
+    });
   }
 
   publicList(): PublicProvider[] {
@@ -187,8 +230,20 @@ export class Providers {
     this.settings.set('ai_default_provider', id ?? '');
   }
 
+  /** The admin's choice for private notes (AD-079), else the first provider with the tick; null = none has it. */
+  privateDefaultId(): string | null {
+    const id = this.settings.get('ai_private_provider');
+    const own = id ? this.get(id) : null;
+    return own?.private ? own.id : (this.list().find((p) => p.private)?.id ?? null);
+  }
+
+  setPrivateDefault(id: string | null) {
+    if (id && !this.get(id)?.private) throw new AiProviderError('Dieser Anbieter ist nicht für private Notizen zugelassen');
+    this.settings.set('ai_private_provider', id ?? '');
+  }
+
   /** Creates or updates; `apiKey: ''` keeps the stored key, `null` removes it. `cloud` is derived (AD-028). */
-  save(input: Partial<Omit<ProviderConfig, 'secretId' | 'cloud'>> & { kind: ProviderKind; apiKey?: string | null; cloud?: unknown }): PublicProvider {
+  save(input: Partial<Omit<ProviderConfig, 'secretId' | 'cloud' | 'effort' | 'private'>> & { kind: ProviderKind; apiKey?: string | null; cloud?: unknown; effort?: string | null; private?: unknown }): PublicProvider {
     if (!PROVIDER_KINDS.includes(input.kind)) throw new AiProviderError('Unbekannter Anbieter-Typ');
     const list = this.list();
     const existing = input.id ? list.find((p) => p.id === input.id) : undefined;
@@ -214,7 +269,15 @@ export class Providers {
       cloud: false,
       secretId: existing?.secretId ?? null,
     };
+    // Effort: only Anthropic knows it; '' / null = the model's default, undefined = keep.
+    const effort: unknown = input.effort === undefined ? existing?.effort : input.effort;
+    if (effort && !isEffort(effort)) throw new AiProviderError('Unbekannte Stufe für den Aufwand');
+    if (kind === 'anthropic' && isEffort(effort)) p.effort = effort;
     p.cloud = isCloud(p);
+    // Private notes (AD-079): an explicit tick wins; otherwise kept, and for a new provider derived from „cloud“.
+    // A provider that moves from the own network into the cloud (new address) never keeps a derived tick silently.
+    const keep = existing && existing.cloud === p.cloud ? existing.private : undefined;
+    p.private = typeof input.private === 'boolean' ? input.private : (keep ?? !p.cloud);
     if (typeof input.apiKey === 'string' && input.apiKey.trim()) p.secretId = this.secrets.put(input.apiKey.trim(), p.secretId ?? undefined);
     if (input.apiKey === null && p.secretId) {
       this.secrets.delete(p.secretId);
@@ -324,13 +387,26 @@ export class Providers {
     const key = this.key(p);
     if (p.kind === 'anthropic') {
       if (!key) throw new AiProviderError('Für Anthropic fehlt der API-Key');
-      const j = (await this.call(`${trimSlash(p.baseUrl)}/v1/messages`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: p.model, system: req.system, messages: req.messages, max_tokens: req.maxTokens ?? 2048, temperature: req.temperature ?? 0.3 }),
-      })) as { content?: { type: string; text?: string }[]; model?: string; usage?: { input_tokens?: number; output_tokens?: number } };
+      const j = (await this.call(
+        `${trimSlash(p.baseUrl)}/v1/messages`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: p.model, system: req.system, messages: req.messages, ...anthropicBody(p) }),
+        },
+        ANTHROPIC_TIMEOUT_MS,
+      )) as {
+        content?: { type: string; text?: string }[];
+        model?: string;
+        stop_reason?: string | null;
+        stop_details?: { category?: string | null } | null;
+        usage?: { input_tokens?: number; output_tokens?: number };
+      };
+      // Read by type: an answer can begin with thinking blocks.
+      const text = (j.content ?? []).filter((c) => c.type === 'text').map((c) => c.text ?? '').join('');
+      anthropicStop(j, !!text.trim());
       return {
-        text: (j.content ?? []).filter((c) => c.type === 'text').map((c) => c.text ?? '').join(''),
+        text,
         model: j.model ?? p.model,
         inputTokens: j.usage?.input_tokens,
         outputTokens: j.usage?.output_tokens,
@@ -393,7 +469,7 @@ export class Providers {
         }
       }
       type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; json?: string };
-      const streamed: { blocks: Block[]; model?: string; usage: { input_tokens?: number; output_tokens?: number } } = { blocks: [], usage: {} };
+      const streamed: { blocks: Block[]; model?: string; stop_reason?: string | null; usage: { input_tokens?: number; output_tokens?: number } } = { blocks: [], usage: {} };
       const init = {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
@@ -402,15 +478,21 @@ export class Providers {
           system: req.system,
           messages,
           tools: req.tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.parameters })),
-          max_tokens: req.maxTokens ?? 4096,
-          temperature: 0.1,
+          ...anthropicBody(p),
           ...(req.onText ? { stream: true } : {}),
         }),
       };
       const url = `${trimSlash(p.baseUrl)}/v1/messages`;
       const raw = req.onText
         ? await this.callStream(url, init, (data) => {
-            let e: { type?: string; index?: number; message?: { model?: string; usage?: { input_tokens?: number } }; content_block?: Block; delta?: { type?: string; text?: string; partial_json?: string }; usage?: { output_tokens?: number } };
+            let e: {
+              type?: string;
+              index?: number;
+              message?: { model?: string; usage?: { input_tokens?: number } };
+              content_block?: Block;
+              delta?: { type?: string; text?: string; partial_json?: string; stop_reason?: string | null };
+              usage?: { output_tokens?: number };
+            };
             try {
               e = JSON.parse(data);
             } catch {
@@ -427,9 +509,12 @@ export class Providers {
                 b.text = (b.text ?? '') + e.delta.text;
                 req.onText!(e.delta.text);
               } else if (e.delta?.type === 'input_json_delta') b.json = (b.json ?? '') + (e.delta.partial_json ?? '');
-            } else if (e.type === 'message_delta') streamed.usage.output_tokens = e.usage?.output_tokens;
-          }).catch(unsupported)
-        : await this.call(url, init).catch(unsupported);
+            } else if (e.type === 'message_delta') {
+              streamed.usage.output_tokens = e.usage?.output_tokens;
+              streamed.stop_reason = e.delta?.stop_reason;
+            }
+          }, ANTHROPIC_TIMEOUT_MS).catch(unsupported)
+        : await this.call(url, init, ANTHROPIC_TIMEOUT_MS).catch(unsupported);
       if (raw === undefined) {
         for (const b of streamed.blocks) {
           if (b?.type === 'tool_use') {
@@ -441,15 +526,22 @@ export class Providers {
           }
         }
       }
-      const j = (raw === undefined ? { content: streamed.blocks.filter(Boolean), model: streamed.model, usage: streamed.usage } : raw) as {
+      const j = (raw === undefined ? { content: streamed.blocks.filter(Boolean), model: streamed.model, stop_reason: streamed.stop_reason, usage: streamed.usage } : raw) as {
         content?: Block[];
         model?: string;
+        stop_reason?: string | null;
+        stop_details?: { category?: string | null } | null;
         usage?: { input_tokens?: number; output_tokens?: number };
       };
+      // Thinking blocks are left out of the replayed history: the API allows that (the model then
+      // answers without its earlier reasoning) and the agent's history stays protocol-neutral.
       const content = j.content ?? [];
+      const text = content.filter((c) => c.type === 'text').map((c) => c.text ?? '').join('');
+      const toolUses = content.filter((c) => c.type === 'tool_use');
+      anthropicStop(j, !!text.trim() || toolUses.length > 0);
       return {
-        text: content.filter((c) => c.type === 'text').map((c) => c.text ?? '').join(''),
-        toolCalls: content.filter((c) => c.type === 'tool_use').map((c, i) => ({ id: c.id ?? `call_${i}`, name: c.name ?? '', args: c.input ?? {} })),
+        text,
+        toolCalls: toolUses.map((c, i) => ({ id: c.id ?? `call_${i}`, name: c.name ?? '', args: c.input ?? {} })),
         model: j.model ?? p.model,
         inputTokens: j.usage?.input_tokens,
         outputTokens: j.usage?.output_tokens,
@@ -538,6 +630,27 @@ export class Providers {
       inputTokens: j.usage?.prompt_tokens,
       outputTokens: j.usage?.completion_tokens,
     };
+  }
+
+  /**
+   * Anthropic: the effort levels the chosen model supports (Models API `capabilities.effort`), so the
+   * settings offer only those. `null` = unknown (no model chosen, or the API does not tell).
+   */
+  async efforts(p: ProviderConfig): Promise<Effort[] | null> {
+    if (p.kind !== 'anthropic' || !p.model) return null;
+    const key = this.key(p);
+    if (!key) throw new AiProviderError('Für Anthropic fehlt der API-Key');
+    let j: { capabilities?: { effort?: { supported?: boolean } & Partial<Record<Effort, { supported?: boolean }>> } };
+    try {
+      j = (await this.call(`${trimSlash(p.baseUrl)}/v1/models/${encodeURIComponent(p.model)}`, { headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' } }, 15_000)) as typeof j;
+    } catch (e) {
+      if (e instanceof AiProviderError && e.status === 404) throw new AiProviderError(`Das Modell ${p.model} gibt es bei Anthropic nicht`, 404);
+      throw e;
+    }
+    const effort = j.capabilities?.effort;
+    if (!effort) return null;
+    if (effort.supported === false) return [];
+    return EFFORTS.filter((e) => effort[e]?.supported !== false);
   }
 
   /** Connection test: the provider's model list (also helps picking a model). */

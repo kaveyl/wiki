@@ -1,6 +1,6 @@
 // „KI-Freigabe …“ on a source, folder or note (admins, AD-011, AD-031): released or not, plus what
-// applies without an own rule (inherited, and from where). „Only the own network“ is offered only
-// where it changes something — when local and cloud providers are both set up. On a source also
+// applies without an own rule (inherited, and from where). „Only private AI“ is offered only where it
+// changes something — when providers with and without the private tick are both set up (AD-031, AD-079). On a source also
 // its AI memory in `.kaveyl-wiki/ai/` (instructions, confirmed entries; AD-026).
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -106,15 +106,15 @@ export function AiRuleDialog({ mountId, target, path, title, onClose }: { mountI
               {t('Die KI darf die Inhalte lesen (Fragen, Zusammenfassen) und Änderungen vorschlagen – übernommen wird nur, was du bestätigst.')}{' '}
               {all.length === 0
                 ? t('Noch kein KI-Anbieter eingerichtet (Einstellungen → KI).')
-                : kinds.cloud.length === 0
+                : !kinds.anyCloud
                   ? t('Die Inhalte bleiben im eigenen Netz ({local}).', { local: list(kinds.local) })
                   : t('Die Inhalte gehen dafür an: {all}.', { all: list(all) })}
             </Option>
             {showLocal && (
-              <Option value="local" choice={choice} set={setChoice} label={t('Freigegeben – nur für KI im eigenen Netz')}>
+              <Option value="local" choice={choice} set={setChoice} label={t('Freigegeben – nur private KI')}>
                 {kinds.local.length
                   ? t('Nur {local} sieht die Inhalte, nie {cloud}.', { local: list(kinds.local), cloud: list(kinds.cloud) })
-                  : t('Du hast keine KI im eigenen Netz eingerichtet – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.', { cloud: list(kinds.cloud) })}
+                  : t('Keine KI ist für private Notizen zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.', { cloud: list(kinds.cloud) })}
               </Option>
             )}
             <Option value="blocked" choice={choice} set={setChoice} label={target === 'mount' ? t('Nicht freigegeben') : t('Nicht freigegeben (Ausnahme)')}>

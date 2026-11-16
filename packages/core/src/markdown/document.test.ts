@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadMarkdown, saveMarkdown, canonicalKey } from './document.js';
-import { blockToMarkdown } from './to-markdown.js';
+import { blockToMarkdown, withoutEmptyItems } from './to-markdown.js';
 import { readFrontmatter, setFrontmatterKeys, splitFrontmatter, updateFrontmatter } from './frontmatter.js';
 import type { PMNode } from './from-mdast.js';
 
@@ -164,6 +164,166 @@ describe('loadMarkdown/saveMarkdown', () => {
     const a: PMNode = { type: 'paragraph', content: [{ type: 'text', text: 'x', marks: [{ type: 'italic' }, { type: 'bold' }] }] };
     const b: PMNode = { type: 'paragraph', content: [{ type: 'text', text: 'x', marks: [{ type: 'bold' }, { type: 'italic' }] }] };
     expect(canonicalKey(a)).toBe(canonicalKey(b));
+  });
+});
+
+describe('lists: empty items', () => {
+  const p = (text?: string): PMNode => ({ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] });
+  const task = (text?: string, ...more: PMNode[]): PMNode => ({ type: 'taskItem', attrs: { checked: false }, content: [p(text), ...more] });
+  const item = (text?: string, ...more: PMNode[]): PMNode => ({ type: 'listItem', content: [p(text), ...more] });
+  const tasks = (...items: PMNode[]): PMNode => ({ type: 'taskList', content: items });
+  const bullets = (...items: PMNode[]): PMNode => ({ type: 'bulletList', content: items });
+  const types = (md: string) => loadMarkdown(md).doc.content!.map((n) => n.type);
+
+  it('writes a checklist with empty items (Enter after or between items) as a checklist', () => {
+    const { source } = loadMarkdown('');
+    const out = saveMarkdown(source, { type: 'doc', content: [tasks(task('Ei'), task(), task('Brot'), task(' '))] });
+    expect(out).toBe('- [ ] Ei\n- [ ] Brot\n');
+    // Read → write → read: still one checklist with both items, not raw Markdown.
+    const again = loadMarkdown(out);
+    expect(again.doc.content).toEqual([tasks(task('Ei'), task('Brot'))]);
+    expect(saveMarkdown(again.source, again.doc, { forceSplice: true })).toBe(out);
+  });
+
+  it('counts empty items added in the editor as no change: the file keeps its bytes', () => {
+    const raw = '---\ntitle: Einkauf   # eigener Kommentar\nunbekannt: [a, b]\n---\n\n# Einkauf\n\n* [ ] Ei\n* [x] Brot\n';
+    const { doc, source } = loadMarkdown(raw);
+    const list = doc.content![1]!;
+    const edited = { ...doc, content: [doc.content![0]!, { ...list, content: [...list.content!, task()] }] };
+    expect(saveMarkdown(source, edited)).toBe(raw);
+    // A new checklist without any text yet is not written at all.
+    expect(saveMarkdown(source, { ...doc, content: [...doc.content!, tasks(task())] })).toBe(raw);
+  });
+
+  it('writes only the edited list, with its empty items left out; front matter and other blocks stay byte for byte', () => {
+    const raw = '---\nid: x1\nfremd: { a: 1 }   # bleibt\n---\nVorher\n\n* [ ] Ei\n\nDazwischen\n\n- a\n-\n- b\n';
+    const { doc, source } = loadMarkdown(raw);
+    expect(types(raw)).toEqual(['paragraph', 'taskList', 'paragraph', 'bulletList']);
+    const edited = structuredClone(doc);
+    edited.content![1]!.content!.push(task(), task('Milch'), task());
+    const out = saveMarkdown(source, edited);
+    expect(out).toBe('---\nid: x1\nfremd: { a: 1 }   # bleibt\n---\nVorher\n\n- [ ] Ei\n- [ ] Milch\n\nDazwischen\n\n- a\n-\n- b\n');
+    expect(types(out)).toEqual(['paragraph', 'taskList', 'paragraph', 'bulletList']);
+  });
+
+  it('keeps an empty item that the file already has, as long as its list is not edited', () => {
+    const raw = 'Absatz\n\n- a\n-\n- b\n';
+    const { doc, source } = loadMarkdown(raw);
+    const edited = { ...doc, content: [p('Neu'), doc.content![1]!] };
+    expect(saveMarkdown(source, edited)).toBe('Neu\n\n- a\n-\n- b\n');
+  });
+
+  it('drops empty items in every kind of list, also nested, and lifts the sub-items of an empty item', () => {
+    expect(withoutEmptyItems(bullets(item('a'), item(), item('b')))).toEqual(bullets(item('a'), item('b')));
+    const ordered: PMNode = { type: 'orderedList', attrs: { start: 3 }, content: [item(), item('c')] };
+    expect(blockToMarkdown(withoutEmptyItems(ordered)!)).toBe('3. c');
+    expect(withoutEmptyItems(bullets(item('a', tasks(task(), task('x')))))).toEqual(bullets(item('a', tasks(task('x')))));
+    expect(withoutEmptyItems(bullets(item('a', tasks(task()))))).toEqual(bullets(item('a')));
+    expect(withoutEmptyItems(tasks(task('a'), task(undefined, tasks(task('b'), task('c')))))).toEqual(tasks(task('a'), task('b'), task('c')));
+    const quote: PMNode = { type: 'blockquote', content: [tasks(task('a'), task())] };
+    expect(blockToMarkdown(withoutEmptyItems(quote)!)).toBe('> - [ ] a');
+    expect(withoutEmptyItems(tasks(task(), task()))).toBeNull();
+  });
+
+  it('keeps what has no lossless form without the item, and returns the same object when nothing goes', () => {
+    // An empty first line above a paragraph or a list of another kind.
+    const above = tasks(task('a'), task(undefined, p('Absatz')));
+    expect(withoutEmptyItems(above)).toBe(above);
+    const other = tasks(task(undefined, bullets(item('x'))));
+    expect(withoutEmptyItems(other)).toBe(other);
+    const full = tasks(task('a', bullets(item('b'))));
+    expect(withoutEmptyItems(full)).toBe(full);
+    const quote: PMNode = { type: 'blockquote', content: [tasks(task())] };
+    expect(withoutEmptyItems(quote)).toBe(quote);
+  });
+});
+
+describe('lists directly after each other', () => {
+  const p = (text: string): PMNode => ({ type: 'paragraph', content: [{ type: 'text', text }] });
+  const tasks = (...texts: string[]): PMNode => ({ type: 'taskList', content: texts.map((t) => ({ type: 'taskItem', attrs: { checked: false }, content: [p(t)] })) });
+  const bullets = (...texts: string[]): PMNode => ({ type: 'bulletList', content: texts.map((t) => ({ type: 'listItem', content: [p(t)] })) });
+  const ordered = (...texts: string[]): PMNode => ({ type: 'orderedList', attrs: { start: 1 }, content: texts.map((t) => ({ type: 'listItem', content: [p(t)] })) });
+  const types = (md: string) => loadMarkdown(md).doc.content!.map((n) => n.type);
+  const write = (...content: PMNode[]) => saveMarkdown(loadMarkdown('').source, { type: 'doc', content });
+  /** Write, read back: the same blocks, and writing again changes nothing. */
+  const roundTrip = (out: string, content: PMNode[]) => {
+    const again = loadMarkdown(out);
+    expect(again.doc.content!.map(canonicalKey)).toEqual(content.map(canonicalKey));
+    expect(saveMarkdown(again.source, again.doc, { forceSplice: true })).toBe(out);
+  };
+
+  it('writes a checklist and a bullet list after it as two lists, not one mixed list (raw Markdown)', () => {
+    const content = [tasks('Ei', 'Brot'), bullets('Notiz')];
+    const out = write(...content);
+    expect(out).toBe('- [ ] Ei\n- [ ] Brot\n\n* Notiz\n');
+    roundTrip(out, content);
+  });
+
+  it('separates lists of the same kind and numbered lists by their marker; a third list alternates again', () => {
+    const content = [bullets('a'), bullets('b'), tasks('c')];
+    const out = write(...content);
+    expect(out).toBe('- a\n\n* b\n\n- [ ] c\n');
+    roundTrip(out, content);
+    const numbered = [ordered('eins'), ordered('zwei'), bullets('x'), ordered('drei')];
+    const out2 = write(...numbered);
+    expect(out2).toBe('1. eins\n\n1) zwei\n\n- x\n\n1. drei\n');
+    roundTrip(out2, numbered);
+  });
+
+  it('gives a new list the other marker next to an unchanged list, which keeps its bytes', () => {
+    const before = loadMarkdown('Text\n\n- b\n');
+    const out = saveMarkdown(before.source, { type: 'doc', content: [before.doc.content![0]!, tasks('a'), before.doc.content![1]!] });
+    expect(out).toBe('Text\n\n* [ ] a\n\n- b\n');
+    const after = loadMarkdown('- [ ] a\n');
+    const out2 = saveMarkdown(after.source, { type: 'doc', content: [after.doc.content![0]!, bullets('b')] });
+    expect(out2).toBe('- [ ] a\n\n* b\n');
+    expect(types(out2)).toEqual(['taskList', 'bulletList']);
+    // Between `-` and `*`, the third bullet.
+    const both = loadMarkdown('- a\n\nWeg\n\n* c\n');
+    const out3 = saveMarkdown(both.source, { type: 'doc', content: [both.doc.content![0]!, bullets('b'), both.doc.content![2]!] });
+    expect(out3).toBe('- a\n\n+ b\n\n* c\n');
+    expect(types(out3)).toEqual(['bulletList', 'bulletList', 'bulletList']);
+  });
+
+  it('swaps only the markers of an unchanged list that becomes the neighbour of another one (block in between deleted)', () => {
+    const raw = '---\nid: x1\n---\n- [ ] a\n- [x] b\n\nDazwischen\n\n- c\n  weiter\n- d\n\n  zweiter Absatz\n';
+    const { doc, source } = loadMarkdown(raw);
+    const out = saveMarkdown(source, { type: 'doc', content: [doc.content![0]!, doc.content![2]!] });
+    expect(out).toBe('---\nid: x1\n---\n- [ ] a\n- [x] b\n\n* c\n  weiter\n* d\n\n  zweiter Absatz\n');
+    expect(types(out)).toEqual(['taskList', 'bulletList']);
+    // Numbered lists have two delimiters: between `1.` and `1)`, the new list takes `1)` and the unchanged one after it `1.`.
+    const nums = loadMarkdown('1. a\n\nWeg\n\n1) c\n');
+    const out2 = saveMarkdown(nums.source, { type: 'doc', content: [nums.doc.content![0]!, ordered('b'), nums.doc.content![2]!] });
+    expect(out2).toBe('1. a\n\n1) b\n\n1. c\n');
+    expect(types(out2)).toEqual(['orderedList', 'orderedList', 'orderedList']);
+  });
+
+  it('never swaps a marker into another meaning (`* * * *` would be a rule)', () => {
+    const { doc, source } = loadMarkdown('- [ ] a\n\nWeg\n\n- * * *\n');
+    expect(types('- * * *\n')).toEqual(['rawBlock']);
+    const out = saveMarkdown(source, { type: 'doc', content: [doc.content![0]!, doc.content![2]!] });
+    expect(out).toBe('- [ ] a\n\n+ * * *\n');
+    expect(types(out)).toEqual(['taskList', 'rawBlock']);
+  });
+
+  it('separates lists in quotes, callouts, details and list items too', () => {
+    const quote: PMNode = { type: 'blockquote', content: [tasks('a'), bullets('b')] };
+    expect(blockToMarkdown(quote)).toBe('> - [ ] a\n>\n> * b');
+    const callout: PMNode = { type: 'callout', attrs: { kind: 'NOTE' }, content: [ordered('a'), ordered('b')] };
+    expect(blockToMarkdown(callout)).toBe('> [!NOTE]\n>\n> 1. a\n>\n> 1) b');
+    const details: PMNode = {
+      type: 'details',
+      attrs: { open: false },
+      content: [
+        { type: 'detailsSummary', content: [{ type: 'text', text: 'Mehr' }] },
+        { type: 'detailsContent', content: [tasks('a'), bullets('b'), p('c')] },
+      ],
+    };
+    expect(blockToMarkdown(details)).toBe('<details>\n<summary>Mehr</summary>\n\n- [ ] a\n\n* b\n\nc\n\n</details>');
+    const nested = bullets('x');
+    nested.content![0]!.content!.push(tasks('a'), bullets('b'));
+    expect(blockToMarkdown(nested)).toBe('- x\n\n  - [ ] a\n\n  * b');
+    for (const block of [quote, callout, details, nested]) roundTrip(write(block), [block]);
   });
 });
 

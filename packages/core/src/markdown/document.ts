@@ -13,7 +13,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { blocksToPM, type PMNode } from './from-mdast.js';
-import { blockToMarkdown } from './to-markdown.js';
+import { blockToMarkdown, withoutEmptyItems, type ListMarker } from './to-markdown.js';
 import { splitFrontmatter } from './frontmatter.js';
 import { editorSchema } from './schema.js';
 
@@ -88,7 +88,17 @@ export interface SaveOptions {
 export function saveMarkdown(source: SourceMap, doc: PMNode, options: SaveOptions = {}): string {
   // Empty paragraphs cannot exist in Markdown (they vanish on the next load); dropping them
   // keeps editor artefacts (e.g. a trailing empty line) from producing blank-line diffs.
-  const next = (doc.content ?? []).filter((node) => !isEmptyParagraph(node)).map((node) => ({ node, key: canonicalKey(node) }));
+  // Empty list items likewise (withoutEmptyItems): a block that differs from the file only by
+  // them counts as unchanged; a block of the file stays as it is, even with empty items of its own.
+  const known = new Set(source.blocks.map((b) => b.key));
+  const next = (doc.content ?? []).flatMap((node) => {
+    if (isEmptyParagraph(node)) return [];
+    const key = canonicalKey(node);
+    const written = withoutEmptyItems(node);
+    if (known.has(key)) return [{ node: written ?? node, key }];
+    if (!written) return [];
+    return [{ node: written, key: written === node ? key : canonicalKey(written) }];
+  });
   const frontmatter = options.frontmatter ?? source.frontmatter;
   const unchanged =
     frontmatter === source.frontmatter &&
@@ -104,15 +114,23 @@ export function saveMarkdown(source: SourceMap, doc: PMNode, options: SaveOption
   // inherit its surrounding whitespace (e.g. a heading followed by a single newline).
   const slot = pairReplacements(match, source.blocks.length);
 
-  let body = '';
-  next.forEach((block, j) => {
+  const parts = next.map((block, j) => {
     const i = match[j];
+    return i !== undefined ? source.blocks[i]!.md : blockToMarkdown(block.node);
+  });
+  separateLists(
+    parts,
+    next.map((block, j) => (match[j] === undefined ? block.node : null)),
+  );
+
+  let body = '';
+  parts.forEach((md, j) => {
     if (j > 0) {
       const prev = slot[j - 1];
       const cur = slot[j];
       body += cur !== undefined && prev !== undefined && cur === prev + 1 ? source.seps[prev]! : '\n\n';
     }
-    body += i !== undefined ? source.blocks[i]!.md : blockToMarkdown(block.node);
+    body += md;
   });
 
   if (next.length) {
@@ -122,6 +140,82 @@ export function saveMarkdown(source: SourceMap, doc: PMNode, options: SaveOption
   }
   if (source.eol === '\r\n') body = body.replace(/\n/g, '\r\n');
   return frontmatter + body;
+}
+
+const BULLETS: ListMarker[] = ['-', '*', '+'];
+const DELIMITERS: ListMarker[] = ['.', ')'];
+/** First line of a list item: a cheap filter before parsing. */
+const LIST_START = /^ {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t\n]|$)/;
+
+/**
+ * Lists of the same kind with only blank lines between them are ONE list in Markdown: a checklist written right
+ * after a bullet list (both `-`) would load as a mixed list, i.e. raw Markdown. Such a neighbour gets another marker
+ * (`*`, `+`; `1)` for `1.`), with which CommonMark starts a new list – rendered, nothing changes. A written block
+ * avoids the markers of both neighbours; a block copied from the file is only touched when it must (e.g. the block
+ * between two lists was deleted): then only its item markers change, same width, every other byte stays.
+ * `parts` is changed in place; `written[j]` is the node of a written block, null for a copied one.
+ * SEE-DOC: HANDBOOK.md#bekannte-besonderheiten--stolperfallen
+ */
+function separateLists(parts: string[], written: (PMNode | null)[]): void {
+  const looks = parts.map((md) => LIST_START.test(md));
+  let prev: ListMarker | null = null;
+  parts.forEach((md, j) => {
+    if (!looks[j] || (!looks[j - 1] && !looks[j + 1])) {
+      prev = null;
+      return;
+    }
+    let marker = listMarkers(md)?.marker ?? null;
+    const node = written[j];
+    const after = node && written[j + 1] === null && looks[j + 1] ? (listMarkers(parts[j + 1]!)?.marker ?? null) : null;
+    if (marker && (marker === prev || marker === after)) {
+      const choices = (DELIMITERS.includes(marker) ? DELIMITERS : BULLETS).filter((c) => c !== prev);
+      choices.sort((a, b) => Number(a === after) - Number(b === after));
+      for (const c of choices) {
+        if (c === marker) break;
+        const candidate = node && node.type !== 'rawBlock' ? blockToMarkdown(node, c) : withMarker(md, c);
+        if (candidate !== null && listMarkers(candidate)?.marker === c) {
+          parts[j] = candidate;
+          marker = c;
+          break;
+        }
+      }
+    }
+    prev = marker;
+  });
+}
+
+/** Marker and item positions of a block that is exactly one list. */
+function listMarkers(md: string): { marker: ListMarker; at: number[] } | null {
+  if (!LIST_START.test(md)) return null;
+  const tree = parseMarkdown(md);
+  const list = tree.children[0];
+  if (tree.children.length !== 1 || list?.type !== 'list') return null;
+  const at: number[] = [];
+  for (const item of list.children) {
+    let k = item.position?.start.offset;
+    if (k === undefined) return null;
+    while (md[k]! >= '0' && md[k]! <= '9') k++;
+    at.push(k);
+  }
+  const marker = md[at[0] ?? -1];
+  return marker && (BULLETS as string[]).concat(DELIMITERS).includes(marker) ? { marker: marker as ListMarker, at } : null;
+}
+
+/** The list with other item markers – only if it still reads exactly the same (`- * * *` must not become a rule). */
+function withMarker(md: string, marker: ListMarker): string | null {
+  const info = listMarkers(md);
+  if (!info || DELIMITERS.includes(info.marker) !== DELIMITERS.includes(marker)) return null;
+  // In one pass (a slice per item was quadratic – diff check 0.2.14).
+  const parts: string[] = [];
+  let from = 0;
+  for (const k of info.at) {
+    parts.push(md.slice(from, k), marker);
+    from = k + 1;
+  }
+  parts.push(md.slice(from));
+  const out = parts.join('');
+  const shape = (s: string) => JSON.stringify(parseMarkdown(s), (key, value: unknown) => (key === 'position' ? undefined : value));
+  return shape(out) === shape(md) ? out : null;
 }
 
 function toEditorNode(node: PMNode | null, md: string): PMNode {

@@ -22,16 +22,20 @@ import {
   MessageSquareWarning,
   ChevronsDownUp,
   PenTool,
+  CalendarDays,
+  Clock,
+  CalendarClock,
 } from 'lucide-react';
 import { CALLOUT_KINDS, normalizeLinkInput } from '@kaveyl-wiki/core';
 import { cx, inputDialog, promptDialog } from '../ui';
 import { CALLOUT_LABELS } from './callouts';
 import { openDrawing } from './Drawing';
-import { t } from '../i18n';
+import { lang, t } from '../i18n';
 
 interface SlashItem {
   title: string;
-  hint: string;
+  /** A function for hints that change (today's date). */
+  hint: string | (() => string);
   keywords: string[];
   icon: ReactNode;
   run: (editor: Editor, range: Range) => void;
@@ -58,6 +62,18 @@ const askAtSlash = (editor: Editor, range: Range, ask: () => Promise<Content | n
     else editor.commands.focus();
   });
 };
+
+const pad = (n: number) => String(n).padStart(2, '0');
+/**
+ * Today's date as plain text (owner 15.11.): German 16.11.2026, otherwise 2026-11-16 – unambiguous, unlike
+ * 11/16/2026. Fixed text, it does not change later.
+ */
+export function dateText(d: Date, language: string = lang): string {
+  return language === 'de' ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}` : `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+/** The time as 14:35 (24 hours, every language). */
+export const timeText = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const insertText = (text: string) => (e: Editor, r: Range) => chain(e, r).insertContent(text).run();
 
 export const SLASH_ITEMS: SlashItem[] = [
   { title: t('Text'), hint: t('Normaler Absatz'), keywords: ['text', 'absatz', 'paragraph'], icon: <Type />, run: (e, r) => chain(e, r).setParagraph().run() },
@@ -174,13 +190,43 @@ export const SLASH_ITEMS: SlashItem[] = [
         return [{ type: 'text', text, marks: [{ type: 'link', attrs: { href } }] }, { type: 'text', text: ' ' }];
       }),
   },
+  {
+    title: t('Datum'),
+    hint: () => t('Heute: {date}', { date: dateText(new Date()) }),
+    keywords: ['datum', 'date', 'heute', 'today', 'tag'],
+    icon: <CalendarDays />,
+    run: (e, r) => insertText(dateText(new Date()))(e, r),
+  },
+  {
+    title: t('Uhrzeit'),
+    hint: () => t('Jetzt: {time}', { time: timeText(new Date()) }),
+    keywords: ['zeit', 'uhrzeit', 'time', 'jetzt', 'now'],
+    icon: <Clock />,
+    run: (e, r) => insertText(timeText(new Date()))(e, r),
+  },
+  {
+    title: t('Datum und Uhrzeit'),
+    hint: () => {
+      const now = new Date();
+      return `${dateText(now)} ${timeText(now)}`;
+    },
+    keywords: ['datum', 'date', 'zeit', 'time', 'jetzt', 'now', 'heute', 'today'],
+    icon: <CalendarClock />,
+    run: (e, r) => {
+      const now = new Date();
+      insertText(`${dateText(now)} ${timeText(now)}`)(e, r);
+    },
+  },
 ];
 
 /** Every word of the query in the title or at the start of a keyword: „/heading 2“ finds „Überschrift 2“ in German, too. */
 export function filterItems(query: string): SlashItem[] {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (!words.length) return SLASH_ITEMS;
-  return SLASH_ITEMS.filter((i) => words.every((w) => i.title.toLowerCase().includes(w) || i.keywords.some((k) => k.startsWith(w))));
+  const hits = SLASH_ITEMS.filter((i) => words.every((w) => i.title.toLowerCase().includes(w) || i.keywords.some((k) => k.startsWith(w))));
+  // Whole words first: „/date“ shows „Datum“ before „Datei oder Bild“ (keyword „datei“).
+  const exact = (i: SlashItem) => words.some((w) => i.keywords.includes(w) || i.title.toLowerCase().split(/\s+/).includes(w));
+  return [...hits.filter(exact), ...hits.filter((i) => !exact(i))];
 }
 
 /** Keeps the keyboard-selected entry of a scrolling popup list visible (its direct children are the entries). */
@@ -232,7 +278,7 @@ const SlashList = forwardRef<MenuHandle, SuggestionProps<SlashItem>>(function Sl
           <span className="flex h-8 w-8 items-center justify-center rounded-md border border-line bg-bg text-fg-muted [&>svg]:h-4 [&>svg]:w-4">{item.icon}</span>
           <span className="min-w-0">
             <span className="block text-sm">{item.title}</span>
-            <span className="block truncate text-xs text-fg-faint">{item.hint}</span>
+            <span className="block truncate text-xs text-fg-faint">{typeof item.hint === 'function' ? item.hint() : item.hint}</span>
           </span>
         </button>
       ))}

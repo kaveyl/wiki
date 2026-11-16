@@ -2,9 +2,9 @@
 // API keys are only ever sent to the server, never shown again (AD-024).
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2 } from 'lucide-react';
+import { Lock, Trash2 } from 'lucide-react';
 import { RuleRow } from '../shell/Cleanup';
-import { api, errorText, type AiProvider, type AiProviderKind } from '../api';
+import { api, errorText, type AiEffort, type AiProvider, type AiProviderKind } from '../api';
 import { Button, ComboInput, Field, Input, Spinner, cx, useModalDirty, confirmDialog, Rich, FormError } from '../ui';
 import { toast } from '../toast';
 import { t } from '../i18n';
@@ -61,16 +61,17 @@ function cloudReason(p: { kind: AiProviderKind; baseUrl?: string; model?: string
 export function AiProvidersPanel() {
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ['ai-providers'], queryFn: api.aiProviders });
-  const [edit, setEdit] = useState<(Partial<AiProvider> & { kind: AiProviderKind; apiKey?: string }) | null>(null);
+  const [edit, setEdit] = useState<ProviderDraft | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['ai-providers'] });
   const providers = data.data?.providers ?? [];
+  const privateCount = providers.filter((p) => p.private).length;
   return (
     <div className="space-y-4 text-sm">
       <h3 className="font-medium">{t('Für alle: Anbieter und Aufbewahrung')}</h3>
       <p className="text-fg-muted">
         <Rich
           text={t(
-            'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, nur lokal oder auch Cloud). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).',
+            'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).',
           )}
           parts={{ nothing: <b>{t('nichts')}</b>, menu: <b>{t('KI-Freigabe …')}</b> }}
         />
@@ -81,9 +82,16 @@ export function AiProvidersPanel() {
             <span className="min-w-0 flex-1">
               <span className="font-medium">{p.name}</span>
               <span className="ml-2 text-xs text-fg-faint">
-                {KIND_LABEL[p.kind]} · {p.model || t('kein Modell')} · {p.cloud ? t('Cloud') : t('lokal')}
+                {KIND_LABEL[p.kind]} · {p.model || t('kein Modell')}
+                {p.effort ? ` · ${t('Aufwand: {level}', { level: effortLabel(p.effort) })}` : ''} · {p.cloud ? t('Cloud') : t('lokal')}
                 {p.hasKey ? ` · ${t('Key gespeichert')}` : ''}
               </span>
+              {p.private && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded bg-accent-soft px-1.5 py-px text-xs text-fg" title={t('Darf Notizen sehen, die nur für private KI freigegeben sind.')}>
+                  <Lock className="h-3 w-3" aria-hidden="true" />
+                  {t('privat')}
+                </span>
+              )}
             </span>
             <label className="flex items-center gap-1 text-xs text-fg-muted">
               <input
@@ -94,6 +102,18 @@ export function AiProvidersPanel() {
               />
               {t('Standard')}
             </label>
+            {/* Only when there is a choice (AD-079, AD-031): two or more providers for private notes. */}
+            {privateCount > 1 && p.private && (
+              <label className="flex items-center gap-1 text-xs text-fg-muted" title={t('Wird für private Notizen genommen, wenn der Benutzer nichts anderes gewählt hat.')}>
+                <input
+                  type="radio"
+                  name="ai-private-default"
+                  checked={data.data?.privateDefaultId === p.id}
+                  onChange={() => void api.aiSettings({ privateDefaultId: p.id }).then(refresh)}
+                />
+                {t('Standard privat')}
+              </label>
+            )}
             <Button size="sm" variant="ghost" onClick={() => setEdit({ ...p })}>
               {t('Bearbeiten')}
             </Button>
@@ -122,7 +142,9 @@ export function AiProvidersPanel() {
           ))}
         </div>
       )}
-      {edit && <ProviderForm value={edit} onDone={() => (setEdit(null), void refresh())} />}
+      {/* One form per provider: without the key React kept the first one's fields when „Bearbeiten“ was clicked on
+          another provider – „Speichern“ then wrote the wrong provider (owner 16.11.). */}
+      {edit && <ProviderForm key={edit.id ?? `neu-${edit.kind}`} value={edit} onDone={() => (setEdit(null), void refresh())} />}
       <RuleRow
         rule="aiChatDays"
         label={t('Unbenutzte Chats aufbewahren')}
@@ -132,22 +154,42 @@ export function AiProvidersPanel() {
   );
 }
 
-function ProviderForm({ value, onDone }: { value: Partial<AiProvider> & { kind: AiProviderKind; apiKey?: string }; onDone: () => void }) {
-  const [p, setP] = useState(value);
+const EFFORTS: AiEffort[] = ['low', 'medium', 'high', 'xhigh'];
+const hostOf = (url?: string) => {
+  try {
+    return new URL(url ?? '').host || url || '';
+  } catch {
+    return url ?? '';
+  }
+};
+const effortLabel = (e: AiEffort) => ({ low: t('Niedrig'), medium: t('Mittel'), high: t('Hoch'), xhigh: t('Sehr hoch') })[e];
+
+type ProviderDraft = Omit<Partial<AiProvider>, 'effort'> & { kind: AiProviderKind; apiKey?: string; effort?: AiEffort | '' };
+
+function ProviderForm({ value, onDone }: { value: ProviderDraft; onDone: () => void }) {
+  const [p, setP] = useState<ProviderDraft>(value);
   useModalDirty(JSON.stringify(p) !== JSON.stringify(value));
   const [models, setModels] = useState<string[]>([]);
+  // Effort levels the chosen model knows, after „Test connection“ (null = not asked yet → all levels).
+  const [efforts, setEfforts] = useState<AiEffort[] | null>(null);
+  const [effortNote, setEffortNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [testing, setTesting] = useState(false);
   const needsKey = p.kind === 'anthropic' || p.kind === 'openrouter' || p.kind === 'ollama-cloud';
   const cloud = cloudReason(p);
+  // The tick goes along only when changed here: otherwise the server keeps it – and derives it anew when the
+  // address moves the provider into the cloud (or back), so no tick is carried over unnoticed (AD-079).
+  const [privTouched, setPrivTouched] = useState(false);
+  const privateShown = privTouched ? !!p.private : value.id && !!value.cloud === !!cloud ? (value.private ?? !cloud) : !cloud;
+  const privateBody = { private: privTouched ? !!p.private : undefined };
   const save = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      const { cloud: _derived, ...body } = p;
-      const saved = await api.saveAiProvider({ ...body, apiKey: p.apiKey || undefined });
+      const { cloud: _derived, private: _private, ...body } = p;
+      const saved = await api.saveAiProvider({ ...body, ...privateBody, apiKey: p.apiKey || undefined, effort: p.effort ?? '' });
       toast({ kind: 'ok', title: t('Anbieter „{name}“ gespeichert', { name: saved.name }) });
       onDone();
     } catch (err) {
@@ -162,9 +204,20 @@ function ProviderForm({ value, onDone }: { value: Partial<AiProvider> & { kind: 
     setTesting(true);
     try {
       // Save first (the server talks to the provider with the stored key), then list.
-      const saved = await api.saveAiProvider({ ...p, apiKey: p.apiKey || undefined });
-      setP({ ...p, id: saved.id, apiKey: '' });
-      setModels((await api.aiModels(saved.id)).models);
+      const { private: _private, ...rest } = p;
+      const saved = await api.saveAiProvider({ ...rest, ...privateBody, apiKey: p.apiKey || undefined, effort: p.effort ?? '' });
+      const res = await api.aiModels(saved.id);
+      const known = res.efforts ?? null;
+      // A level the model does not know falls back to the model's default (saved with the next „Save“).
+      const keep = !p.effort || !known || known.includes(p.effort);
+      setEffortNote(
+        res.warning ?? (keep ? null : t('{model} kennt die Stufe „{level}“ nicht – zurück auf „Standard des Modells“.', { model: p.model ?? '', level: effortLabel(p.effort as AiEffort) })),
+      );
+      // Saved at once: also after „Cancel“ no level stays stored that the model would refuse (diff check 0.2.14).
+      if (!keep) await api.saveAiProvider({ id: saved.id, kind: p.kind, effort: '' });
+      setP({ ...p, id: saved.id, apiKey: '', effort: keep ? p.effort : '' });
+      setModels(res.models);
+      setEfforts(known);
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -195,13 +248,42 @@ function ProviderForm({ value, onDone }: { value: Partial<AiProvider> & { kind: 
       <Field label={t('Modell')}>
         {/* Wraps below the field when narrow instead of squeezing the button. */}
         <div className="flex flex-wrap gap-2">
-          <ComboInput boxClassName="min-w-48 flex-1" value={p.model ?? ''} options={models} onValueChange={(model) => setP({ ...p, model })} />
+          <ComboInput boxClassName="min-w-48 flex-1" value={p.model ?? ''} options={models} onValueChange={(model) => (setP({ ...p, model }), model !== p.model && (setEfforts(null), setEffortNote(null)))} />
           <Button type="button" className="shrink-0 whitespace-nowrap" disabled={testing || busy} onClick={() => void loadModels()}>
             {testing && <Spinner />} {t('Verbindung testen')}
           </Button>
         </div>
       </Field>
       {models.length > 0 && <p className="text-xs text-ok">{t('Verbunden – {n} Modelle zur Auswahl.', { n: models.length })}</p>}
+      {p.kind === 'anthropic' && efforts?.length !== 0 && (
+        <Field label={t('Aufwand')} hint={t('Wie gründlich das Modell nachdenkt. Höher hilft bei schwierigen Fragen, dauert aber länger und kostet mehr.')}>
+          <select
+            className="h-8 w-full rounded-md border border-line bg-bg px-2"
+            value={p.effort ?? ''}
+            onChange={(e) => (setP({ ...p, effort: e.target.value as AiEffort | '' }), setEffortNote(null))}
+          >
+            <option value="">{t('Standard des Modells')}</option>
+            {EFFORTS.filter((e) => !efforts || efforts.includes(e)).map((e) => (
+              <option key={e} value={e}>
+                {effortLabel(e)}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {p.kind === 'anthropic' && efforts?.length === 0 && <p className="text-xs text-fg-muted">{t('Dieses Modell hat keine Stufen für den Aufwand.')}</p>}
+      {effortNote && <p className="text-xs text-warn">{effortNote}</p>}
+      <label className="flex items-start gap-2">
+        <input type="checkbox" className="mt-0.5" checked={privateShown} onChange={(e) => (setP({ ...p, private: e.target.checked }), setPrivTouched(true))} />
+        <span>
+          {t('Für private Notizen zulassen')}
+          <span className="block text-xs text-fg-muted">
+            {cloud
+              ? t('Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.', { host: hostOf(p.baseUrl) })
+              : t('Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.')}
+          </span>
+        </span>
+      </label>
       {cloud && (
         <p className="rounded-md bg-accent-soft px-2.5 py-2 text-xs text-fg" role="note">
           ☁ <b>{t('Cloud-Anbieter')}</b> – {t('{reason}. Die KI sieht hier nur, was du per KI-Freigabe ausdrücklich auch für Cloud-Anbieter freigibst.', { reason: cloud })}
@@ -224,22 +306,29 @@ function ProviderForm({ value, onDone }: { value: Partial<AiProvider> & { kind: 
 export function AiPersonalPanel() {
   const qc = useQueryClient();
   const providers = useQuery({ queryKey: ['ai-providers'], queryFn: api.aiProviders });
-  const mine = useQuery({ queryKey: ['state', 'ai'], queryFn: () => api.getState<{ providerId?: string; instructions?: string }>('ai') });
+  const mine = useQuery({ queryKey: ['state', 'ai'], queryFn: () => api.getState<{ providerId?: string; privateProviderId?: string; instructions?: string }>('ai') });
   const [instructions, setInstructions] = useState('');
   const [providerId, setProviderId] = useState('');
+  const [privateId, setPrivateId] = useState('');
   useEffect(() => {
     setInstructions(mine.data?.instructions ?? '');
     setProviderId(mine.data?.providerId ?? '');
+    setPrivateId(mine.data?.privateProviderId ?? '');
   }, [mine.data]);
   // Only own edits count (the effect above copies the saved values in one render later).
   const [touched, setTouched] = useState(false);
-  useModalDirty(touched && !!mine.data && (instructions !== (mine.data.instructions ?? '') || providerId !== (mine.data.providerId ?? '')));
+  useModalDirty(
+    touched &&
+      !!mine.data &&
+      (instructions !== (mine.data.instructions ?? '') || providerId !== (mine.data.providerId ?? '') || privateId !== (mine.data.privateProviderId ?? '')),
+  );
   const save = async () => {
-    await api.putState('ai', { providerId: providerId || undefined, instructions: instructions.trim() || undefined });
+    await api.putState('ai', { providerId: providerId || undefined, privateProviderId: privateId || undefined, instructions: instructions.trim() || undefined });
     await qc.invalidateQueries({ queryKey: ['state', 'ai'] });
     toast({ kind: 'ok', title: t('KI-Einstellungen gespeichert') });
   };
   const list = providers.data?.providers ?? [];
+  const privates = list.filter((p) => p.private);
   return (
     <div className="space-y-3 text-sm">
       <h3 className="font-medium">{t('Mein KI-Assistent')}</h3>
@@ -249,6 +338,19 @@ export function AiPersonalPanel() {
           <select className={cx('h-8 w-full rounded-md border border-line bg-bg px-2')} value={providerId} onChange={(e) => (setProviderId(e.target.value), setTouched(true))} aria-label={t('Mein Anbieter')}>
             <option value="">{t('Standard ({name})', { name: list.find((p) => p.id === providers.data?.defaultId)?.name ?? '–' })}</option>
             {list.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} ({p.cloud ? t('Cloud') : t('lokal')})
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {/* Only when there is a choice (AD-079): two or more providers may see private notes. */}
+      {privates.length > 1 && (
+        <Field label={t('Für private Notizen')} hint={t('Notizen, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.')}>
+          <select className={cx('h-8 w-full rounded-md border border-line bg-bg px-2')} value={privateId} onChange={(e) => (setPrivateId(e.target.value), setTouched(true))} aria-label={t('Meine KI für private Notizen')}>
+            <option value="">{t('Standard ({name})', { name: privates.find((p) => p.id === providers.data?.privateDefaultId)?.name ?? '–' })}</option>
+            {privates.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name} ({p.cloud ? t('Cloud') : t('lokal')})
               </option>

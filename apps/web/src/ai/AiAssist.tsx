@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as DM from '@radix-ui/react-dropdown-menu';
 import type { Editor } from '@tiptap/react';
-import { ArrowRight, Brain, Check, Columns2, Copy, Plus, ExternalLink, FileCode2, FilePen, FilePlus, History, ListChecks, MessageCircleQuestion, PanelTop, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowRight, Brain, Check, Columns2, Copy, Plus, ExternalLink, FileCode2, FilePen, FilePlus, History, ListChecks, Lock, MessageCircleQuestion, PanelTop, Sparkles, Trash2, X } from 'lucide-react';
 import { loadMarkdown, saveMarkdown, type PMNode } from '@kaveyl-wiki/core';
 import { MarkdownView } from '../editor/MarkdownView';
 import { api, errorText, type AiAction, type AiChatMessage, type AiProposal, type AiScope, type AiSource } from '../api';
@@ -290,9 +290,12 @@ export function AiAskDialog() {
   const scopeText = (o: AiScope) =>
     SCOPE_LABEL[o.kind] +
     (o.kind === 'note' || o.kind === 'folder' ? ` (${o.kind === 'note' ? noteNameIn(o.mountId, o.path) : noteName(o.path)})` : o.kind === 'source' && sourceName(o.mountId) ? ` (${sourceName(o.mountId)})` : '');
-  const submit = async (e: FormEvent) => {
+  const submit = (e: FormEvent) => {
     e.preventDefault();
-    const q = question.trim();
+    void run(question.trim());
+  };
+  /** One question to the agent; `providerId` = „Ask with <private AI>“ (AD-079), otherwise the server picks. */
+  const run = async (q: string, providerId?: string) => {
     if (!q || busy) return;
     setBusy(true);
     setError(null);
@@ -300,7 +303,7 @@ export function AiAskDialog() {
     let done: string | null = null;
     let failed: string | null = null;
     try {
-      await api.aiAgent({ question: q, scope, chatId }, (ev) => {
+      await api.aiAgent({ question: q, scope, chatId, providerId }, (ev) => {
         // Text before a tool call was only thinking aloud: a step replaces it.
         if (ev.type === 'step') setLive((l) => l && { ...l, steps: [...l.steps, ev.label], text: '' });
         else if (ev.type === 'delta') setLive((l) => l && { ...l, text: l.text + ev.text });
@@ -312,7 +315,9 @@ export function AiAskDialog() {
       if (done) {
         const id: string = done;
         // Load the stored chat first, then swap the live view for it in one go (no flash, no duplicates).
-        await qc.fetchQuery({ queryKey: ['ai-chat', id], queryFn: () => api.aiChat(id) });
+        // Always from the server: the app keeps queries fresh for 30 s, so a follow-up in the same chat showed the
+        // old chat without the new answer (E2E private AI, 16.11.).
+        await qc.fetchQuery({ queryKey: ['ai-chat', id], queryFn: () => api.aiChat(id), staleTime: 0 });
         setQuestion('');
         setLive(null);
         setChatId(id);
@@ -443,6 +448,8 @@ export function AiAskDialog() {
                 proposals={proposals.filter((p) => m.meta.proposals?.includes(p.id))}
                 onChanged={refresh}
                 onClose={close}
+                // Only under the newest answer: the same question once more, with the AI that may see private notes.
+                onAskWith={i === messages.length - 1 && messages[i - 1]?.role === 'user' && !busy ? (id) => void run(messages[i - 1]!.content, id) : undefined}
               />
             ))}
             {live && (
@@ -555,8 +562,11 @@ function Message({
   proposals,
   onChanged,
   onClose,
+  onAskWith,
 }: {
   message: AiChatMessage;
+  /** „Ask with <private AI>“ under an answer that left private notes out (AD-079). */
+  onAskWith?: (providerId: string) => void;
   /** The question this answers (title when saved as a note). */
   question: string;
   scope: AiScope;
@@ -651,6 +661,24 @@ function Message({
               {m.meta.provider} · {m.meta.model}
               {m.meta.mode === 'agent' ? ' · Agent' : ''}
             </span>
+          )}
+        </div>
+      )}
+      {m.role === 'assistant' && m.meta.privateSkipped && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md bg-accent-soft px-2.5 py-2 text-xs text-fg" role="note">
+          <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            {tn(
+              m.meta.privateSkipped.count,
+              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notiz ist nicht dabei.',
+              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notizen sind nicht dabei.',
+              { provider: m.meta.provider ?? '' },
+            )}
+          </span>
+          {onAskWith && (
+            <Button size="sm" onClick={() => onAskWith(m.meta.privateSkipped!.provider.id)}>
+              {t('Mit {name} fragen', { name: m.meta.privateSkipped.provider.name })}
+            </Button>
           )}
         </div>
       )}

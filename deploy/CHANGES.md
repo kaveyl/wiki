@@ -3,6 +3,57 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.14 (Beta) – 2026-11-16
+
+Private AI: a cloud provider you trust can be allowed for private notes. Plus effort for Claude, the date by slash
+command, and fixes for tabs, tables and lists.
+
+### Upgrade notes
+- **From 0.2.3 or newer:** replace the image and restart. No database change.
+- **From 0.2.2 or older:** the database is updated on start (v24, see 0.2.3) – take a database backup first.
+- **Release rules “only for AI in your own network”** keep their meaning: they are now called “Allowed – private AI
+  only”, and every provider in your own network is ticked as private. A cloud provider sees them only after you tick
+  “Allow for private notes” on it.
+
+### Added
+- **Private AI:** each AI provider has the tick **Allow for private notes** (on by itself for an AI in your own network).
+  Notes, folders and sources allowed for “private AI only” always go to a private AI – summarise, continue and ask –,
+  whichever provider is the default; with several, admins choose **Default private** and every user can pick **My AI
+  for private notes**. A provider chosen explicitly without the tick is refused, nothing is sent.
+- **Asking over mixed areas:** the default provider answers without the private notes and says how many matching ones
+  it left out, with a button **“Ask with …”** that asks the private AI in the same chat. A chat that holds private
+  content then stays with private AI.
+- **Effort for Anthropic:** Claude models get **Effort** (model default, low, medium, high, very high) instead of
+  temperature; only the levels the model supports are offered.
+- **Date and time:** the slash commands `/date`, `/time` and “Date and time” insert the current date and time as text,
+  in the format of the account's language.
+- **All tabs:** with many tabs open, a button **“All tabs (n)”** lists every tab to switch to or close.
+
+### Changed
+- **Many tabs** get narrower first and then scroll sideways (also with the mouse wheel) – without a scroll bar covering
+  the tab names.
+
+### Fixed
+- **Anthropic** answered with an error (400, “temperature is deprecated”) on current models; Kaveyl Wiki no longer sends
+  a temperature there.
+- **Tables** no longer run under the table of contents: long cell text wraps.
+- The folder row in the sidebar is marked when the folder's page is open in the active tab.
+- **Lists:** an empty item in a checklist no longer turns the whole checklist into a raw block when saved, and two
+  lists directly after each other stay two lists (the second gets another marker).
+- A follow-up question in the same chat shows its answer at once (it appeared only after a while).
+- “Test connection” for Anthropic lists the models even when the effort levels of the entered model cannot be read; a
+  level the model does not know is not kept.
+- **Linux:** a middle click on a row in the sidebar or on a tab (open in a new tab) no longer pastes the last marked
+  text into the open note.
+
+### Security
+- **Chats from before 0.2.14** in which an AI in your own network answered stay with private AI: a follow-up no longer
+  sends their history to a cloud provider.
+- An AI that may see nothing in a source no longer learns the source's or folder's name from the question's context, a
+  source someone cannot see is refused as the context of a question, and someone who may not read a place no longer
+  learns its release rule from an error message.
+- Swapping list markers took quadratic time for very long lists (only in the editor; the server's limits stayed).
+
 ## 0.2.13 (Beta) – 2026-11-01
 
 A maintenance release: current system packages and dependencies. It contains everything from 0.2.12.

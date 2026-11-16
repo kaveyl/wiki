@@ -191,4 +191,12 @@ export class AiRules {
   anyReleased(mountId: string): boolean {
     return this.rules(mountId).some((r) => !r.orphan && r.level !== 'none');
   }
+
+  /** Something in the source is released for this kind of provider (AD-079: only private AI sees „private only“). */
+  anyReleasedFor(mountId: string, privateAi: boolean, folder?: string): boolean {
+    const fits = (g: AiGrant) => g.level !== 'none' && (g.cloud || privateAi);
+    if (folder === undefined) return this.rules(mountId).some((r) => !r.orphan && fits(r));
+    // Inside a folder: the folder itself, or a rule further down.
+    return fits(this.grant(mountId, folder, true)) || this.rules(mountId).some((r) => !r.orphan && r.target !== 'mount' && fits(r) && under(r.path, folder));
+  }
 }

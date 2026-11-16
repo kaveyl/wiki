@@ -1,7 +1,7 @@
 // UX additions after Phase 3 (pinned tabs, favorites menu, manual order, icons, images).
 // Runs after the other specs in the same seeded workspace (admin + local mount "Notizen").
 import { expect, test, type Page } from '@playwright/test';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHmac } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { waitIndexed } from './indexed';
@@ -749,4 +749,103 @@ test('sidebar width: the divider follows a finger (folding phone, open), the mou
   const steps = Math.round((now - start) / 16);
   for (let i = 0; i < Math.abs(steps); i++) await touch.keyboard.press(steps > 0 ? 'ArrowLeft' : 'ArrowRight');
   await ctx.close();
+});
+
+test('owner finds 15.11.: many tabs shrink without a scroll bar and „Alle Tabs“ lists them; a folder tab marks the folder; /Datum and /Uhrzeit', async () => {
+  // Many steps with short pauses for the editor: more than the default minute under load.
+  test.setTimeout(150_000);
+  const step = (name: string) => console.log(`[15.11.] ${name}`);
+  mkdirSync(join(NOTES, 'ordnerprobe'), { recursive: true });
+  writeFileSync(join(NOTES, 'ordnerprobe/index.md'), '# Ordnerprobe\n\nOrdnerseite.\n');
+  writeFileSync(join(NOTES, 'ordnerprobe/innen.md'), '# Innen\n\nErste Zeile.\n');
+  // Own notes for the many tabs – what other tests leave behind varies.
+  const many = Array.from({ length: 9 }, (_, i) => `ordnerprobe/tab-${i + 1}.md`);
+  for (const [i, p] of many.entries()) writeFileSync(join(NOTES, p), `# Tab ${i + 1}\n`);
+  await waitIndexed(page, 'Notizen', ['ordnerprobe/index.md', 'ordnerprobe/innen.md', ...many]);
+  const row = (path: string) => tree().locator(`[data-node][data-path="${path}"]`).first();
+  // The test before may leave Settings open (Esc in a settings page goes back to Settings first).
+  for (let i = 0; i < 4 && (await page.getByRole('dialog').count()); i++) await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  try {
+    step('folder tab');
+    // A folder with a folder page: its tab marks the folder row in the tree, also after another tab was active.
+    await row('ordnerprobe').click();
+    await expect(page.locator('[data-tab="ordnerprobe/index.md"][data-active-tab]')).toBeVisible();
+    await expect(row('ordnerprobe')).toHaveAttribute('aria-selected', 'true');
+    // Tabs left open by tests before (the pinned one stays).
+    await page.locator('[data-tab="ordnerprobe/index.md"]').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Andere Tabs schließen' }).click();
+    await row('ordnerprobe/innen.md').click({ button: 'middle' });
+    await page.locator('[data-tab="ordnerprobe/innen.md"]').click();
+    await expect(row('ordnerprobe/innen.md')).toHaveAttribute('aria-selected', 'true');
+    await expect(row('ordnerprobe')).toHaveAttribute('aria-selected', 'false');
+    await page.locator('[data-tab="ordnerprobe/index.md"]').click();
+    await expect(row('ordnerprobe')).toHaveAttribute('aria-selected', 'true');
+    await expect(row('ordnerprobe/innen.md')).toHaveAttribute('aria-selected', 'false');
+
+    step('date and time');
+    // /Datum, /Uhrzeit (German account → dd.mm.yyyy, HH:MM).
+    await page.locator('[data-tab="ordnerprobe/innen.md"]').click();
+    const editor = page.locator('.prose-note').filter({ visible: true });
+    await editor.getByText('Erste Zeile.').click();
+    // The editor takes the caret from a click a moment later (faster than any person types).
+    await page.waitForTimeout(300);
+    await page.keyboard.press('End');
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Heute: ');
+    await page.keyboard.type('/Datum');
+    await expect(page.getByRole('button', { name: /^Datum/ }).first()).toBeVisible();
+    await page.keyboard.press('Enter');
+    await page.keyboard.type(' um ');
+    await page.keyboard.type('/Uhrzeit');
+    await expect(page.getByRole('button', { name: /^Uhrzeit/ }).first()).toBeVisible();
+    await page.keyboard.press('Enter');
+    const now = new Date();
+    const day = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+    await expect.poll(() => read('ordnerprobe/innen.md'), { timeout: 10_000 }).toContain(`Heute: ${day} um `);
+    expect(read('ordnerprobe/innen.md')).toMatch(/Heute: \d{2}\.\d{2}\.\d{4} um \d{2}:\d{2}/);
+
+    step('middle click');
+    // Linux: a middle click on a tree row must not paste the marked text into the open note (the 15.11. test run
+    // found 24 × U+FFFC in it). Mark a word, put the caret back, then middle-click rows below.
+    await editor.getByText('Erste Zeile.').dblclick();
+    await page.waitForTimeout(300);
+    await editor.getByText('Erste Zeile.').click();
+    await page.waitForTimeout(300);
+    const before = read('ordnerprobe/innen.md');
+
+    step('many tabs');
+    // Many tabs at a narrow window: they shrink, the bar has no visible scroll bar (it cut the tab text), and „Alle Tabs (n)“
+    // lists every tab – choose one, close one, the list stays open.
+    await page.setViewportSize({ width: 900, height: 700 });
+    for (const p of many) {
+      await row(p).click({ button: 'middle' });
+      await expect(page.locator(`[data-tab="${p}"]`)).toHaveCount(1);
+    }
+    await page.waitForTimeout(2500);
+    expect(read('ordnerprobe/innen.md')).toBe(before);
+    const bar = tabs().first().locator('xpath=..');
+    expect(await bar.evaluate((el: HTMLElement) => ({ style: getComputedStyle(el).scrollbarWidth, lost: el.offsetHeight - el.clientHeight }))).toEqual({ style: 'none', lost: 0 });
+    step('all tabs list');
+    const n = await tabs().count();
+    const all = page.getByRole('button', { name: `Alle Tabs (${n})` });
+    await expect(all).toBeVisible();
+    await all.click();
+    const items = page.locator('[data-all-tabs-item]');
+    await expect(items).toHaveCount(n);
+    await items.filter({ hasText: 'tab-7' }).click();
+    await expect(page.locator('[data-tab="ordnerprobe/tab-7.md"][data-active-tab]')).toBeVisible();
+    await all.click();
+    await items.filter({ hasText: 'tab-5' }).getByRole('button', { name: 'Tab schließen' }).click();
+    await expect(items).toHaveCount(n - 1);
+    await expect(page.locator('[data-tab="ordnerprobe/tab-5.md"]')).toHaveCount(0);
+    await shot(page, 'tabs-alle');
+    await page.keyboard.press('Escape');
+  } finally {
+    await page.setViewportSize({ width: 1360, height: 860 });
+    const open = await tabs().evaluateAll((els) => els.map((e) => e.getAttribute('data-tab')));
+    for (const p of open) if (p && p !== 'trilium.md') await page.locator(`[data-tab="${p}"]`).first().click({ button: 'middle' });
+    rmSync(join(NOTES, 'ordnerprobe'), { recursive: true, force: true });
+  }
 });

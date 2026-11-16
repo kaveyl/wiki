@@ -179,8 +179,14 @@ unter [Auf einem neuen Server](#auf-einem-neuen-server).
   Zuletzt auch Strg+Klick; im Baum [markiert](#mehrere-markieren) Strg+Klick). Rechtsklick auf einen Tab → **„Tab anheften“**: angeheftete Tabs rücken nach links,
   zeigen eine Stecknadel statt ×, werden beim Öffnen einer anderen Notiz nie ersetzt und bleiben
   bei „Andere Tabs schließen“ und Mittelklick stehen. Klick auf die Stecknadel löst sie wieder.
+  Sind viele Tabs offen, werden sie schmaler (der Name bleibt lesbar); passen sie trotzdem nicht, lässt sich
+  die Leiste mit dem Mausrad seitlich schieben, und rechts erscheint der Knopf **„Alle Tabs (n)“** (Zahl mit
+  Pfeil): Er listet jeden offenen Tab – ein Klick wechselt dorthin, das × schließt ihn, die Liste bleibt dabei
+  offen. Der Tab einer Ordnerseite markiert im Baum den Ordner.
 
 ![Angeheftete Tabs](handbuch/50-angeheftet.webp)
+
+![Alle Tabs](handbuch/tabs-alle.webp)
 - **Mitte:** der Editor mit Formatierungsleiste. **Rechts** das Inhaltsverzeichnis (bei
   längeren Notizen), ein- und ausblendbar.
 - Oben rechts in der Notiz: **Editor / Markdown** (Ansicht umschalten), Breite umschalten
@@ -303,7 +309,8 @@ Inhaltsverzeichnis ein/aus und **„…“** mit:
 ### Rechtsklick auf einen Tab
 
 **Rechts daneben anzeigen**, **Links daneben anzeigen**, **Geteilte Ansicht schließen**, **Tab anheften /
-lösen**, **Tab schließen**, **Andere Tabs schließen**. Die mittlere Maustaste schließt einen Tab.
+lösen**, **Tab schließen**, **Andere Tabs schließen**. Die mittlere Maustaste schließt einen Tab. Bei vielen Tabs
+listet der Knopf **„Alle Tabs (n)“** rechts in der Leiste alle offenen.
 
 ### Befehlspalette
 
@@ -627,6 +634,10 @@ tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#markdown-spickzettel
   dazwischen), zeigt Kaveyl Wiki sie als **einen durchgehenden Absatz** – genau wie Wiki.js, Gitea, GitHub
   und die Markdown-Norm. Die Umbrüche in der Datei bleiben dabei erhalten; in der Ansicht **Markdown**
   siehst du sie.
+- **Listen und Checklisten:** Ein leerer Punkt (Enter nach dem letzten Punkt oder zwischen zwei Punkten) bleibt im
+  Editor zum Weitertippen stehen, wird aber nicht gespeichert – wie leere Zeilen. So bleibt eine Checkliste auch in der
+  Datei eine Checkliste. Zwei Listen direkt hintereinander bleiben zwei Listen; in der Datei trägt die zweite dafür
+  ein anderes Zeichen (`*` statt `-`, `1)` statt `1.`).
 - **Codeblöcke** werden farbig hervorgehoben, sobald eine Sprache gewählt ist (` ```python `).
 - **Auswahlmenü:** Text markieren → kleines Menü für fett, kursiv, durchgestrichen, Code, Link, **Überschrift 1–3**
   (macht den ganzen Absatz zur Überschrift, noch einmal geklickt wieder zu Text; in Listen nicht möglich) und
@@ -636,7 +647,9 @@ tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#markdown-spickzettel
 
 - **Slash-Befehle:** `/` am Zeilenanfang oder nach einem Leerzeichen öffnet ein Menü (Überschrift, Liste, Checkliste,
   Code, Tabelle, Zitat, Hinweis-Boxen, aufklappbarer Block, Notiz verlinken, Datei oder Bild,
-  Diagramm (Mermaid), Trennlinie, Link). Weitertippen filtert – auch mit mehreren Wörtern, deutsch oder englisch
+  Diagramm (Mermaid), Trennlinie, Link, **Datum**, **Uhrzeit**, **Datum und Uhrzeit**). Datum und Uhrzeit sind die
+  jetzigen, als Text eingefügt – auf Deutsch `16.11.2026` und `14:05`, in den anderen Sprachen `2026-11-16`
+  (`/datum`, `/date`, `/uhrzeit`, `/time`). Weitertippen filtert – auch mit mehreren Wörtern, deutsch oder englisch
   (`/überschrift 2`, `/heading 2`, `/h2`) –, Enter oder Tab fügt ein, Esc schließt.
 
 ![Slash-Menü](handbuch/13-slash-menue.webp)
@@ -2298,19 +2311,22 @@ Alles, womit Programme an die Notizen kommen: der KI-Assistent und persönliche 
 Der Reiter hat zwei Abschnitte: **Für alle: Anbieter und Aufbewahrung** (nur für Admins sichtbar, gilt für alle
 Benutzer) und **Mein KI-Assistent** (für jeden das eigene).
 
-- **KI-Anbieter** (Admins): Liste der Anbieter mit Name, Art, Modell und „☁ Cloud-Anbieter“; der
-  Auswahlknopf **Standard** legt fest, welcher Anbieter gilt, wenn jemand keinen eigenen wählt. „+ Ollama“, „+ Ollama Cloud“, „+ Anthropic“, „+ OpenRouter“,
+- **KI-Anbieter** (Admins): Liste der Anbieter mit Name, Art, Modell, „☁ Cloud-Anbieter“ und – bei Anbietern, die
+  private Notizen sehen dürfen – **privat**; der
+  Auswahlknopf **Standard** legt fest, welcher Anbieter gilt, wenn jemand keinen eigenen wählt. Sind mehrere Anbieter
+  für private Notizen zugelassen, legt **Standard privat** fest, welcher davon sie bekommt. „+ Ollama“, „+ Ollama Cloud“, „+ Anthropic“, „+ OpenRouter“,
   „+ OpenAI-kompatibel“ öffnen das Formular: **Name**, **Adresse**, **API-Key** (verschlüsselt, nie
-  wieder angezeigt), **Modell** – „Verbindung testen“ listet die Modelle. Details:
-  [KI einrichten](#ki-einrichten).
+  wieder angezeigt), **Modell** – „Verbindung testen“ listet die Modelle –, bei Anthropic **Aufwand** und das Häkchen
+  **Für private Notizen zulassen**. Details: [KI einrichten](#ki-einrichten).
 - **Unbenutzte Chats aufbewahren** (Admins): Standard **90 Tage** seit der letzten Nachricht, 0 = nie.
   Je Quelle abweichend: [Quelle bearbeiten](#eine-quelle-bearbeiten) → „KI-Chats aufbewahren“.
-- **Mein KI-Assistent** (alle): **Mein Anbieter** (sonst der Standard), **Persönliche Anweisungen**
+- **Mein KI-Assistent** (alle): **Mein Anbieter** (sonst der Standard), bei mehreren zugelassenen Anbietern
+  **Meine KI für private Notizen** (sonst „Standard privat“), **Persönliche Anweisungen**
   (gehen bei jeder Anfrage mit, z. B. „antworte knapp, auf Deutsch“) und **eigene Chats löschen**.
 - Was die KI sehen darf, stellst du nicht hier ein, sondern per Rechtsklick → **KI-Freigabe …** –
   siehe [KI-Freigaben](#ki-freigaben).
 
-![KI-Anbieter](handbuch/60-ki-anbieter.webp)
+![KI-Anbieter](handbuch/ki-anbieter-privat.webp)
 
 #### API-Tokens
 
@@ -2700,13 +2716,30 @@ Hinweis „☁ Cloud-Anbieter“: Ollama Cloud, Anthropic und OpenRouter sind im
 OpenAI-kompatible Dienste sind lokal, wenn die Adresse im eigenen Netz liegt (`localhost`,
 `192.168.…`, `10.…`, Docker-Name wie `ollama`), sonst Cloud (z. B. `…openai.azure.com`). Ein
 Cloud-Modell im lokalen Ollama (Name endet auf `-cloud`, z. B. `gpt-oss:120b-cloud`) zählt
-ebenfalls als Cloud, weil Ollama es an ollama.com weiterleitet. Ein Anbieter ist der **Standard**; jeder
+ebenfalls als Cloud, weil Ollama es an ollama.com weiterleitet.
+
+**Aufwand (Anthropic):** Claude-Modelle kennen keine einstellbare „Temperatur“ mehr, dafür einen **Aufwand** –
+**Standard des Modells**, **Niedrig**, **Mittel**, **Hoch** oder **Sehr hoch**. Mehr Aufwand heißt gründlicher
+nachdenken, dafür langsamer und teurer. Zur Wahl stehen nur die Stufen, die das gewählte Modell kann (nach
+„Verbindung testen“); kennt es keine, steht das im Formular. Die Liste zeigt die Stufe hinter dem Modell.
+
+**Für private Notizen zulassen:** Mit diesem Häkchen behandelt Kaveyl Wiki einen Anbieter wie eine KI im eigenen
+Netz: Er darf Notizen sehen, die **nur für private KI** freigegeben sind ([KI-Freigaben](#ki-freigaben)). Eine KI im
+eigenen Netz hat das Häkchen von selbst (abschaltbar). Bei einem Cloud-Anbieter setzt du es bewusst – etwa bei einem
+Anbieter mit Zero Data Retention (ZDR); das Formular nennt dann, wohin die Inhalte gehen, denn ob dort wirklich nichts
+gespeichert wird, kann Kaveyl Wiki nicht prüfen. Notizen, die nur für private KI freigegeben sind, gehen **immer** an
+eine private KI – beim Zusammenfassen, Weiterschreiben und Fragen –, egal welcher Anbieter Standard ist: zuerst die
+eigene Wahl („Meine KI für private Notizen“), dann **Standard privat**, sonst der erste zugelassene Anbieter. Wird
+dort ausdrücklich ein Anbieter ohne Häkchen gewählt, lehnt Kaveyl Wiki ab, statt die Notiz zu schicken. Nimmst du das
+Häkchen weg, sieht dieser Anbieter die privaten Notizen sofort nicht mehr.
+
+Ein Anbieter ist der **Standard**; jeder
 Benutzer kann unter Einstellungen → KI einen anderen wählen und **persönliche Anweisungen**
 hinterlegen (gehen bei jeder Anfrage mit). Dort lassen sich auch die eigenen Chatverläufe löschen;
 der Admin legt fest, wie lange Verläufe aufbewahrt werden ([Chats und Aufbewahrung](#chats-und-aufbewahrung)).
 Keys werden verschlüsselt gespeichert und nie wieder angezeigt.
 
-![KI-Anbieter](handbuch/60-ki-anbieter.webp)
+![KI-Anbieter](handbuch/ki-anbieter-privat.webp)
 
 ### KI-Freigaben
 
@@ -2719,12 +2752,13 @@ eine Quelle, einen Ordner oder eine Notiz → **KI-Freigabe …**:
 | **Freigegeben** | Die KI darf die Inhalte lesen (Fragen, Zusammenfassen) und Änderungen **vorschlagen** – übernommen wird nur, was du bestätigst. Der Dialog nennt, an welche Anbieter die Inhalte dafür gehen. |
 | **Nicht freigegeben (Ausnahme)** | Sperrt hier, auch wenn darüber etwas freigegeben ist – z. B. die ganze Quelle frei, nur der Ordner „Tagebuch“ nicht. Eine Sperre gewinnt immer. |
 
-**Lokal oder Cloud – nur, wenn du beides hast:** Hast du nur Cloud-Anbieter (z. B. nur Ollama Cloud),
-heißt „Freigegeben“: geht an Ollama Cloud. Hast du nur eine KI im eigenen Netz, bleibt alles im Haus.
-Erst wenn **beide** Arten eingerichtet sind, gibt es zusätzlich **„Freigegeben – nur für KI im eigenen
-Netz“**: die lokale KI sieht die Inhalte, die Cloud-KI nie (z. B. für ein Tagebuch). Was du freigibst,
-solange es keinen Cloud-Anbieter gibt, gilt nur fürs eigene Netz – kommt später ein Cloud-Anbieter
-dazu, geht dadurch nichts von selbst in die Cloud. Zusätzlich gilt: `ai: false` im Frontmatter sperrt
+**Privat oder nicht – nur, wenn du beides hast:** „Private KI“ sind die Anbieter mit dem Häkchen **Für private Notizen
+zulassen** ([KI einrichten](#ki-einrichten)) – eine KI im eigenen Netz von selbst, ein Cloud-Anbieter nur, wenn du es
+setzt. Sind alle Anbieter Cloud ohne Häkchen (z. B. nur Ollama Cloud), heißt „Freigegeben“: geht an Ollama Cloud.
+Sind alle privat, bleibt es dabei. Erst wenn **beide** Arten eingerichtet sind, gibt es zusätzlich **„Freigegeben – nur
+private KI“**: die privaten Anbieter sehen die Inhalte, die anderen nie (z. B. für ein Tagebuch). Der Dialog nennt, wer
+welche Seite ist. Was du freigibst, solange es nur private Anbieter gibt, gilt nur für private KI – kommt später ein
+anderer dazu, geht dadurch nichts von selbst zu ihm. Zusätzlich gilt: `ai: false` im Frontmatter sperrt
 eine Notiz, verschlüsselte Notizen sind immer tabu, und die KI bekommt nie mehr, als der fragende
 Benutzer lesen darf.
 
@@ -2735,10 +2769,10 @@ Benutzer lesen darf.
 **Überblick über alle Freigaben (Admins):** Sobald es eine Freigabe gibt, steht in der Seitenleiste
 unter „Zuletzt“ der Abschnitt **✦ KI-Freigaben** (auf-/zuklappbar wie die Favoriten). Jede Zeile ist eine
 Regel: Quelle, Ordner oder Notiz (die Quelle in Klammern), rechts **freigegeben** oder **nicht freigegeben**
-(rot); mit lokaler und Cloud-KI auch **nur eigenes Netz**. Orange **wirkt nicht** heißt: nur fürs eigene
-Netz freigegeben, aber es gibt keine KI im eigenen Netz – die Cloud-KI sieht es nicht (Freigabe bearbeiten →
-„Freigegeben“). Oben filterst du nach **alle**, **aktiv** (freigegeben), **gesperrt** und – wenn es solche Regeln gibt –
-**lokal** (ein zugeklappter Abschnitt klappt dabei auf). Ein Klick zeigt die Stelle im Baum (eine Notiz wird geöffnet);
+(rot); mit privater und anderer KI auch **nur private KI**. Orange **wirkt nicht** heißt: nur für private KI
+freigegeben, aber kein Anbieter ist für private Notizen zugelassen – niemand sieht es (Häkchen setzen oder Freigabe
+bearbeiten → „Freigegeben“). Oben filterst du nach **alle**, **aktiv** (freigegeben), **gesperrt** und – wenn es solche
+Regeln gibt – **privat** (ein zugeklappter Abschnitt klappt dabei auf). Ein Klick zeigt die Stelle im Baum (eine Notiz wird geöffnet);
 Rechtsklick (auf dem Handy lange drücken): **Freigabe bearbeiten …**, **Im Baum anzeigen**, **Freigabe
 entfernen**. Grau mit „verwaist“ sind Regeln, deren Notiz es nicht mehr gibt – die gelten nirgends und
 können weg. Im Baum selbst trägt jede Quelle, jeder Ordner und jede Notiz mit eigener Regel ein kleines
@@ -2839,6 +2873,16 @@ Eine Garantie ist das bei Sprachmodellen nicht: Prüfe Wichtiges über die verli
   vorn) und schließt das Fenster. Schon offene Notizen bekommen keinen zweiten Tab.
 
 ![Frag die Wissensbasis](handbuch/63-ki-fragen.webp)
+
+**Private Notizen beim Fragen:** Fragst du über einen Bereich, in dem auch Notizen „nur für private KI“ liegen,
+antwortet dein Standard-Anbieter – ohne diese Notizen. Gibt es passende, steht unter der Antwort ein Hinweis wie
+„Gefunden wird nur, was für Claude freigegeben ist – 2 passende private Notizen sind nicht dabei.“ mit dem Knopf
+**„Mit … fragen“**: Er stellt dieselbe Frage im selben Chat an die private KI, die die Notizen dann mit einbezieht.
+Ab da bleibt der Chat bei der privaten KI, denn sein Verlauf enthält private Inhalte; für einen anderen Anbieter
+beginnst du einen neuen Chat. Fragst du direkt über eine Notiz oder einen Ordner „nur für private KI“, geht die Frage
+gleich an die private KI.
+
+![Hinweis auf private Notizen](handbuch/ki-fragen-privat-hinweis.webp)
 
 ### Aufträge und Vorschläge
 

@@ -1,7 +1,7 @@
 // Workspace layout: sidebar (search, mount trees) + tab bar + note view.
 import { Suspense, useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { Settings, LogOut, Plus, X, FileText, PanelLeftClose, PanelLeft, FilePlus, RefreshCw, Sun, Moon, Monitor, ListTree, Maximize2, ListFilter, LocateFixed, History, FolderPlus, Hash, Star, Columns2, Pin, PinOff, ChevronsUpDown, ChevronsDownUp, Sparkles, Trash2, Printer, FileDown, CircleHelp, CircleUserRound, Languages, UserRoundCog, ArrowUpCircle, ShieldAlert } from 'lucide-react';
+import { Settings, LogOut, Plus, X, ChevronDown, FileText, PanelLeftClose, PanelLeft, FilePlus, RefreshCw, Sun, Moon, Monitor, ListTree, Maximize2, ListFilter, LocateFixed, History, FolderPlus, Hash, Star, Columns2, Pin, PinOff, ChevronsUpDown, ChevronsDownUp, Sparkles, Trash2, Printer, FileDown, CircleHelp, CircleUserRound, Languages, UserRoundCog, ArrowUpCircle, ShieldAlert } from 'lucide-react';
 import * as DM from '@radix-ui/react-dropdown-menu';
 import { api, ApiError, type Entry, type Mount, type User } from '../api';
 import { useServerEvents } from '../events';
@@ -611,18 +611,40 @@ function TabBar({
 }) {
   const { activate, closeTab, closeOthers, setPinned, openSplit, closeSplit } = useWorkspace.getState();
   const splitId = useWorkspace((s) => s.splitId);
-  // Many tabs scroll sideways: fade the edge where more follow, and keep the active tab in view.
+  // Many tabs first get narrower (down to a minimum), then scroll sideways without a visible scroll bar (it
+  // took the room of the tab text – owner 15.11.): the mouse wheel scrolls sideways, the edge where more follow
+  // fades, the active tab stays in view, and „All tabs“ lists every open tab.
   const bar = useRef<HTMLDivElement | null>(null);
+  const [overflow, setOverflow] = useState(false);
   const barRef = useCallback((el: HTMLDivElement | null) => {
     bar.current = el;
-    return scrollHint(el);
+    if (!el) return;
+    const stopHint = scrollHint(el);
+    const check = () => setOverflow(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(check);
+    ro?.observe(el);
+    const mo = typeof MutationObserver === 'undefined' ? null : new MutationObserver(check);
+    mo?.observe(el, { childList: true, subtree: true, characterData: true });
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollWidth <= el.clientWidth + 1 || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      stopHint?.();
+      ro?.disconnect();
+      mo?.disconnect();
+      el.removeEventListener('wheel', onWheel);
+    };
   }, []);
   useEffect(() => {
     bar.current?.querySelector<HTMLElement>(':scope > [data-active-tab]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [activeId, tabs.length]);
   return (
     <div className="flex h-9 shrink-0 items-end border-b border-line bg-subtle pl-1" data-print="hide">
-      <div ref={barRef} className="scroll-hint flex min-w-0 flex-1 items-end gap-0.5 self-stretch overflow-x-auto">
+      <div ref={barRef} className="scroll-hint no-scrollbar flex min-w-0 flex-1 items-end gap-0.5 self-stretch overflow-x-auto">
       {collapsed && (
         <IconButton label={t('Seitenleiste einblenden')} className="mb-1.5 mr-1" onClick={onExpand}>
           <PanelLeft className="h-4 w-4" />
@@ -633,8 +655,10 @@ function TabBar({
           <ContextTrigger asChild>
             <div
               className={cx(
-                'group flex h-8 shrink-0 cursor-default items-center gap-1.5 rounded-t-md border border-b-0 px-2.5 text-[0.8125rem]',
+                'group flex h-8 shrink cursor-default items-center gap-1.5 rounded-t-md border border-b-0 px-2.5 text-[0.8125rem]',
                 tab.pinned ? 'max-w-[160px]' : 'max-w-[220px]',
+                // Narrowest: still a few letters of the name next to icon and close button (Dev check 16.11.).
+                tab.id === activeId ? 'min-w-44' : 'min-w-32',
                 tab.id === activeId ? 'border-line bg-bg text-fg' : tab.id === splitId ? 'border-line bg-bg text-fg-muted' : 'border-transparent text-fg-muted hover:bg-hover',
               )}
               onClick={() => activate(tab.id)}
@@ -702,12 +726,64 @@ function TabBar({
         </ContextMenu>
       ))}
       </div>
+      {overflow && <AllTabs tabs={tabs} activeId={activeId} folderNote={folderNote} />}
       {/* Always visible, also with the sidebar closed and on phones: help, settings, account – and the colour scheme. */}
       <div className="flex shrink-0 items-center gap-0.5 self-stretch border-l border-line px-1.5">{appButtons}</div>
       <div className="flex shrink-0 items-center self-stretch border-l border-line px-1.5">
         <ThemeToggle className="h-7 w-7" />
       </div>
     </div>
+  );
+}
+
+/** „All tabs (n)“: shown when the tabs do not fit; jump to any open tab or close it without hunting in the bar. */
+function AllTabs({ tabs, activeId, folderNote }: { tabs: Tab[]; activeId: string | null; folderNote: (mountId: string) => string | undefined }) {
+  const { activate, closeTab } = useWorkspace.getState();
+  return (
+    <DM.Root modal={false}>
+      <DM.Trigger asChild>
+        <button
+          className="mb-0.5 ml-0.5 flex h-7 shrink-0 items-center gap-0.5 self-end rounded px-1.5 text-[0.75rem] text-fg-muted hover:bg-hover hover:text-fg data-[state=open]:bg-hover"
+          aria-label={t('Alle Tabs ({n})', { n: tabs.length })}
+          title={t('Alle Tabs ({n})', { n: tabs.length })}
+        >
+          {tabs.length}
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </DM.Trigger>
+      <DM.Portal>
+        <DropdownContent align="end" sideOffset={4} minWidth={240} className="max-h-[70vh] max-w-[min(26rem,calc(100vw-1rem))] overflow-y-auto">
+          {tabs.map((tab) => (
+            <DM.Item
+              key={tab.id}
+              className="group flex cursor-default select-none items-center gap-2 rounded-md py-1 pl-2 pr-1 outline-none data-[highlighted]:bg-hover"
+              onSelect={() => activate(tab.id)}
+              title={tab.path}
+              data-all-tabs-item={tab.path}
+            >
+              <FileText className={cx('h-4 w-4 shrink-0', tab.id === activeId ? 'text-accent' : 'text-fg-faint')} />
+              <span className={cx('min-w-0 flex-1 truncate', tab.id === activeId && 'font-medium')}>{noteName(tab.path, folderNote(tab.mountId))}</span>
+              {tab.pinned ? (
+                <Pin className="mx-1.5 h-3 w-3 shrink-0 text-fg-faint" aria-label={t('Angeheftet')} />
+              ) : (
+                <button
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-fg-faint hover:bg-active hover:text-fg"
+                  onClick={(e) => {
+                    // Close only this tab – the list stays open for the next one.
+                    e.stopPropagation();
+                    e.preventDefault();
+                    closeTab(tab.id);
+                  }}
+                  aria-label={t('Tab schließen')}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </DM.Item>
+          ))}
+        </DropdownContent>
+      </DM.Portal>
+    </DM.Root>
   );
 }
 

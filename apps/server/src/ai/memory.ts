@@ -11,7 +11,7 @@ import type { Author } from '../git/sync.js';
 import type { MountManager } from '../mounts/manager.js';
 import { absPath, type Mount } from '../mounts/model.js';
 import type { Scope } from './assistant.js';
-import type { ProviderConfig } from './providers.js';
+import { isPrivate, type ProviderConfig } from './providers.js';
 import type { AiRules } from './rules.js';
 import { META_DIR } from '../notes/meta.js';
 
@@ -81,18 +81,20 @@ export function createMemory(d: MemoryDeps) {
      * Instructions and memory of the sources in reach of this question, as a prompt block —
      * only sources released for the AI at their top level (and for cloud, if needed).
      */
-    async context(req: FastifyRequest, p: ProviderConfig, scope: Scope, inReach: (mountId: string) => boolean): Promise<string> {
+    async context(req: FastifyRequest, p: ProviderConfig, scope: Scope, inReach: (mountId: string) => boolean, seen?: { private: boolean }): Promise<string> {
       if (scope.kind === 'general') return '';
       const parts: string[] = [];
       for (const mount of d.manager.list()) {
         if (mount.paused || !this.enabled(mount) || !inReach(mount.id) || !d.rootReadable(req, mount.id)) continue;
         const g = d.rules.grant(mount.id, INSTRUCTIONS);
-        if (g.level === 'none' || (p.cloud && !g.cloud)) continue;
+        if (g.level === 'none' || (!isPrivate(p) && !g.cloud)) continue;
         for (const [rel, what] of [
           [INSTRUCTIONS, 'Anweisungen'],
           [MEMORY, 'Gedächtnis'],
         ] as const) {
           const text = body((await read(mount, rel)) ?? '');
+          // Content released for private AI only went along: the chat stays with private AI (AD-079).
+          if (text && !g.cloud && seen) seen.private = true;
           if (text) parts.push(`${what} für die Quelle „${mount.name}“ (${rel}):\n${text.slice(0, MAX_CHARS)}`);
         }
       }

@@ -4,6 +4,7 @@ export * from './markdown/from-mdast.js';
 export * from './markdown/to-markdown.js';
 export * from './markdown/document.js';
 export * from './markdown/meta.js';
+export * from './markdown/tasks.js';
 export * from './links.js';
 export * from './linkScan.js';
 export * from './password.js';

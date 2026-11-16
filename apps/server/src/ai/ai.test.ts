@@ -48,6 +48,16 @@ beforeEach(async () => {
         res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ data: [{ id: 'mini' }, { id: 'gross' }] }));
         return;
       }
+      if (req.url?.startsWith('/v1/models/')) {
+        // Anthropic Models API: one model with its capabilities (here without `xhigh`).
+        const id = decodeURIComponent(req.url.slice('/v1/models/'.length));
+        if (id !== 'claude-test') return void res.writeHead(404, { 'content-type': 'application/json' }).end(JSON.stringify({ error: { message: `model: ${id}` } }));
+        const level = (supported: boolean) => ({ supported });
+        res
+          .writeHead(200, { 'content-type': 'application/json' })
+          .end(JSON.stringify({ id, capabilities: { effort: { supported: true, low: level(true), medium: level(true), high: level(true), xhigh: level(false), max: level(true) } } }));
+        return;
+      }
       const body = JSON.parse(data || '{}');
       received.push({ path: req.url ?? '', auth: req.headers.authorization, body });
       if (req.url === '/v1/messages' && body.stream) {
@@ -72,6 +82,20 @@ beforeEach(async () => {
         ev('message_delta', { usage: { output_tokens: 7 } });
         ev('message_stop', {});
         res.end();
+        return;
+      }
+      if (req.url === '/v1/messages' && !body.tools) {
+        // Anthropic Messages API, one answer: like the current models it rejects `temperature` and
+        // begins with a thinking block; „REFUSE“ in the question gives a refusal.
+        if ('temperature' in body) return void res.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({ error: { message: '`temperature` is deprecated for this model.' } }));
+        const last = String(body.messages?.at(-1)?.content ?? '');
+        if (last.includes('REFUSE')) {
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ model: body.model, content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: 'cyber' } }));
+          return;
+        }
+        res.writeHead(200, { 'content-type': 'application/json' }).end(
+          JSON.stringify({ model: body.model, content: [{ type: 'thinking', thinking: '', signature: 'sig' }, { type: 'text', text: 'Von Claude umformuliert.' }], stop_reason: 'end_turn', usage: { input_tokens: 9, output_tokens: 4 } }),
+        );
         return;
       }
       if (body.tools) {
@@ -175,10 +199,119 @@ describe('AI assistant (AD-011, AD-024)', () => {
     const list = JSON.stringify((await inject('GET', '/api/ai/providers')).json());
     expect(list).not.toContain('sk-test-geheim-123');
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'read', cloud: false });
-    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json().error).toContain('nur für lokale');
+    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json().error).toContain('nur für private KI');
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'read', cloud: true });
     expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).statusCode).toBe(200);
     expect(received.at(-1)!.auth).toBe('Bearer sk-test-geheim-123');
+  });
+
+  it('private AI (AD-079): a ticked cloud provider sees private notes, is taken there automatically, the default says what it left out', async () => {
+    const put = (body: object) => inject('PUT', '/api/ai/providers', { baseUrl: fakeUrl, ...body });
+    const claude = (await put({ kind: 'anthropic', name: 'Claude', model: 'claude-test', apiKey: 'sk-ant-test' })).json() as { id: string; private: boolean };
+    const ollama = (await put({ kind: 'ollama-cloud', name: 'Ollama ZDR', model: 'gpt-oss:120b', apiKey: 'sk-ollama-zdr', private: true })).json() as { id: string; private: boolean; cloud: boolean };
+    expect(claude.private).toBe(false);
+    expect(ollama).toMatchObject({ cloud: true, private: true });
+    await inject('PUT', '/api/ai/settings', { defaultId: claude.id });
+    expect((await inject('GET', '/api/ai/providers')).json()).toMatchObject({ defaultId: claude.id, privateDefaultId: ollama.id });
+    // Only a ticked provider can be the default for private notes.
+    expect((await inject('PUT', '/api/ai/settings', { privateDefaultId: claude.id })).json().error).toContain('nicht für private Notizen');
+
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'suggest', cloud: true });
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'folder', path: 'privat', level: 'suggest', cloud: false });
+
+    // A note released for private AI only: the private AI, whatever the default is.
+    const r = await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'privat/tagebuch.md' });
+    expect(r.json()).toMatchObject({ provider: 'Ollama ZDR' });
+    expect(received.at(-1)).toMatchObject({ path: '/v1/chat/completions', auth: 'Bearer sk-ollama-zdr' });
+    expect((await inject('GET', `/api/ai/status/${mountId}/privat/tagebuch.md`)).json()).toMatchObject({ provider: { name: 'Ollama ZDR' }, read: true });
+    // Elsewhere the default.
+    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json()).toMatchObject({ provider: 'Claude' });
+
+    // Across all sources the default answers; the private match stays out and is counted, with the AI that may see it.
+    const all = (await inject('POST', '/api/ai/ask', { question: 'Was steht zum Kolibri?', scope: { kind: 'all' } })).json() as { chatId: string; provider: string; sources: { path: string }[]; privateSkipped?: unknown };
+    expect(all.provider).toBe('Claude');
+    expect(JSON.stringify(received.at(-1)!.body)).not.toContain('Kolibri privat');
+    expect(all.privateSkipped).toEqual({ count: 1, provider: { id: ollama.id, name: 'Ollama ZDR' } });
+    // „Ask with Ollama ZDR“: the same question with the private AI includes it, no hint.
+    const again = (await inject('POST', '/api/ai/ask', { question: 'Was steht zum Kolibri?', scope: { kind: 'all' }, providerId: ollama.id, chatId: all.chatId })).json() as {
+      chatId: string;
+      provider: string;
+      privateSkipped?: unknown;
+    };
+    expect(again).toMatchObject({ chatId: all.chatId, provider: 'Ollama ZDR' });
+    expect(again.privateSkipped).toBeUndefined();
+    expect(JSON.stringify(received.at(-1)!.body)).toContain('Kolibri privat');
+    // From now on the chat carries private content (the history goes along): it stays with the private AI …
+    const next = await inject('POST', '/api/ai/ask', { question: 'Und was noch?', scope: { kind: 'all' }, chatId: all.chatId });
+    expect(next.json()).toMatchObject({ provider: 'Ollama ZDR' });
+    expect(received.at(-1)).toMatchObject({ auth: 'Bearer sk-ollama-zdr' });
+    // … also for the agent, and asking the default by name is refused – nothing reaches it.
+    const before = received.length;
+    const named = await inject('POST', '/api/ai/ask', { question: 'Und was noch?', scope: { kind: 'all' }, chatId: all.chatId, providerId: claude.id });
+    expect(named.json().error).toContain('neuen Chat');
+    expect(received).toHaveLength(before);
+    const agentEvents = await agent({ question: 'Und was noch?', scope: { kind: 'all' }, chatId: all.chatId });
+    expect(agentEvents.at(-1)).toMatchObject({ type: 'answer', provider: 'Ollama ZDR' });
+    expect(received.slice(before).every((r) => r.auth === 'Bearer sk-ollama-zdr')).toBe(true);
+    // A question about the private folder itself goes to the private AI.
+    expect((await inject('POST', '/api/ai/ask', { question: 'Was steht zum Kolibri?', scope: { kind: 'folder', mountId, path: 'privat' } })).json()).toMatchObject({ provider: 'Ollama ZDR' });
+
+    // A place released for private AI only is not worked on by another AI named by the caller – not even its name
+    // goes out (security matrix 16.11.); the AI status says „not available“ for ai: false notes up front.
+    const before2 = received.length;
+    expect((await inject('POST', '/api/ai/ask', { question: 'Kolibri?', scope: { kind: 'folder', mountId, path: 'privat' }, providerId: claude.id })).json().error).toContain('Dieser Bereich ist nur für private KI');
+    expect((await agent({ question: 'Kolibri?', scope: { kind: 'folder', mountId, path: 'privat' }, providerId: claude.id })).at(-1)).toMatchObject({ type: 'error' });
+    expect(received).toHaveLength(before2);
+    expect((await inject('GET', `/api/ai/status/${mountId}/offen/gesperrt.md`)).json()).toMatchObject({ read: false, suggest: false });
+
+    // Without the tick nobody may see the private note: the default says why.
+    await put({ id: ollama.id, kind: 'ollama-cloud', private: false });
+    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'privat/tagebuch.md' })).json().error).toContain('nur für private KI');
+    expect((await inject('GET', '/api/ai/providers')).json().privateDefaultId).toBeNull();
+  });
+
+  it('private AI, diff check 0.2.14: old chats stay private, an unreleased source is not named, rules stay unsaid where one may not read', async () => {
+    const put = (body: object) => inject('PUT', '/api/ai/providers', { baseUrl: fakeUrl, ...body });
+    const claude = (await put({ kind: 'anthropic', name: 'Claude', model: 'claude-test', apiKey: 'sk-ant-test' })).json() as { id: string };
+    const local = await provider(); // „Lokal“ in the own network: private by itself
+    await inject('PUT', '/api/ai/settings', { defaultId: claude.id });
+    // Only the subfolder is released, for private AI only; the source itself has no rule.
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'folder', path: 'privat', level: 'suggest', cloud: false });
+
+    // A question about the whole source goes to Claude (nothing there for it) – without the source's name.
+    const before = received.length;
+    await agent({ question: 'Kolibri?', scope: { kind: 'source', mountId } });
+    const toClaude = JSON.stringify(received.slice(before));
+    expect(received.length).toBeGreaterThan(before);
+    expect(toClaude).not.toContain('„Wiki“');
+    expect(toClaude).not.toContain('privat');
+
+    // A chat from before the mark (0.2.13): the local AI answered from the private folder. A follow-up stays private.
+    const chat = (await inject('POST', '/api/ai/ask', { question: 'Was steht zum Kolibri?', scope: { kind: 'all' }, providerId: local.id })).json() as { chatId: string; provider: string };
+    expect(chat.provider).toBe('Lokal');
+    app.db.prepare("UPDATE ai_messages SET meta_json = json_remove(meta_json, '$.privateContent') WHERE chat_id = ?").run(chat.chatId);
+    const n = received.length;
+    expect((await inject('POST', '/api/ai/ask', { question: 'Und?', scope: { kind: 'all' }, chatId: chat.chatId, providerId: claude.id })).json().error).toContain('neuen Chat');
+    expect(received).toHaveLength(n);
+    expect((await inject('POST', '/api/ai/ask', { question: 'Und?', scope: { kind: 'all' }, chatId: chat.chatId })).json()).toMatchObject({ provider: 'Lokal' });
+
+    // Someone who may not read the private folder learns nothing about its rule – the usual refusal.
+    await inject('POST', '/api/admin/users', { email: 'maria@example.test', username: 'maria', password: 'Maria-Passwort-0001' });
+    app.db.prepare('UPDATE users SET must_change_password = 0').run();
+    const maria = `kw_session=${(await app.server.inject({ method: 'POST', url: '/api/login', payload: { email: 'maria@example.test', password: 'Maria-Passwort-0001' } })).cookies.find((c) => c.name === 'kw_session')!.value}`;
+    const users = (await inject('GET', '/api/admin/users')).json() as { id: string; username: string }[];
+    await inject('POST', `/api/acl/${mountId}`, { target: 'folder', path: 'privat', subject: 'user', subjectId: users.find((u) => u.username === 'maria')!.id, level: 'none' });
+    const theirs = (await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'privat/tagebuch.md', providerId: claude.id }, maria)).json() as { error: string };
+    expect(theirs.error).toBeTruthy();
+    expect(theirs.error).not.toContain('private KI');
+    // A source one does not see: unknown to the agent as well, nothing goes out.
+    const n2 = received.length;
+    expect((await agent({ question: 'Kolibri?', scope: { kind: 'source', mountId: '01HXXXXXXXXXXXXXXXXXXXXXXX' } })).at(-1)).toMatchObject({ type: 'error' });
+    await inject('POST', `/api/acl/${mountId}`, { target: 'mount', path: '', subject: 'user', subjectId: users.find((u) => u.username === 'maria')!.id, level: 'none' });
+    const hiddenSource = await agent({ question: 'Kolibri?', scope: { kind: 'source', mountId } }, maria);
+    expect(hiddenSource.at(-1)).toMatchObject({ type: 'error' });
+    expect(JSON.stringify(hiddenSource)).not.toContain('„Wiki“');
+    expect(received).toHaveLength(n2);
   });
 
   it('ask: sources only from released, readable notes; a none rule always wins; chats are kept per user', async () => {
@@ -285,7 +418,7 @@ describe('AI assistant (AD-011, AD-024)', () => {
     expect(received.at(-1)!.auth).toBe('Bearer ollama-key-123');
     await inject('PUT', '/api/ai/settings', { defaultId: p.id });
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'read', cloud: false });
-    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json().error).toContain('nur für lokale');
+    expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json().error).toContain('nur für private KI');
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'read', cloud: true });
     expect((await inject('POST', '/api/ai/transform', { action: 'summarize', mountId, path: 'offen/plan.md' })).json()).toMatchObject({ provider: 'Ollama Cloud', model: 'gpt-oss:120b' });
     expect(received.at(-1)).toMatchObject({ path: '/v1/chat/completions', auth: 'Bearer ollama-key-123' });
@@ -569,6 +702,50 @@ describe('AI agent (AD-026)', () => {
     expect(second.messages[1]!.content[0]).toMatchObject({ type: 'tool_use', input: { query: 'Kolibri' } });
     expect(second.messages[2]!.content[0]).toMatchObject({ type: 'tool_result' });
     expect(received.at(-1)!.auth).toBeUndefined();
+  });
+
+  it('Anthropic: no temperature (current models reject it), effort as output_config, room for thinking (owner 15.11.)', async () => {
+    const put = (body: object) => inject('PUT', '/api/ai/providers', { kind: 'anthropic', name: 'Claude', baseUrl: fakeUrl, model: 'claude-test', apiKey: 'sk-ant-test', ...body });
+    // Like every provider setting error (errors.ts: AiProviderError → 502).
+    expect((await put({ effort: 'turbo' })).json().error).toContain('Unbekannte Stufe');
+    const p = (await put({ effort: 'high' })).json() as { id: string; effort?: string };
+    expect(p.effort).toBe('high');
+    // The connection test tells which levels the model knows; an unknown model is named.
+    expect((await inject('POST', `/api/ai/providers/${p.id}/models`, {})).json()).toMatchObject({ efforts: ['low', 'medium', 'high'] });
+    await inject('PUT', '/api/ai/settings', { defaultId: p.id });
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'folder', path: 'offen', level: 'suggest', cloud: true });
+
+    const r = await inject('POST', '/api/ai/transform', { action: 'rewrite', mountId, path: 'offen/plan.md', text: 'Der Plan steht.', providerId: p.id });
+    expect(r.json()).toMatchObject({ text: 'Von Claude umformuliert.' });
+    const sent = received.at(-1)!.body as Record<string, unknown>;
+    expect(sent).not.toHaveProperty('temperature');
+    expect(sent).toMatchObject({ output_config: { effort: 'high' }, max_tokens: 16_000 });
+
+    // Agent (tools, streamed): the same rules.
+    script = [{ content: 'Fertig.' }];
+    await agent({ question: 'Wo steht der Kolibri?', scope: { kind: 'all' } });
+    const agentBody = received.at(-1)!.body as Record<string, unknown>;
+    expect(agentBody).not.toHaveProperty('temperature');
+    expect(agentBody).toMatchObject({ output_config: { effort: 'high' }, stream: true });
+
+    // „Model default“ sends no effort; saving without the field keeps it, '' removes it.
+    expect(((await put({ id: p.id })).json() as { effort?: string }).effort).toBe('high');
+    expect(((await put({ id: p.id, effort: '' })).json() as { effort?: string }).effort).toBeUndefined();
+    await inject('POST', '/api/ai/transform', { action: 'rewrite', mountId, path: 'offen/plan.md', text: 'Der Plan steht.', providerId: p.id });
+    expect(received.at(-1)!.body).not.toHaveProperty('output_config');
+
+    // A refusal is said as such instead of an empty answer.
+    const refused = await inject('POST', '/api/ai/transform', { action: 'rewrite', mountId, path: 'offen/plan.md', text: 'REFUSE', providerId: p.id });
+    expect(refused.json().error).toContain('abgelehnt (cyber)');
+
+    // Other kinds have no effort; an unknown Anthropic model is named in the connection test.
+    expect(((await inject('PUT', '/api/ai/providers', { kind: 'ollama', name: 'L', baseUrl: fakeUrl, model: 'mini', effort: 'high' })).json() as { effort?: string }).effort).toBeUndefined();
+    const other = (await put({ model: 'claude-gibt-es-nicht' })).json() as { id: string };
+    // … without costing the model list to pick the right name from (diff check 0.2.14).
+    const listed = (await inject('POST', `/api/ai/providers/${other.id}/models`, {})).json() as { models: string[]; efforts: unknown; warning: string };
+    expect(Array.isArray(listed.models)).toBe(true);
+    expect(listed.efforts).toBeNull();
+    expect(listed.warning).toContain('gibt es bei Anthropic nicht');
   });
 });
 

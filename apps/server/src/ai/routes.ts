@@ -33,14 +33,20 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
   server.get('/api/ai/providers', async (req) => {
     const list = d.providers.publicList();
     const defaultId = d.providers.defaultId();
-    if (req.user!.isAdmin) return { providers: list, defaultId, retentionDays: retention() };
-    return { providers: list.map((p) => ({ id: p.id, name: p.name, kind: p.kind, cloud: p.cloud, model: p.model })), defaultId, retentionDays: retention() };
+    const privateDefaultId = d.providers.privateDefaultId();
+    if (req.user!.isAdmin) return { providers: list, defaultId, privateDefaultId, retentionDays: retention() };
+    return {
+      providers: list.map((p) => ({ id: p.id, name: p.name, kind: p.kind, cloud: p.cloud, private: p.private, model: p.model })),
+      defaultId,
+      privateDefaultId,
+      retentionDays: retention(),
+    };
   });
 
-  server.put<{ Body: { id?: string; kind: ProviderKind; name?: string; baseUrl?: string; model?: string; cloud?: boolean; apiKey?: string | null } }>('/api/ai/providers', async (req) => {
+  server.put<{ Body: { id?: string; kind: ProviderKind; name?: string; baseUrl?: string; model?: string; cloud?: boolean; apiKey?: string | null; effort?: string | null; private?: boolean } }>('/api/ai/providers', async (req) => {
     d.requireAdmin(req);
     const p = d.providers.save(req.body);
-    d.audit(req, 'ai-provider-saved', `KI-Anbieter gespeichert: ${p.name} (${p.kind}, ${p.cloud ? 'Cloud' : 'lokal'}, Modell ${p.model || '–'})`);
+    d.audit(req, 'ai-provider-saved', `KI-Anbieter gespeichert: ${p.name} (${p.kind}, ${p.cloud ? 'Cloud' : 'lokal'}, Modell ${p.model || '–'}${p.effort ? `, Aufwand ${p.effort}` : ''}${p.private ? ', für private Notizen' : ''})`);
     return p;
   });
 
@@ -52,9 +58,10 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
     return { ok: true };
   });
 
-  server.put<{ Body: { defaultId?: string | null; retentionDays?: number } }>('/api/ai/settings', async (req) => {
+  server.put<{ Body: { defaultId?: string | null; privateDefaultId?: string | null; retentionDays?: number } }>('/api/ai/settings', async (req) => {
     d.requireAdmin(req);
     if (req.body.defaultId !== undefined) d.providers.setDefault(req.body.defaultId || null);
+    if (req.body.privateDefaultId !== undefined) d.providers.setPrivateDefault(req.body.privateDefaultId || null);
     if (typeof req.body.retentionDays === 'number') writeRules(d.settings, { aiChatDays: req.body.retentionDays });
     return { ok: true };
   });
@@ -63,7 +70,15 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
     d.requireAdmin(req);
     const p = d.providers.get(req.params.id);
     if (!p) throw new AiRuleError('Anbieter nicht gefunden');
-    return { models: await d.providers.models(p) };
+    const models = await d.providers.models(p);
+    // Anthropic: which effort levels the chosen model knows (the settings offer only those).
+    // A failure there (unknown model name, time-out) must not cost the model list – then the levels are just unknown.
+    if (p.kind !== 'anthropic') return { models };
+    try {
+      return { models, efforts: await d.providers.efforts(p) };
+    } catch (err) {
+      return { models, efforts: null, warning: err instanceof Error ? err.message : String(err) };
+    }
   });
 
   // ── Release rules (AD-011) ───────────────────────────────────────────────────────
@@ -87,7 +102,7 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
     const rule = d.rules.set({ mountId: mount.id, target: req.body.target, path, level: req.body.level, cloud: req.body.cloud === true });
     const what = req.body.target === 'mount' ? 'ganze Quelle' : path;
     const label = { none: 'nicht freigegeben', read: 'nur lesen', suggest: 'freigegeben' }[rule.level];
-    d.audit(req, 'ai-rule-set', `KI-Freigabe ${mount.name}: ${what} → ${label}${rule.level === 'none' ? '' : rule.cloud ? ' (auch Cloud)' : ' (nur eigenes Netz)'}`, mount);
+    d.audit(req, 'ai-rule-set', `KI-Freigabe ${mount.name}: ${what} → ${label}${rule.level === 'none' ? '' : rule.cloud ? ' (auch Cloud)' : ' (nur private KI)'}`, mount);
     return rule;
   });
 
@@ -101,7 +116,7 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
   // ── Using the assistant ──────────────────────────────────────────────────────────
   server.get<{ Params: { mountId: string; '*': string } }>('/api/ai/status/:mountId/*', async (req) => {
     const mount = d.visibleMount(req, req.params.mountId);
-    return d.assistant.status(req, mount.id, req.params['*']);
+    return await d.assistant.status(req, mount.id, req.params['*']);
   });
 
   server.post<{ Body: { action: AiAction; mountId: string; path: string; text?: string; instruction?: string; language?: string; providerId?: string } }>('/api/ai/transform', async (req) =>

@@ -11,7 +11,7 @@ import type { MountManager } from '../mounts/manager.js';
 import { cleanRelPath, type Mount } from '../mounts/model.js';
 import { isEncryptedNote } from '../notes/encryption.js';
 import type { NoteService } from '../notes/service.js';
-import { AiProviderError, type ChatMessage, type ProviderConfig, type Providers } from './providers.js';
+import { AiProviderError, isPrivate, type ChatMessage, type ProviderConfig, type Providers } from './providers.js';
 import type { AiLevel, AiRules } from './rules.js';
 
 export class AiAccessError extends Error {}
@@ -50,6 +50,24 @@ export interface AssistantDeps {
   visibleMount(req: FastifyRequest, mountId: string): Mount;
   audit(req: FastifyRequest, action: string, message: string, detail: Record<string, unknown>): void;
 }
+
+/** Reason of `blocked()` when only the provider is wrong: the note is released for private AI only (AD-079). */
+export const PRIVATE_ONLY = 'nur für private KI freigegeben';
+/** Where an AI request is about: a note, or a folder/source (`dir`), for picking the private AI (AD-079). */
+export interface Place {
+  mountId: string;
+  path: string;
+  dir?: boolean;
+}
+/** The place of a question's scope: one note, a folder or a whole source; „all“/„general“ have none. */
+export const placeOf = (scope: Scope): Place | undefined =>
+  scope.kind === 'note'
+    ? { mountId: scope.mountId, path: scope.path }
+    : scope.kind === 'folder'
+      ? { mountId: scope.mountId, path: scope.path, dir: true }
+      : scope.kind === 'source'
+        ? { mountId: scope.mountId, path: '', dir: true }
+        : undefined;
 
 const MAX_NOTE_CHARS = 6000;
 const MAX_SOURCES = 6;
@@ -100,7 +118,7 @@ export function citedSources(answer: string, sources: Source[]): Source[] {
 }
 
 export function createAssistant(d: AssistantDeps) {
-  const personal = (req: FastifyRequest): { providerId?: string; instructions?: string } => {
+  const personal = (req: FastifyRequest): { providerId?: string; privateProviderId?: string; instructions?: string } => {
     const row = d.db.prepare("SELECT value_json FROM user_state WHERE user_id = ? AND key = 'ai'").get(req.user!.id) as { value_json: string } | undefined;
     try {
       return row ? (JSON.parse(row.value_json) ?? {}) : {};
@@ -116,6 +134,78 @@ export function createAssistant(d: AssistantDeps) {
     return p;
   };
 
+  /** The AI for private notes (AD-079): own choice → the admin's → the first with the tick; null = none. */
+  const privateProvider = (req: FastifyRequest): ProviderConfig | null => {
+    const own = personal(req).privateProviderId;
+    const mine = own ? d.providers.get(own) : null;
+    if (mine?.private) return mine;
+    const id = d.providers.privateDefaultId();
+    return id ? d.providers.get(id) : null;
+  };
+
+  /**
+   * The provider for a request about a place (AD-079): an explicit choice wins; otherwise the user's or the
+   * default provider – unless the place itself is released for private AI only and that provider is not
+   * private: then the private AI, whatever the default is.
+   */
+  const providerAt = (req: FastifyRequest, id: string | undefined, place?: Place): ProviderConfig => {
+    const base = providerFor(req, id);
+    if (!place || isPrivate(base)) return base;
+    // What the user may not read gets the usual refusal later – the rule there stays unsaid (diff check 0.2.14).
+    if (!d.canRead(req, place.mountId, cleanRelPath(place.path), !!place.dir)) return base;
+    const g = d.rules.grant(place.mountId, cleanRelPath(place.path), !!place.dir);
+    if (g.level === 'none' || g.cloud) return base;
+    const priv = id ? null : privateProvider(req);
+    if (priv) return priv;
+    // Named by the caller, or no private AI: a place released for private AI only is not worked on at all –
+    // not even its name goes to this provider (matrix 16.11.: the agent named the source in its task).
+    throw new AiAccessError(`${place.dir ? 'Dieser Bereich' : 'Diese Notiz'} ist ${PRIVATE_ONLY}.`);
+  };
+
+  /** Released, but for private AI only (AD-079): content from here makes a chat private. */
+  const privateGrant = (mountId: string, path: string, dir = false) => {
+    const g = d.rules.grant(mountId, cleanRelPath(path), dir);
+    return g.level !== 'none' && !g.cloud;
+  };
+
+  /**
+   * A chat that already carried content released for private AI only (its answers may quote it, and the
+   * history goes along with every further question) stays with private AI (AD-079): a non-private provider
+   * becomes the private one; asked for by name, or without a private AI, it is refused.
+   */
+  const keepChatPrivate = (req: FastifyRequest, p: ProviderConfig, chatId: string | undefined, explicit: boolean): ProviderConfig => {
+    if (!chatId || isPrivate(p)) return p;
+    const hit = d.db.prepare("SELECT 1 FROM ai_messages WHERE chat_id = ? AND json_extract(meta_json, '$.privateContent') = 1 LIMIT 1").get(chatId);
+    if (!hit && !legacyPrivate(chatId)) return p;
+    const priv = explicit ? null : privateProvider(req);
+    if (!priv) throw new AiAccessError(`Dieser Chat enthält Inhalte aus privaten Notizen und geht nur an eine private KI – für ${p.name} einen neuen Chat beginnen.`);
+    return priv;
+  };
+
+  /**
+   * Answers from before the mark (0.2.13 and older, diff check 0.2.14): a provider that is private now may have read notes
+   * released for the own network only, and its answer quotes them – such a chat counts as private, as does one whose
+   * sources are private now.
+   */
+  const legacyPrivate = (chatId: string): boolean => {
+    const rows = d.db
+      .prepare("SELECT sources_json, meta_json FROM ai_messages WHERE chat_id = ? AND role = 'assistant' AND json_extract(meta_json, '$.privateContent') IS NULL")
+      .all(chatId) as { sources_json: string; meta_json: string }[];
+    if (!rows.length) return false;
+    const privateNames = new Set(d.providers.list().filter(isPrivate).map((x) => x.name));
+    return rows.some((r) => {
+      const meta = JSON.parse(r.meta_json) as { provider?: string };
+      const sources = JSON.parse(r.sources_json) as Source[];
+      return (meta.provider !== undefined && privateNames.has(meta.provider)) || sources.some((x) => privateGrant(x.mountId, x.path));
+    });
+  };
+
+  /** For answers that left private notes out (AD-079): how many, and which AI may see them (for „Ask with …“). */
+  const privateHint = (req: FastifyRequest, p: ProviderConfig, count: number): { privateSkipped?: { count: number; provider: { id: string; name: string } } } => {
+    const other = count > 0 && !isPrivate(p) ? privateProvider(req) : null;
+    return other ? { privateSkipped: { count, provider: { id: other.id, name: other.name } } } : {};
+  };
+
   const rank = (l: AiLevel) => ['none', 'read', 'suggest'].indexOf(l);
 
   /** Why a note may not go to this provider, or null when it may. */
@@ -123,7 +213,7 @@ export function createAssistant(d: AssistantDeps) {
     if (!d.canRead(req, mountId, path)) return 'keine Berechtigung';
     const g = d.rules.grant(mountId, path);
     if (rank(g.level) < rank(need)) return need === 'suggest' && g.level === 'read' ? 'für die KI nur zum Lesen freigegeben' : 'nicht für die KI freigegeben';
-    if (p.cloud && !g.cloud) return 'nur für lokale KI-Anbieter freigegeben';
+    if (!isPrivate(p) && !g.cloud) return PRIVATE_ONLY;
     return null;
   };
 
@@ -162,7 +252,7 @@ export function createAssistant(d: AssistantDeps) {
     });
 
   /** Candidate notes for a question: ranked by full-text match (any word), inside the scope. */
-  const candidates = (req: FastifyRequest, p: ProviderConfig, scope: Scope, question: string): { mountId: string; path: string }[] => {
+  const candidates = (req: FastifyRequest, p: ProviderConfig, scope: Scope, question: string, skipped?: { private: number }): { mountId: string; path: string }[] => {
     const mounts = d.manager.list().filter((m) => !m.paused && d.rules.anyReleased(m.id));
     const inScope =
       scope.kind === 'all'
@@ -180,6 +270,11 @@ export function createAssistant(d: AssistantDeps) {
     if (words.length) {
       const match = words.map((w) => `"${w.replace(/"/g, '""')}"*`).join(' OR ');
       rows = d.db.prepare(`SELECT mount_id, entry_path FROM entries_fts WHERE entries_fts MATCH ? AND mount_id IN (${marks}) ORDER BY rank LIMIT 200`).all(match, ...inScope) as typeof rows;
+      // Matches only the private AI may see (AD-079): counted for the hint, never sent.
+      if (skipped)
+        skipped.private = rows.filter(
+          (r) => (!prefix || r.entry_path.startsWith(prefix)) && /\.md$/i.test(r.entry_path) && blocked(req, p, r.mount_id, r.entry_path, 'read') === PRIVATE_ONLY,
+        ).length;
     }
     let hits = rows.filter(ok);
     // Few or no matches (a vague question like „Was ist noch offen?“ in a folder): fill up with the
@@ -195,31 +290,37 @@ export function createAssistant(d: AssistantDeps) {
   return {
     personal,
     /** The same gates for the agent (AD-026): one place decides what the AI may see and do. */
-    core: { providerFor, blocked, noteFor, system, auditCall },
+    core: { providerFor, providerAt, privateProvider, privateHint, privateGrant, keepChatPrivate, blocked, noteFor, system, auditCall },
 
     /** Which AI level/cloud flag applies here, and whether the current provider may use it (for the UI). */
-    status(req: FastifyRequest, mountId: string, path: string) {
+    async status(req: FastifyRequest, mountId: string, path: string) {
       const providers = d.providers.publicList();
       let provider: ProviderConfig | null = null;
       try {
-        provider = providerFor(req);
+        provider = providerAt(req, undefined, { mountId, path: cleanRelPath(path), dir: !/\.md$/i.test(path) });
       } catch {
         provider = null;
       }
       const grant = d.rules.grant(mountId, cleanRelPath(path), !/\.md$/i.test(path));
+      let read = provider ? !blocked(req, provider, mountId, cleanRelPath(path), 'read') : false;
+      let suggest = provider ? !blocked(req, provider, mountId, cleanRelPath(path), 'suggest') : false;
+      // `ai: false` and encrypted notes: the request would be refused anyway – say so up front (matrix 16.11.).
+      const mount = /\.md$/i.test(path) && (read || suggest) ? d.manager.get(mountId) : undefined;
+      const note = mount ? await d.notes.read(mount, cleanRelPath(path)).catch(() => null) : null;
+      if (note && (note.frontmatter.ai === false || isEncryptedNote(note.raw))) read = suggest = false;
       return {
         configured: providers.length > 0,
         provider: provider ? { id: provider.id, name: provider.name, cloud: provider.cloud } : null,
         grant,
-        read: provider ? !blocked(req, provider, mountId, cleanRelPath(path), 'read') : false,
-        suggest: provider ? !blocked(req, provider, mountId, cleanRelPath(path), 'suggest') : false,
+        read,
+        suggest,
       };
     },
 
     /** Editor action on the selection (or the whole note): returns a suggestion, never writes. */
     async transform(req: FastifyRequest, input: { action: AiAction; mountId: string; path: string; text?: string; instruction?: string; language?: string; providerId?: string }) {
       if (!(ACTIONS as readonly string[]).includes(input.action)) throw new AiAccessError('Unbekannte Aktion');
-      const p = providerFor(req, input.providerId);
+      const p = providerAt(req, input.providerId, { mountId: input.mountId, path: input.path });
       const need: AiLevel = input.action === 'summarize' ? 'read' : 'suggest';
       const { mount, note } = await noteFor(req, p, input.mountId, input.path, need);
       const text = (input.text?.trim() ? input.text : note.raw).slice(0, 40_000);
@@ -246,11 +347,13 @@ export function createAssistant(d: AssistantDeps) {
     async ask(req: FastifyRequest, input: { question: string; scope: Scope; chatId?: string; providerId?: string }) {
       const question = String(input.question ?? '').trim().slice(0, 4000);
       if (!question) throw new AiAccessError('Frage fehlt');
-      const p = providerFor(req, input.providerId);
       const scope = input.scope ?? { kind: 'all' };
       if (!['note', 'folder', 'source', 'all', 'general'].includes(scope.kind)) throw new AiAccessError('Unbekannter Bezug');
+      let p = providerAt(req, input.providerId, placeOf(scope));
+      const skipped = { private: 0 };
 
       let chat = input.chatId ? (d.db.prepare('SELECT id FROM ai_chats WHERE id = ? AND user_id = ?').get(input.chatId, req.user!.id) as { id: string } | undefined) : undefined;
+      p = keepChatPrivate(req, p, chat?.id, !!input.providerId);
       const history: ChatMessage[] = chat
         ? (d.db.prepare('SELECT role, content FROM ai_messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 8').all(chat.id) as ChatMessage[]).reverse()
         : [];
@@ -260,7 +363,7 @@ export function createAssistant(d: AssistantDeps) {
         const { mount, note } = await noteFor(req, p, scope.mountId, scope.path, 'read');
         picked.push({ mountId: mount.id, path: note.path, title: note.title, hash: note.hash, text: note.raw });
       } else if (scope.kind !== 'general') {
-        for (const c of candidates(req, p, scope, `${question} ${history.filter((m) => m.role === 'user').map((m) => m.content).join(' ')}`)) {
+        for (const c of candidates(req, p, scope, `${question} ${history.filter((m) => m.role === 'user').map((m) => m.content).join(' ')}`, skipped)) {
           const mount = d.manager.get(c.mountId);
           if (!mount) continue;
           const note = await d.notes.read(mount, c.path).catch(() => null);
@@ -288,7 +391,17 @@ export function createAssistant(d: AssistantDeps) {
       } else d.db.prepare('UPDATE ai_chats SET updated_at = ? WHERE id = ?').run(t, chat.id);
       const add = d.db.prepare('INSERT INTO ai_messages (id, chat_id, role, content, sources_json, meta_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
       add.run(ulid(), chat.id, 'user', question, '[]', '{}', t);
-      add.run(ulid(), chat.id, 'assistant', res.text, JSON.stringify(sources), JSON.stringify({ provider: p.name, model: res.model }), new Date(Date.now() + 1).toISOString());
+      const hint = privateHint(req, p, skipped.private);
+      const privateContent = picked.some((n) => privateGrant(n.mountId, n.path));
+      add.run(
+        ulid(),
+        chat.id,
+        'assistant',
+        res.text,
+        JSON.stringify(sources),
+        JSON.stringify({ provider: p.name, model: res.model, ...hint, privateContent }),
+        new Date(Date.now() + 1).toISOString(),
+      );
       auditCall(
         req,
         p,
@@ -297,7 +410,7 @@ export function createAssistant(d: AssistantDeps) {
         picked.map((n) => ({ mountId: n.mountId, path: n.path, hash: n.hash })),
         { chatId: chat.id },
       );
-      return { chatId: chat.id, answer: res.text, sources, provider: p.name, model: res.model };
+      return { chatId: chat.id, answer: res.text, sources, provider: p.name, model: res.model, ...hint };
     },
 
     chats(req: FastifyRequest) {

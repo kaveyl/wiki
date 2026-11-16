@@ -20,7 +20,7 @@ type Filter = 'all' | 'released' | 'local' | 'blocked';
 const FILTERS: [Filter, string, string][] = [
   ['all', t('alle'), t('alle Regeln')],
   ['released', t('aktiv'), t('freigegeben')],
-  ['local', t('lokal'), t('nur für KI im eigenen Netz (auch die, die derzeit nicht wirken)')],
+  ['local', t('privat'), t('nur für private KI (auch die, die derzeit nicht wirken)')],
   ['blocked', t('gesperrt'), t('nicht freigegeben')],
 ];
 const matches = (f: Filter, st: RuleState) => f === 'all' || (f === 'local' ? st === 'local' || st === 'ineffective' : st === f);
