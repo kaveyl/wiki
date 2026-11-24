@@ -153,8 +153,8 @@ unter [Auf einem neuen Server](#auf-einem-neuen-server).
   sich mit einem Startpasswort vom Administrator anmeldet, muss zuerst ein eigenes festlegen; vorher geht nichts anderes.
 - Die Anmeldeseite folgt **hell/dunkel** der Einstellung des Geräts (bzw. Einstellungen →
   Darstellung); auf dem Handy steht das Formular unter einem Bildstreifen.
-- **Sprache und Farbschema** stehen oben rechts auf der Anmeldeseite und im Einrichtungsassistenten: **DE | EN**
-  schaltet die Sprache um, das Symbol daneben das Farbschema. So lässt sich Kaveyl Wiki auch komplett auf Englisch
+- **Sprache und Erscheinungsbild** stehen oben rechts auf der Anmeldeseite und im Einrichtungsassistenten: **DE | EN**
+  schaltet die Sprache um, das Symbol daneben Hell, Dunkel oder System. So lässt sich Kaveyl Wiki auch komplett auf Englisch
   einrichten. Ohne eigene Wahl richtet sich die Sprache nach dem Browser (deutscher Browser → Deutsch, sonst
   Englisch). Was du hier wählst, übernimmt dein Konto bei der Anmeldung.
 
@@ -176,12 +176,12 @@ Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Fing
   **Baum | Zuletzt | KI-Freigaben** (KI-Freigaben nur für Administratoren) und darunter die gewählte Ansicht – im Baum
   jede eingebundene **Quelle** (Repository oder Ordner) in einer gemeinsamen Karte. Ganz unten **Quelle einbinden**
   (Administratoren) und der **Papierkorb**, darunter der **Sync-Status** (grüner Punkt „Synchron · 21:20“), das
-  **Zahnrad** (Einstellungen), das **Farbschema-Symbol** und **Seitenleiste ausblenden**. Alle Menüs Eintrag für
+  **Zahnrad** (Einstellungen), das **Hell/Dunkel-Symbol** und **Seitenleiste ausblenden**. Alle Menüs Eintrag für
   Eintrag: [Menüs im Überblick](#menüs-im-überblick).
 - **Oben rechts** in der Tab-Leiste – immer sichtbar, auch bei eingeklappter Seitenleiste: **?** Hilfe und das
   **Konto** (Anfangsbuchstabe und Name: dein Name und deine E-Mail-Adresse, **Mein Konto …**, **Abmelden**). Ist die
-  Seitenleiste eingeklappt, stehen hier zusätzlich das **Zahnrad** und das **Farbschema-Symbol** (Sonne, Mond oder
-  Bildschirm). Jeder Klick auf das Farbschema-Symbol schaltet weiter: Hell → Dunkel → System (folgt dem Gerät); die
+  Seitenleiste eingeklappt, stehen hier zusätzlich das **Zahnrad** und das **Hell/Dunkel-Symbol** (Sonne, Mond oder
+  Bildschirm). Jeder Klick auf das Hell/Dunkel-Symbol schaltet weiter: Hell → Dunkel → System (folgt dem Gerät); die
   Wahl bleibt in diesem Browser gespeichert. Auf dem Handy stehen Hilfe und Einstellungen mit im Konto-Menü, damit die
   Tabs Platz haben.
 - **Oben:** Tabs der geöffneten Seiten. Die mittlere Maustaste öffnet in einem neuen Tab (unter Favoriten und
@@ -191,7 +191,9 @@ Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Fing
   Sind viele Tabs offen, werden sie schmaler (der Name bleibt lesbar); passen sie trotzdem nicht, lässt sich
   die Leiste mit dem Mausrad seitlich schieben, und rechts erscheint der Knopf **„Alle Tabs (n)“** (Zahl mit
   Pfeil): Er listet jeden offenen Tab – ein Klick wechselt dorthin, das × schließt ihn, die Liste bleibt dabei
-  offen. Der Tab einer Ordnerseite markiert im Baum den Ordner.
+  offen. Ein Klick auf einen Tab zeigt seine Seite im Baum: Die Ordner darüber klappen auf, und der Baum rollt nur so
+  weit, bis die Zeile zu sehen ist (die Ansichten „Zuletzt“ und „KI-Freigaben“ bleiben stehen). Der Tab einer
+  Ordnerseite markiert im Baum den Ordner.
 
 ![Angeheftete Tabs](handbuch/50-angeheftet.webp)
 
@@ -250,7 +252,7 @@ Seiten-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersch
 | Quelle einbinden, Papierkorb | wie beschriftet (Quelle einbinden nur für Administratoren) |
 | Sync-Status | Punkt und Wort: grün „Synchron · Uhrzeit“, lila = wartet auf Übertragung oder läuft, orange/rot = bitte ansehen, „Offline“ = keine Verbindung zum Server; ein Klick öffnet die [Sync-Übersicht](#speichern-übertragen-und-synchronisieren) |
 | Zahnrad | [Einstellungen](#einstellungen-im-überblick) |
-| Farbschema | Hell → Dunkel → System |
+| Hell/Dunkel | Hell → Dunkel → System |
 | Seitenleiste ausblenden | wie beschriftet; zurück mit dem Symbol links in der Tab-Leiste |
 
 ### Oben rechts
@@ -259,7 +261,7 @@ Seiten-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersch
 |---|---|
 | ? Hilfe | dieses Handbuch (auch **F1**) |
 | Konto (Anfangsbuchstabe und Name) | dein Name und deine E-Mail-Adresse; **Mein Konto …** öffnet Einstellungen → Konto; **Abmelden** (fragt vorher, wenn noch etwas ungespeichert ist). Auf dem Handy zusätzlich **Hilfe / Handbuch** und **Einstellungen** |
-| Zahnrad, Farbschema | nur bei eingeklappter Seitenleiste (sonst in ihrem Fuß) |
+| Zahnrad, Hell/Dunkel | nur bei eingeklappter Seitenleiste (sonst in ihrem Fuß) |
 
 ### Rechtsklick auf eine Quelle
 
@@ -2433,13 +2435,18 @@ im Protokoll). Aufbau der Lieferung: API-Referenz, „Ereignisse für Agenten“
 
 ### Darstellung
 
-Drei Karten:
+Zwei Karten:
 
-- **Erscheinungsbild:** **Hell / Dunkel / System** (folgt dem Gerät). Gilt für dieses Gerät – schneller geht es über
-  das Farbschema-Symbol unten in der Seitenleiste.
-- **Farbthema:** je ein Thema für hell (**Lavendel-Indigo** als Standard, **Amethyst**, **Pflaume**,
-  **Flieder-Schiefer**) und für dunkel (**Klassisch** – neutrales Anthrazit – als Standard, **Nacht-Indigo**,
-  **OLED-Schwarz**). Welches gerade gilt, entscheidet das Farbschema. Auch die Farbthemen gelten für diesen Browser.
+- **Erscheinungsbild:** oben **Wie das Gerät / Hell / Dunkel** – „Wie das Gerät“ folgt dem hellen oder dunklen Modus
+  des Betriebssystems und wechselt mit ihm. Schneller geht es über das Hell/Dunkel-Symbol unten in der Seitenleiste
+  (Hell → Dunkel → System). Darunter je eine Reihe **Farbschemata**: hell **Lavendel** (Standard), **Sand**,
+  **Salbei**, **Fjord**, **Heide**; dunkel **Klassisch** (Standard, neutrales Anthrazit), **Sand dunkel**, **Moos**,
+  **Graphit**, **Schwarz** (echtes Schwarz, schont OLED-Bildschirme). Jedes helle Schema steht über seinem dunklen
+  Gegenstück. Ein Klick wählt ein Schema sofort aus, mit der Tastatur geht es mit den Pfeiltasten. Ist **Hell** oder
+  **Dunkel** fest eingestellt, sind die Muster der anderen Reihe abgeschwächt, ihre Überschrift trägt den Zusatz „gilt im dunklen (hellen)
+  Erscheinungsbild“ – wählen kannst du dort trotzdem. Erscheinungsbild und Farbschemata gelten für diesen Browser.
+  Wer bis Version 0.2.16 ein anderes Farbthema gewählt hatte, bekommt das ähnlichste neue: Pflaume → Heide,
+  OLED-Schwarz → Schwarz, Amethyst und Flieder-Schiefer → Lavendel, Nacht-Indigo → Klassisch.
 - **Editor:** die **Werkzeugleiste** – **Schwebend unten** (Standard: eine Leiste am unteren Rand der Seite, darüber
   die Formatzeile mit Überschriften, fett, kursiv usw., die du mit **Aa** ein- und ausblendest) oder **Oben** (eine
   Leiste über der Seite; ist sie zu breit, etwa bei größerer Schrift, bricht sie in eine zweite Zeile um). Auf dem Handy steht sie immer oben. Dazu **Editorbreite** (Normal, Breit, Voll oder eigener

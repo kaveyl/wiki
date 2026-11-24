@@ -1061,7 +1061,7 @@ function IconField({ value, onChange }: { value: string; onChange: (icon: string
       <Popover.Root open={open} onOpenChange={setOpen}>
         <Popover.Trigger asChild>
           <button type="button" aria-label={t('Icon der Quelle')} className="flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-line-control text-xs text-fg-muted hover:border-fg-faint hover:bg-hover">
-            {current ? <IconGlyph icon={current} /> : t('automatisch')}
+            {current ? <IconGlyph icon={current} fallback={t('automatisch')} /> : t('automatisch')}
           </button>
         </Popover.Trigger>
         <Popover.Portal>

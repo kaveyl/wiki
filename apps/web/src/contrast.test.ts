@@ -2,6 +2,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { DARK_PALETTES, LIGHT_PALETTES } from './theme';
 
 const css = readFileSync(resolve(import.meta.dirname, 'styles.css'), 'utf8');
 
@@ -14,14 +15,12 @@ function block(selector: string): Record<string, string> {
 
 const root = block(':root');
 const dark = { ...root, ...block('.dark') };
-/** Every palette (Einstellungen → Darstellung → Farbthema) over the standard of its scheme (theme.ts). */
-const palettes = {
-  amethyst: { ...root, ...block(":root[data-palette='amethyst']") },
-  plum: { ...root, ...block(":root[data-palette='plum']") },
-  slate: { ...root, ...block(":root[data-palette='slate']") },
-  'dark indigo': { ...dark, ...block(".dark[data-palette='indigo']") },
-  'dark oled': { ...dark, ...block(".dark[data-palette='oled']") },
-};
+/** Every colour scheme (Einstellungen → Darstellung, AD-082) over the standard of its mode – taken from theme.ts, so a new
+ *  scheme cannot slip past these checks. */
+const palettes = Object.fromEntries([
+  ...LIGHT_PALETTES.slice(1).map((p) => [p, { ...root, ...block(`:root[data-palette='${p}']`) }]),
+  ...DARK_PALETTES.slice(1).map((p) => [`dark ${p}`, { ...dark, ...block(`.dark[data-palette='${p}']`) }]),
+]) as Record<string, Record<string, string>>;
 const schemes = {
   light: root,
   dark,
@@ -173,6 +172,65 @@ describe('colour tokens (styles.css)', () => {
           expect(contrast(tokens['fg-muted'], over(tokens[surface], tokens[bg]))).toBeGreaterThanOrEqual(4.5);
         });
       }
+    }
+  }
+
+  // The pairs Kaveyl Notes checks for its schemes (styles.test.ts there, AD-082), in the names of this app: Notes'
+  // bg = --bg-subtle, canvas = --canvas, sheet = --bg, subtle/fill = --bg-muted, raised and dock = --bg-raised.
+  const NOTES_PAIRS: [fg: string, bgs: string[], min: number][] = [
+    ['fg', ['bg-subtle', 'canvas', 'bg', 'bg-muted', 'bg-raised', 'accent-soft'], 4.5],
+    ['fg-muted', ['bg-subtle', 'canvas', 'bg', 'bg-muted', 'bg-raised', 'accent-soft'], 4.5],
+    ['accent', ['bg-subtle', 'canvas', 'bg', 'bg-muted', 'bg-raised', 'accent-soft'], 4.5],
+    ['danger', ['bg-subtle', 'bg', 'bg-raised'], 4.5],
+    ['border-control', ['bg-subtle', 'canvas', 'bg', 'bg-raised'], 3],
+    ['ok', ['bg', 'canvas', 'bg-muted'], 3],
+    ['warn', ['bg-muted', 'bg', 'bg-raised'], 3],
+  ];
+  for (const [name, tokens] of Object.entries(schemes) as [Scheme, Record<string, string>][]) {
+    if (!inApp(name)) continue;
+    for (const [fg, bgs, min] of NOTES_PAIRS) {
+      for (const bg of bgs) {
+        it(`${name}: --${fg} on --${bg} reaches ${min}:1 (pairs of Kaveyl Notes)`, () => {
+          // Translucent fills (accent-soft, code-bg in dark) lie on the sheet.
+          expect(contrast(tokens[fg], over(tokens[bg], tokens['bg']))).toBeGreaterThanOrEqual(min);
+        });
+      }
+    }
+    it(`${name}: --on-cta on --accent-cta reaches 4.5:1 (filled buttons)`, () => {
+      expect(contrast(tokens['on-cta'], tokens['accent-cta'])).toBeGreaterThanOrEqual(4.5);
+    });
+    it(`${name}: --accent-fg on --accent reaches 4.5:1`, () => {
+      expect(contrast(tokens['accent-fg'], tokens['accent'])).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+
+  // Callouts in the page (Hinweisboxen): the title in the callout colour and the text on a 7 % tint of it, in every
+  // scheme (AD-082). NOTE takes the accent of the scheme, the others a fixed colour for light and one for dark.
+  const callout = (kind: string, isDark: boolean) =>
+    css.match(new RegExp((isDark ? '\\.dark ' : '\\n') + "\\.prose-note \\.callout\\[data-callout='" + kind + "'\\] \\{ --c: (#[0-9a-f]{6}); \\}"))?.[1];
+  const tint = (c: string, base: string, share: number) =>
+    '#' + [1, 3, 5].map((i) => Math.round(parseInt(c.slice(i, i + 2), 16) * share + parseInt(base.slice(i, i + 2), 16) * (1 - share)).toString(16).padStart(2, '0')).join('');
+  for (const [name, tokens] of Object.entries(schemes) as [Scheme, Record<string, string>][]) {
+    if (!inApp(name)) continue;
+    const isDark = tokens['bg'] === undefined ? false : luminance(tokens['bg']) < 0.2;
+    for (const kind of ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION']) {
+      it(`${name}: callout ${kind} title and text reach 4.5:1 on the page`, () => {
+        const c = kind === 'NOTE' ? tokens['accent'] : callout(kind, isDark);
+        expect(c, kind).toMatch(/^#[0-9a-f]{6}$/);
+        const ground = tint(c!, tokens['bg']!, 0.07);
+        expect(contrast(c, ground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrast(tokens['fg'], ground)).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+
+  // Status pills and menu rows: --ok/--warn/--danger as text on their own soft fill over the sheet (AD-082).
+  for (const [name, tokens] of Object.entries(schemes) as [Scheme, Record<string, string>][]) {
+    if (!inApp(name)) continue;
+    for (const kind of ['ok', 'warn', 'danger']) {
+      it(`${name}: text --${kind} on --${kind}-soft reaches 4.5:1`, () => {
+        expect(contrast(tokens[kind], over(tokens[`${kind}-soft`], tokens['bg']))).toBeGreaterThanOrEqual(4.5);
+      });
     }
   }
 

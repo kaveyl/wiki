@@ -47,7 +47,7 @@ export function AuthLayout({ children, footer }: { children: ReactNode; footer?:
         data-testid="auth-card"
         className="auth relative flex w-full flex-1 flex-col overflow-hidden bg-[var(--auth-card)] sm:max-w-[420px] sm:flex-none sm:rounded-2xl sm:border sm:border-line sm:shadow-[var(--auth-shadow)] md:min-h-[440px] md:max-w-[680px] md:flex-row"
       >
-        {/* Language and colour scheme before signing in – the whole setup can run in another language.
+        {/* Language and appearance (light/dark) before signing in – the whole setup can run in another language.
             Over the picture on phones; on wide screens md:pt-14 on <main> keeps the logo row below it (design-012). */}
         <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-lg bg-[var(--auth-card)] p-1 shadow-sm">
           <LanguageSwitch />

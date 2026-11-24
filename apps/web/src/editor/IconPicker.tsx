@@ -1,11 +1,11 @@
 // Icon picker: Lucide symbols (common set, by category, or searched), emoji, and uploaded
 // custom icons. The value format is described in icons.tsx.
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Upload, X } from 'lucide-react';
 import { api, errorText } from '../api';
 import { cx, Spinner, useTabs, FormError } from '../ui';
-import { customIconUrl, LUCIDE_ICONS, useAllIcons } from './icons';
+import { customIconUrl, isEmoji, LUCIDE_ICONS, useAllIcons } from './icons';
 import { t, tn } from '../i18n';
 
 const EMOJI = ['📘', '📗', '📕', '📙', '📒', '📝', '📌', '📎', '🗂️', '📁', '🗃️', '📊', '📈', '🗓️', '✅', '⭐', '💡', '🔥', '🚀', '🎯', '🧠', '🛠️', '⚙️', '🔒', '🔑', '🌍', '🏠', '💼', '💰', '🧪', '🐛', '📦', '🖥️', '☁️', '🐳', '🤖', '❤️', '🎵', '📷', '✈️'];
@@ -121,6 +121,11 @@ function LucideTab({ value, onPick }: { value: string | null; onPick: (icon: str
 
 function EmojiTab({ value, onPick }: { value: string | null; onPick: (icon: string) => void }) {
   const [own, setOwn] = useState('');
+  const hint = useId();
+  // Only one emoji is an icon; anything else gets a hint instead of being set (owner find 24.11.).
+  const ok = isEmoji(own);
+  const wrong = own.trim() !== '' && !ok;
+  const set = () => ok && onPick(`emoji:${own.trim()}`);
   return (
     <div className="space-y-2">
       <Grid>
@@ -134,15 +139,22 @@ function EmojiTab({ value, onPick }: { value: string | null; onPick: (icon: stri
         <input
           value={own}
           onChange={(e) => setOwn(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && own.trim() && onPick(`emoji:${own.trim()}`)}
+          onKeyDown={(e) => e.key === 'Enter' && set()}
           placeholder={t('Eigenes Emoji …')}
           aria-label={t('Eigenes Emoji')}
+          aria-invalid={wrong}
+          aria-describedby={wrong ? hint : undefined}
           className="h-7 min-w-0 flex-1 rounded border border-line bg-bg px-2 text-sm"
         />
-        <button className="h-7 rounded px-2 text-xs text-fg-muted hover:bg-hover" disabled={!own.trim()} onClick={() => onPick(`emoji:${own.trim()}`)}>
+        <button className="h-7 rounded px-2 text-xs text-fg-muted hover:bg-hover" disabled={!ok} onClick={set}>
           {t('Setzen')}
         </button>
       </div>
+      {wrong && (
+        <p id={hint} role="alert" className="text-xs text-danger">
+          {t('Bitte genau ein Emoji eingeben (z. B. über die Emoji-Tastatur des Geräts).')}
+        </p>
+      )}
     </div>
   );
 }

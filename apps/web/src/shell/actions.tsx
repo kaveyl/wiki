@@ -176,7 +176,7 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
                 title={icon ? t('Icon ändern') : t('Icon wählen (optional)')}
                 className="mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-control text-fg-muted hover:border-fg-faint hover:bg-hover"
               >
-                {icon ? <IconGlyph icon={icon} className="h-4 w-4" /> : <Smile className="h-4 w-4 text-fg-faint" />}
+                {icon ? <IconGlyph icon={icon} className="h-4 w-4" fallback={<Smile className="h-4 w-4 text-fg-faint" />} /> : <Smile className="h-4 w-4 text-fg-faint" />}
               </button>
             </Popover.Trigger>
             <Popover.Portal>

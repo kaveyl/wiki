@@ -1,4 +1,4 @@
-// Interface languages and the colour scheme switch (AD-046). The rest of the suite runs in German (locale de-DE);
+// Interface languages and the light/dark switch „Erscheinungsbild wechseln“ (AD-046). The rest of the suite runs in German (locale de-DE);
 // here browsers ask for English. Runs after the other specs in the seeded workspace (admin + "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { openSettingsPage } from './settings-nav';
@@ -107,12 +107,12 @@ test('the account language follows to another browser; Einstellungen → Darstel
   await ctx.close();
 });
 
-test('colour scheme switch: light → dark → system, kept after a reload', async ({ browser }) => {
+test('appearance switch: light → dark → system, kept after a reload', async ({ browser }) => {
   const ctx = await browser.newContext({ locale: 'de-DE', colorScheme: 'light' });
   const page = await ctx.newPage();
   await page.goto('/');
   // On the sign-in page too.
-  const onLogin = page.getByRole('button', { name: 'Farbschema wechseln' });
+  const onLogin = page.getByRole('button', { name: 'Erscheinungsbild wechseln' });
   await expect(onLogin).toHaveAttribute('data-theme-state', 'system');
   await page.getByLabel('E-Mail', { exact: true }).fill(ADMIN.email);
   await page.getByLabel('Passwort', { exact: true }).fill(ADMIN.password);
@@ -120,7 +120,7 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await expect(page.getByRole('navigation', { name: 'Quellen' }).first()).toBeVisible();
 
   // In the foot of the sidebar (redesign 23.11.).
-  const toggle = page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' });
+  const toggle = page.locator('aside').getByRole('button', { name: 'Erscheinungsbild wechseln' });
   await expect(toggle).toHaveAttribute('data-theme-state', 'system');
   await toggle.click();
   await expect(toggle).toHaveAttribute('data-theme-state', 'light');
@@ -129,7 +129,7 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await expect(toggle).toHaveAttribute('data-theme-state', 'dark');
   await expect(html(page)).toHaveClass(/\bdark\b/);
   await page.reload();
-  await expect(page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'dark');
+  await expect(page.locator('aside').getByRole('button', { name: 'Erscheinungsbild wechseln' })).toHaveAttribute('data-theme-state', 'dark');
   await expect(html(page)).toHaveClass(/\bdark\b/);
   // Settings → Darstellung shows the same state (one shared store).
   await page.getByRole('button', { name: 'Einstellungen' }).first().click();
@@ -137,8 +137,8 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await settings.getByRole('button', { name: 'Darstellung' }).first().click();
   await expect(settings.getByRole('button', { name: 'Dunkel', exact: true })).toHaveClass(/border-accent/);
   await page.keyboard.press('Escape');
-  await page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' }).click();
-  await expect(page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'system');
+  await page.locator('aside').getByRole('button', { name: 'Erscheinungsbild wechseln' }).click();
+  await expect(page.locator('aside').getByRole('button', { name: 'Erscheinungsbild wechseln' })).toHaveAttribute('data-theme-state', 'system');
   await expect(html(page)).not.toHaveClass(/\bdark\b/);
   await ctx.close();
 });

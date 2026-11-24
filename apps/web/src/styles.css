@@ -52,77 +52,143 @@
   --dock-shadow: 0 2px 6px rgba(30, 24, 72, 0.06), 0 12px 28px -10px rgba(30, 24, 72, 0.22), 0 0 0 1px rgba(91, 70, 229, 0.08);
 }
 
-/* Warm amethyst. */
-:root[data-palette='amethyst'] {
-  --canvas: #f3eefb;
-  --bg-subtle: #f9f6fd;
-  --bg-muted: #f3eefb;
-  --card: #f6f2fc;
-  --bg-hover: rgba(124, 58, 237, 0.065);
-  --bg-active: rgba(124, 58, 237, 0.1);
-  --fg: #221a35;
-  --fg-muted: #695d82;
-  --fg-faint: #72668a;
-  --icon-faint: #9184ab;
-  --border: #e5dcf4;
-  --border-soft: #eee7f8;
-  --border-control: #8b839c;
-  --accent: #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-cta: #7c3aed;
-  --accent-soft: #ede4ff;
-  --accent-tint: #f5f0ff;
-  --code-bg: rgba(124, 58, 237, 0.08);
+/* The schemes of Kaveyl Notes 0.5.17 (values only, own token names; AD-082). Hover, shadows and the scrim come from
+   the text colour, the quiet fills from the ground – as there. */
+/* Sand: sand and ochre, warm umber. */
+:root[data-palette='sand'] {
+  --canvas: #f3efe6;
+  --card: #faf8f3;
+  --bg: #ffffff;
+  --bg-subtle: #faf8f3;
+  --bg-muted: #f3efe6;
+  --bg-raised: #ffffff;
+  --bg-hover: rgba(80, 60, 20, 0.06);
+  /* 9 % instead of 10 %: --fg-muted keeps 4.5:1 on a chosen row over the window ground (AD-048). */
+  --bg-active: rgba(138, 98, 10, 0.09);
+  --fg: #26231d;
+  --fg-muted: #6b6457;
+  --fg-faint: #6b6457;
+  --icon-faint: #8c8370;
+  --border: #e7e1d4;
+  --border-soft: #f1ede5;
+  --border-control: #8c8370;
+  --accent: #8a620a;
+  --accent-hover: #755308;
+  --accent-fg: #ffffff;
+  --accent-cta: #8a620a;
+  --on-cta: #ffffff;
+  --accent-soft: #f6ecd3;
+  --accent-tint: #faf6e9;
+  --danger: #b42318;
+  --ok: #2f7a50;
+  --warn: #c2410c;
+  --code-bg: #f3efe6;
+  --scrim: rgba(38, 35, 29, 0.34);
+  --sheet-shadow: 0 1px 2px rgba(60, 45, 15, 0.06), 0 6px 16px -8px rgba(60, 45, 15, 0.18);
+  --shadow: 0 18px 44px -16px rgba(50, 35, 10, 0.34), 0 0 0 1px rgba(60, 45, 15, 0.07);
+  --dock-shadow: 0 18px 44px -16px rgba(50, 35, 10, 0.34), 0 0 0 1px rgba(60, 45, 15, 0.07);
 }
 
-/* Plum / berry. */
-:root[data-palette='plum'] {
-  --canvas: #f6eef5;
-  --bg-subtle: #fbf6fa;
-  --bg-muted: #f6eef5;
-  --card: #f8f1f7;
-  --bg-hover: rgba(134, 25, 143, 0.065);
-  --bg-active: rgba(134, 25, 143, 0.09);
-  --fg: #29192a;
-  --fg-muted: #725b74;
-  --fg-faint: #7a647b;
-  --icon-faint: #99819b;
-  --border: #e9d8e8;
-  --border-soft: #f1e5f0;
-  --border-control: #958494;
-  --accent: #86198f;
-  --accent-hover: #701a75;
-  --accent-cta: #86198f;
-  --accent-soft: #f3dff4;
-  --accent-tint: #faf0fa;
+/* Salbei (sage): green. */
+:root[data-palette='sage'] {
+  --canvas: #e6ebe3;
+  --card: #f4f6f1;
+  --bg: #fbfcf9;
+  --bg-subtle: #f4f6f1;
+  --bg-muted: #e6ebe3;
+  --bg-raised: #fbfcf9;
+  --bg-hover: rgba(30, 42, 32, 0.06);
+  --bg-active: rgba(61, 107, 63, 0.1);
+  --fg: #1e2a20;
+  --fg-muted: #56645a;
+  --fg-faint: #56645a;
+  --icon-faint: #7a867d;
+  --border: #d6dfd2;
+  --border-soft: #e5ebe2;
+  --border-control: #7a867d;
+  --accent: #3d6b3f;
+  --accent-hover: #345b36;
+  --accent-fg: #ffffff;
+  --accent-cta: #3d6b3f;
+  --on-cta: #ffffff;
+  --accent-soft: #dfeadb;
+  --accent-tint: #edf3ea;
+  --danger: #b42318;
+  --ok: #2f7a50;
   --warn: #c2410c;
-  --ok: #1c7c52;
-  --code-bg: rgba(134, 25, 143, 0.07);
+  --code-bg: #e6ebe3;
+  --scrim: rgba(30, 42, 32, 0.34);
+  --sheet-shadow: 0 1px 2px rgba(30, 42, 32, 0.06), 0 6px 16px -8px rgba(30, 42, 32, 0.18);
+  --shadow: 0 18px 44px -16px rgba(30, 42, 32, 0.3), 0 0 0 1px rgba(30, 42, 32, 0.07);
+  --dock-shadow: 0 18px 44px -16px rgba(30, 42, 32, 0.3), 0 0 0 1px rgba(30, 42, 32, 0.07);
 }
 
-/* Lilac slate: quiet and easy on the eyes. */
-:root[data-palette='slate'] {
-  --canvas: #f1f0f6;
-  --bg-subtle: #f8f7fb;
-  --bg-muted: #f1f0f6;
-  --card: #f4f3f8;
-  --bg-hover: rgba(95, 82, 153, 0.065);
-  --bg-active: rgba(95, 82, 153, 0.1);
-  --fg: #22202e;
-  --fg-muted: #656178;
-  --fg-faint: #6e6a7e;
-  --icon-faint: #8e8aa1;
-  --border: #e2e0ec;
-  --border-soft: #eceaf3;
-  --border-control: #8a8895;
-  --accent: #5f5299;
-  --accent-hover: #4e4282;
-  --accent-cta: #5f5299;
-  --accent-soft: #e9e6f3;
-  --accent-tint: #f3f1f9;
+/* Fjord: blue grey, petrol. */
+:root[data-palette='fjord'] {
+  --canvas: #e3e9ef;
+  --card: #f2f5f8;
+  --bg: #fbfcfd;
+  --bg-subtle: #f2f5f8;
+  --bg-muted: #e3e9ef;
+  --bg-raised: #fbfcfd;
+  --bg-hover: rgba(23, 34, 46, 0.06);
+  --bg-active: rgba(31, 106, 138, 0.1);
+  --fg: #17222e;
+  --fg-muted: #4f5f70;
+  --fg-faint: #4f5f70;
+  --icon-faint: #74828f;
+  --border: #d3dde7;
+  --border-soft: #e3e9f0;
+  --border-control: #74828f;
+  --accent: #1f6a8a;
+  --accent-hover: #1a5a75;
+  --accent-fg: #ffffff;
+  --accent-cta: #1f6a8a;
+  --on-cta: #ffffff;
+  --accent-soft: #dcecf3;
+  --accent-tint: #ecf4f8;
+  --danger: #b42318;
+  --ok: #2f7a50;
   --warn: #c2410c;
-  --ok: #1c7c52;
-  --code-bg: rgba(95, 82, 153, 0.08);
+  --code-bg: #e3e9ef;
+  --scrim: rgba(23, 34, 46, 0.34);
+  --sheet-shadow: 0 1px 2px rgba(23, 34, 46, 0.06), 0 6px 16px -8px rgba(23, 34, 46, 0.18);
+  --shadow: 0 18px 44px -16px rgba(23, 34, 46, 0.3), 0 0 0 1px rgba(23, 34, 46, 0.07);
+  --dock-shadow: 0 18px 44px -16px rgba(23, 34, 46, 0.3), 0 0 0 1px rgba(23, 34, 46, 0.07);
+}
+
+/* Heide (heather): violet. */
+:root[data-palette='heather'] {
+  --canvas: #ece6ee;
+  --card: #f7f3f8;
+  --bg: #fdfbfd;
+  --bg-subtle: #f7f3f8;
+  --bg-muted: #ece6ee;
+  --bg-raised: #fdfbfd;
+  --bg-hover: rgba(38, 29, 42, 0.06);
+  --bg-active: rgba(122, 59, 120, 0.1);
+  --fg: #261d2a;
+  --fg-muted: #645869;
+  --fg-faint: #645869;
+  --icon-faint: #867c8a;
+  --border: #e2d9e5;
+  --border-soft: #ede7ef;
+  --border-control: #867c8a;
+  --accent: #7a3b78;
+  --accent-hover: #683266;
+  --accent-fg: #ffffff;
+  --accent-cta: #7a3b78;
+  --on-cta: #ffffff;
+  --accent-soft: #f1e1f0;
+  --accent-tint: #f7eef6;
+  --danger: #b42318;
+  --ok: #2f7a50;
+  --warn: #c2410c;
+  --code-bg: #ece6ee;
+  --scrim: rgba(38, 29, 42, 0.34);
+  --sheet-shadow: 0 1px 2px rgba(38, 29, 42, 0.06), 0 6px 16px -8px rgba(38, 29, 42, 0.18);
+  --shadow: 0 18px 44px -16px rgba(38, 29, 42, 0.3), 0 0 0 1px rgba(38, 29, 42, 0.07);
+  --dock-shadow: 0 18px 44px -16px rgba(38, 29, 42, 0.3), 0 0 0 1px rgba(38, 29, 42, 0.07);
 }
 
 /* Dark, standard „Klassisch“: neutral anthracite with lavender accents. Buttons are filled with --accent-cta
@@ -143,7 +209,8 @@
   --icon-faint: #6f6f7b;
   --border: #2e2e36;
   --border-soft: #26262d;
-  --border-control: #6b6b72;
+  /* 3:1 also on --bg-raised (dock, toasts), the pairs of Kaveyl Notes (AD-082). */
+  --border-control: #75757c;
   --accent: #9b8cff;
   --accent-hover: #ada0ff;
   --accent-fg: #0b0b12;
@@ -165,45 +232,140 @@
   --dock-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 36px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* Night indigo: a coloured dark theme. */
-.dark[data-palette='indigo'] {
-  --canvas: #0f0e1d;
-  --bg: #1b1932;
-  --bg-subtle: #151428;
-  --bg-muted: #232040;
-  --bg-raised: #28254a;
-  --card: #211e3c;
-  --bg-active: rgba(139, 125, 255, 0.16);
-  --fg: #eeecf9;
-  --fg-muted: #a49fc2;
-  --fg-faint: #8e89aa;
-  --icon-faint: #767096;
-  --border: #2d294f;
-  --border-soft: #252242;
-  --border-control: #6b6785;
-  --accent: #8b7dff;
-  --accent-hover: #9d91ff;
-  --accent-soft: rgba(139, 125, 255, 0.18);
-  --accent-tint: rgba(139, 125, 255, 0.1);
+/* Sand dunkel (dark sand). */
+.dark[data-palette='sand-dark'] {
+  --canvas: #100e0b;
+  --card: #15130f;
+  --bg: #1d1a15;
+  --bg-subtle: #15130f;
+  --bg-muted: #2f2a21;
+  --bg-raised: #24201a;
+  --bg-hover: rgba(255, 240, 210, 0.06);
+  --bg-active: rgba(226, 182, 92, 0.14);
+  --fg: #f1ebde;
+  --fg-muted: #a9a08f;
+  --fg-faint: #a9a08f;
+  --icon-faint: #7a7262;
+  --border: #342f25;
+  --border-soft: #2b271f;
+  --border-control: #7a7262;
+  --accent: #e2b65c;
+  --accent-hover: #e6c174;
+  --accent-fg: #241a06;
+  --accent-cta: #e2b65c;
+  --on-cta: #241a06;
+  --accent-soft: #3a311f;
+  --accent-tint: #2e281b;
+  --danger: #f97066;
+  --ok: #6fcf97;
+  --warn: #fb923c;
+  --code-bg: #25211a;
+  --scrim: rgba(5, 4, 2, 0.55);
+  --sheet-shadow: 0 0 0 1px rgba(255, 240, 210, 0.06);
+  --shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 240, 210, 0.09);
+  --dock-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 240, 210, 0.09);
 }
 
-/* OLED black. */
-.dark[data-palette='oled'] {
+/* Moos (moss): green. */
+.dark[data-palette='moss'] {
+  --canvas: #0c110d;
+  --card: #111712;
+  --bg: #182019;
+  --bg-subtle: #111712;
+  --bg-muted: #29312a;
+  --bg-raised: #1f2720;
+  --bg-hover: rgba(229, 237, 228, 0.06);
+  --bg-active: rgba(155, 208, 154, 0.14);
+  --fg: #e5ede4;
+  --fg-muted: #9cab9b;
+  --fg-faint: #9cab9b;
+  --icon-faint: #707c6f;
+  --border: #283328;
+  --border-soft: #222b22;
+  --border-control: #707c6f;
+  --accent: #9bd09a;
+  --accent-hover: #aad7a9;
+  --accent-fg: #0f2210;
+  --accent-cta: #9bd09a;
+  --on-cta: #0f2210;
+  --accent-soft: #263a27;
+  --accent-tint: #203021;
+  --danger: #f97066;
+  --ok: #6fcf97;
+  --warn: #fb923c;
+  --code-bg: #202821;
+  --scrim: rgba(5, 7, 5, 0.55);
+  --sheet-shadow: 0 0 0 1px rgba(229, 237, 228, 0.06);
+  --shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(229, 237, 228, 0.09);
+  --dock-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(229, 237, 228, 0.09);
+}
+
+/* Graphit (graphite): neutral grey, turquoise. */
+.dark[data-palette='graphite'] {
+  --canvas: #121314;
+  --card: #17181a;
+  --bg: #1f2023;
+  --bg-subtle: #17181a;
+  --bg-muted: #303134;
+  --bg-raised: #26272a;
+  --bg-hover: rgba(236, 236, 238, 0.06);
+  --bg-active: rgba(127, 209, 199, 0.14);
+  --fg: #ececee;
+  --fg-muted: #a3a5ab;
+  --fg-faint: #a3a5ab;
+  --icon-faint: #76787d;
+  --border: #303236;
+  --border-soft: #292b2e;
+  --border-control: #76787d;
+  --accent: #7fd1c7;
+  --accent-hover: #92d8cf;
+  --accent-fg: #0b2522;
+  --accent-cta: #7fd1c7;
+  --on-cta: #0b2522;
+  --accent-soft: #213634;
+  --accent-tint: #202d2d;
+  --danger: #f97066;
+  --ok: #6fcf97;
+  --warn: #fb923c;
+  --code-bg: #27282b;
+  --scrim: rgba(7, 8, 8, 0.55);
+  --sheet-shadow: 0 0 0 1px rgba(236, 236, 238, 0.06);
+  --shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(236, 236, 238, 0.09);
+  --dock-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(236, 236, 238, 0.09);
+}
+
+/* Schwarz (black): true black for OLED. */
+.dark[data-palette='black'] {
   --canvas: #000000;
-  --bg: #141418;
-  --bg-subtle: #0c0c0f;
-  --bg-muted: #1d1d23;
-  --bg-raised: #222229;
-  --card: #0c0c0f;
-  --bg-active: rgba(165, 180, 252, 0.14);
-  --fg-faint: #868690;
-  --border: #26262e;
-  --border-soft: #1d1d24;
-  --border-control: #66666c;
-  --accent: #a5b4fc;
-  --accent-hover: #b8c4fd;
-  --accent-soft: rgba(165, 180, 252, 0.16);
-  --accent-tint: rgba(165, 180, 252, 0.1);
+  --card: #000000;
+  --bg: #0d0d0d;
+  --bg-subtle: #000000;
+  --bg-muted: #202020;
+  --bg-raised: #151414;
+  --bg-hover: rgba(242, 239, 232, 0.06);
+  --bg-active: rgba(215, 166, 212, 0.14);
+  --fg: #f2efe8;
+  --fg-muted: #a8a296;
+  --fg-faint: #a8a296;
+  --icon-faint: #726e66;
+  --border: #262421;
+  --border-soft: #1c1b19;
+  --border-control: #726e66;
+  --accent: #d7a6d4;
+  --accent-hover: #ddb3da;
+  --accent-fg: #2a0f28;
+  --accent-cta: #d7a6d4;
+  --on-cta: #2a0f28;
+  --accent-soft: #2a1a29;
+  --accent-tint: #1e151e;
+  --danger: #f97066;
+  --ok: #6fcf97;
+  --warn: #fb923c;
+  --code-bg: #161615;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --sheet-shadow: 0 0 0 1px rgba(242, 239, 232, 0.06);
+  --shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(242, 239, 232, 0.09);
+  --dock-shadow: 0 22px 50px -18px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(242, 239, 232, 0.09);
 }
 
 /* Sign-in pages (login, setup, reset, invitation): the brand look of the login design. The
@@ -508,7 +670,7 @@ mark.hit {
 .prose-note a[href*='/assets/']::before {
   --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E");
 }
-/* GitHub alerts (> [!NOTE] …) — same colours as GitHub/Gitea. */
+/* GitHub alerts (> [!NOTE] …) – NOTE in the accent of the scheme, the others close to GitHub's colours. */
 .prose-note .callout {
   --c: var(--accent);
   border-left: 3px solid var(--c);
@@ -525,11 +687,12 @@ mark.hit {
   color: var(--c);
 }
 .prose-note .callout[data-callout='NOTE']::before { content: var(--callout-note, 'ℹ︎  Hinweis'); }
-.prose-note .callout[data-callout='TIP'] { --c: #1a7f37; }
+/* A little darker than GitHub's: the title keeps 4.5:1 on the tint in every light scheme (contrast.test.ts). */
+.prose-note .callout[data-callout='TIP'] { --c: #197c36; }
 .prose-note .callout[data-callout='TIP']::before { content: var(--callout-tip, '💡 Tipp'); }
-.prose-note .callout[data-callout='IMPORTANT'] { --c: #8250df; }
+.prose-note .callout[data-callout='IMPORTANT'] { --c: #7f4edb; }
 .prose-note .callout[data-callout='IMPORTANT']::before { content: var(--callout-important, '❗ Wichtig'); }
-.prose-note .callout[data-callout='WARNING'] { --c: #9a6700; }
+.prose-note .callout[data-callout='WARNING'] { --c: #946300; }
 .prose-note .callout[data-callout='WARNING']::before { content: var(--callout-warning, '⚠︎  Warnung'); }
 .prose-note .callout[data-callout='CAUTION'] { --c: #cf222e; }
 .prose-note .callout[data-callout='CAUTION']::before { content: var(--callout-caution, '⛔ Vorsicht'); }
@@ -997,3 +1160,9 @@ mark.hit {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Einstellungen → Darstellung: the row of colour schemes not in effect right now fades its swatches (like Kaveyl
+   Notes); the names stay as they are (4.5:1, AD-048). */
+.swatch-row .swatch { transition: opacity 0.15s; }
+.swatch-row.is-idle .swatch { opacity: 0.7; }
+.swatch-row.is-idle:hover .swatch, .swatch-row.is-idle:focus-within .swatch { opacity: 1; }

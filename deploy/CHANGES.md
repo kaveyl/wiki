@@ -3,6 +3,34 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.17 (Beta) – 2026-11-25
+
+Colour schemes like Kaveyl Notes – five light and five dark – and a tree that follows the tabs.
+
+### Upgrade notes
+- A colour theme chosen up to 0.2.16 moves to the closest new scheme by itself (see below). No database change.
+
+### Changed
+- **Colour schemes like Kaveyl Notes.** Settings → Appearance now offers five light schemes – **Lavender** (standard),
+  **Sand**, **Sage**, **Fjord**, **Heather** – and five dark ones – **Classic** (standard), **Dark sand**, **Moss**,
+  **Graphite**, **Black** – as two rows of round swatches; each light scheme stands above its dark counterpart. The row
+  that does not apply right now (with Light or Dark set) shows faded swatches and says so. The swatches work with the arrow keys.
+  The mode buttons read “Like the device / Light / Dark”; the light/dark icon in the sidebar is now called “Change
+  appearance”.
+- A colour theme chosen up to 0.2.16 moves silently to the closest new scheme: Plum → Heather, OLED black → Black,
+  Amethyst and Lilac slate → Lavender, Night indigo → Classic. The browser and app bar take the page colour of the
+  scheme.
+- Callout titles (tip, important, warning) are a little darker in light mode, so they reach 4.5:1 contrast in every
+  scheme; the control borders of the dark Classic scheme are a little lighter (3:1 also on floating bars).
+- A click on a tab shows its page in the sidebar tree: the folders above it open and the row scrolls into view (only
+  as far as needed; the Recent and AI access views stay as they are).
+
+### Fixed
+- Opening a folder of the first level no longer makes the sidebar tree jump: the box around the open branch moved its
+  folder row by a few pixels.
+- “Custom emoji” in the icon picker only takes one emoji; text such as a word is refused with a hint. An icon value in a
+  file that is not an emoji shows the plain folder or page symbol instead of running over the name.
+
 ## 0.2.16 (Beta) – 2026-11-24
 
 Kaveyl Wiki now says **page** instead of **note** everywhere – the app, messages, e-mails, the manual, the API and

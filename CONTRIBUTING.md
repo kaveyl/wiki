@@ -5,7 +5,7 @@ Thank you for helping! Kaveyl Wiki is maintained by a small core team, so here i
 ## Bugs and ideas
 
 Open an [issue](https://github.com/kaveyl/wiki/issues/new/choose) – the forms ask for what we need (version, steps,
-what you expected). Please search first whether it already exists, and never post passwords, tokens or private note
+what you expected). Please search first whether it already exists, and never post passwords, tokens or private page
 contents. Security issues go through **Security → Report a vulnerability** instead (see [SECURITY.md](SECURITY.md)).
 
 ## Code changes
@@ -26,13 +26,13 @@ When we have agreed:
 
 ## Conventions
 
-- **Notes stay plain files.** Kaveyl Wiki never keeps note content in its database and never rewrites what the user
+- **Pages stay plain files.** Kaveyl Wiki never keeps page content in its database and never rewrites what the user
   did not change – keep it that way.
 - **Visible texts** are written in German in `t('…')` / `tn(…)` and get an English entry in the dictionaries
   (`apps/web/src/i18n/en/`, server: `apps/server/src/i18n/en.ts`); `i18n.test.ts` checks this.
 - **The manual is the in-app help.** If users see a difference, update `docs/BENUTZERHANDBUCH.md` and
   `docs/i18n/en/BENUTZERHANDBUCH.md` – headings are help anchors, `help.test.ts` checks both.
-- **Permissions everywhere.** New note routes go through the existing access checks; public and MCP operations live in
+- **Permissions everywhere.** New page routes go through the existing access checks; public and MCP operations live in
   `apps/server/src/api/ops.ts`.
 - **Commit messages:** `type(scope): short description` – `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
 - Do not reformat files you do not otherwise change.

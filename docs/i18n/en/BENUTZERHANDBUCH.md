@@ -152,8 +152,8 @@ If this is a **new server** for a Kaveyl Wiki instance that existed before, do n
   signs in with a start password from the administrator must first set their own; nothing else works before that.
 - The sign-in page follows **light/dark** from the device setting (or Settings →
   Appearance); on the phone the form sits below a strip of pictures.
-- **Language and colour scheme** are at the top right of the sign-in page and in the setup wizard: **DE | EN**
-  switches the language, the icon next to it the colour scheme. This way you can also set up Kaveyl Wiki entirely in English.
+- **Language and appearance** are at the top right of the sign-in page and in the setup wizard: **DE | EN**
+  switches the language, the icon next to it light, dark or system. This way you can also set up Kaveyl Wiki entirely in English.
   Without a choice of your own, the language follows the browser (German browser → German, otherwise
   English). What you choose here is taken over by your account when you sign in.
 
@@ -174,11 +174,11 @@ of the sidebar.
   **search**; your **favourites** as small chips (with many, two rows to scroll); the switch **Tree | Recent | AI
   access** (AI access for administrators only) and below it the chosen view – in the tree every added **source**
   (repository or folder) in one shared card. At the very bottom **Add source** (administrators) and the **Trash**,
-  below them the **sync status** (green dot “In sync · 21:20”), the **gear** (Settings), the **colour scheme icon** and
+  below them the **sync status** (green dot “In sync · 21:20”), the **gear** (Settings), the **light/dark icon** and
   **Hide sidebar**. All menus, entry by entry: [Menus at a glance](#menüs-im-überblick).
 - **Top right** in the tab bar – always visible, even with the sidebar collapsed: **?** Help and the **account**
   (initial and name: your name and your e-mail address, **My account …**, **Sign out**). With the sidebar collapsed,
-  the **gear** and the **colour scheme icon** (sun, moon or screen) are here too. Each click on the colour scheme icon
+  the **gear** and the **light/dark icon** (sun, moon or screen) are here too. Each click on the light/dark icon
   moves on: Light → Dark → System (follows the device); the choice stays saved in this browser. On the phone, Help and
   Settings are also in the account menu so that the tabs have room.
 - **Top:** tabs of the open pages. The middle mouse button opens in a new tab (under Favorites and
@@ -187,8 +187,9 @@ of the sidebar.
   open with “Close other tabs” and middle-click. Clicking the pin unpins them again.
   With many tabs open they get narrower (the name stays readable); if they still do not fit, the mouse wheel
   scrolls the bar sideways and the button **“All tabs (n)”** (number with an arrow) appears on the right: it lists
-  every open tab – a click switches to it, the × closes it, and the list stays open. The tab of a folder page marks
-  the folder in the tree.
+  every open tab – a click switches to it, the × closes it, and the list stays open. A click on a tab shows its page
+  in the tree: the folders above it open, and the tree scrolls only as far as needed to show the row (the Recent and
+  AI access views stay as they are). The tab of a folder page marks the folder in the tree.
 
 ![Pinned tabs](handbuch/50-angeheftet.webp)
 
@@ -247,7 +248,7 @@ page menu **“…”**. What you are not allowed to do (e.g. without write perm
 | Add source, Trash | as labelled (Add source for administrators only) |
 | Sync status | dot and word: green “In sync · time”, purple = waiting to be transferred or running, orange/red = please take a look, “Offline” = no connection to the server; a click opens the [sync overview](#speichern-übertragen-und-synchronisieren) |
 | Gear | [Settings](#einstellungen-im-überblick) |
-| Colour scheme | Light → Dark → System |
+| Light/dark | Light → Dark → System |
 | Hide sidebar | as labelled; back with the icon on the left of the tab bar |
 
 ### Top right {#oben-rechts}
@@ -256,7 +257,7 @@ page menu **“…”**. What you are not allowed to do (e.g. without write perm
 |---|---|
 | ? Help | this manual (also **F1**) |
 | Account (initial and name) | your name and your e-mail address; **My account …** opens Settings → Account; **Sign out** (asks first if something is still unsaved). On the phone also **Help / manual** and **Settings** |
-| Gear, colour scheme | only with the sidebar collapsed (otherwise in its foot) |
+| Gear, light/dark | only with the sidebar collapsed (otherwise in its foot) |
 
 ### Right-clicking a source {#rechtsklick-auf-eine-quelle}
 
@@ -2401,13 +2402,17 @@ a delivery: API reference, “Events for agents”. What goes where and when –
 
 ### Appearance {#darstellung}
 
-Three cards:
+Two cards:
 
-- **Appearance:** **Light / Dark / System** (follows the device). Applies to this device – it is quicker via the colour
-  scheme icon at the bottom of the sidebar.
-- **Colour theme:** one theme for light (**Lavender indigo** as the standard, **Amethyst**, **Plum**, **Lilac slate**)
-  and one for dark (**Classic** – neutral anthracite – as the standard, **Night indigo**, **OLED black**). The colour
-  scheme decides which one applies. The colour themes also apply to this browser.
+- **Appearance:** at the top **Like the device / Light / Dark** – “Like the device” follows the light or dark mode of
+  the operating system and changes with it. It is quicker via the light/dark icon at the bottom of the sidebar
+  (Light → Dark → System). Below, one row of **colour schemes** each: light **Lavender** (the standard), **Sand**,
+  **Sage**, **Fjord**, **Heather**; dark **Classic** (the standard, neutral anthracite), **Dark sand**, **Moss**,
+  **Graphite**, **Black** (true black, easy on OLED screens). Each light scheme stands above its dark counterpart. A
+  click picks a scheme at once; with the keyboard, use the arrow keys. When **Light** or **Dark** is set, the other row
+  shows faded swatches and its heading says “applies in the dark (light) appearance” – you can still pick there. Appearance and colour schemes
+  apply to this browser. Anyone who had chosen another colour theme up to version 0.2.16 gets the closest new one:
+  Plum → Heather, OLED black → Black, Amethyst and Lilac slate → Lavender, Night indigo → Classic.
 - **Editor:** the **toolbar** – **Floating at the bottom** (the standard: a bar at the bottom edge of the page, above it
   the formatting row with headings, bold, italic etc., which you show or hide with **Aa**) or **On top** (one bar above
   the page; if it is too wide, e.g. with a larger font, it wraps into a second row). On the phone it is always on top. Plus **Editor width** (Normal, Wide, Full width or a percentage of your

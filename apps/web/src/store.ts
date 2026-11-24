@@ -21,8 +21,11 @@ interface Workspace {
   selected: string | null;
   /** Incremented on every openNote (also for the note already open): the phone drawer closes. */
   opened: number;
-  /** Incremented on every reveal so the tree scrolls even when the target is unchanged. */
-  reveal: { key: string; nonce: number } | null;
+  /**
+   * Incremented on every reveal so the tree scrolls even when the target is unchanged. `soft`: following a tab click –
+   * the tree scrolls only as far as needed and the sidebar keeps its view (Zuletzt, KI-Freigaben).
+   */
+  reveal: { key: string; nonce: number; soft?: boolean } | null;
   sidebarWidth: number;
   /** Tab shown in the right half next to the active tab (split view), or null. */
   splitId: string | null;
@@ -58,6 +61,15 @@ interface Workspace {
 const newId = () => Math.random().toString(36).slice(2, 10);
 const pinnedCount = (tabs: Tab[]) => tabs.filter((t) => t.pinned).length;
 const under = (path: string, root: string) => path === root || path.startsWith(root + '/');
+
+/** The state for showing a note in the tree: its source and folders open, the note selected, a new reveal. */
+function revealed(s: Pick<Workspace, 'expanded' | 'reveal'>, mountId: string, path: string, soft: boolean) {
+  const expanded = { ...s.expanded, [nodeKey(mountId, '')]: true as const };
+  const parts = path.split('/');
+  for (let i = 1; i < parts.length; i++) expanded[nodeKey(mountId, parts.slice(0, i).join('/'))] = true;
+  const key = nodeKey(mountId, path);
+  return { expanded, selected: key, reveal: { key, nonce: (s.reveal?.nonce ?? 0) + 1, ...(soft ? { soft } : {}) } };
+}
 
 export const useWorkspace = create<Workspace>((set, get) => ({
   tabs: [],
@@ -146,6 +158,9 @@ export const useWorkspace = create<Workspace>((set, get) => ({
     // Activating the right-hand note swaps the two halves.
     const splitId = get().splitId === id ? get().activeId : get().splitId;
     set({ activeId: id, splitId, selected: tab ? nodeKey(tab.mountId, tab.path) : get().selected });
+    // The tree follows the tab (owner 24.11.): its folders open and the row comes into view – nothing moves when it is
+    // already visible.
+    if (tab) set(revealed(get(), tab.mountId, tab.path, true));
   },
 
   closeTab(id) {
@@ -208,11 +223,7 @@ export const useWorkspace = create<Workspace>((set, get) => ({
   },
 
   revealInTree(mountId, path) {
-    const expanded = { ...get().expanded, [nodeKey(mountId, '')]: true as const };
-    const parts = path.split('/');
-    for (let i = 1; i < parts.length; i++) expanded[nodeKey(mountId, parts.slice(0, i).join('/'))] = true;
-    const key = nodeKey(mountId, path);
-    set({ expanded, selected: key, reveal: { key, nonce: (get().reveal?.nonce ?? 0) + 1 } });
+    set(revealed(get(), mountId, path, false));
   },
 
   setSidebarWidth(w) {

@@ -55,3 +55,20 @@ describe('noteName', () => {
     expect(noteName('docs/folder')).toBe('folder');
   });
 });
+
+describe('activate (tab click)', () => {
+  it('the tree follows the tab: source and folders open, the note selected, a soft reveal (owner 24.11.)', () => {
+    ws().openNote('m', 'Haus/Heizung/Wartung.md', 'Wartung');
+    ws().openNote('m', 'Diverses/Einkauf.md', 'Einkauf', { newTab: true });
+    const first = ws().tabs.find((t) => t.path === 'Haus/Heizung/Wartung.md')!;
+    useWorkspace.setState({ expanded: {} });
+    ws().activate(first.id);
+    expect(Object.keys(ws().expanded).sort()).toEqual(['m:', 'm:Haus', 'm:Haus/Heizung'].sort());
+    expect(ws().selected).toBe('m:Haus/Heizung/Wartung.md');
+    expect(ws().reveal).toMatchObject({ key: 'm:Haus/Heizung/Wartung.md', soft: true });
+  });
+  it('„Im Baum anzeigen“ stays a hard reveal (switches the sidebar to the tree)', () => {
+    ws().revealInTree('m', 'a.md');
+    expect(ws().reveal?.soft).toBeUndefined();
+  });
+});

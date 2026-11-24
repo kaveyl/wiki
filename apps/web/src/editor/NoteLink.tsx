@@ -9,6 +9,7 @@ import { formatLink } from '@kaveyl-wiki/core';
 import { api, type SearchHit } from '../api';
 import { cx } from '../ui';
 import { popupRenderer, useActiveIntoView, type MenuHandle } from './SlashMenu';
+import { isEmoji } from './icons';
 import { noteNameIn } from '../names';
 import { t } from '../i18n';
 
@@ -67,7 +68,7 @@ const NoteList = forwardRef<MenuHandle, SuggestionProps<SearchHit>>(function Not
             command(item);
           }}
         >
-          <span className="shrink-0 text-fg-faint">{item.icon?.startsWith('emoji:') ? item.icon.slice(6) : <FileText className="h-4 w-4" />}</span>
+          <span className="shrink-0 text-fg-faint">{item.icon?.startsWith('emoji:') && isEmoji(item.icon.slice(6)) ? item.icon.slice(6) : <FileText className="h-4 w-4" />}</span>
           <span className="min-w-0">
             <span className="block truncate text-sm">{noteNameIn(item.mountId, item.path)}</span>
             <span className="block truncate text-xs text-fg-faint">{item.path}</span>

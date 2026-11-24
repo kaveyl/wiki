@@ -64,7 +64,7 @@ import { useActions } from './actions';
 import { MarkedBar, MarkedMenuItems } from './Marked';
 import { rowItem, useMarked, visibleRows, type MarkedItem } from './marked';
 import { importMarkdown } from './importing';
-import { IconGlyph } from '../editor/icons';
+import { IconGlyph, isEmoji } from '../editor/icons';
 import { usePersonal } from '../personal';
 import { copyWithToast } from '../clipboard';
 import { fullPath, noteName, noteNameIn } from '../names';
@@ -671,7 +671,11 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
   const icon = isDir ? (index.folderIcons.get(entry.path) ?? entry.icon) : entry.icon;
 
   useEffect(() => {
-    if (reveal) document.querySelector(`[data-node="${CSS.escape(key)}"]`)?.scrollIntoView({ block: 'nearest' });
+    // Each reveal scrolls once – not again when the row mounts anew later (a tab click reveals, and the tree must not
+    // jump back to it after you scrolled away).
+    if (!reveal || reveal <= lastReveal) return;
+    lastReveal = reveal;
+    document.querySelector(`[data-node="${CSS.escape(key)}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [reveal, key]);
 
   const open = (newTab: boolean) => {
@@ -1077,14 +1081,20 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
       ))}
     </div>
   );
-  // The open branch: the folder of the first level holding the open note lies in a box of its own.
-  if (depth === 1 && isDir && branch && expanded)
+  // The open branch: the folder of the first level holding the open note lies in a box of its own. No space above and the
+  // left padding taken back (-ml-1 px-1), so the folder row stays exactly where it was – opening the branch made the
+  // tree jump by 8 px before (owner find 24.11.); nothing reaches over the row above or past the scroll area.
+  // A folder of the first level is always wrapped in the same element, so the box coming and going does not mount the
+  // whole branch anew.
+  if (depth === 1 && isDir) {
+    const box = branch && expanded;
     return (
-      <div className="my-1 rounded-xl bg-card p-1 dark:bg-bg" data-branch="">
+      <div className={box ? '-ml-1 -mr-0.5 mb-1 rounded-xl bg-card px-1 pb-1 dark:bg-bg' : undefined} data-branch={box ? '' : undefined}>
         {row}
         {below}
       </div>
     );
+  }
   return (
     <>
       {row}
@@ -1092,6 +1102,9 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
     </>
   );
 }
+
+/** Nonce of the last reveal the tree scrolled for (one scroll per reveal). */
+let lastReveal = 0;
 
 /** Tooltip on a source: what it is, also when it has an icon of its own. */
 export const mountKind = (m: Mount) =>
@@ -1118,7 +1131,7 @@ export function MountKind({ mount }: { mount: Mount }) {
 export function MountIcon({ mount }: { mount: Mount }) {
   // Neutral without an own icon: the kind is always shown by MountKind right of the name (AD-032).
   const fallback = <Library className="h-3.5 w-3.5 shrink-0" aria-hidden />;
-  if (mount.icon) return /^(lucide|emoji|custom):/.test(mount.icon) ? <IconGlyph icon={mount.icon} className="h-3.5 w-3.5" fallback={fallback} /> : <span className="w-4 text-center">{mount.icon}</span>;
+  if (mount.icon) return /^(lucide|emoji|custom):/.test(mount.icon) ? <IconGlyph icon={mount.icon} className="h-3.5 w-3.5" fallback={fallback} /> : isEmoji(mount.icon) ? <span className="w-4 text-center">{mount.icon}</span> : fallback;
   return fallback;
 }
 
@@ -1129,13 +1142,13 @@ export function MountIcon({ mount }: { mount: Mount }) {
 export function EntryIcon({ icon, isDir, open, active }: { icon: string | null; isDir: boolean; open?: boolean; active?: boolean }) {
   // Frontmatter `icon:` (see editor/icons.tsx), otherwise folder/file.
   const FolderIcon = open ? FolderOpen : Folder;
-  const glyph = icon ? (
-    <IconGlyph icon={icon} className={cx('h-[15px] w-[15px] text-[0.875rem]', active && 'text-accent')} />
-  ) : isDir ? (
+  const plain = isDir ? (
     <FolderIcon className={cx('h-[14px] w-[14px]', active ? 'text-accent' : 'text-icon-faint opacity-80 dark:opacity-100')} strokeWidth={1.55} />
   ) : (
     <File className={cx('h-[14px] w-[14px]', active ? 'text-accent' : 'text-icon-faint opacity-70 dark:opacity-100')} strokeWidth={1.45} />
   );
+  // An icon value that cannot be shown (e.g. text instead of an emoji) falls back to the plain folder/sheet.
+  const glyph = icon ? <IconGlyph icon={icon} className={cx('h-[15px] w-[15px] text-[0.875rem]', active && 'text-accent')} fallback={plain} /> : plain;
   return <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center">{glyph}</span>;
 }
 

@@ -1,4 +1,4 @@
-// Small global switches: colour scheme (header of the app and the sign-in pages) and language (sign-in pages,
+// Small global switches: appearance light/dark/system (header of the app and the sign-in pages) and language (sign-in pages,
 // Einstellungen → Darstellung, palette).
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { LANGUAGES, lang, switchLanguage, t, type Lang } from './i18n';
@@ -16,8 +16,8 @@ export function ThemeToggle({ className }: { className?: string }) {
   const next = NEXT_THEME[theme];
   return (
     <IconButton
-      label={t('Farbschema wechseln')}
-      title={t('Farbschema: {now} – Klick: {next}', { now: themeName(theme), next: themeName(next) })}
+      label={t('Erscheinungsbild wechseln')}
+      title={t('Erscheinungsbild: {now} – Klick: {next}', { now: themeName(theme), next: themeName(next) })}
       className={className}
       onClick={() => setTheme(next)}
       data-theme-state={theme}

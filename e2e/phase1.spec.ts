@@ -76,6 +76,17 @@ test('mounts a local folder through the wizard', async () => {
   await page.getByLabel('Name in der Seitenleiste').fill('Projektwiki');
   await page.getByRole('button', { name: 'Icon der Quelle' }).click();
   await page.getByRole('tab', { name: 'Emoji' }).click();
+  // Owner find 24.11.: text is not an emoji – a hint instead of setting it (it ran over the name in the tree).
+  const own = page.getByRole('textbox', { name: 'Eigenes Emoji' });
+  await own.fill('testtest');
+  await expect(page.getByText('Bitte genau ein Emoji eingeben', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Setzen', exact: true })).toBeDisabled();
+  await own.press('Enter');
+  await expect(own).toBeVisible();
+  await own.fill('🐳');
+  await expect(page.getByText('Bitte genau ein Emoji eingeben', { exact: false })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Setzen', exact: true })).toBeEnabled();
+  await own.fill('');
   await page.getByRole('button', { name: 'Emoji 📒' }).click();
   await page.getByRole('button', { name: 'Einbinden' }).click();
   await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('Projektwiki', { exact: true })).toBeVisible();

@@ -1,27 +1,27 @@
 # Installing Kaveyl Wiki
 
-Kaveyl Wiki is a wiki whose only storage is Git: notes are Markdown files in repositories (Gitea, GitHub, GitLab, any
+Kaveyl Wiki is a wiki whose only storage is Git: pages are Markdown files in repositories (Gitea, GitHub, GitLab, any
 Git server) or in folders. It runs as a single Docker container. Once it is running, the full manual is inside
 Kaveyl Wiki under **Help** (key F1), in English and German.
 
 ## Requirements
 
 - A Linux machine or NAS with an x86-64 processor (amd64), Docker and Docker Compose.
-- About 1 GB of space for the image, plus space for your notes.
+- About 1 GB of space for the image, plus space for your pages.
 
 ## 1. Get the image
 
 The image is published on the GitHub Container Registry. In `docker-compose.yml`, `image:` already names it, e.g.
-`ghcr.io/kaveyl/wiki:0.2.16`; `docker compose up -d` (or `docker compose pull`) downloads it.
+`ghcr.io/kaveyl/wiki:0.2.17`; `docker compose up -d` (or `docker compose pull`) downloads it.
 
 Alternatively, each release on GitHub carries the file `kaveyl-wiki-<version>.tar.gz`:
 
 ```sh
 sha256sum -c --ignore-missing SHA256SUMS   # optional: check the downloaded files
-docker load -i kaveyl-wiki-0.2.16.tar.gz
+docker load -i kaveyl-wiki-0.2.17.tar.gz
 ```
 
-Then set `image: kaveyl-wiki:0.2.16` in `docker-compose.yml` – a name without a registry is only looked up on your own
+Then set `image: kaveyl-wiki:0.2.17` in `docker-compose.yml` – a name without a registry is only looked up on your own
 machine.
 
 ## 2. Create the folders and start
@@ -105,7 +105,7 @@ In detail, with examples: in Kaveyl Wiki under **Help → Access over the networ
 
 What matters is **`kaveyl-wiki/config`**: the database (accounts, settings, search, log), the key `secret.key` that
 encrypts stored credentials, and Kaveyl Wiki's own backups. Without `secret.key`, stored tokens can no longer be read.
-Notes in repositories are in the repository anyway; folders under `kaveyl-wiki/docs` need a backup of their own (Kaveyl
+Pages in repositories are in the repository anyway; folders under `kaveyl-wiki/docs` need a backup of their own (Kaveyl
 Wiki's backup takes their versions along).
 Kaveyl Wiki can create backups itself (Settings → Backup), also to a NAS over SMB.
 

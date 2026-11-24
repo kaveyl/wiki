@@ -15,7 +15,7 @@ import { AllTokensPanel, TokensPanel, UsersPanel } from './Users';
 import { CloudflarePanel, GroupsPanel } from './Access';
 import { RightsPanel } from './Rights';
 import { ProxyAuthPanel, ProxyConnections, ReverseProxyPanel } from './Proxy';
-import { DARK_PALETTES, LIGHT_PALETTES, usePalettes, useTheme, type DarkPalette, type LightPalette, type Theme } from '../theme';
+import { DARK_PALETTES, LIGHT_PALETTES, LOOK, usePalettes, useTheme, type DarkPalette, type LightPalette, type Theme } from '../theme';
 import { usePrefs, type EditorWidth } from '../prefs';
 import { Button, Field, Input, Spinner, cx, useModalDirty, fillNodes, useTabs, FormError, FormStatus, MissingHint, useRepeatCheck } from '../ui';
 import { copyWithToast } from '../clipboard';
@@ -791,48 +791,70 @@ function SetCard({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** Colours of the palettes for their swatch (window ground, sheet, accent – as in styles.css). */
-const SWATCH: Record<LightPalette | DarkPalette, [string, string, string]> = {
-  lavender: ['#efedf8', '#ffffff', '#5b46e5'],
-  amethyst: ['#f3eefb', '#ffffff', '#7c3aed'],
-  plum: ['#f6eef5', '#ffffff', '#86198f'],
-  slate: ['#f1f0f6', '#ffffff', '#5f5299'],
-  classic: ['#111114', '#1e1e23', '#9b8cff'],
-  indigo: ['#0f0e1d', '#1b1932', '#8b7dff'],
-  oled: ['#000000', '#141418', '#a5b4fc'],
-};
 const PALETTE_NAME: Record<LightPalette | DarkPalette, string> = {
-  lavender: t('Lavendel-Indigo'),
-  amethyst: t('Amethyst'),
-  plum: t('Pflaume'),
-  slate: t('Flieder-Schiefer'),
+  lavender: t('Lavendel'),
+  sand: t('Sand'),
+  sage: t('Salbei'),
+  fjord: t('Fjord'),
+  heather: t('Heide'),
   classic: t('Klassisch'),
-  indigo: t('Nacht-Indigo'),
-  oled: t('OLED-Schwarz'),
+  'sand-dark': t('Sand dunkel'),
+  moss: t('Moos'),
+  graphite: t('Graphit'),
+  black: t('Schwarz'),
 };
 
-function PaletteTiles<P extends LightPalette | DarkPalette>({ all, value, onPick, label }: { all: readonly P[]; value: P; onPick: (p: P) => void; label: string }) {
+/**
+ * One row of round swatches (ground of the scheme, accent as dot) as a radio group, like Kaveyl Notes: Tab reaches
+ * the chosen one, arrow keys and Home/End pick another at once (AD-082).
+ */
+function PaletteSwatches<P extends LightPalette | DarkPalette>({ all, value, onPick, labelledBy, idle }: { all: readonly P[]; value: P; onPick: (p: P) => void; labelledBy: string; idle: boolean }) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const key = (e: React.KeyboardEvent, i: number) => {
+    const n = all.length;
+    const to = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: n - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    const j = (to + n) % n;
+    onPick(all[j]!);
+    refs.current[j]?.focus();
+  };
   return (
-    <div role="group" aria-label={label} className="flex flex-wrap gap-x-6 gap-y-3">
+    <div
+      role="radiogroup"
+      aria-labelledby={labelledBy}
+      // Not in effect right now: only the swatches fade (0.7 like Kaveyl Notes), the names keep 4.5:1 (AD-048).
+      className={cx('swatch-row grid grid-cols-[repeat(auto-fit,minmax(3.5rem,1fr))] gap-x-2 gap-y-3', idle && 'is-idle')}
+    >
       {all.map((p, i) => {
-        const [canvas, sheet, accent] = SWATCH[p];
+        const look = LOOK[p];
+        const on = value === p;
         return (
           <button
             key={p}
-            aria-pressed={value === p}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            role="radio"
+            aria-checked={on}
+            tabIndex={on ? 0 : -1}
             title={i === 0 ? t('{name} (Standard)', { name: PALETTE_NAME[p] }) : PALETTE_NAME[p]}
-            className="flex w-20 flex-col items-center gap-1.5 rounded-xl py-1 text-xs hover:bg-hover"
+            className="flex min-w-0 flex-col items-center gap-1.5 rounded-xl py-1 text-xs hover:bg-hover"
             onClick={() => onPick(p)}
+            onKeyDown={(e) => key(e, i)}
           >
-            {/* The window ground as ring, the sheet inside, the accent as dot (redesign 23.11.). */}
+            {/* The ground of the scheme, the accent as dot in the middle (Kaveyl Notes). */}
             <span
-              className={cx('flex h-10 w-10 items-center justify-center rounded-full', value === p ? 'ring-2 ring-accent ring-offset-2 ring-offset-card' : 'ring-1 ring-line-control')}
-              style={{ background: sheet, boxShadow: `inset 0 0 0 4px ${canvas}` }}
+              className={cx(
+                'swatch flex h-10 w-10 items-center justify-center rounded-full',
+                on ? 'ring-2 ring-accent ring-offset-2 ring-offset-card' : 'ring-1 ring-line-control',
+              )}
+              style={{ background: look.bg }}
               aria-hidden
             >
-              <span className="h-4 w-4 rounded-full" style={{ background: accent }} />
+              <span className="h-4 w-4 rounded-full" style={{ background: look.accent }} />
             </span>
-            <span className={cx('text-center leading-tight', value === p ? 'font-semibold text-fg' : 'text-fg-muted')}>{PALETTE_NAME[p]}</span>
+            <span className={cx('text-center leading-tight', on ? 'font-semibold text-fg' : 'text-fg-muted')}>{PALETTE_NAME[p]}</span>
           </button>
         );
       })}
@@ -842,17 +864,17 @@ function PaletteTiles<P extends LightPalette | DarkPalette>({ all, value, onPick
 
 function Appearance() {
   const [theme, setTheme] = useTheme();
+  const id = useId();
   const palettes = usePalettes();
   const { toolbar, set } = usePrefs();
   const options: [Theme, string, React.ReactNode][] = [
-    ['system', t('System'), <Monitor key="s" className="h-4 w-4" />],
+    ['system', t('Wie das Gerät'), <Monitor key="s" className="h-4 w-4" />],
     ['light', t('Hell'), <Sun key="l" className="h-4 w-4" />],
     ['dark', t('Dunkel'), <Moon key="d" className="h-4 w-4" />],
   ];
   return (
     <div className="space-y-4">
       <SetCard title={t('Erscheinungsbild')}>
-        <div className="text-xs font-medium text-fg-muted">{t('Farbschema')}</div>
         <div className="flex gap-2">
           {options.map(([k, label, icon]) => (
             <button key={k} aria-pressed={theme === k} className={cx('flex flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border py-3 text-sm', theme === k ? 'border-accent bg-accent-soft font-medium text-accent ring-1 ring-accent' : 'border-line-control hover:border-fg-faint hover:bg-hover')} onClick={() => setTheme(k)}>
@@ -861,14 +883,17 @@ function Appearance() {
             </button>
           ))}
         </div>
-        <p className="text-xs text-fg-faint">{t('„System“ folgt automatisch der Einstellung deines Betriebssystems.')}</p>
-      </SetCard>
-      <SetCard title={t('Farbthema')}>
-        <div className="text-xs font-medium text-fg-muted">{t('Hell')}</div>
-        <PaletteTiles all={LIGHT_PALETTES} value={palettes.light} onPick={palettes.setLight} label={t('Farbthema hell')} />
-        <div className="pt-1 text-xs font-medium text-fg-muted">{t('Dunkel')}</div>
-        <PaletteTiles all={DARK_PALETTES} value={palettes.dark} onPick={palettes.setDark} label={t('Farbthema dunkel')} />
-        <p className="text-xs text-fg-faint">{t('Gilt für diesen Browser. Je ein Thema für hell und dunkel – umgeschaltet wird mit dem Farbschema.')}</p>
+        <div id={`${id}-light`} className="pt-1 text-xs font-medium text-fg-muted">
+          {t('Helles Farbschema')}
+          {theme === 'dark' && <span className="font-normal"> · {t('gilt im hellen Erscheinungsbild')}</span>}
+        </div>
+        <PaletteSwatches all={LIGHT_PALETTES} value={palettes.light} onPick={palettes.setLight} labelledBy={`${id}-light`} idle={theme === 'dark'} />
+        <div id={`${id}-dark`} className="pt-1 text-xs font-medium text-fg-muted">
+          {t('Dunkles Farbschema')}
+          {theme === 'light' && <span className="font-normal"> · {t('gilt im dunklen Erscheinungsbild')}</span>}
+        </div>
+        <PaletteSwatches all={DARK_PALETTES} value={palettes.dark} onPick={palettes.setDark} labelledBy={`${id}-dark`} idle={theme === 'light'} />
+        <p className="text-xs text-fg-faint">{t('Gilt für diesen Browser. „Wie das Gerät“ folgt dem hellen oder dunklen Modus des Betriebssystems; jedes helle Farbschema steht über seinem dunklen Gegenstück.')}</p>
       </SetCard>
       <SetCard title={t('Editor')}>
         <div className="text-xs font-medium text-fg-muted">{t('Werkzeugleiste')}</div>

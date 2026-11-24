@@ -377,9 +377,19 @@ export function Shell({ user }: { user: User }) {
     ...(user.isAdmin ? [['ai', t('KI-Freigaben')] as [SidebarView, string]] : []),
   ];
   // „Im Baum anzeigen“ from anywhere (menu, palette, AI shares): the sidebar shows the tree again.
-  const revealed = useWorkspace((s) => s.reveal?.nonce ?? 0);
+  // Following a tab click (soft) leaves the view as it is.
+  const revealed = useWorkspace((s) => (s.reveal && !s.reveal.soft ? s.reveal.nonce : 0));
   useEffect(() => {
-    if (revealed && usePrefs.getState().sidebarView !== 'tree') usePrefs.getState().set({ sidebarView: 'tree' });
+    if (!revealed || usePrefs.getState().sidebarView === 'tree') return;
+    usePrefs.getState().set({ sidebarView: 'tree' });
+    // The row scrolled while the tree was hidden – once it shows, scroll again (the row, or the folder of a folder page).
+    const key = useWorkspace.getState().reveal?.key;
+    if (!key) return;
+    const timer = setTimeout(() => {
+      const at = (k: string) => document.querySelector(`[role="treeitem"][data-node="${CSS.escape(k)}"]`);
+      (at(key) ?? at(key.slice(0, key.lastIndexOf('/'))))?.scrollIntoView({ block: 'nearest' });
+    }, 50);
+    return () => clearTimeout(timer);
   }, [revealed]);
   const viewTabs = useTabs(
     views.map(([v]) => v),
@@ -824,7 +834,7 @@ function TabBar({
       ))}
       </div>
       {overflow && <AllTabs tabs={tabs} activeId={activeId} folderNote={folderNote} />}
-      {/* Always visible, also with the sidebar closed and on phones: help and account; settings and the colour scheme
+      {/* Always visible, also with the sidebar closed and on phones: help and account; settings and the light/dark switch
           here only while the sidebar (whose foot holds them) is closed. */}
       <div className="flex shrink-0 items-center gap-1 self-stretch px-2">
         {appButtons}

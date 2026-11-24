@@ -171,14 +171,14 @@ test('help, settings and the account menu sit at the top right – also with the
   await page.getByRole('button', { name: 'Anmelden' }).click();
   const sidebar = page.getByRole('complementary', { name: 'Seitenleiste' });
   await expect(sidebar).toBeVisible();
-  // Redesign 23.11.: settings and the colour scheme in the foot of the sidebar, help and account at the top right;
-  // with the sidebar closed, settings and colour scheme move up there.
+  // Redesign 23.11.: settings and the light/dark switch in the foot of the sidebar, help and account at the top right;
+  // with the sidebar closed, settings and light/dark move up there.
   await expect(sidebar.getByRole('button', { name: 'Einstellungen' })).toHaveCount(1);
   await expect(page.locator('main').getByRole('button', { name: 'Einstellungen' })).toHaveCount(0);
   await sidebar.getByRole('button', { name: 'Seitenleiste ausblenden' }).click();
   await expect(page.getByRole('button', { name: 'Hilfe (F1)' })).toBeVisible();
   await expect(page.locator('main').getByRole('button', { name: 'Einstellungen' })).toBeVisible();
-  await expect(page.locator('main').getByRole('button', { name: 'Farbschema wechseln' })).toBeVisible();
+  await expect(page.locator('main').getByRole('button', { name: 'Erscheinungsbild wechseln' })).toBeVisible();
   await page.getByRole('button', { name: /^Konto/ }).click();
   const menu = page.getByRole('menu');
   await expect(menu).toContainText('e2e@example.test');

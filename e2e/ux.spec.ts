@@ -329,6 +329,55 @@ test('expand and collapse: everything, per source and per folder; "+" makes note
   await expect(tree().getByText('Unterordner', { exact: true }).first()).toBeVisible();
 });
 
+
+test('a tab click shows its page in the tree: folders open, the row in view (owner 24.11.)', async () => {
+  const sidebar = page.locator('aside');
+  // The one button reads „Alles aufklappen“ or „Alles zuklappen“, depending on the tree the test before left.
+  const expandAll = sidebar.getByRole('button', { name: 'Alles aufklappen' });
+  if (await expandAll.isVisible()) await expandAll.click();
+  await openNote('roadmap');
+  await tree().getByText('formeln', { exact: true }).first().click({ button: 'middle' });
+  await expect(page.locator('[data-tab="formeln.md"]').first()).toBeVisible();
+  await sidebar.getByRole('button', { name: 'Alles zuklappen' }).click();
+  await expect(tree().getByText('roadmap', { exact: true })).toHaveCount(0);
+  await page.locator('[data-tab="plan/roadmap.md"]').first().click();
+  await expect(tree().getByText('roadmap', { exact: true }).first()).toBeInViewport();
+  // Each reveal scrolls once: scrolled down and a page further below clicked, the tree stays there (review nf-001).
+  const scroller = tree().locator('xpath=ancestor::div[contains(@class,"overflow-y-auto")][1]');
+  await scroller.evaluate((el) => (el.scrollTop = el.scrollHeight));
+  const bottom = await scroller.evaluate((el) => el.scrollTop);
+  // The row „Im Baum anzeigen“ has to bring back below; without overflow there is nothing to scroll – roadmap then.
+  let target = tree().getByText('roadmap', { exact: true }).first();
+  let targetTab = 'plan/roadmap.md';
+  if (bottom > 0) {
+    const last = tree().locator('[role="treeitem"][data-node]').last();
+    const lastKey = (await last.getAttribute('data-node')) ?? '';
+    expect(lastKey).not.toContain(':plan/');
+    await last.click(); // opens it in the active tab: the selection leaves plan/
+    await page.waitForTimeout(300);
+    // The box around plan/ goes (8 px less height, the end of the list moves up by that); a jump back would be far more.
+    expect(Math.abs((await scroller.evaluate((el) => el.scrollTop)) - bottom)).toBeLessThanOrEqual(10);
+    target = tree().locator(`[role="treeitem"][data-node="${lastKey}"]`);
+    // The tab of what opened (a folder opens its folder page).
+    targetTab = (await page.locator('[data-tab][data-active-tab]').first().getAttribute('data-tab')) ?? '';
+  }
+  // The sidebar keeps its view: a tab click does not switch „Zuletzt“ back to the tree.
+  await sidebar.getByRole('tab', { name: 'Zuletzt', exact: true }).click();
+  await page.locator('[data-tab="formeln.md"]').first().click();
+  await expect(sidebar.getByRole('tab', { name: 'Zuletzt', exact: true })).toHaveAttribute('aria-selected', 'true');
+  // „Im Baum anzeigen“ from „Zuletzt“: the tree comes back and the row is in view (review nr-002).
+  await page.locator(`[data-tab="${targetTab}"]`).first().click();
+  await sidebar.getByRole('tab', { name: 'Baum', exact: true }).click();
+  await scroller.evaluate((el, b) => (el.scrollTop = b > 0 ? 0 : el.scrollHeight), bottom);
+  await sidebar.getByRole('tab', { name: 'Zuletzt', exact: true }).click();
+  await page.keyboard.press('Control+k');
+  await page.keyboard.type('Aktuelle Seite im Baum');
+  await page.keyboard.press('Enter');
+  await expect(sidebar.getByRole('tab', { name: 'Baum', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(target).toBeInViewport();
+  await page.locator('[data-tab="formeln.md"]').first().click({ button: 'middle' });
+});
+
 test('trash: a deleted folder comes back from the sidebar trash; emptying asks first', async () => {
   const del = async () => {
     await tree().locator('[data-node]', { hasText: 'Unterordner' }).first().click({ button: 'right' });
@@ -708,6 +757,59 @@ test('font sizes: Darstellung → Schriftgröße, four sliders that act at once,
   await expect.poll(() => px(note)).toBe(16);
   await expect.poll(() => px(page.locator('html'))).toBe(16);
   await page.keyboard.press('Escape');
+});
+
+test('colour schemes (AD-082): an old palette moves on, two rows of swatches with arrow keys, the other row dimmed', async () => {
+  const html = page.locator('html');
+  const bar = page.locator('meta[name="theme-color"]');
+  // A palette of 0.2.16 (Pflaume) becomes Heide before the first paint and stays so.
+  await page.evaluate(() => {
+    localStorage.setItem('kaveyl-wiki.theme', 'light');
+    localStorage.setItem('kaveyl-wiki.palette-light', 'plum');
+  });
+  await page.reload();
+  await expect(html).toHaveAttribute('data-palette', 'heather');
+  await expect(bar).toHaveAttribute('content', '#fdfbfd');
+  expect(await page.evaluate(() => localStorage.getItem('kaveyl-wiki.palette-light'))).toBe('heather');
+
+  await openSettingsPage(page, 'Darstellung');
+  const dialog = page.getByRole('dialog', { name: 'Einstellungen' });
+  const light = dialog.getByRole('radiogroup', { name: 'Helles Farbschema' });
+  const dark = dialog.getByRole('radiogroup', { name: 'Dunkles Farbschema' });
+  await expect(light.getByRole('radio')).toHaveText(['Lavendel', 'Sand', 'Salbei', 'Fjord', 'Heide']);
+  await expect(dark.getByRole('radio')).toHaveText(['Klassisch', 'Sand dunkel', 'Moos', 'Graphit', 'Schwarz']);
+  await expect(light.getByRole('radio', { name: 'Heide' })).toHaveAttribute('aria-checked', 'true');
+  // „Hell“ is set: the dark row does not apply right now – dimmed, with a hint, still selectable.
+  await expect(dialog.getByText('· gilt im dunklen Erscheinungsbild')).toBeVisible();
+  // Only the swatches fade, the names keep their contrast.
+  await expect(dark.locator('.swatch').first()).toHaveCSS('opacity', '0.7');
+  await expect(dark.getByRole('radio', { name: 'Moos' })).toHaveCSS('opacity', '1');
+  await dark.getByRole('radio', { name: 'Moos' }).click();
+  await expect(html).toHaveAttribute('data-palette', 'heather');
+  // Arrow keys and Home/End pick at once.
+  await light.getByRole('radio', { name: 'Sand', exact: true }).click();
+  await expect(html).toHaveAttribute('data-palette', 'sand');
+  await page.keyboard.press('ArrowRight');
+  await expect(html).toHaveAttribute('data-palette', 'sage');
+  await expect(light.getByRole('radio', { name: 'Salbei' })).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(html).not.toHaveAttribute('data-palette', /./);
+  // Dark shows the dark choice; the light row is dimmed now.
+  await dialog.getByRole('button', { name: 'Dunkel', exact: true }).click();
+  await expect(html).toHaveAttribute('data-palette', 'moss');
+  await expect(bar).toHaveAttribute('content', '#182019');
+  await expect(dialog.getByText('· gilt im hellen Erscheinungsbild')).toBeVisible();
+  await dark.getByRole('radio', { name: 'Klassisch' }).click();
+  await expect(html).not.toHaveAttribute('data-palette', /./);
+  // Back to the standard: like the device, both rows in full.
+  await dialog.getByRole('button', { name: 'Wie das Gerät' }).click();
+  await expect(dialog.getByText(/· gilt im/)).toHaveCount(0);
+  await expect(light.locator('.swatch').first()).toHaveCSS('opacity', '1');
+  await expect(dark.locator('.swatch').first()).toHaveCSS('opacity', '1');
+  await page.mouse.move(0, 0);
+  await shot(page, '19-einstellungen-darstellung');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => ['theme', 'palette-light', 'palette-dark'].forEach((k) => localStorage.removeItem(`kaveyl-wiki.${k}`)));
 });
 
 test('sidebar width: the divider follows a finger (folding phone, open), the mouse and the arrow keys', async ({ browser }) => {

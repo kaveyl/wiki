@@ -38,12 +38,29 @@ export function useAllIcons(load = true): All | null {
 
 export const customIconUrl = (id: string) => `/api/icons/${encodeURIComponent(id)}`;
 
+const graphemes = typeof Intl !== 'undefined' && 'Segmenter' in Intl ? new Intl.Segmenter(undefined, { granularity: 'grapheme' }) : null;
+/**
+ * Exactly one emoji (a pictograph with its modifiers and joiners, a flag, a keycap) – nothing else fits the 18 px
+ * slot of an icon. Text such as „testtest“ is not an icon (owner find 24.11.: it ran over the name in the tree).
+ */
+export function isEmoji(s: string): boolean {
+  const v = s.trim();
+  if (!v || v.length > 32) return false;
+  // A keycap is a digit, # or * with the enclosing keycap; no other combining marks (they would stack over the row).
+  if (v.includes('\u20e3')) return /^[0-9#*]\ufe0f?\u20e3$/u.test(v);
+  if (/\p{M}/u.test(v.replace(/[\ufe0e\ufe0f]/gu, ''))) return false;
+  if (!/\p{Extended_Pictographic}|\p{Regional_Indicator}{2}/u.test(v)) return false;
+  // One grapheme; without Intl.Segmenter (old browsers) at least no letters, digits or spaces beside it.
+  return graphemes ? [...graphemes.segment(v)].length === 1 : !/[\p{L}\p{N}\s]/u.test(v);
+}
+
 /** Renders an icon value; `null` when there is none (or it cannot be shown), so callers pick a default. */
 /** `fallback`: shown instead of an empty square when a Lucide name does not exist. */
 export function IconGlyph({ icon, className, fallback }: { icon: string; className?: string; fallback?: ReactNode }) {
   if (icon.startsWith('lucide:')) return <LucideGlyph name={icon.slice(7)} className={className} fallback={fallback} />;
   if (icon.startsWith('custom:')) return <CustomGlyph id={icon.slice(7)} className={className} />;
   const emoji = icon.replace(/^emoji:/, '');
+  if (!isEmoji(emoji)) return <>{fallback ?? null}</>;
   return <span className={cx('w-4 shrink-0 text-center text-[0.8125rem] leading-none', className)}>{emoji}</span>;
 }
 

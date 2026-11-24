@@ -17,9 +17,11 @@
       try {
         const t = localStorage.getItem('kaveyl-wiki.theme') || 'system';
         const dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-        const bar = { lavender: '#ffffff', amethyst: '#ffffff', plum: '#ffffff', slate: '#ffffff', classic: '#1e1e23', indigo: '#1b1932', oled: '#141418' };
+        const bar = { lavender: '#ffffff', sand: '#ffffff', sage: '#fbfcf9', fjord: '#fbfcfd', heather: '#fdfbfd', classic: '#1e1e23', 'sand-dark': '#1d1a15', moss: '#182019', graphite: '#1f2023', black: '#0d0d0d' };
+        const old = { plum: 'heather', amethyst: 'lavender', slate: 'lavender', oled: 'black', indigo: 'classic' };
         let p = localStorage.getItem(dark ? 'kaveyl-wiki.palette-dark' : 'kaveyl-wiki.palette-light');
-        if (!bar[p] || (dark ? ['lavender', 'amethyst', 'plum', 'slate'] : ['classic', 'indigo', 'oled']).includes(p)) p = dark ? 'classic' : 'lavender';
+        if (Object.hasOwn(old, p)) p = old[p];
+        if (!Object.hasOwn(bar, p) || (dark ? ['lavender', 'sand', 'sage', 'fjord', 'heather'] : ['classic', 'sand-dark', 'moss', 'graphite', 'black']).includes(p)) p = dark ? 'classic' : 'lavender';
         document.documentElement.classList.toggle('dark', dark);
         if (p !== 'classic' && p !== 'lavender') document.documentElement.setAttribute('data-palette', p);
         document.querySelector('meta[name="theme-color"]').content = bar[p];

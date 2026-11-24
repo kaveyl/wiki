@@ -110,6 +110,7 @@ export default {
   'Emoji {emoji}': 'Emoji {emoji}',
   'Eigenes Emoji …': 'Custom emoji …',
   'Eigenes Emoji': 'Custom emoji',
+  'Bitte genau ein Emoji eingeben (z. B. über die Emoji-Tastatur des Geräts).': 'Please enter exactly one emoji (e.g. from the emoji keyboard of your device).',
   Setzen: 'Set',
   'Eigenes Icon {name}': 'Custom icon {name}',
   'Icon {name} löschen': 'Delete icon {name}',

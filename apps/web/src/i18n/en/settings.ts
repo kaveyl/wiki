@@ -582,8 +582,6 @@ export default {
   'Noch kein Webhook angekommen.': 'No webhook received yet.',
   verbergen: 'hide',
   anzeigen: 'show',
-  Farbschema: 'Colour scheme',
-  '„System“ folgt automatisch der Einstellung deines Betriebssystems.': '“System” automatically follows your operating system’s setting.',
   Normal: 'Normal',
   'ca. 860 px – angenehme Lesebreite': 'approx. 860 px – comfortable reading width',
   Breit: 'Wide',
