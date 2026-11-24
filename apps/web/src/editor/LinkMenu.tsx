@@ -56,7 +56,7 @@ export function LinkMenu({
               <div role="alert" className="px-2 pb-1 text-xs text-danger">{t('Ziel fehlt – dieser Link führt ins Leere.')}</div>
               {isNote && editor.isEditable && onCreate && (
                 <DM.Item className={item} onSelect={onCreate}>
-                  <FilePlus className="h-4 w-4 text-fg-muted" /> {t('Notiz anlegen')}
+                  <FilePlus className="h-4 w-4 text-fg-muted" /> {t('Seite anlegen')}
                 </DM.Item>
               )}
             </>

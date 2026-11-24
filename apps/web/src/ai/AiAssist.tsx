@@ -175,7 +175,7 @@ export function AiSuggestionDialog() {
         {s.result && /\[[^\]\d][^\]]*\](?!\()/.test(s.result) && (
           <p className="text-xs text-fg-muted">{t('Angaben in [eckigen Klammern] sind Platzhalter der KI – bitte ausfüllen.')}</p>
         )}
-        {selection && !unchanged && s.result && <p className="text-xs text-warn">{t('Die Notiz wurde inzwischen geändert – Ersetzen ist nicht mehr möglich, Einfügen am Ende schon.')}</p>}
+        {selection && !unchanged && s.result && <p className="text-xs text-warn">{t('Die Seite wurde inzwischen geändert – Ersetzen ist nicht mehr möglich, Einfügen am Ende schon.')}</p>}
         <div className="flex flex-wrap justify-end gap-2">
           {s.result && <Button size="sm" variant="ghost" onClick={() => void copyWithToast(s.result!, 'Vorschlag')}>{t('Kopieren')}</Button>}
           <Button size="sm" variant="ghost" onClick={close}>
@@ -237,7 +237,7 @@ export function AiMenuButton({ editor, mountId, path, className, pill }: { edito
           className,
         )}
         aria-label={t('KI')}
-        title={t('Für diese Notiz ist die KI nicht freigegeben')}
+        title={t('Für diese Seite ist die KI nicht freigegeben')}
       >
         <Sparkles className="h-4 w-4" /> {t('KI')}
       </button>
@@ -261,7 +261,7 @@ export function AiMenuButton({ editor, mountId, path, className, pill }: { edito
       </DM.Trigger>
       <DM.Portal>
         <DropdownContent align="start" sideOffset={4} className="z-50">
-          {actions.length === 0 && <div className="px-2 py-1.5 text-xs text-fg-muted">{t('Für diese Notiz darf die KI nur lesen, nichts vorschlagen.')}</div>}
+          {actions.length === 0 && <div className="px-2 py-1.5 text-xs text-fg-muted">{t('Für diese Seite darf die KI nur lesen, nichts vorschlagen.')}</div>}
           {actions.map((a) => (
             <DM.Item key={a} onSelect={() => void runAiAction(editor, mountId, path, a)} className="cursor-default rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover">
               {ACTION_LABEL[a]}
@@ -282,7 +282,7 @@ export function AiMenuButton({ editor, mountId, path, className, pill }: { edito
 }
 
 const SCOPE_LABEL: Record<AiScope['kind'], string> = {
-  note: t('Diese Notiz'),
+  note: t('Diese Seite'),
   folder: t('Dieser Ordner'),
   source: t('Diese Quelle'),
   all: t('Alles Freigegebene'),
@@ -485,14 +485,14 @@ export function AiAskDialog() {
             {!messages.length && !live && scope.kind === 'general' && (
               <p className="text-fg-muted">
                 {t(
-                  'Allgemeine Frage an das Sprachmodell – ohne Wiki: Es geht keine Notiz an den Anbieter, die Antwort kommt aus dem Wissen des Modells und hat keine Quellen. Sie kann veraltet oder falsch sein; für Fragen zu deinen Notizen einen anderen Bezug wählen.',
+                  'Allgemeine Frage an das Sprachmodell – ohne Wiki: Es geht keine Seite an den Anbieter, die Antwort kommt aus dem Wissen des Modells und hat keine Quellen. Sie kann veraltet oder falsch sein; für Fragen zu deinen Seiten einen anderen Bezug wählen.',
                 )}
               </p>
             )}
             {!messages.length && !live && scope.kind !== 'general' && (
               <p className="text-fg-muted">
                 {t(
-                  'Die KI sucht und liest selbst – nur in Notizen, die für sie freigegeben sind und die du lesen darfst. Auf Wunsch schlägt sie Änderungen vor (neue Notiz, Text ändern, verschieben, sich etwas merken); ausgeführt wird erst, wenn du „Übernehmen“ klickst. Quellen stehen unter der Antwort.',
+                  'Die KI sucht und liest selbst – nur in Seiten, die für sie freigegeben sind und die du lesen darfst. Auf Wunsch schlägt sie Änderungen vor (neue Seite, Text ändern, verschieben, sich etwas merken); ausgeführt wird erst, wenn du „Übernehmen“ klickst. Quellen stehen unter der Antwort.',
                 )}
               </p>
             )}
@@ -660,7 +660,7 @@ function Message({
     if (ok) setCopied();
     toast(
       ok
-        ? { kind: 'ok', title: t('Antwort kopiert'), text: t('In eine Notiz einfügen: formatiert; in einen Texteditor: als Markdown.') }
+        ? { kind: 'ok', title: t('Antwort kopiert'), text: t('In eine Seite einfügen: formatiert; in einen Texteditor: als Markdown.') }
         : { kind: 'error', title: t('Nicht kopiert'), text: t('Der Browser hat den Zugriff auf die Zwischenablage verweigert.') },
     );
   };
@@ -673,7 +673,7 @@ function Message({
       ...(scope.kind === 'note' || scope.kind === 'folder' ? { mountId: scope.mountId, folder: scope.kind === 'folder' ? scope.path : scope.path.split('/').slice(0, -1).join('/') } : scope.kind === 'source' ? { mountId: scope.mountId, folder: '' } : {}),
       onSaved: onClose,
     });
-  // „In Notiz einfügen“ (owner 24.11.): into the open note where its cursor was; never placed (start of the note) → at
+  // „In Seite einfügen“ (owner 24.11.): into the open note where its cursor was; never placed (start of the note) → at
   // the end. The sources come along as links that work from that note, like when saving the answer as a note.
   const current = useAi((x) => x.current);
   const qc = useQueryClient();
@@ -687,7 +687,7 @@ function Message({
       const openToAll = !st || (st.grant.level !== 'none' && st.grant.cloud);
       if (
         openToAll &&
-        !(await confirmDialog(t('Diese Antwort kann Inhalt aus privaten Notizen enthalten. In „{name}“ können ihn danach auch KIs lesen, die nicht für private Notizen zugelassen sind.', { name: noteNameIn(mountId, path) }), {
+        !(await confirmDialog(t('Diese Antwort kann Inhalt aus privaten Seiten enthalten. In „{name}“ können ihn danach auch KIs lesen, die nicht für private Seiten zugelassen sind.', { name: noteNameIn(mountId, path) }), {
           confirmLabel: t('Trotzdem einfügen'),
         }))
       )
@@ -703,7 +703,7 @@ function Message({
     const { $to } = selection;
     const at = selection.eq(Selection.atStart(doc)) ? doc.content.size : $to.depth >= 1 ? $to.after(1) : $to.pos;
     editor.chain().focus().insertContentAt(at, blocks).run();
-    toast({ kind: 'ok', title: t('In die Notiz eingefügt'), text: noteNameIn(mountId, path) });
+    toast({ kind: 'ok', title: t('In die Seite eingefügt'), text: noteNameIn(mountId, path) });
     onClose();
   };
   return (
@@ -739,11 +739,11 @@ function Message({
           </Button>
           {target && (
             <Button size="sm" variant="ghost" onClick={() => void insert()} title={t('Unter dem Absatz mit der Schreibmarke in „{name}“ einfügen', { name: noteNameIn(target.mountId, target.path) })}>
-              <TextCursorInput className="h-3.5 w-3.5" /> {t('In Notiz einfügen')}
+              <TextCursorInput className="h-3.5 w-3.5" /> {t('In Seite einfügen')}
             </Button>
           )}
           <Button size="sm" variant="ghost" onClick={save}>
-            <FilePlus className="h-3.5 w-3.5" /> {t('Als Notiz speichern …')}
+            <FilePlus className="h-3.5 w-3.5" /> {t('Als Seite speichern …')}
           </Button>
         </div>
       )}
@@ -787,8 +787,8 @@ function Message({
           <span className="min-w-0 flex-1">
             {tn(
               m.meta.privateSkipped.count,
-              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notiz ist nicht dabei.',
-              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notizen sind nicht dabei.',
+              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Seite ist nicht dabei.',
+              'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Seiten sind nicht dabei.',
               { provider: m.meta.provider ?? '' },
             )}
           </span>
@@ -818,7 +818,7 @@ function ProposalCard({ proposal, onChanged, onClose }: { proposal: AiProposal; 
   const where = (path: string) => `${p.mountName} / ${path || t('oberste Ebene')}`;
   const title =
     p.kind === 'create'
-      ? t('Neue Notiz „{title}“ in {where}', { title: p.title ?? '', where: where(p.path) })
+      ? t('Neue Seite „{title}“ in {where}', { title: p.title ?? '', where: where(p.path) })
       : p.kind === 'write'
         ? t('Ändern: {where}', { where: where(p.path) })
         : p.kind === 'move'
@@ -853,8 +853,8 @@ function ProposalCard({ proposal, onChanged, onClose }: { proposal: AiProposal; 
           {p.status === 'open' && p.privateWarning && (
             <div className="mt-1 text-xs text-warn" role="note">
               {p.privateWarning === 'move'
-                ? t('Achtung: Das ist nur für private KI freigegeben. Am Ziel können es nach dem Verschieben auch KIs lesen, die nicht für private Notizen zugelassen sind.')
-                : t('Achtung: Dieser Vorschlag kann Inhalt aus privaten Notizen enthalten. Am Ziel können ihn nach dem Übernehmen auch KIs lesen, die nicht für private Notizen zugelassen sind.')}
+                ? t('Achtung: Das ist nur für private KI freigegeben. Am Ziel können es nach dem Verschieben auch KIs lesen, die nicht für private Seiten zugelassen sind.')
+                : t('Achtung: Dieser Vorschlag kann Inhalt aus privaten Seiten enthalten. Am Ziel können ihn nach dem Übernehmen auch KIs lesen, die nicht für private Seiten zugelassen sind.')}
             </div>
           )}
         </div>

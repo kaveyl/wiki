@@ -129,7 +129,7 @@ it('to another source: the copy is closed even when the move fails half-way (sec
 it('to another source: when copying itself fails, what was copied is closed already (sec2-016)', async () => {
   mkdirSync(join(root, 'projekte', 'ziel'), { recursive: true });
   mkdirSync(join(wiki, 'fz'), { recursive: true });
-  writeFileSync(join(wiki, 'fz', 'notiz.md'), '# Notiz\n');
+  writeFileSync(join(wiki, 'fz', 'notiz.md'), '# Seite\n');
   writeFileSync(join(wiki, 'fz', '.kaveyl-wiki.yml'), 'sort: name\n');
   const end = Date.now() + 5000;
   while (!(await inject('GET', `/api/tree/${mountId}`, admin)).body.includes('fz/notiz.md') && Date.now() < end) await new Promise((r) => setTimeout(r, 50));

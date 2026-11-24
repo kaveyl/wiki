@@ -37,8 +37,8 @@ export function useTagActions(tag: string) {
         suggestions: all.filter((x) => tagKey(x.tag) !== tagKey(tag)).map((x) => x.tag),
         hint: tn(
           mine?.count ?? 0,
-          'Ändert {n} Notiz mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.',
-          'Ändert {n} Notizen mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.',
+          'Ändert {n} Seite mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.',
+          'Ändert {n} Seiten mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.',
           { tag },
         ),
         confirmLabel: merge ? t('Zusammenführen') : t('Umbenennen'),
@@ -54,8 +54,8 @@ export function useTagActions(tag: string) {
       !(await confirmDialog(
         tn(
           other.count,
-          '#{other} gibt es schon ({n} Notiz). #{tag} damit zusammenführen? Notizen mit beiden Tags behalten es einmal.',
-          '#{other} gibt es schon ({n} Notizen). #{tag} damit zusammenführen? Notizen mit beiden Tags behalten es einmal.',
+          '#{other} gibt es schon ({n} Seite). #{tag} damit zusammenführen? Seiten mit beiden Tags behalten es einmal.',
+          '#{other} gibt es schon ({n} Seiten). #{tag} damit zusammenführen? Seiten mit beiden Tags behalten es einmal.',
           { other: other.tag, tag },
         ),
         { confirmLabel: t('Zusammenführen') },
@@ -69,8 +69,8 @@ export function useTagActions(tag: string) {
         kind: r.skipped ? 'warn' : 'ok',
         title: other ? t('#{tag} mit #{other} zusammengeführt', { tag, other: other.tag }) : t('#{tag} heißt jetzt #{to}', { tag, to }),
         text: r.skipped
-          ? tn(r.notes, '{n} Notiz geändert, {skipped} ohne Schreibrecht unverändert.', '{n} Notizen geändert, {skipped} ohne Schreibrecht unverändert.', { skipped: r.skipped })
-          : tn(r.notes, '{n} Notiz geändert.', '{n} Notizen geändert.'),
+          ? tn(r.notes, '{n} Seite geändert, {skipped} ohne Schreibrecht unverändert.', '{n} Seiten geändert, {skipped} ohne Schreibrecht unverändert.', { skipped: r.skipped })
+          : tn(r.notes, '{n} Seite geändert.', '{n} Seiten geändert.'),
       });
     } catch (e) {
       toast({ kind: 'error', title: t('Umbenennen fehlgeschlagen'), text: errorText(e) });
@@ -81,7 +81,7 @@ export function useTagActions(tag: string) {
     const all = await qc.fetchQuery({ queryKey: ['tags'], queryFn: api.tags, staleTime: 5_000 });
     const count = all.find((x) => tagKey(x.tag) === tagKey(tag))?.count ?? 0;
     const ok = await confirmDialog(
-      tn(count, '#{tag} aus {n} Notiz entfernen? Die Notiz selbst bleibt, auch ihre anderen Tags.', '#{tag} aus {n} Notizen entfernen? Die Notizen selbst bleiben, auch ihre anderen Tags.', { tag }),
+      tn(count, '#{tag} aus {n} Seite entfernen? Die Seite selbst bleibt, auch ihre anderen Tags.', '#{tag} aus {n} Seiten entfernen? Die Seiten selbst bleiben, auch ihre anderen Tags.', { tag }),
       { confirmLabel: t('Tag entfernen'), danger: true },
     );
     if (!ok) return;
@@ -92,8 +92,8 @@ export function useTagActions(tag: string) {
         kind: r.skipped ? 'warn' : 'ok',
         title: t('#{tag} entfernt', { tag }),
         text: r.skipped
-          ? tn(r.notes, '{n} Notiz geändert, {skipped} ohne Schreibrecht unverändert.', '{n} Notizen geändert, {skipped} ohne Schreibrecht unverändert.', { skipped: r.skipped })
-          : tn(r.notes, '{n} Notiz geändert.', '{n} Notizen geändert.'),
+          ? tn(r.notes, '{n} Seite geändert, {skipped} ohne Schreibrecht unverändert.', '{n} Seiten geändert, {skipped} ohne Schreibrecht unverändert.', { skipped: r.skipped })
+          : tn(r.notes, '{n} Seite geändert.', '{n} Seiten geändert.'),
       });
     } catch (e) {
       toast({ kind: 'error', title: t('Tag nicht entfernt'), text: errorText(e) });
@@ -110,7 +110,7 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
       <ContextTrigger asChild>{children}</ContextTrigger>
       <ContextContent>
         <ContextItem icon={<Hash />} onSelect={show}>
-          {t('Notizen mit #{tag} zeigen', { tag })}
+          {t('Seiten mit #{tag} zeigen', { tag })}
         </ContextItem>
         <ContextSub icon={<Palette />} label={t('Farbe')}>
           {TAG_COLORS.map((c) => (
@@ -132,7 +132,7 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
           {t('Umbenennen / zusammenführen …')}
         </ContextItem>
         <ContextItem icon={<Trash2 />} danger onSelect={() => void remove()}>
-          {t('Aus allen Notizen entfernen …')}
+          {t('Aus allen Seiten entfernen …')}
         </ContextItem>
       </ContextContent>
     </ContextMenu>

@@ -6,7 +6,7 @@
 
 **Simple for everyday use. Built for the age of AI.**
 
-A self-hosted wiki for personal notes, documentation and team projects – as easy as a modern notes app,<br>
+A self-hosted wiki for technical docs, team knowledge and your own projects – as easy to use as a modern editor,<br>
 with plain Markdown files in Git underneath and a built-in MCP server for your AI agents.
 
 [![CI](https://github.com/kaveyl/wiki/actions/workflows/ci.yml/badge.svg)](https://github.com/kaveyl/wiki/actions/workflows/ci.yml)
@@ -17,7 +17,7 @@ with plain Markdown files in Git underneath and a built-in MCP server for your A
 [Website](https://kaveyl.app) · [All features](https://kaveyl.app/features/) · [Install](deploy/INSTALLATION.md) ·
 [Manual](docs/i18n/en/BENUTZERHANDBUCH.md) · [API & MCP](docs/i18n/en/API.md) · [Changes](deploy/CHANGES.md)
 
-<img src="docs/images/recipe.webp" alt="Kaveyl Wiki in the browser: the folder tree with a personal source and three team sources on the left, an apple strudel recipe with coloured tags, a table, a tip and a shopping checklist in the editor, the table of contents on the right" width="900">
+<img src="docs/images/homelab.webp" alt="Kaveyl Wiki in the browser: on the left the folder tree with the source “Homelab” (servers, network, runbooks, decisions), three team sources and a small personal one, in the editor the server page “docker-01” with coloured tags, a table of its services, a warning, an update checklist and a Compose file, on the right the table of contents" width="900">
 
 </div>
 
@@ -35,7 +35,7 @@ nor inside a closed cloud.
 - **For developers & DevOps** – every page stays a Markdown file in a Git repository or folder. Edit the same files in
   VS Code, Neovim or with `git`; your CI pipelines keep running as before.
 - **For AI agents & automation** – a built-in MCP server and a REST API. Claude Code, Cursor or your own scripts search,
-  read and change notes – never with more rights than the account behind the token.
+  read and change pages – never with more rights than the account behind the token.
 
 ## How it works
 
@@ -51,9 +51,9 @@ versions and decide. Your content lives in no database, and nothing is ever sile
 |---|---|
 | **Writing** | Editor or Markdown source, tables, checklists, callouts, formulas (KaTeX), Mermaid diagrams, Excalidraw drawings, templates, slash commands |
 | **Finding** | Instant search across all sources, command palette (Ctrl+K), filters by tag, source and date, backlinks |
-| **Working together** | See who is typing, saved changes arrive at once for everyone, one commit per person, follow notes and folders, e-mail digests |
-| **Permissions** | Per source, folder and note; groups, guests, invitations, sharing by e-mail; the same rules for API and MCP |
-| **Protection** | Versions and restore, trash, notes and folders encrypted in the browser (age), encrypted backups to a folder or SMB share |
+| **Working together** | See who is typing, saved changes arrive at once for everyone, one commit per person, follow pages and folders, e-mail digests |
+| **Permissions** | Per source, folder and page; groups, guests, invitations, sharing by e-mail; the same rules for API and MCP |
+| **Protection** | Versions and restore, trash, pages and folders encrypted in the browser (age), encrypted backups to a folder or SMB share |
 | **Import & export** | From HedgeDoc, Joplin, Logseq, SilverBullet, Obsidian, Outline, Trilium, Wiki.js and Markdown folders; export as HTML, Markdown or PDF |
 | **AI** | An assistant (Ollama, Ollama Cloud, Anthropic, OpenRouter or OpenAI-compatible) that only suggests and sees only what an admin shares |
 | **Agents** | MCP server, REST API with OpenAPI, personal tokens, event webhooks, an example agent that acts only after a person approves |
@@ -66,19 +66,19 @@ The complete list is on **[kaveyl.app/features](https://kaveyl.app/features/)**.
 <table>
   <tr>
     <td width="50%"><img src="docs/images/editor.webp" alt="A deployment runbook with coloured tags, a warning callout, a checklist and code blocks"><br><sub>Runbooks with checklists and code</sub></td>
-    <td width="50%"><img src="docs/images/workspace.webp" alt="Five notes in tabs, one pinned, and two recipes side by side"><br><sub>Tabs and two notes side by side</sub></td>
+    <td width="50%"><img src="docs/images/workspace.webp" alt="Five pages in tabs, one pinned, and two pages side by side – a runbook and the reverse proxy with its diagram"><br><sub>Tabs and two pages side by side</sub></td>
   </tr>
   <tr>
     <td><img src="docs/images/presence.webp" alt="A runbook with the notice “Maria Chen is editing” at the top"><br><sub>See who is editing</sub></td>
     <td><img src="docs/images/history.webp" alt="The versions of a runbook: commits by Maria Chen and Sam Rivera, an added step highlighted in green"><br><sub>Every change, with author and difference</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/images/agent.webp" alt="An incident note by a server agent: one tick rejected, a question answered, an action run after approval"><br><sub>An agent that acts only after approval</sub></td>
+    <td><img src="docs/images/agent.webp" alt="An incident page written by a server agent: one tick not accepted, a question answered, an action run after approval"><br><sub>An agent that acts only after approval</sub></td>
     <td><img src="docs/images/permissions.webp" alt="The permission grid: people and groups in rows, sources in columns, inherited rights shown"><br><sub>Permissions as a grid</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/images/ai.webp" alt="A question to the knowledge base answered by a cloud model, with the recipe as source"><br><sub>Ask your notes</sub></td>
-    <td><img src="docs/images/dark.webp" alt="A travel plan with a day table, a packing checklist and a callout in dark mode"><br><sub>Dark mode</sub></td>
+    <td><img src="docs/images/ai.webp" alt="A question to the knowledge base answered by a cloud model, with the server, proxy and runbook pages as sources"><br><sub>Ask your pages</sub></td>
+    <td><img src="docs/images/dark.webp" alt="The reverse proxy page in dark mode: a small diagram, a table of hosts and the proxy configuration"><br><sub>Dark mode</sub></td>
   </tr>
 </table>
 

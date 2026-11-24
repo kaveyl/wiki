@@ -42,7 +42,7 @@ export const SearchBox = forwardRef<SearchHandle, { mounts: Mount[]; onSearchPag
     if (!r || !query) return [];
     return [
       { label: t('Ordner'), hits: r.folders },
-      { label: t('Notizen'), hits: r.notes },
+      { label: t('Seiten'), hits: r.notes },
       { label: t('Inhalt'), hits: r.content },
     ].filter((g) => g.hits.length);
   }, [result.data, query]);
@@ -107,7 +107,7 @@ export const SearchBox = forwardRef<SearchHandle, { mounts: Mount[]; onSearchPag
           onKeyDown={onKeyDown}
           placeholder={t('Suchen …')}
           className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fg-faint"
-          aria-label={t('Notizen durchsuchen')}
+          aria-label={t('Seiten durchsuchen')}
         />
         <kbd className="hidden rounded border border-line px-1 text-[0.625rem] text-fg-faint sm:block" title={t('Strg+K öffnet die Befehlspalette')}>
           {t('Strg P')}

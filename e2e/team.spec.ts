@@ -110,7 +110,7 @@ test('two people type at the same moment: asked both ways, one gets the notice, 
   // Paul starts typing: asked once, „Trotzdem bearbeiten“ puts the cursor back and his text reaches Lena.
   await typeAtEnd(p, 'P');
   const askP = p.getByRole('alertdialog');
-  await expect(askP).toContainText('Lena Lang bearbeitet diese Notiz gerade');
+  await expect(askP).toContainText('Lena Lang bearbeitet diese Seite gerade');
   await askP.getByRole('button', { name: 'Trotzdem bearbeiten' }).click();
   await expect(askP).toHaveCount(0);
   await expect(editor(p)).toBeFocused();
@@ -120,7 +120,7 @@ test('two people type at the same moment: asked both ways, one gets the notice, 
   // Now Lena is asked – Paul is editing.
   await typeAtEnd(l, ' ');
   const askL = l.getByRole('alertdialog');
-  await expect(askL).toContainText('Paul Probst bearbeitet diese Notiz gerade');
+  await expect(askL).toContainText('Paul Probst bearbeitet diese Seite gerade');
   await askL.getByRole('button', { name: 'Trotzdem bearbeiten' }).click();
   await expect(askL).toHaveCount(0);
   await expect(editor(l)).toBeFocused();
@@ -145,7 +145,7 @@ test('moved while open: the tab follows, typing goes on at the new place, links 
   const ref = await note('Verweis', '# Verweis\n\n[Zum Umzug](Umzug.md)\n');
   const page = await openNote(lena, P);
   expect((await paul.api.post(`/api/notes/${mountId}/move`, { data: { from: P, to: 'Archiv/Umzug alt.md' } })).ok()).toBe(true);
-  await expect(page.getByRole('button', { name: 'Pfad der Notiz' })).toContainText('Archiv/Umzug alt', { timeout: 10_000 });
+  await expect(page.getByRole('button', { name: 'Pfad der Seite' })).toContainText('Archiv/Umzug alt', { timeout: 10_000 });
   await expect(page.getByRole('alert').filter({ hasText: 'gelöscht oder verschoben' })).toHaveCount(0);
   await typeAtEnd(page, ' Lena nach Umzug');
   await expect.poll(async () => (await read('Archiv/Umzug alt.md'))?.raw, { timeout: 10_000 }).toContain('Lena nach Umzug');
@@ -161,10 +161,10 @@ test('renamed while someone types: the unsaved text lands in the renamed note, t
   await expect.poll(async () => (await read('Tippen umbenannt.md'))?.raw, { timeout: 10_000 }).toContain('Ungespeichert');
   await page.waitForTimeout(1500);
   expect(await read(P)).toBeNull();
-  await expect(page.getByRole('button', { name: 'Pfad der Notiz' })).toContainText('Tippen umbenannt');
+  await expect(page.getByRole('button', { name: 'Pfad der Seite' })).toContainText('Tippen umbenannt');
 });
 
-test('deleted while open: shown at once; „Als neue Notiz speichern …“ keeps what was typed afterwards', async () => {
+test('deleted while open: shown at once; „Als neue Seite speichern …“ keeps what was typed afterwards', async () => {
   const P = await note('Löschfall', '# Löschfall\n\nWichtiger Inhalt.\n');
   const page = await openNote(lena, P);
   expect((await paul.api.delete(`/api/notes/${mountId}/${enc(P)}`, { data: {} })).ok()).toBe(true);
@@ -173,7 +173,7 @@ test('deleted while open: shown at once; „Als neue Notiz speichern …“ keep
   await typeAtEnd(page, ' Nach dem Löschen getippt');
   await page.waitForTimeout(1500);
   expect(await read(P)).toBeNull();
-  await gone.getByRole('button', { name: 'Als neue Notiz speichern …' }).click();
+  await gone.getByRole('button', { name: 'Als neue Seite speichern …' }).click();
   await page.getByRole('dialog').last().getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect.poll(async () => (await read(P))?.raw, { timeout: 10_000 }).toContain('Nach dem Löschen getippt');
   expect((await read(P))!.raw).toContain('Wichtiger Inhalt.');

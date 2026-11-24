@@ -49,7 +49,7 @@ export function openDrawing(editor: Editor, src?: string, pos?: number) {
   const ctx = drawingContexts.get(editor);
   if (!ctx) return;
   if (isSealed(ctx.mountId, ctx.notePath)) {
-    toast({ kind: 'warn', title: t('Zeichnungen gibt es in verschlüsselten Notizen nicht'), text: t('Die Zeichnung läge unverschlüsselt in assets/.') });
+    toast({ kind: 'warn', title: t('Zeichnungen gibt es in verschlüsselten Seiten nicht'), text: t('Die Zeichnung läge unverschlüsselt in assets/.') });
     return;
   }
   if (src) {

@@ -55,6 +55,6 @@ if (name) origins(chunk(name), Number(top ?? 30));
 else {
   const base = [chunk('index'), chunk('App')];
   console.log(`Anmeldeseite:              ${kb(gzip(closure(base)))}`);
-  console.log(`Oberfläche ohne Notiz:     ${kb(gzip(closure([...base, chunk('Shell')])))}`);
-  console.log(`mit geöffneter Notiz:      ${kb(gzip(closure([...base, chunk('Shell'), chunk('NoteView')])))}`);
+  console.log(`Oberfläche ohne Seite:     ${kb(gzip(closure([...base, chunk('Shell')])))}`);
+  console.log(`mit geöffneter Seite:      ${kb(gzip(closure([...base, chunk('Shell'), chunk('NoteView')])))}`);
 }

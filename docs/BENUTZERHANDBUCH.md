@@ -17,7 +17,7 @@ tags: kaveyl-wiki, handbuch
 3. [Anmelden und Oberfläche](#anmelden-und-oberfläche)
 4. [Menüs im Überblick](#menüs-im-überblick)
 5. [Quellen einbinden](#quellen-einbinden)
-6. [Notizen finden und lesen](#notizen-finden-und-lesen)
+6. [Seiten finden und lesen](#seiten-finden-und-lesen)
 7. [Bearbeiten](#bearbeiten) (mit [Markdown-Spickzettel](#markdown-spickzettel))
 8. [So funktioniert der Abgleich](#so-funktioniert-der-abgleich)
 9. [Speichern, Übertragen und Synchronisieren](#speichern-übertragen-und-synchronisieren)
@@ -29,7 +29,7 @@ tags: kaveyl-wiki, handbuch
 15. [Berechtigungen](#berechtigungen)
 16. [Konten, Einladungen und Teilen per E-Mail](#konten-einladungen-und-teilen-per-e-mail)
 17. [Im Team arbeiten](#im-team-arbeiten) (mit [Beobachten](#beobachten) und [Agenten im Team](#agenten-im-team))
-18. [Verschlüsselte Notizen und Ordner](#verschlüsselte-notizen-und-ordner)
+18. [Verschlüsselte Seiten und Ordner](#verschlüsselte-seiten-und-ordner)
 19. [Einstellungen im Überblick](#einstellungen-im-überblick) (mit [Backup](#backup))
 20. [Zugriff über das Netz](#zugriff-über-das-netz) (Reverse-Proxy, Pangolin)
 21. [Daten, Protokoll und Sicherungen](#daten-protokoll-und-sicherungen) (mit [Löschregeln](#löschregeln))
@@ -63,7 +63,7 @@ Wie Kaveyl Wiki mit dem Git-Server und mit anderen Editoren und Geräten zusamme
 ### Auf einen Blick
 
 **Dateien statt Datenbank.** Kaveyl Wiki ist ein Wiki für ganz normale Markdown-Dateien – eine eigene
-Datenbank für Inhalte gibt es nicht. Die Notizen liegen in Git-Repositories (Gitea, GitHub, GitLab oder
+Datenbank für Inhalte gibt es nicht. Die Seiten liegen in Git-Repositories (Gitea, GitHub, GitLab oder
 jede Git-Adresse) oder in Ordnern, die in den Container eingehängt sind. Jede Quelle erscheint links als
 eigener Baum; die Sofort-Suche und die Befehlspalette (Strg+K) finden alles.
 
@@ -74,16 +74,16 @@ nichts wird still überschrieben, Konflikte zeigt Kaveyl Wiki an. Unter jeder Qu
 mit deinem Git-Server ab, lokale Ordner führen ihre Versionen mit einem eigenen Git auf dem Server.
 
 **Schutz und Rechte.** Versionen, Papierkorb, Backups auf ein NAS oder einen eigenen Ordner,
-Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Notizen regeln, wer was sehen
+Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Seiten regeln, wer was sehen
 und ändern darf.
 
 **KI und Schnittstellen.** Ein KI-Assistent hilft beim Schreiben und beantwortet Fragen aus
-freigegebenen Notizen – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und
+freigegebenen Seiten – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und
 KI-Werkzeuge wie Claude mit denselben Rechten mit.
 
 Kaveyl Wiki läuft als **Docker-Container**. Was es selbst speichert (Benutzer, Einstellungen, Protokoll,
 Sicherungen, lokale Kopien der Repositories), liegt in den eingehängten Ordnern `/config` und `/data`;
-lokale Ordner (Notizen nur auf diesem Server) liegen unter `/docs` – siehe [Daten, Protokoll und Sicherungen](#daten-protokoll-und-sicherungen).
+lokale Ordner (Seiten nur auf diesem Server) liegen unter `/docs` – siehe [Daten, Protokoll und Sicherungen](#daten-protokoll-und-sicherungen).
 
 ## Hilfe in Kaveyl Wiki
 
@@ -166,12 +166,12 @@ unter [Auf einem neuen Server](#auf-einem-neuen-server).
 
 ![Oberfläche](handbuch/02-oberflaeche.webp)
 
-Die Notiz liegt als abgerundetes Blatt auf einem ruhigen Hintergrund; die Seitenleiste steht links direkt auf diesem
+Die Seite liegt als abgerundetes Blatt auf einem ruhigen Hintergrund; die Seitenleiste steht links direkt auf diesem
 Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Finger schieben, mit der Tastatur ← →)
 ändert die Breite der Seitenleiste.
 
 - **Links (Seitenleiste)** von oben nach unten: „Kaveyl Wiki“ mit ✦ **KI fragen** (wenn eingerichtet) und **#** Tags;
-  der Knopf **Neue Notiz** (legt sie im Ordner der offenen Notiz an, sonst in der ersten Quelle, in die du schreiben
+  der Knopf **Neue Seite** (legt sie im Ordner der offenen Seite an, sonst in der ersten Quelle, in die du schreiben
   darfst); die **Suche**; deine **Favoriten** als kleine Chips (bei vielen in zwei Zeilen zum Scrollen); der Umschalter
   **Baum | Zuletzt | KI-Freigaben** (KI-Freigaben nur für Administratoren) und darunter die gewählte Ansicht – im Baum
   jede eingebundene **Quelle** (Repository oder Ordner) in einer gemeinsamen Karte. Ganz unten **Quelle einbinden**
@@ -184,9 +184,9 @@ Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Fing
   Bildschirm). Jeder Klick auf das Farbschema-Symbol schaltet weiter: Hell → Dunkel → System (folgt dem Gerät); die
   Wahl bleibt in diesem Browser gespeichert. Auf dem Handy stehen Hilfe und Einstellungen mit im Konto-Menü, damit die
   Tabs Platz haben.
-- **Oben:** Tabs der geöffneten Notizen. Die mittlere Maustaste öffnet in einem neuen Tab (unter Favoriten und
+- **Oben:** Tabs der geöffneten Seiten. Die mittlere Maustaste öffnet in einem neuen Tab (unter Favoriten und
   Zuletzt auch Strg+Klick; im Baum [markiert](#mehrere-markieren) Strg+Klick). Rechtsklick auf einen Tab → **„Tab anheften“**: angeheftete Tabs rücken nach links,
-  zeigen eine Stecknadel statt ×, werden beim Öffnen einer anderen Notiz nie ersetzt und bleiben
+  zeigen eine Stecknadel statt ×, werden beim Öffnen einer anderen Seite nie ersetzt und bleiben
   bei „Andere Tabs schließen“ und Mittelklick stehen. Klick auf die Stecknadel löst sie wieder.
   Sind viele Tabs offen, werden sie schmaler (der Name bleibt lesbar); passen sie trotzdem nicht, lässt sich
   die Leiste mit dem Mausrad seitlich schieben, und rechts erscheint der Knopf **„Alle Tabs (n)“** (Zahl mit
@@ -196,25 +196,25 @@ Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Fing
 ![Angeheftete Tabs](handbuch/50-angeheftet.webp)
 
 ![Alle Tabs](handbuch/tabs-alle.webp)
-- **Mitte:** der Editor; die Werkzeugleiste schwebt unten über der Notiz (oder steht oben, siehe
-  [Darstellung](#darstellung)). **Rechts** das Inhaltsverzeichnis (bei längeren Notizen), ein- und ausblendbar.
-- Oben rechts in der Notiz: **Editor / Markdown** (Ansicht umschalten), Breite umschalten
+- **Mitte:** der Editor; die Werkzeugleiste schwebt unten über der Seite (oder steht oben, siehe
+  [Darstellung](#darstellung)). **Rechts** das Inhaltsverzeichnis (bei längeren Seiten), ein- und ausblendbar.
+- Oben rechts auf der Seite: **Editor / Markdown** (Ansicht umschalten), Breite umschalten
   und das Menü **„…“** (Versionen, Umbenennen, Löschen …).
 
-**Willkommensseite.** Solange keine Notiz offen ist, zeigt die Mitte die Willkommensseite. Oben stehen die ersten
+**Willkommensseite.** Solange keine Seite offen ist, zeigt die Mitte die Willkommensseite. Oben stehen die ersten
 Schritte, passend zur Rolle; was schon erledigt ist, ist abgehakt:
 
 - **Administratoren:** Quelle einbinden, E-Mail-Versand einrichten, Reverse-Proxy mit https einrichten (erledigt,
   sobald Kaveyl Wiki deine Anfrage als https erkennt – siehe [Reverse-Proxy](#reverse-proxy)), Leute einladen (erledigt,
   sobald es ein zweites Konto gibt) und ein Backup festlegen (erledigt mit einem aktiven Zeitplan). Ohne https gehen
-  Passwörter und Notizen unverschlüsselt durchs Netz, und ohne eingetragenen Proxy sieht Kaveyl Wiki nicht, wer wirklich
+  Passwörter und Seiten unverschlüsselt durchs Netz, und ohne eingetragenen Proxy sieht Kaveyl Wiki nicht, wer wirklich
   anfragt – im Protokoll steht dann nur die Adresse des Proxys, und die Anmeldebremse trifft alle zugleich.
-- **Benutzer:** Notizen finden (erledigt nach der ersten geöffneten Notiz), Favoriten merken (nach dem ersten Stern),
+- **Benutzer:** Seiten finden (erledigt nach der ersten geöffneten Seite), Favoriten merken (nach dem ersten Stern),
   Darstellung anpassen, Kaveyl Wiki wie eine App benutzen (mit dem Weg für dein Gerät, erledigt, wenn es schon als App
   läuft – siehe [Im Browser und als App](#im-browser-und-als-app-handy-tablet-computer)).
-- **Gäste:** die geteilte Notiz öffnen, Darstellung anpassen, Kaveyl Wiki wie eine App benutzen.
+- **Gäste:** die geteilte Seite öffnen, Darstellung anpassen, Kaveyl Wiki wie eine App benutzen.
 
-Ist noch keine Quelle freigegeben, steht statt „Notizen finden“ **„Auf eine Freigabe warten“** – ein Administrator
+Ist noch keine Quelle freigegeben, steht statt „Seiten finden“ **„Auf eine Freigabe warten“** – ein Administrator
 gibt Quellen oder Ordner frei (siehe [Berechtigungen](#berechtigungen)); dasselbe steht dann auch in der Seitenleiste. Darunter steht, was Kaveyl Wiki kann: für alle
 Versionen und Papierkorb; für Benutzer zusätzlich KI-Assistent, API und MCP, Verschlüsselung und die Arbeit mit
 anderen Editoren; für Administratoren außerdem Backup, Benachrichtigungen und Kaveyl Wiki wie eine App.
@@ -230,16 +230,16 @@ Mitte mit **„Willkommensseite anzeigen“**. Die Wahl gilt für dein Konto auf
 ## Menüs im Überblick
 
 Fast alles erreichst du per **Rechtsklick** (auf Touch-Geräten: **lange drücken**) oder über das
-Notiz-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), erscheint gar nicht erst.
+Seiten-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), erscheint gar nicht erst.
 
 ### Kopfzeile der Seitenleiste
 
 | Symbol | Wirkung |
 |---|---|
 | ✦ KI fragen | [Frag die Wissensbasis](#frag-die-wissensbasis) über alles Freigegebene |
-| # Tags | **Tags verwalten:** alle Tags mit Anzahl und Farbe. Ein Klick wählt ein Tag, darunter stehen **Notizen zeigen**, **Farbe**, **Umbenennen**, **Zusammenführen** und **Löschen** (nimmt das Tag nach einer Rückfrage mit der Anzahl aus allen Notizen, die du bearbeiten darfst – die Notizen bleiben); ein Doppelklick zeigt die Notizen gleich, Rechtsklick öffnet dieselben Befehle als Menü |
-| Neue Notiz | neue Notiz im Ordner der offenen Notiz (sonst in der ersten beschreibbaren Quelle) |
-| Favoriten-Chips | ein Klick öffnet, Rechtsklick wie unter [Favoriten](#notizen-finden-und-lesen) |
+| # Tags | **Tags verwalten:** alle Tags mit Anzahl und Farbe. Ein Klick wählt ein Tag, darunter stehen **Seiten zeigen**, **Farbe**, **Umbenennen**, **Zusammenführen** und **Löschen** (nimmt das Tag nach einer Rückfrage mit der Anzahl aus allen Seiten, die du bearbeiten darfst – die Seiten bleiben); ein Doppelklick zeigt die Seiten gleich, Rechtsklick öffnet dieselben Befehle als Menü |
+| Neue Seite | neue Seite im Ordner der offenen Seite (sonst in der ersten beschreibbaren Quelle) |
+| Favoriten-Chips | ein Klick öffnet, Rechtsklick wie unter [Favoriten](#seiten-finden-und-lesen) |
 | Baum \| Zuletzt \| KI-Freigaben | welche Ansicht darunter steht; die Wahl gilt für dein Konto. „Im Baum anzeigen“ schaltet von selbst auf „Baum“ |
 | Quellen: Alles auf-/zuklappen | alle Ordner aller Quellen auf- oder zuklappen |
 
@@ -265,9 +265,9 @@ Notiz-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersche
 
 | Eintrag | Wirkung |
 |---|---|
-| Neue Notiz / Neuer Ordner | auf oberster Ebene der Quelle |
+| Neue Seite / Neuer Ordner | auf oberster Ebene der Quelle |
 | Einfügen „…“ | was du vorher kopiert oder ausgeschnitten hast (Strg+V) |
-| Importieren ▸ Markdown-Dateien … | `.md`-Dateien vom Computer als Notizen auf die oberste Ebene ([Markdown importieren](#markdown-importieren)) |
+| Importieren ▸ Markdown-Dateien … | `.md`-Dateien vom Computer als Seiten auf die oberste Ebene ([Markdown importieren](#markdown-importieren)) |
 | Importieren ▸ Aus anderem Programm … | Export eines anderen Programms (ZIP) als neuer Ordner ([Aus anderen Programmen importieren](#aus-anderen-programmen-importieren)) |
 | Berechtigungen … | [Rechte](#berechtigungen) für die ganze Quelle (Admins, „verwalten“) |
 | Teilen ▸ Zugriff per E-Mail geben … | die ganze Quelle mit jemandem [teilen](#konten-einladungen-und-teilen-per-e-mail) (Admins, „verwalten“) |
@@ -275,59 +275,59 @@ Notiz-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersche
 | Anordnen → Quelle nach oben / unten, Oberste Ebene alphabetisch sortieren | Reihenfolge in der Seitenleiste bzw. der obersten Ebene |
 | Jetzt synchronisieren | holt und überträgt sofort (Repositories) |
 | Exportieren ▸ HTML (ZIP) / Markdown (ZIP) | die ganze Quelle als Webseiten oder als Markdown-Dateien ([Export](#exportieren-und-drucken)) |
-| Papierkorb | gelöschte Notizen dieser Quelle ([Papierkorb](#versionen-und-papierkorb)) |
+| Papierkorb | gelöschte Seiten dieser Quelle ([Papierkorb](#versionen-und-papierkorb)) |
 | Backup ▸ Jetzt sichern / Sicherungen und Wiederherstellen … / Zeitpläne … | sofort sichern (alle aktiven Zeitpläne mit dieser Quelle), ihre [Sicherungen](#sicherungen) oder [Zeitpläne](#zeitpläne) öffnen (Admins) |
 | Quelle bearbeiten … | [Quelle bearbeiten](#eine-quelle-bearbeiten): Name, Symbol, Optionen, Inhalt, aushängen (Admins) |
 | Repository löschen … | nur Gitea/GitHub/GitLab, Admins ([Repositories löschen](#repositories-löschen)) |
 
-### Rechtsklick auf einen Ordner oder eine Notiz
+### Rechtsklick auf einen Ordner oder eine Seite
 
 Ganz oben steht eine Leiste mit fünf Kacheln für das Häufigste, darunter folgen die übrigen Einträge in Gruppen;
 **Löschen** steht rot abgesetzt am Ende.
 
-- **Kacheln an einer Notiz:** **Neuer Tab** (auch mittlere Maustaste), **Kopieren**, **Ausschneiden**, **Umbenennen**
+- **Kacheln an einer Seite:** **Neuer Tab** (auch mittlere Maustaste), **Kopieren**, **Ausschneiden**, **Umbenennen**
   (Umbenennen / verschieben), **Favorit**.
-- **Kacheln an einem Ordner:** **Fokus** (nur diesen Ordner zeigen), **Notiz** und **Ordner** (neu darin),
+- **Kacheln an einem Ordner:** **Fokus** (nur diesen Ordner zeigen), **Seite** und **Ordner** (neu darin),
   **Umbenennen**, **Favorit**.
 
 | Eintrag | Wirkung |
 |---|---|
-| Öffnen & Neu anlegen ▸ Rechts / Links daneben öffnen, Neue Notiz / Neuer Ordner daneben | an Notizen: [geteilte Ansicht](#notizen-finden-und-lesen) und Neues auf derselben Ebene |
+| Öffnen & Neu anlegen ▸ Rechts / Links daneben öffnen, Neue Seite / Neuer Ordner daneben | an Seiten: [geteilte Ansicht](#seiten-finden-und-lesen) und Neues auf derselben Ebene |
 | Öffnen (Tab / Rechts / Links) ▸ In neuem Tab, Rechts / Links daneben öffnen | an Ordnern mit Ordnerseite |
-| Kopieren / Ausschneiden / Pfad ▸ Kopieren, Ausschneiden, Einfügen „…“, Pfad kopieren | an Ordnern; an Notizen stehen Einfügen „…“ daneben und **Pfad kopieren** direkt in der Liste. Strg+C / Strg+X / Strg+V gehen im Baum immer. Der Pfad kommt vollständig mit der Quelle vorne (`Quelle/Ordner/Notiz.md`) in die Zwischenablage |
+| Kopieren / Ausschneiden / Pfad ▸ Kopieren, Ausschneiden, Einfügen „…“, Pfad kopieren | an Ordnern; an Seiten stehen Einfügen „…“ daneben und **Pfad kopieren** direkt in der Liste. Strg+C / Strg+X / Strg+V gehen im Baum immer. Der Pfad kommt vollständig mit der Quelle vorne (`Quelle/Ordner/Seite.md`) in die Zwischenablage |
 | Umbenennen / verschieben (Kachel) | Name und Ziel, auch in eine andere Quelle; Links werden repariert |
 | Auswählen | [mehrere markieren](#mehrere-markieren) – Kästchen vor den Zeilen, ein Tippen markiert (für Tablet und Handy; mit der Maus: Strg+Klick) |
 | Anordnen → Nach oben / Nach unten, Inhalt alphabetisch sortieren | Reihenfolge ohne Ziehen |
-| Importieren / Exportieren ▸ Markdown-Dateien …, Aus anderem Programm … | nur an Ordnern: `.md`-Dateien vom Computer als Notizen hinein ([Markdown importieren](#markdown-importieren)) bzw. Export eines anderen Programms (ZIP) als neuer Unterordner ([Aus anderen Programmen importieren](#aus-anderen-programmen-importieren)) |
-| Importieren / Exportieren ▸ HTML (ZIP), Markdown (ZIP) bzw. an Notizen Exportieren ▸ HTML-Datei, Markdown | [Export](#exportieren-und-drucken) |
+| Importieren / Exportieren ▸ Markdown-Dateien …, Aus anderem Programm … | nur an Ordnern: `.md`-Dateien vom Computer als Seiten hinein ([Markdown importieren](#markdown-importieren)) bzw. Export eines anderen Programms (ZIP) als neuer Unterordner ([Aus anderen Programmen importieren](#aus-anderen-programmen-importieren)) |
+| Importieren / Exportieren ▸ HTML (ZIP), Markdown (ZIP) bzw. an Seiten Exportieren ▸ HTML-Datei, Markdown | [Export](#exportieren-und-drucken) |
 | Aus Backup wiederherstellen … | die [Sicherungen](#sicherungen) der Quelle, beim Öffnen ist diese Stelle ausgewählt (Admins) |
 | Favorit (Kachel) | Zu Favoriten / Aus Favoriten entfernen – die Chips oben in der Seitenleiste |
 | Icon ändern … | Symbol, Emoji oder eigenes Icon |
-| Ordner verschlüsseln … / Ordner fertig verschlüsseln … / Verschlüsselung aufheben … | [Verschlüsselung](#verschlüsselte-notizen-und-ordner) |
-| Berechtigungen … | [Rechte](#berechtigungen) für diesen Ordner bzw. diese Notiz |
-| Teilen ▸ Per Mail versenden … | nur an Notizen: die Notiz als Datei an eine beliebige Adresse ([Per Mail versenden](#per-mail-versenden)); ausgegraut ohne E-Mail-Versand und bei verschlüsselten Notizen |
-| Teilen ▸ Zugriff per E-Mail geben … | Ordner (mit allem darin) bzw. Notiz mit jemandem [teilen](#konten-einladungen-und-teilen-per-e-mail) („verwalten“) |
+| Ordner verschlüsseln … / Ordner fertig verschlüsseln … / Verschlüsselung aufheben … | [Verschlüsselung](#verschlüsselte-seiten-und-ordner) |
+| Berechtigungen … | [Rechte](#berechtigungen) für diesen Ordner bzw. diese Seite |
+| Teilen ▸ Per Mail versenden … | nur an Seiten: die Seite als Datei an eine beliebige Adresse ([Per Mail versenden](#per-mail-versenden)); ausgegraut ohne E-Mail-Versand und bei verschlüsselten Seiten |
+| Teilen ▸ Zugriff per E-Mail geben … | Ordner (mit allem darin) bzw. Seite mit jemandem [teilen](#konten-einladungen-und-teilen-per-e-mail) („verwalten“) |
 | KI-Freigabe … | [KI-Freigabe](#ki-freigaben) genau hier (Admins); „Aktiv“ dahinter: hier gilt schon eine eigene Regel |
 | Löschen (an Ordnern: Ordner löschen) | in den [Papierkorb](#versionen-und-papierkorb), mit Rückfrage |
 
-### Notiz-Menü „…“ und Kopfzeile der Notiz
+### Seiten-Menü „…“ und Kopfzeile der Seite
 
-In der Kopfzeile: **Icon** der Notiz (Klick ändert es), **Pfad** (Quelle / Ordner / Notiz – in schmalen Fenstern
+In der Kopfzeile: **Icon** der Seite (Klick ändert es), **Pfad** (Quelle / Ordner / Seite – in schmalen Fenstern
 vorne zu „…“ gekürzt; ein Klick oder Antippen zeigt ihn ganz), **Stern** (Favorit), **Editor / Markdown** (beschriftet
-nur, wenn der Notizname daneben ganz Platz hat), **Herunterladen** (Pfeil nach unten: die Notiz als `.md`, mit Bildern
-oder Dateien als ZIP – siehe [Export](#exportieren-und-drucken); nicht bei verschlüsselten Notizen), Breite,
-Inhaltsverzeichnis ein/aus und **„…“**. Oben im Menü stehen vier Kacheln: **Im Baum** (klappt den Baum bis zur Notiz
-auf), **Versionen** ([Versionen](#versionen-und-papierkorb) aus der Git-Historie – wiederherstellen oder als neue Notiz
+nur, wenn der Seitenname daneben ganz Platz hat), **Herunterladen** (Pfeil nach unten: die Seite als `.md`, mit Bildern
+oder Dateien als ZIP – siehe [Export](#exportieren-und-drucken); nicht bei verschlüsselten Seiten), Breite,
+Inhaltsverzeichnis ein/aus und **„…“**. Oben im Menü stehen vier Kacheln: **Im Baum** (klappt den Baum bis zur Seite
+auf), **Versionen** ([Versionen](#versionen-und-papierkorb) aus der Git-Historie – wiederherstellen oder als neue Seite
 speichern), **Drucken** (Drucken / als PDF) und **Teilen** (öffnet ▸ Per Mail versenden … / Zugriff per E-Mail
 geben …). Darunter:
 
 | Eintrag | Wirkung |
 |---|---|
 | Dokument: Exportieren ▸ HTML-Datei / Markdown | [Export](#exportieren-und-drucken) |
-| Dokument: Als Vorlage speichern | macht die Notiz zur [Vorlage](#vorlagen) |
+| Dokument: Als Vorlage speichern | macht die Seite zur [Vorlage](#vorlagen) |
 | Dokument: Schreibgeschützt (Schalter) | setzt bzw. entfernt `readonly: true` im Frontmatter |
 | KI: KI fragen …, Zusammenfassen, Weiterschreiben | nur wo es keine Werkzeugleiste gibt (Lesemodus, Markdown-Ansicht) – sonst im [KI-Knopf](#ki-im-editor) |
-| Schutz & Verwaltung: Jetzt sperren, Verschlüsseln … / Verschlüsselung entfernen … | [Verschlüsselung](#verschlüsselte-notizen-und-ordner) |
+| Schutz & Verwaltung: Jetzt sperren, Verschlüsseln … / Verschlüsselung entfernen … | [Verschlüsselung](#verschlüsselte-seiten-und-ordner) |
 | Schutz & Verwaltung: Berechtigungen …, Umbenennen / verschieben | wie im Rechtsklick-Menü |
 | Löschen | rot abgesetzt am Ende, wie im Rechtsklick-Menü |
 
@@ -339,14 +339,14 @@ listet der Knopf **„Alle Tabs (n)“** rechts in der Leiste alle offenen.
 
 ### Befehlspalette
 
-**Strg+K** öffnet ein Eingabefeld für Notizen und Befehle. Unter dem Feld wählen **Alle**, **Titel** (nur
-Treffer im Namen) und **Volltext** (nur Treffer im Text), welche Notizen erscheinen; **# Tags** öffnet die Tag-Übersicht,
-**✦ KI fragen** (wenn eingerichtet) die [Wissensbasis](#frag-die-wissensbasis). Mit `>` am Anfang nur Befehle: neue Notiz,
+**Strg+K** öffnet ein Eingabefeld für Seiten und Befehle. Unter dem Feld wählen **Alle**, **Titel** (nur
+Treffer im Namen) und **Volltext** (nur Treffer im Text), welche Seiten erscheinen; **# Tags** öffnet die Tag-Übersicht,
+**✦ KI fragen** (wenn eingerichtet) die [Wissensbasis](#frag-die-wissensbasis). Mit `>` am Anfang nur Befehle: neue Seite,
 neuer Ordner, im Baum anzeigen, Favorit, Versionen, KI fragen, Tags, Suche mit Filtern,
 synchronisieren, drucken, exportieren, Papierkorb, Einstellungen, **Hilfe**, Quelle einbinden,
 hell/dunkel/System, Sprache, Seitenleiste, Inhaltsverzeichnis, Breite.
 
-![Rechtsklick auf eine Notiz](handbuch/101-menue-notiz.webp)
+![Rechtsklick auf eine Seite](handbuch/101-menue-notiz.webp)
 
 ## Quellen einbinden
 
@@ -362,7 +362,7 @@ hell/dunkel/System, Sprache, Seitenleiste, Inhaltsverzeichnis, Breite.
    - **Git-URL** – beliebiges HTTPS-Repository. Unter **Anmeldung**: ohne (öffentlich), eine
      passende Verbindung (gleiche Adresse – wird vorgeschlagen) oder **Neuer Token …** (optional mit
      Benutzername); daraus wird beim Einbinden eine Verbindung.
-   - **Lokaler Ordner** – für Notizen, die nur auf diesem Server liegen: ein Unterordner von `/docs`, den der Betreiber
+   - **Lokaler Ordner** – für Seiten, die nur auf diesem Server liegen: ein Unterordner von `/docs`, den der Betreiber
      in der `docker-compose.yml` einhängt (auf dem Server z. B. `./kaveyl-wiki/docs` neben der `docker-compose.yml`).
      **Neuer Ordner …** legt im geöffneten Ordner einen Unterordner an und öffnet ihn – etwa einen je Person („Annas
      Wiki“), ohne Terminal. Mit **Versionen führen** (Standard, siehe Optionen) bekommt der Ordner ein eigenes Git:
@@ -371,7 +371,7 @@ hell/dunkel/System, Sprache, Seitenleiste, Inhaltsverzeichnis, Breite.
      Geräte, VS Code am PC): ein Repository (Gitea, GitHub, GitLab, Git-URL).
 2. **Branch** (nur bei Repositories). Ist das Repository noch leer (kein Commit, also auch kein Branch – der Anbieter nennt trotzdem „main“), steht das dort: erst beim Anbieter eine Datei anlegen (z. B. README) oder das Repository über „Neues Repository“ anlegen, dann **Erneut prüfen**.
 3. **Inhalt:** Häkchen-Baum – ganzes Repository, einzelne Ordner oder einzelne Dateien.
-4. **Optionen:** Name und Symbol in der Seitenleiste (dieselbe Auswahl wie bei Notizen: Symbole,
+4. **Optionen:** Name und Symbol in der Seitenleiste (dieselbe Auswahl wie bei Seiten: Symbole,
    Emoji, eigene Icons; ohne Auswahl zeigt die Seitenleiste die Art: **Git-Zweig** für Repositories,
    **Ordner mit Git-Zeichen** für lokale Ordner mit eigenem Git, **Festplatte** für lokale Ordner ohne
    Git – mit der Maus auf dem Namen steht die Art immer, auch bei eigenem Symbol) sowie:
@@ -386,12 +386,12 @@ hell/dunkel/System, Sprache, Seitenleiste, Inhaltsverzeichnis, Breite.
 |---|---|
 | Versionen führen | Nur bei lokalen Ordnern ohne Git, **Standard an**. Kaveyl Wiki legt im Ordner ein eigenes Git an (versteckter Ordner `.git`) und speichert jede Änderung als Version – mit der Person als Autor; was ein anderes Programm dort ändert (etwa über eine Freigabe des NAS), wird ebenfalls eine Version, mit „Kaveyl Wiki“ als Autor. Kein Push, kein Pull. Gelöschtes bleibt im Verlauf (wie bei Repositories). Kaveyl Wiki muss in den Ordner schreiben dürfen (Besitzer, siehe `user:` in der `docker-compose.yml`), sonst sagt es das beim Einbinden. Aus = nur Dateien, ohne Versionen; später per Rechtsklick auf die Quelle → „Quelle bearbeiten …“ → **Versionen einschalten …**. |
 | Änderungen automatisch committen (und pushen) | Bei Repositories Standard, bei Ordnern mit **Versionen führen** immer an. In lokalen Ordnern mit eigenem Git (etwa einem Projekt, an dem du in VS Code arbeitest) aus: Kaveyl Wiki schreibt nur die Dateien, committen machst du selbst. **Lokale Ordner ohne Git** haben diese Option nicht – dort wird nur gespeichert. |
-| Wann deine Änderungen nach Git schreiben? | Pause nach der letzten Änderung, bevor committet/gepusht wird: 10 s, **2 Min (Standard)**, 5 oder 15 Min. Beim Verlassen der Notiz und mit Strg+S immer sofort. |
-| Metadaten ins Frontmatter schreiben | Neue Notizen bekommen eine `id:` – damit erkennt Kaveyl Wiki sie auch nach Umbenennen in VS Code wieder. Aus = Dateien bekommen nie Metadaten. |
+| Wann deine Änderungen nach Git schreiben? | Pause nach der letzten Änderung, bevor committet/gepusht wird: 10 s, **2 Min (Standard)**, 5 oder 15 Min. Beim Verlassen der Seite und mit Strg+S immer sofort. |
+| Metadaten ins Frontmatter schreiben | Neue Seiten bekommen eine `id:` – damit erkennt Kaveyl Wiki sie auch nach Umbenennen in VS Code wieder. Aus = Dateien bekommen nie Metadaten. |
 | Schreibgeschützt | Nur lesen; kein Bearbeiten, Anlegen, Löschen in Kaveyl Wiki. |
-| Ordner-Notiz | Datei, die als Inhalt ihres Ordners gezeigt wird (`index.md`, bei Wiki.js oft `home.md`). |
+| Ordnerseite | Datei, die als Inhalt ihres Ordners gezeigt wird (`index.md`, bei Wiki.js oft `home.md`). |
 | KI-Gedächtnis | Anweisungen und Merk-Einträge der KI in `.kaveyl-wiki/ai/` dieser Quelle mitschicken (nur wirksam, wenn die Quelle für die KI freigegeben ist). |
-| KI-Chats aufbewahren | Wie lange unbenutzte [KI-Chats](#chats-und-aufbewahrung) über diese Quelle (ihre Notizen, Ordner oder die ganze Quelle) bleiben: **wie in Einstellungen → KI** (Standard 90 Tage), 7 / 30 / 90 / 180 Tage, 1 Jahr oder nie löschen – z. B. kürzer für ein Tagebuch. |
+| KI-Chats aufbewahren | Wie lange unbenutzte [KI-Chats](#chats-und-aufbewahrung) über diese Quelle (ihre Seiten, Ordner oder die ganze Quelle) bleiben: **wie in Einstellungen → KI** (Standard 90 Tage), 7 / 30 / 90 / 180 Tage, 1 Jahr oder nie löschen – z. B. kürzer für ein Tagebuch. |
 
 ### Eine Quelle bearbeiten
 
@@ -478,19 +478,19 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 Öffentliche Repositories und lokale Ordner brauchen keine Verbindung.
 
-## Notizen finden und lesen
+## Seiten finden und lesen
 
 - **Sofort-Suche** links oben (Strg+P): Ergebnisse erscheinen beim Tippen, gruppiert nach
-  Ordnern, Notizen (Titel/Pfad) und Inhalt; zum Inhalt zählen auch die **Tags** („rezept“ oder „#rezept“ findet
-  Notizen mit diesem Tag). Rechtsklick (auf Touch-Geräten: lange drücken) auf einen Treffer → „In neuem Tab
+  Ordnern, Seiten (Titel/Pfad) und Inhalt; zum Inhalt zählen auch die **Tags** („rezept“ oder „#rezept“ findet
+  Seiten mit diesem Tag). Rechtsklick (auf Touch-Geräten: lange drücken) auf einen Treffer → „In neuem Tab
   öffnen“, „Rechts/Links daneben öffnen“, „Im Baum anzeigen“ oder „Pfad kopieren“ (der Pfad
   mit der Quelle vorne; eine Meldung bestätigt das Kopieren). „Alle Ergebnisse …“ öffnet die
   Such-Seite.
 
 ![Suche](handbuch/06-suche.webp)
 
-- **Befehlspalette** (Strg+K): ein Eingabefeld für alles – Notiz suchen und öffnen
-  (Strg+Enter: neuer Tab) oder Befehle ausführen (neue Notiz/neuer Ordner, im Baum anzeigen,
+- **Befehlspalette** (Strg+K): ein Eingabefeld für alles – Seite suchen und öffnen
+  (Strg+Enter: neuer Tab) oder Befehle ausführen (neue Seite/neuer Ordner, im Baum anzeigen,
   Versionen, synchronisieren, Einstellungen, hell/dunkel, Seitenleiste, Inhaltsverzeichnis,
   Breite). Mit `>` am Anfang erscheinen nur Befehle.
 
@@ -502,27 +502,27 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
   | Eingabe | Wirkung |
   |---|---|
-  | `tag:projekt` | nur Notizen mit diesem Tag |
+  | `tag:projekt` | nur Seiten mit diesem Tag |
   | `in:Handbuch` | nur diese Quelle (Name) |
   | `path:docs/` | nur dieser Ordner |
   | `seit:7d` | geändert in den letzten 7 Tagen (`h`, `d`, `w`, `m`, `y` oder ein Datum) |
   | `"genaue Phrase"` | Wörter genau in dieser Reihenfolge |
-  | `-wort` | Notizen mit diesem Wort ausschließen |
+  | `-wort` | Seiten mit diesem Wort ausschließen |
 
 ![Such-Seite](handbuch/34-such-seite.webp)
 
-- **Favoriten:** Stern oben rechts in der Notiz (oder Rechtsklick im Baum → „Zu Favoriten“,
-  das geht auch für Ordner ohne eigene Ordnernotiz – ein Klick darauf zeigt den Ordner aufgeklappt
+- **Favoriten:** Stern oben rechts auf der Seite (oder Rechtsklick im Baum → „Zu Favoriten“,
+  das geht auch für Ordner ohne eigene Ordnerseite – ein Klick darauf zeigt den Ordner aufgeklappt
   im Baum). Favoriten stehen als kleine Chips unter der Suche – immer mit einem Klick erreichbar, ohne den Baum nach
   unten zu schieben. Rechtsklick auf einen Favoriten oder einen Eintrag in „Zuletzt“: in neuem Tab, rechts oder links
   daneben öffnen, im Baum anzeigen, **Aus Favoriten entfernen** bzw. „Zu Favoriten“. **Zuletzt** ist eine Ansicht der
-  Seitenleiste (Umschalter **Baum | Zuletzt | KI-Freigaben**): die zuletzt geöffneten Notizen – oder mit „geändert“ die
+  Seitenleiste (Umschalter **Baum | Zuletzt | KI-Freigaben**): die zuletzt geöffneten Seiten – oder mit „geändert“ die
   zuletzt geänderten (auch von anderen, aus VS Code oder per Git). Hinter jedem Eintrag steht grau in Klammern die
   **Quelle** – praktisch, weil Git-Projekte oft dieselbe Ordnerstruktur haben (z. B. mehrere `README` oder `docs/`).
   Listen und gewählte Ansicht gehören zu deinem Konto und liegen nicht im Repository.
-  In „Zuletzt“ landet eine Notiz erst, wenn sie sich öffnen ließ. Einträge, deren Notiz es nicht
+  In „Zuletzt“ landet eine Seite erst, wenn sie sich öffnen ließ. Einträge, deren Seite es nicht
   mehr gibt (gelöscht, außerhalb umbenannt, Quelle ausgehängt), blendet die Seitenleiste aus.
-  Lässt sich eine Notiz nicht öffnen, bietet der Tab „Suchen“ und „Papierkorb“ (Notiz nicht
+  Lässt sich eine Seite nicht öffnen, bietet der Tab „Suchen“ und „Papierkorb“ (Seite nicht
   gefunden) bzw. „Erneut versuchen“ (anderer Fehler) und „Tab schließen“ an.
 
 ![Favoriten und Zuletzt](handbuch/37-favoriten.webp)
@@ -530,7 +530,7 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 ![Menü in den Favoriten](handbuch/51-favoriten-menue.webp)
 
 - **Icons:** Klick auf das Symbol links neben dem Pfad (oder Rechtsklick im Baum → „Icon ändern
-  …“; beim Anlegen gleich im Fenster „Neue Notiz“/„Neuer Ordner“). Drei Reiter:
+  …“; beim Anlegen gleich im Fenster „Neue Seite“/„Neuer Ordner“). Drei Reiter:
   - **Symbole** – „Häufig“ zeigt eine Auswahl; über die Liste daneben alle rund 1 900
     Lucide-Symbole nach **Kategorie** (Dateien, Entwicklung, Finanzen, Wetter …) oder „Alle“.
     Das Suchfeld durchsucht Namen, Schlagworte und Kategorien (Namen und Schlagworte englisch,
@@ -538,25 +538,25 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
   - **Emoji** – Auswahl oder ein beliebiges eigenes Emoji.
   - **Eigene** – **Hochladen …** (PNG, WebP, JPEG, GIF oder SVG, höchstens 256 KB, auch mehrere
     auf einmal). Eigene Icons gelten für **alle Quellen** und alle Benutzer; löschen darf sie der,
-    der sie hochgeladen hat, oder ein Admin. Notizen mit einem gelöschten Icon zeigen ein leeres
+    der sie hochgeladen hat, oder ein Admin. Seiten mit einem gelöschten Icon zeigen ein leeres
     Kästchen.
 
   „Kein Icon“ entfernt es. Gespeichert im Frontmatter als `icon: lucide:rocket`,
-  `icon: emoji:📘` bzw. `icon: custom:<id>`; ein Ordner zeigt das Icon seiner Ordnernotiz. Eigene
+  `icon: emoji:📘` bzw. `icon: custom:<id>`; ein Ordner zeigt das Icon seiner Ordnerseite. Eigene
   Icons liegen in der Datenbank der App (nicht im Repository) und sind in deren Sicherung enthalten.
 
 ![Symbole suchen](handbuch/53-icon-suche.webp)
 
 ![Eigene Icons](handbuch/54-eigene-icons.webp)
-- **Schreibschutz:** „…“ → „Schreibschutz setzen“ schreibt `readonly: true` in die Notiz – sie
+- **Schreibschutz:** „…“ → „Schreibschutz setzen“ schreibt `readonly: true` in die Seite – sie
   öffnet dann für alle im Lesemodus; oben in der Kopfzeile steht dann gelb **„Nur lesen“** (ein Klick entsperrt sie
-  vorübergehend). Aufheben über denselben Menüpunkt. Darfst du eine Notiz nur lesen, steht dort gelb
+  vorübergehend). Aufheben über denselben Menüpunkt. Darfst du eine Seite nur lesen, steht dort gelb
   **„Schreibgeschützt“**.
-- **Geteilte Ansicht:** Rechtsklick auf eine Notiz im Baum oder einen Suchtreffer → „Rechts daneben
-  öffnen“ oder „Links daneben öffnen“ (im Tab-Menü heißt es „Rechts/Links daneben anzeigen“). Die gewählte Notiz kommt neben die
+- **Geteilte Ansicht:** Rechtsklick auf eine Seite im Baum oder einen Suchtreffer → „Rechts daneben
+  öffnen“ oder „Links daneben öffnen“ (im Tab-Menü heißt es „Rechts/Links daneben anzeigen“). Die gewählte Seite kommt neben die
   aktuelle. Ist sie selbst die aktuelle (gerade per Klick geöffnet), kommt die zuvor geöffnete
-  Notiz auf die andere Seite. Beide Hälften sind vollwertige Editoren; ein Klick auf den Tab der
-  rechten Notiz tauscht die Seiten, × in ihrer Kopfzeile schließt die Teilung.
+  Seite in die andere Hälfte. Beide Hälften sind vollwertige Editoren; ein Klick auf den Tab der
+  rechten Hälfte tauscht die beiden, × in ihrer Kopfzeile schließt die Teilung.
 
 ![Geteilte Ansicht](handbuch/38-geteilte-ansicht.webp)
 
@@ -566,7 +566,7 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
   aufklappen / zuklappen**, beim Überfahren jedes Ordners – in jeder Quelle, auf jeder Ebene – **Alles darunter
   aufklappen / zuklappen** (ein Symbol, das je nach Zustand umschaltet; hat der Ordner keine
   Unterordner, klappt es nur ihn selbst auf oder zu) und, wo du schreiben darfst, **+** für eine
-  neue Notiz oder einen neuen Ordner. **Alt+Klick** auf den
+  neue Seite oder einen neuen Ordner. **Alt+Klick** auf den
   Pfeil eines Ordners klappt ihn ebenfalls mit allem darunter auf oder zu. Auf Touch-Geräten
   (ohne Maus) stehen die Symbole an der Quelle immer und am gerade gewählten Ordner.
 - **Zeichen am rechten Rand** einer Zeile bleiben immer an derselben Stelle: ✦ (eigene
@@ -580,33 +580,33 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 - **Fokus (Hoisting):** Rechtsklick auf einen Ordner → „Nur diesen Ordner zeigen (Fokus)“. Die
   Seitenleiste zeigt dann nur noch diesen Ordner; „Fokus: …“ oben mit × hebt ihn auf.
 - **Namen:** Baum, Tabs, Kopfzeile, Suche, Favoriten und Listen zeigen überall den **Dateinamen**
-  ohne `.md` (eine Ordnernotiz `index.md` unter dem Namen ihres Ordners). Ein `title:` im
-  Frontmatter oder die erste Überschrift ändern die Anzeige nicht – die Suche findet Notizen
+  ohne `.md` (eine Ordnerseite `index.md` unter dem Namen ihres Ordners). Ein `title:` im
+  Frontmatter oder die erste Überschrift ändern die Anzeige nicht – die Suche findet Seiten
   aber weiterhin auch über ihren Titel.
 - **Tags:** stehen über dem Text. „+ Tag“ fügt einen hinzu (Tippen schlägt passende vorhandene
-  Tags vor, der Pfeil im Feld oder ↓ zeigt alle; antippen oder Enter übernimmt), × entfernt ihn, ein Klick zeigt alle Notizen mit diesem Tag. Gespeichert
+  Tags vor, der Pfeil im Feld oder ↓ zeigt alle; antippen oder Enter übernimmt), × entfernt ihn, ein Klick zeigt alle Seiten mit diesem Tag. Gespeichert
   wird im Frontmatter `tags:` im Stil der Datei – Wiki.js-Schreibweise `tags: a, b` bleibt so,
   eine YAML-Liste bleibt eine Liste. Alle Tags mit Anzahl: **#** oben in der Seitenleiste.
 
 ![Tags](handbuch/35-tags.webp)
 
-- **Farbige Tags:** Rechtsklick auf ein Tag (über der Notiz oder im Fenster **#**; auf dem Handy lange
+- **Farbige Tags:** Rechtsklick auf ein Tag (über der Seite oder im Fenster **#**; auf dem Handy lange
   drücken) → **Farbe** → eine von zwölf Farben oder **Keine Farbe** (grau). Die Farbe gilt für das Tag in
-  der ganzen Quelle und erscheint über den Notizen, im Fenster **#** und in der Suche. Gespeichert wird sie
+  der ganzen Quelle und erscheint über den Seiten, im Fenster **#** und in der Suche. Gespeichert wird sie
   in der Datei `.kaveyl-wiki.yml` oben in der Quelle (`tagColors:`) – sie reist also mit dem Repository mit,
   und andere Kaveyl-Wiki-Installationen sehen dieselben Farben. Kommt ein Tag in mehreren Quellen vor, färbt
   Kaveyl Wiki es in allen, in die du schreiben darfst; in den übrigen bleibt es, wie es ist. Das Fenster **#**
   zeigt dann die häufigste Farbe. Färben darf, wer in der Quelle schreiben darf.
 - **Tag umbenennen oder zusammenführen:** Rechtsklick auf ein Tag → **Umbenennen / zusammenführen …**,
-  neuen Namen eingeben. Kaveyl Wiki ändert das Tag in jeder Notiz, die du bearbeiten darfst (in allen
+  neuen Namen eingeben. Kaveyl Wiki ändert das Tag in jeder Seite, die du bearbeiten darfst (in allen
   Quellen; jede Datei behält ihre Schreibweise). Gibt es den neuen Namen schon, fragt Kaveyl Wiki nach und
-  führt beide zusammen – eine Notiz mit beiden Tags behält es einmal. Die Farbe geht mit, wenn das Ziel
-  noch keine hat. Notizen ohne Schreibrecht bleiben unverändert; die Meldung sagt, wie viele.
+  führt beide zusammen – eine Seite mit beiden Tags behält es einmal. Die Farbe geht mit, wenn das Ziel
+  noch keine hat. Seiten ohne Schreibrecht bleiben unverändert; die Meldung sagt, wie viele.
 
 ![Farbe eines Tags wählen](handbuch/117-tag-farbe.webp)
 
-- **Links auf Notizen** tragen ein kleines Notiz-Symbol, Links auf Anhänge eine Büroklammer.
-  Mit der Maus kurz über einem Notiz-Link verweilen zeigt eine **Vorschau** (Name, Pfad,
+- **Links auf Seiten** tragen ein kleines Seiten-Symbol, Links auf Anhänge eine Büroklammer.
+  Mit der Maus kurz über einem Seiten-Link verweilen zeigt eine **Vorschau** (Name, Pfad,
   Textanfang).
 
 ![Link-Vorschau](handbuch/36-link-vorschau.webp)
@@ -617,15 +617,15 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 - **Markdown-Ansicht:** zeigt und bearbeitet den Quelltext direkt. Auch hier steht rechts das Inhaltsverzeichnis
   (derselbe Schalter); ein Klick springt zur Zeile der Überschrift. Die Zeile `id:` ganz oben ist ausgegraut: Das ist
-  die Kennung der Notiz. Daran erkennt Kaveyl Wiki die Notiz wieder, wenn sie außerhalb (z. B. in VS Code oder per Git)
-  umbenannt oder verschoben wird, und Rechte oder KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.
-  Nicht ändern oder löschen – fehlt sie, merkt sich Kaveyl Wiki die Notiz nur noch über ihren Pfad.
-  Sehr große Notizen (über 100 000 Zeichen) zeigt die Markdown-Ansicht als reinen Text – ohne Hervorhebung und
+  die Kennung der Seite. Daran erkennt Kaveyl Wiki die Seite wieder, wenn sie außerhalb (z. B. in VS Code oder per Git)
+  umbenannt oder verschoben wird, und Rechte oder KI-Freigaben, die direkt auf dieser Seite liegen, hängen daran.
+  Nicht ändern oder löschen – fehlt sie, merkt sich Kaveyl Wiki die Seite nur noch über ihren Pfad.
+  Sehr große Seiten (über 100 000 Zeichen) zeigt die Markdown-Ansicht als reinen Text – ohne Hervorhebung und
   Inhaltsverzeichnis, damit sie flüssig bleibt. Der Kopf der Karte nennt Datei, Zeile und Spalte; unten (bzw. oben,
   je nach Einstellung der Werkzeugleiste) schwebt eine eigene Leiste: **Frontmatter** springt zu den Kopfdaten ganz
   oben (fehlen sie, legt der Knopf sie mit `tags:` an), **Zeilenumbruch** schaltet zwischen Umbrechen und seitlichem
   Scrollen langer Zeilen (merkt sich dieser Browser), dazu Rückgängig und Wiederholen.
-- Neben den Tags steht, wann die Notiz zuletzt geändert wurde („Bearbeitet heute, 20:38“).
+- Neben den Tags steht, wann die Seite zuletzt geändert wurde („Bearbeitet heute, 20:38“).
 
 ![Markdown-Ansicht](handbuch/08-markdown-ansicht.webp)
 
@@ -644,7 +644,7 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 
 ![Editor](handbuch/10-editor.webp)
 
-- **Werkzeugleiste:** Standard ist eine schwebende Leiste unten über der Notiz. Die untere Reihe hat **+** (Block
+- **Werkzeugleiste:** Standard ist eine schwebende Leiste unten über der Seite. Die untere Reihe hat **+** (Block
   einfügen: nummerierte Liste, Zitat, Codeblock, aufklappbarer Block, Trennlinie, Hilfe), **Aa** (Formatzeile ein/aus),
   Checkliste, Aufzählung, Hinweis-Box, Tabelle, Anhang, **✦ KI** und Rückgängig/Wiederholen; die Formatzeile darüber
   Überschrift 1–3, fett, kursiv, durchgestrichen, Code, Link, Format übertragen und Emoji. In
@@ -681,7 +681,7 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 ![Auswahlmenü](handbuch/12-auswahlmenue.webp)
 
 - **Slash-Befehle:** `/` am Zeilenanfang oder nach einem Leerzeichen öffnet ein Menü (Überschrift, Liste, Checkliste,
-  Code, Tabelle, Zitat, Hinweis-Boxen, aufklappbarer Block, Notiz verlinken, Datei oder Bild,
+  Code, Tabelle, Zitat, Hinweis-Boxen, aufklappbarer Block, Seite verlinken, Datei oder Bild,
   Diagramm (Mermaid), Trennlinie, Link, **Datum**, **Uhrzeit**, **Datum und Uhrzeit**). Datum und Uhrzeit sind die
   jetzigen, als Text eingefügt – auf Deutsch `16.11.2026` und `14:05`, in den anderen Sprachen `2026-11-16`
   (`/datum`, `/date`, `/uhrzeit`, `/time`). Weitertippen filtert – auch mit mehreren Wörtern, deutsch oder englisch
@@ -691,8 +691,8 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 
 - **Dateien und Bilder anhängen:** Büroklammer in der Leiste, Datei ins Editorfenster ziehen
   oder aus der Zwischenablage einfügen (z. B. einen Screenshot). Die Datei landet im Ordner
-  `assets/` neben der Notiz und wird als Bild bzw. Link eingefügt – so funktioniert sie auch in
-  Gitea und VS Code. Unter der Notiz erscheint die Liste **Anhänge** mit Größe, Vorschau (Bilder,
+  `assets/` neben der Seite und wird als Bild bzw. Link eingefügt – so funktioniert sie auch in
+  Gitea und VS Code. Unter der Seite erscheint die Liste **Anhänge** mit Größe, Vorschau (Bilder,
   PDF) und Herunterladen. Ein Klick auf einen Datei-Link öffnet die Vorschau bzw. lädt herunter.
   Gleichnamige Dateien werden durchnummeriert (`Angebot-2.pdf`), nie überschrieben. Ausführbare
   Dateien (.exe, .bat, .ps1 …) sind ab Werk gesperrt; welche Endungen gesperrt sind und die Höchstgröße (Standard
@@ -716,11 +716,11 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 ![Bild zentriert, halbe Breite](handbuch/55-bild-zentriert.webp)
 
 - **Große Bilder:** Ein Bild ohne eigene Breite nimmt höchstens etwa **zwei Drittel der Fensterhöhe**
-  ein – ein Handyfoto füllt also nicht mehr den ganzen Bildschirm, und die Notiz bleibt lesbar. Die
+  ein – ein Handyfoto füllt also nicht mehr den ganzen Bildschirm, und die Seite bleibt lesbar. Die
   **Lupe** oben rechts am Bild (beim Darüberfahren, am ausgewählten Bild und auf Touch-Geräten immer
   sichtbar) oder **„Groß anzeigen“** in der kleinen Bildleiste zeigt es so groß, wie das Fenster
   erlaubt; in der Leseansicht genügt ein Klick aufs Bild. Schließen mit Klick, **Esc** oder ×. Bilder
-  werden erst geladen, wenn sie ins Bild scrollen – lange Notizen mit vielen Bildern öffnen und
+  werden erst geladen, wenn sie ins Bild scrollen – lange Seiten mit vielen Bildern öffnen und
   scrollen dadurch flüssig.
 - **Beim Einfügen verkleinert:** Fotos und Bildschirmfotos, die größer als **2400 Pixel** (längste
   Kante) oder schwerer als 2 MB sind, verkleinert Kaveyl Wiki schon im Browser und speichert sie als
@@ -731,8 +731,8 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 
 ![Bild groß anzeigen](handbuch/94-bild-gross.webp)
 
-- **Notiz verlinken:** `[[` tippen und ein paar Buchstaben des Titels – Kaveyl Wiki schlägt
-  passende Notizen derselben Quelle vor; Enter fügt einen normalen relativen Link ein
+- **Seite verlinken:** `[[` tippen und ein paar Buchstaben des Titels – Kaveyl Wiki schlägt
+  passende Seiten derselben Quelle vor; Enter fügt einen normalen relativen Link ein
   (`[Roadmap](plan/roadmap.md)`), der auch in Gitea und VS Code funktioniert.
 - **Link auf eine Adresse:** `/link` oder der Link-Knopf öffnet ein Kaveyl-Wiki-Fenster mit **Link-Ziel**
   (Web-Adresse oder relativer Pfad) und **Linktext**; Enter übernimmt, Esc bricht ab. Am bestehenden Link
@@ -740,7 +740,7 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 
 ![Link einfügen](handbuch/107-link-einfuegen.webp)
 
-![Notiz verlinken](handbuch/32-notiz-verlinken.webp)
+![Seite verlinken](handbuch/32-notiz-verlinken.webp)
 
 - **Formeln:** `$E = mc^2$` im Satz oder `$$ … $$` in eigener Zeile (LaTeX) werden mit KaTeX
   gesetzt – genauso, wie GitHub sie darstellt. Slash-Befehle „Formel …“ fügen eine ein (Eingabe im
@@ -768,13 +768,13 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 
 - **Zeichnungen (Excalidraw):** Slash-Befehl „Zeichnung (Excalidraw)“ (`/zeichnung`) öffnet eine
   Zeichenfläche – Formen, Pfeile, Text, Freihand. **Speichern** legt die Zeichnung als
-  `assets/zeichnung.excalidraw.svg` neben der Notiz ab und fügt sie als Bild ein (jede weitere bekommt
+  `assets/zeichnung.excalidraw.svg` neben der Seite ab und fügt sie als Bild ein (jede weitere bekommt
   eine Nummer: `zeichnung-2.excalidraw.svg` – jede lässt sich gleich bearbeiten). Weil die Datei
   ein normales SVG ist, sieht man sie überall (Gitea, VS Code, Wiki.js); die Zeichnung selbst
   steckt mit in der Datei. Bearbeiten: **Doppelklick** auf das Bild oder Bild anklicken →
   „Zeichnung bearbeiten“ – gespeichert wird in dieselbe Datei, die alte Fassung bleibt in der
   Git-Historie. Auch auf excalidraw.com lässt sich die Datei öffnen („Öffnen“ → SVG mit Szene).
-  In verschlüsselten Notizen gibt es keine Zeichnungen (die Datei läge unverschlüsselt daneben).
+  In verschlüsselten Seiten gibt es keine Zeichnungen (die Datei läge unverschlüsselt daneben).
 
 ![Zeichnung](handbuch/65-zeichnung.webp)
 
@@ -783,25 +783,25 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
 - **Format übertragen** (Pinsel in der Leiste): Cursor in formatierten Text setzen (z. B. fett),
   Pinsel klicken, dann den Zieltext mit der Maus markieren (oder mit Umschalt+Pfeiltasten) –
   er bekommt genau diese Formatierung. Esc bricht ab.
-- **Wer ist noch da?** Haben andere Benutzer dieselbe Notiz offen, steht oben „Maria hat die
-  Notiz offen“ – tippt jemand gerade, „Maria bearbeitet gerade“ (orange). Gleichzeitiges
+- **Wer ist noch da?** Haben andere Benutzer dieselbe Seite offen, steht oben „Maria hat die
+  Seite offen“ – tippt jemand gerade, „Maria bearbeitet gerade“ (orange). Gleichzeitiges
   Bearbeiten ist möglich, aber wer zuletzt speichert, bekommt den Hinweis „außerhalb geändert“
   und entscheidet (siehe Konflikte) – also besser absprechen.
 
 ![Präsenz](handbuch/45-praesenz.webp)
 
-- **Fängst du an zu tippen, während jemand anderes die Notiz gerade bearbeitet,** fragt Kaveyl Wiki
-  einmal nach: „Maria bearbeitet diese Notiz gerade …“ – mit der Folge: Wer später speichert, bekommt
+- **Fängst du an zu tippen, während jemand anderes die Seite gerade bearbeitet,** fragt Kaveyl Wiki
+  einmal nach: „Maria bearbeitet diese Seite gerade …“ – mit der Folge: Wer später speichert, bekommt
   einen Hinweis; Änderungen an verschiedenen Stellen lassen sich zusammenführen, an derselben Stelle
   muss eine Fassung gewählt werden. **Trotzdem bearbeiten** behält deine Eingabe und fragt nicht noch
   einmal, solange die andere Person weiter bearbeitet (Pausen unter einer Minute zählen nicht).
-  **Abbrechen** verwirft den eben getippten Text, die Notiz zeigt wieder den gespeicherten Stand.
+  **Abbrechen** verwirft den eben getippten Text, die Seite zeigt wieder den gespeicherten Stand.
   Gesperrt wird nichts – die Frage ist nur ein Hinweis. Änderungen über die API, MCP oder von außen
   (Git, andere Programme) lösen sie nicht aus.
-- **Speichert jemand anderes, während du die Notiz offen hast,** siehst du die Änderung sofort – dein
+- **Speichert jemand anderes, während du die Seite offen hast,** siehst du die Änderung sofort – dein
   Cursor und die Stelle, an der du liest, bleiben, wo sie waren. Hast du selbst gerade Ungespeichertes,
   kommt stattdessen der Hinweis (siehe [Konflikte auflösen](#konflikte-auflösen)). Verschiebt oder
-  benennt jemand die offene Notiz um, folgt dein Tab ihr, und was du tippst, landet an der neuen Stelle.
+  benennt jemand die offene Seite um, folgt dein Tab ihr, und was du tippst, landet an der neuen Stelle.
 
 ![Nachfrage beim gleichzeitigen Bearbeiten](handbuch/45b-weiche-sperre.webp)
 
@@ -809,7 +809,7 @@ direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#mark
   „Gespeichert“).
 - Was der Editor nicht darstellen kann (z. B. HTML, Fußnoten), erscheint als grau umrandeter
   Block und bleibt unverändert erhalten.
-- Notizen mit `readonly: true` im Frontmatter öffnen im Lesemodus („Nur lesen“ zum Entsperren).
+- Seiten mit `readonly: true` im Frontmatter öffnen im Lesemodus („Nur lesen“ zum Entsperren).
 
 ### Markdown-Spickzettel
 
@@ -823,7 +823,7 @@ aber Markdown, damit die Datei überall lesbar bleibt. In der **Markdown-Ansicht
 | Fett, kursiv, durchgestrichen | `**fett**`, `*kursiv*`, `~~weg~~` | Strg+B, Strg+I, Leiste |
 | Code im Text | `` `code` `` | Strg+E |
 | Link | `[Text](https://beispiel.de)` | Leiste „Link“ oder Text markieren → Link im Auswahlmenü |
-| Link auf eine Notiz | `[Roadmap](plan/roadmap.md)` (relativ) oder Wiki.js-Stil `/plan/roadmap` | `[[` + Name |
+| Link auf eine Seite | `[Roadmap](plan/roadmap.md)` (relativ) oder Wiki.js-Stil `/plan/roadmap` | `[[` + Name |
 | Bild | `![Beschreibung](assets/bild.webp)`, mit Breite `<img src="…" width="400">` | einfügen, ziehen, Büroklammer |
 | Aufzählung | `- Punkt` oder `* Punkt` | Leiste, `/aufzählung` |
 | Nummerierte Liste | `1. Punkt` | Leiste, `/nummeriert` |
@@ -845,9 +845,9 @@ unverändert erhalten. Leere Zeilen speichert Markdown nicht – sie verschwinde
 
 ### Vorlagen
 
-Beim Anlegen einer Notiz lässt sich eine **Vorlage** wählen. Vorlagen sind normale Markdown-
+Beim Anlegen einer Seite lässt sich eine **Vorlage** wählen. Vorlagen sind normale Markdown-
 Dateien im Ordner `.kaveyl-wiki/templates/` der jeweiligen Quelle (versioniert, auch in VS Code
-bearbeitbar; sie erscheinen nicht im Baum). In der Auswahl stehen sie unter ihrem **Dateinamen**. Eine bestehende Notiz wird über „…“ → „Als Vorlage
+bearbeitbar; sie erscheinen nicht im Baum). In der Auswahl stehen sie unter ihrem **Dateinamen**. Eine bestehende Seite wird über „…“ → „Als Vorlage
 speichern“ zur Vorlage. Platzhalter, die beim Anlegen ersetzt werden:
 
 | Platzhalter | Beispiel |
@@ -870,19 +870,19 @@ Direkt miteinander reden die Kopien nie.
 ![Wer schickt was wohin – und wann: Browser, Agenten, Git-Server, eingehängter Ordner, Benachrichtigungen und Ereignis-Webhooks mit ihren Zeiten](handbuch/abgleich-wege.webp)
 
 **Was Kaveyl Wiki schickt.** Was du in Kaveyl Wiki schreibst, steht nach weniger als einer Sekunde in der Datei. Zum Server geht
-es gebündelt: sobald du die Notiz verlässt, mit Strg+S, nach einer Pause beim Schreiben (Standard 2 Minuten, je Quelle
+es gebündelt: sobald du die Seite verlässt, mit Strg+S, nach einer Pause beim Schreiben (Standard 2 Minuten, je Quelle
 einstellbar unter „Wann deine Änderungen nach Git schreiben?“) und wer am Stück schreibt, spätestens alle 10 Minuten. Dabei entsteht ein Commit mit
 dir als Autor, und Kaveyl Wiki überträgt ihn sofort.
 
 **Was Kaveyl Wiki holt.** Änderungen anderer holt Kaveyl Wiki alle 5 Minuten vom Server. Mit einem
 [Webhook](#verbindungen) meldet der Server jede Änderung sofort, dann ist sie nach wenigen Sekunden da. In der
 [Sync-Übersicht](#speichern-übertragen-und-synchronisieren) geht es jederzeit auch von Hand mit „Jetzt synchronisieren“.
-Ist eine Notiz gerade offen und unverändert, lädt sie die neue Fassung von selbst.
+Ist eine Seite gerade offen und unverändert, lädt sie die neue Fassung von selbst.
 
 **Zwei Arten Webhook.** Der **Push-Webhook** geht vom Git-Server zu Kaveyl Wiki: Er meldet jeden Push, damit Kaveyl Wiki
 nicht bis zum nächsten Abgleich wartet (einrichten unter [Verbindungen](#verbindungen)). Der
 **[Ereignis-Webhook](#ereignis-webhooks)** geht von Kaveyl Wiki zu einem anderen System, etwa einem Agenten: Er meldet jede
-Änderung an Notizen, egal ob sie in der App, über die API, MCP oder von außen kam. Wer welche Änderungen per Punkt, E-Mail
+Änderung an Seiten, egal ob sie in der App, über die API, MCP oder von außen kam. Wer welche Änderungen per Punkt, E-Mail
 oder Pushover erfährt, steht unter [Beobachten](#beobachten). Das Beispiel zeigt alles zusammen mit Uhrzeiten:
 
 ![Beispiel mit Uhrzeiten: Anna schreibt, Tom sieht es live, ein Agent antwortet, Lena bekommt eine E-Mail, eine Kollegin pusht aus VS Code](handbuch/abgleich-beispiel.webp)
@@ -895,8 +895,8 @@ diesem Branch oder führt seine Arbeit dort zusammen.
 
 **Nur Kaveyl Wiki, auf mehreren Geräten.** PC, Tablet und Handy öffnen im Browser dieselbe Kaveyl-Wiki-Instanz. Sie arbeiten
 alle auf derselben Kopie, zwischen den Geräten gibt es also nichts abzugleichen – eine Änderung auf dem Handy ist
-auf dem PC sofort da. Bearbeiten zwei Geräte gleichzeitig dieselbe Notiz, merkt Kaveyl Wiki das beim Speichern und zeigt den
-Hinweis „Die Notiz wurde außerhalb geändert“ mit „Zusammenführen“, „Fremde Version laden“ oder „Meine Version speichern“.
+auf dem PC sofort da. Bearbeiten zwei Geräte gleichzeitig dieselbe Seite, merkt Kaveyl Wiki das beim Speichern und zeigt den
+Hinweis „Die Seite wurde außerhalb geändert“ mit „Zusammenführen“, „Fremde Version laden“ oder „Meine Version speichern“.
 
 **Kaveyl Wiki und ein PC mit VS Code.** Auf dem PC liegt ein eigener Klon des Repositorys. VS Code gleicht ihn nicht von
 selbst ab: Hol vor dem Bearbeiten den neuesten Stand (in VS Code „Synchronisieren“ bzw. `git pull`) und schick ihn danach
@@ -931,11 +931,11 @@ sehen ist, kann es also etwas dauern.
 ### Wenn zwei gleichzeitig ändern
 
 Haben Kaveyl Wiki und jemand anderes seit dem letzten Abgleich beide etwas geändert, setzt Kaveyl Wiki die eigenen Änderungen
-auf den neuen Stand des Servers auf. Betreffen sie **verschiedene Notizen oder verschiedene Stellen derselben Notiz**,
+auf den neuen Stand des Servers auf. Betreffen sie **verschiedene Seiten oder verschiedene Stellen derselben Seite**,
 passt das von selbst zusammen, und niemand merkt etwas. Die Versionsgeschichte bleibt dabei eine gerade Linie, ohne
 zusätzliche Merge-Commits.
 
-Haben beide **dieselben oder direkt benachbarte Zeilen** geändert – oder hat einer eine Notiz gelöscht, die der andere
+Haben beide **dieselben oder direkt benachbarte Zeilen** geändert – oder hat einer eine Seite gelöscht, die der andere
 bearbeitet hat –, entsteht ein **Konflikt**. Dann überschreibt Kaveyl Wiki nichts: Deine Fassung bleibt gesichert, das
 Übertragen pausiert, und das Sync-Symbol zeigt eine Warnung. Gelöst wird der Konflikt in Kaveyl Wiki, mit allen drei Fassungen
 nebeneinander – siehe [Konflikte auflösen](#konflikte-auflösen). Bis dahin kommt nichts aus dieser Quelle beim Server an.
@@ -962,20 +962,20 @@ der Sync-Übersicht steht dazu eine Warnung. Das gilt auch, wenn dabei ein Konfl
 - **Speichern** in die Datei passiert sofort (wenige hundert Millisekunden nach dem Tippen).
 - **Abgemeldet, während noch etwas ungespeichert ist** (Abmelden in einem anderen Tab, Sitzung abgelaufen,
   Passwort geändert): Der Tab bleibt offen, mit dem Hinweis **„Du bist abgemeldet“** und der Zahl der noch nicht
-  gespeicherten Notizen. **„In neuem Tab anmelden“** öffnet Kaveyl Wiki in einem neuen Tab; danach hier **„Jetzt speichern“**
+  gespeicherten Seiten. **„In neuem Tab anmelden“** öffnet Kaveyl Wiki in einem neuen Tab; danach hier **„Jetzt speichern“**
   – die neue Anmeldung gilt auch für diesen Tab. Erst wenn alles gespeichert ist (oder du **„Änderungen verwerfen und
   abmelden“** bestätigst), erscheint die Anmeldung. Der Inhalt bleibt dabei nur in diesem Tab, nicht auf dem Gerät;
   beim Schließen oder Neuladen warnt der Browser. Auch der eigene **Abmelden**-Knopf fragt vorher nach, wenn noch
   etwas ungespeichert ist.
   Hat sich in der Zwischenzeit ein **anderes Konto** angemeldet (die Anmeldung gilt für alle Tabs dieses Browsers),
   werden die Änderungen **nicht** unter diesem Konto gespeichert: Der Hinweis **„Anderes Konto angemeldet“** nennt
-  beide Namen. **„Inhalte kopieren“** legt den Text aller noch nicht gespeicherten Notizen in die Zwischenablage;
+  beide Namen. **„Inhalte kopieren“** legt den Text aller noch nicht gespeicherten Seiten in die Zwischenablage;
   meldest du dich im anderen Tab wieder mit dem ursprünglichen Konto an, speichert **„Erneut prüfen“** bzw. der Editor
   von selbst. **„Änderungen verwerfen“** (mit Rückfrage) öffnet den Arbeitsplatz des neuen Kontos.
 - **Server kurz nicht erreichbar**, während noch etwas ungespeichert ist: Der Arbeitsplatz bleibt stehen, oben
-  erscheint ein Hinweis mit der Zahl der offenen Notizen. Sobald der Server wieder da ist, speichert der Editor
+  erscheint ein Hinweis mit der Zahl der offenen Seiten. Sobald der Server wieder da ist, speichert der Editor
   von selbst – den Tab bis dahin offen lassen. Ist nichts offen, erscheint wie bisher „Server nicht erreichbar“.
-- **Übertragen** (Commit und bei Repositories Push) passiert, sobald du die Notiz **verlässt**
+- **Übertragen** (Commit und bei Repositories Push) passiert, sobald du die Seite **verlässt**
   (anderer Tab, Tab schließen, Browserfenster im Hintergrund), mit **Strg+S**, nach der
   eingestellten **Pause** (Standard 2 Min) – und wer am Stück schreibt, spätestens alle 10 Minuten.
   Eine Bearbeitung ergibt so meist **einen** Commit; du bist der Autor.
@@ -997,44 +997,44 @@ der Sync-Übersicht steht dazu eine Warnung. Das gilt auch, wenn dabei ein Konfl
 ![Sync-Übersicht](handbuch/11-sync-uebersicht.webp)
 
 - Änderungen von außen holt Kaveyl Wiki alle 5 Minuten, sofort bei eingerichtetem
-  [Webhook](#webhooks), oder mit „Jetzt synchronisieren“. Ist eine Notiz
+  [Webhook](#webhooks), oder mit „Jetzt synchronisieren“. Ist eine Seite
   offen und unverändert, lädt sie automatisch neu.
 - **Wiki.js** holt Änderungen aus Git in seinem eigenen Intervall (standardmäßig 5 Minuten).
 
 ## Anlegen, Umbenennen, Verschieben, Löschen
 
-Alles per **Rechtsklick** im Baum (oder im Notiz-Menü „…“):
+Alles per **Rechtsklick** im Baum (oder im Seiten-Menü „…“):
 
-- **Neue Notiz / Neuer Ordner** – auch über das **„+“**, das beim Überfahren einer Quelle oder
-  eines Ordners erscheint (Auswahl „Neue Notiz“ oder „Neuer Ordner“). Der Dateiname wird aus dem
+- **Neue Seite / Neuer Ordner** – auch über das **„+“**, das beim Überfahren einer Quelle oder
+  eines Ordners erscheint (Auswahl „Neue Seite“ oder „Neuer Ordner“). Der Dateiname wird aus dem
   Titel gebildet (Sonderzeichen wie `:` werden ersetzt, ein schon vorhandener Name bekommt „ 2“ – eine Meldung nennt
   dann den Namen, unter dem gespeichert wurde). Das Feld links neben dem Titel wählt gleich ein
   **Icon** (freiwillig, dieselbe Auswahl wie bei „Icon ändern“).
 
 ![„+“ an einem Ordner](handbuch/59-ordner-neu.webp)
 - **Umbenennen / verschieben:** Dateiname eintippen, **Ziel aus der Liste wählen** (alle
-  Quellen und Ordner, durchsuchbar). Links auf die Notiz werden automatisch angepasst.
+  Quellen und Ordner, durchsuchbar). Links auf die Seite werden automatisch angepasst.
 
 ![Umbenennen und Verschieben](handbuch/15-umbenennen-verschieben.webp)
 
 - **In eine andere Quelle verschieben:** gleiches Fenster, Ziel in einer anderen Quelle.
-  Die Notiz wird dort angelegt und hier gelöscht; verlinkte Bilder werden mitkopiert
+  Die Seite wird dort angelegt und hier gelöscht; verlinkte Bilder werden mitkopiert
   (Originale bleiben, Dateien ohne Leserecht kommen nicht mit). Die Git-Historie bleibt in der alten Quelle, und Links aus der alten
-  Quelle auf diese Notiz kann Kaveyl Wiki nicht über Repository-Grenzen anpassen.
+  Quelle auf diese Seite kann Kaveyl Wiki nicht über Repository-Grenzen anpassen.
 
 ![Verschieben in eine andere Quelle](handbuch/18-quellwechsel.webp)
 
-- **Kopieren / Ausschneiden / Einfügen:** Rechtsklick auf eine Notiz oder einen Ordner →
+- **Kopieren / Ausschneiden / Einfügen:** Rechtsklick auf eine Seite oder einen Ordner →
   „Kopieren“ (Strg+C) oder „Ausschneiden“ (Strg+X), dann Rechtsklick auf einen Ordner oder den
-  Namen einer Quelle → „Einfügen …“ (Strg+V; auf einer Notiz = daneben). Die Kürzel wirken, wenn
+  Namen einer Quelle → „Einfügen …“ (Strg+V; auf einer Seite = daneben). Die Kürzel wirken, wenn
   der Eintrag im Baum gewählt ist. Das geht auch zwischen Quellen.
   - **Kopieren** legt ein Duplikat an; gibt es den Namen am Ziel schon, heißt es „name (Kopie)“,
-    „name (Kopie 2)“ … Ein Ordner wird mit seinen Notizen, Bildern, PDFs, Anhängen (`assets/`) und
+    „name (Kopie 2)“ … Ein Ordner wird mit seinen Seiten, Bildern, PDFs, Anhängen (`assets/`) und
     Ordner-Einstellungen (`.kaveyl-wiki.yml`) kopiert; andere Dateien darin – Skripte, Konfiguration, versteckte
-    Dateien – bleiben zurück (die Meldung nennt ihre Anzahl). Eine Notiz nimmt ihre Bilder und Anhänge aus ihrem Ordner mit. Jede Kopie bekommt eine neue
-    `id`; Links in der Kopie werden so angepasst, dass sie dieselben Notizen erreichen (innerhalb
-    eines kopierten Ordners: die Kopien). Notizen und Dateien ohne Leserecht werden nicht mitkopiert. In eine
-    **andere Quelle** kopiert, können Links auf Notizen, die nur in der alten Quelle liegen, nicht
+    Dateien – bleiben zurück (die Meldung nennt ihre Anzahl). Eine Seite nimmt ihre Bilder und Anhänge aus ihrem Ordner mit. Jede Kopie bekommt eine neue
+    `id`; Links in der Kopie werden so angepasst, dass sie dieselben Seiten erreichen (innerhalb
+    eines kopierten Ordners: die Kopien). Seiten und Dateien ohne Leserecht werden nicht mitkopiert. In eine
+    **andere Quelle** kopiert, können Links auf Seiten, die nur in der alten Quelle liegen, nicht
     mehr stimmen – die [Prüfung](#prüfung) zeigt sie als gebrochene Links.
   - **Ausschneiden + Einfügen** verschiebt – wie Ziehen und Ablegen; der ausgeschnittene Eintrag
     erscheint bis dahin blass.
@@ -1043,15 +1043,15 @@ Alles per **Rechtsklick** im Baum (oder im Notiz-Menü „…“):
 
 - **Mehrere auf einmal:** markieren (siehe [Mehrere markieren](#mehrere-markieren)), dann verschieben, löschen,
   exportieren oder teilen.
-- **Löschen:** mit Rückfrage; bei Ordnern nennt sie die Zahl der Notizen darin (die Ordnerseite zählt nicht mit). Bei Ordnern werden
-  nur Notizen gelöscht, andere Dateien (Code, Bilder) bleiben. Gelöschtes landet im
+- **Löschen:** mit Rückfrage; bei Ordnern nennt sie die Zahl der Seiten darin (die Ordnerseite zählt nicht mit). Bei Ordnern werden
+  nur Seiten gelöscht, andere Dateien (Code, Bilder) bleiben. Gelöschtes landet im
   [Papierkorb](#versionen-und-papierkorb) der Quelle und lässt sich dort zurückholen – gleich nach
   dem Löschen auch über **Wiederherstellen** in der Meldung „„Name“ ist im Papierkorb“. Die
   Tastatur steht danach auf der nächsten Zeile im Baum.
 
 ### Mehrere markieren
 
-Wie im Datei-Explorer: **Strg+Klick** (am Mac Cmd+Klick) markiert eine Notiz oder einen Ordner und noch einen; die
+Wie im Datei-Explorer: **Strg+Klick** (am Mac Cmd+Klick) markiert eine Seite oder einen Ordner und noch einen; die
 gerade offene Zeile kommt dabei mit. **Umschalt+Klick** markiert alle sichtbaren Zeilen von der zuletzt markierten bis
 hierher. Auf Tablet und Handy: langes Drücken → **„Auswählen“** – vor den Zeilen erscheinen Kästchen, jedes Tippen
 markiert oder hebt auf. Markiert wird immer in **einer** Quelle; ein Klick in eine andere Quelle fängt neu an.
@@ -1061,23 +1061,23 @@ eine markierte Zeile:
 
 | Aktion | Wirkung |
 |---|---|
-| Per Mail versenden … | die markierten Notizen als Dateien in einer Mail ([Per Mail versenden](#per-mail-versenden)); nur wenn nur Notizen markiert sind |
+| Per Mail versenden … | die markierten Seiten als Dateien in einer Mail ([Per Mail versenden](#per-mail-versenden)); nur wenn nur Seiten markiert sind |
 | Zugriff per E-Mail geben … | eine Einladung bzw. Hinweis-Mail für alle markierten ([Teilen](#konten-einladungen-und-teilen-per-e-mail)); nur wenn du überall „verwalten“ darfst |
 | Verschieben … | alle in einen Ordner, auch in eine andere Quelle; Links werden angepasst. Gibt es einen Namen im Ziel schon, bleibt dieser Eintrag, wo er ist, und die Meldung nennt ihn |
-| Exportieren: Markdown (ZIP) / HTML (ZIP) | eine ZIP-Datei mit den markierten Notizen und Ordnern – die Pfade ab dem gemeinsamen Ordner ([Export](#exportieren-und-drucken)) |
+| Exportieren: Markdown (ZIP) / HTML (ZIP) | eine ZIP-Datei mit den markierten Seiten und Ordnern – die Pfade ab dem gemeinsamen Ordner ([Export](#exportieren-und-drucken)) |
 | Löschen … | nach einer Rückfrage alle in den [Papierkorb](#versionen-und-papierkorb) |
 | Auswahl aufheben | wie **Fertig** oder Esc im Baum |
 
 Ein normaler Klick hebt die Markierung auf und öffnet wie immer. In einem neuen Tab öffnet die **mittlere Maustaste**
 oder Rechtsklick → „In neuem Tab öffnen“.
 
-![Zwei Notizen markiert, Rechtsklick zeigt die Aktionen](handbuch/89-mehrere-markiert.webp)
+![Zwei Seiten markiert, Rechtsklick zeigt die Aktionen](handbuch/89-mehrere-markiert.webp)
 
 ### Markdown importieren
 
 Rechtsklick auf einen Ordner oder den Namen einer Quelle → **Importieren ▸ Markdown-Dateien …** → eine oder mehrere
-`.md`-Dateien vom Computer wählen. Jede wird eine Notiz in diesem Ordner, so wie sie ist (Frontmatter, Tags), unter
-ihrem Dateinamen. Gibt es den Namen schon, heißt die neue Notiz „Name 2“ – überschrieben wird nie. Die Notiz bekommt
+`.md`-Dateien vom Computer wählen. Jede wird eine Seite in diesem Ordner, so wie sie ist (Frontmatter, Tags), unter
+ihrem Dateinamen. Gibt es den Namen schon, heißt die neue Seite „Name 2“ – überschrieben wird nie. Die Seite bekommt
 eine neue `id`, wie eine Kopie. Bilder, auf die die Datei zeigt, kommen nicht mit; einzelne Dateien höchstens 5 MB.
 In einen verschlüsselten Ordner lässt sich keine unverschlüsselte Datei importieren. Du brauchst dort „schreiben“.
 Ganze Exporte aus anderen Programmen: [Aus anderen Programmen importieren](#aus-anderen-programmen-importieren).
@@ -1086,16 +1086,16 @@ Ganze Exporte aus anderen Programmen: [Aus anderen Programmen importieren](#aus-
 
 Rechtsklick auf einen Ordner oder den Namen einer Quelle → **Importieren ▸ Aus anderem Programm …** → den Export des
 anderen Programms als ZIP wählen (höchstens 500 MB). Kaveyl Wiki erkennt das Format und zeigt **vor dem Schreiben**,
-was übernommen wird: Zahl der Notizen, Dateien und Ordner und eine Liste mit Hinweisen, etwa zu Links, die sich nicht
+was übernommen wird: Zahl der Seiten, Dateien und Ordner und eine Liste mit Hinweisen, etwa zu Links, die sich nicht
 zuordnen ließen. Format und Name des neuen Ordners lassen sich dort ändern. **Importieren** legt alles in einen **neuen
-Ordner** – nie über Bestehendes; gibt es den Namen schon, kommt eine Nummer dazu – und schreibt darin die Notiz
-**Import-Bericht** mit allen Hinweisen und Links auf die betroffenen Notizen. In einer Quelle mit Versionen ist der
+Ordner** – nie über Bestehendes; gibt es den Namen schon, kommt eine Nummer dazu – und schreibt darin die Seite
+**Import-Bericht** mit allen Hinweisen und Links auf die betroffenen Seiten. In einer Quelle mit Versionen ist der
 ganze Import eine Version. Rückgängig: den Ordner löschen (er kommt in den Papierkorb).
 
 ![Vorschau eines Imports aus HedgeDoc](handbuch/90-import-vorschau.webp)
 
-Namen werden gesäubert wie beim Anlegen einer Notiz („Hütte 1: Tirol“ wird `Hütte 1 - Tirol.md`); Links zwischen den
-importierten Notizen und Bildern zeigen danach auf die neuen Namen. Bilder und PDFs bleiben an ihrem Platz, andere
+Namen werden gesäubert wie beim Anlegen einer Seite („Hütte 1: Tirol“ wird `Hütte 1 - Tirol.md`); Links zwischen den
+importierten Seiten und Bildern zeigen danach auf die neuen Namen. Bilder und PDFs bleiben an ihrem Platz, andere
 Dateien kommen in `assets/` daneben, gesperrte Dateiendungen ([Anhänge](#anhänge)) bleiben draußen. Du brauchst
 „schreiben“ im Zielordner; in verschlüsselte Ordner lässt sich nichts importieren, Gäste können nicht importieren. Es
 läuft immer nur ein Import zur selben Zeit. Steht ein Reverse-Proxy vor Kaveyl Wiki, muss er so große Uploads
@@ -1103,27 +1103,27 @@ durchlassen – sonst meldet der Dialog „Zu groß für den Server“.
 
 | Programm | So entsteht der Export | Was übernommen wird |
 |---|---|---|
-| **HedgeDoc** (1.x, auch CodiMD) | Startseite → Benutzermenü oben rechts → **Export user data** (deutsch „Exportiere Nutzerdaten“) | alle eigenen Notizen, der Titel wird der Name; `:::info`-Boxen werden Hinweisboxen, `:::spoiler` ein aufklappbarer Abschnitt, `{%youtube …%}` ein Link, `[TOC]` fällt weg; leere Notizen bleiben draußen |
-| **Joplin** | im Menü Datei alles exportieren als „Markdown + Front Matter“ und den Ordner als ZIP packen (auch „Markdown“ ohne Front Matter geht, dann ohne Tags und To-do-Status) | Notizbücher als Ordner, der Titel wird der Name; Bilder und Anhänge kommen in `assets/` neben die erste Notiz, die sie zeigt; Links zwischen Notizen bleiben; Tags bleiben; To-dos behalten offen/erledigt und Fälligkeit im Frontmatter (`todo`, `done`, `due`); HTML-Notizen aus dem Web Clipper und verkleinerte Bilder (`<img>`) werden Markdown |
+| **HedgeDoc** (1.x, auch CodiMD) | Startseite → Benutzermenü oben rechts → **Export user data** (deutsch „Exportiere Nutzerdaten“) | alle eigenen Notizen, der Titel wird der Name; `:::info`-Boxen werden Hinweisboxen, `:::spoiler` ein aufklappbarer Abschnitt, `{%youtube …%}` ein Link, `[TOC]` fällt weg; leere Seiten bleiben draußen |
+| **Joplin** | im Menü Datei alles exportieren als „Markdown + Front Matter“ und den Ordner als ZIP packen (auch „Markdown“ ohne Front Matter geht, dann ohne Tags und To-do-Status) | Notizbücher als Ordner, der Titel wird der Name; Bilder und Anhänge kommen in `assets/` neben die erste Seite, die sie zeigt; Links zwischen Seiten bleiben; Tags bleiben; To-dos behalten offen/erledigt und Fälligkeit im Frontmatter (`todo`, `done`, `due`); HTML-Notizen aus dem Web Clipper und verkleinerte Bilder (`<img>`) werden Markdown |
 | **Logseq** (0.10.x, Graph als Ordner) | den Graph-Ordner (darin `pages`, `journals`, `assets`, `logseq`) als ZIP packen | Seiten und Journale (`Journal/2026-10-28.md`), Namensräume `Touren/2026` werden Ordner; Seiten-Eigenschaften werden Frontmatter (`alias::` → `aliases`), Block-Eigenschaften eine Zeile `schlüssel: wert`; die Gliederung bleibt eine Liste; `[[Seite]]`-Links und Links auf Journale werden normale Links, auch über Aliase; `TODO`/`DONE` werden Aufgaben-Kästchen (`LATER`, `NOW` … bleiben als Wort davor); Block-Verweise `((…))` und Einbettungen werden ein Link auf die Seite mit dem Text des Blocks; `#+BEGIN_NOTE` & Co. werden Hinweisboxen; Bilder ohne Zeitstempel im Namen; Abfragen bleiben als Text, Org-Seiten und Whiteboards bleiben draußen. Logseq 2.x (Datenbank-Version, Beta) wird noch nicht unterstützt |
 | **SilverBullet** | den Ordner des Space (die Seiten als `.md`-Dateien) als ZIP packen | Seiten und Unterordner, Bilder und Dateien; `[[Seite]]`-, `[[Seite\|Text]]`- und `[[Seite#Überschrift]]`-Links werden normale Links, eingebettete Seiten ein Link; `> **note**`-Boxen werden Hinweisboxen; Lua-Ausdrücke und Abfragen (`${…}`, `space-lua`) bleiben als Text stehen und werden nicht ausgeführt; `CONFIG`, Standardbibliothek und Plugs bleiben draußen |
-| **Obsidian** (geprüft mit 1.14) | den Ordner des Tresors (Vault) als ZIP packen – mit oder ohne `.obsidian` | Ordner, Notizen, Bilder und Dateien, wo sie waren; `[[Name]]`, `[[Name\|Text]]`, `[[Name#Überschrift]]`, relative `[[../Ordner/Name]]` und Markdown-Links werden normale Links – auch bei `?`, `#` oder `%` im Namen; bei mehrdeutigen Namen gewinnt die nächstgelegene Notiz; eingebettete Bilder bleiben Bilder (ohne Größe), eingebettete Notizen und PDFs werden ein Link; Callouts aller Arten werden eine der fünf Hinweisboxen (der Titel bleibt), einklappbare ein aufklappbarer Abschnitt; `==markiert==` wird fett, `%%Kommentare%%` unsichtbare HTML-Kommentare; Block-IDs `^abc` fallen weg; `#tags` im Text kommen zusätzlich in `tags`; Eigenschaften bleiben, wie sie sind (Links darin als `[[…]]`); Canvas- und Base-Dateien kommen als Datei mit; `.obsidian` und der Papierkorb `.trash` bleiben draußen |
+| **Obsidian** (geprüft mit 1.14) | den Ordner des Tresors (Vault) als ZIP packen – mit oder ohne `.obsidian` | Ordner, Seiten, Bilder und Dateien, wo sie waren; `[[Name]]`, `[[Name\|Text]]`, `[[Name#Überschrift]]`, relative `[[../Ordner/Name]]` und Markdown-Links werden normale Links – auch bei `?`, `#` oder `%` im Namen; bei mehrdeutigen Namen gewinnt die nächstgelegene Seite; eingebettete Bilder bleiben Bilder (ohne Größe), eingebettete Seiten und PDFs werden ein Link; Callouts aller Arten werden eine der fünf Hinweisboxen (der Titel bleibt), einklappbare ein aufklappbarer Abschnitt; `==markiert==` wird fett, `%%Kommentare%%` unsichtbare HTML-Kommentare; Block-IDs `^abc` fallen weg; `#tags` im Text kommen zusätzlich in `tags`; Eigenschaften bleiben, wie sie sind (Links darin als `[[…]]`); Canvas- und Base-Dateien kommen als Datei mit; `.obsidian` und der Papierkorb `.trash` bleiben draußen |
 | **Outline** (geprüft mit 1.12) | Einstellungen → **Export** → ganzer Arbeitsbereich, oder im Menü einer Sammlung **Exportieren**, jeweils als **Markdown** (auch das neuere **OKF** geht); dann das ZIP herunterladen | Sammlungen als Ordner, ein Dokument mit Unterdokumenten wird die Ordnerseite; Titel, Erstellt/Geändert und ein Emoji-Symbol vor dem Titel kommen mit; Links zwischen Dokumenten (ein Link auf eine Überschrift öffnet das Dokument); jede Datei nur einmal (Outline legt sie neben jedes Dokument, das sie nutzt); Hinweisboxen (`:::info` …) werden Hinweisboxen, einklappbare Abschnitte ein aufklappbarer Abschnitt; Erwähnungen von Personen werden `@Name`; `__unterstrichen__` wird kursiv. Entwürfe, archivierte und gelöschte Dokumente sowie Vorlagen stehen nicht im Export – Links darauf bleiben als Text, der Bericht nennt sie |
-| **Trilium** (geprüft mit 0.106) | Rechtsklick auf die oberste Notiz des Teilbaums → **Exportieren** → **Markdown** | der Baum, wie er in Trilium aussieht – mit den Titeln aus Trilium (nicht den gekürzten Dateinamen des Exports); eine Notiz mit Text **und** Unterseiten wird die Ordnerseite ihres Ordners; Bilder, Anhänge, Verweise, eingebettete Notizen, Fußnoten und Download-Links werden Markdown; Code- und Mermaid-Notizen werden eine Notiz mit Codeblock; Leinwände werden ein Bild mit der Zeichnung als Datei daneben, Mindmaps und Beziehungskarten eine Datei; Labels ohne Wert werden Tags, mit Wert eigene Eigenschaften im Frontmatter, Beziehungen der Titel der Zielnotiz; ein Klon steht am ersten Ort, an den anderen als Link dorthin. **Geschützte Notizen** exportiert Trilium nur bei offener geschützter Sitzung – sonst fehlen sie, der Bericht nennt den Ordner. Suchen, Render- und Karten-Notizen bleiben draußen; Links auf Überschriften verliert Trilium schon beim Export |
+| **Trilium** (geprüft mit 0.106) | Rechtsklick auf die oberste Notiz des Teilbaums → **Exportieren** → **Markdown** | der Baum, wie er in Trilium aussieht – mit den Titeln aus Trilium (nicht den gekürzten Dateinamen des Exports); eine Seite mit Text **und** Unterseiten wird die Ordnerseite ihres Ordners; Bilder, Anhänge, Verweise, eingebettete Notizen, Fußnoten und Download-Links werden Markdown; Code- und Mermaid-Notizen werden eine Seite mit Codeblock; Leinwände werden ein Bild mit der Zeichnung als Datei daneben, Mindmaps und Beziehungskarten eine Datei; Labels ohne Wert werden Tags, mit Wert eigene Eigenschaften im Frontmatter, Beziehungen der Titel der Zielseite; ein Klon steht am ersten Ort, an den anderen als Link dorthin. **Geschützte Seiten** exportiert Trilium nur bei offener geschützter Sitzung – sonst fehlen sie, der Bericht nennt den Ordner. Suchen, Render- und Karten-Notizen bleiben draußen; Links auf Überschriften verliert Trilium schon beim Export |
 | **Wiki.js** (2.x, geprüft mit 2.5) | Administration → **Speicher** → **Local File System** einschalten (Pfad im Container) → Aktion **Dump all content to disk**, dann den Ordner als ZIP packen; wer den **Git-Speicher** nutzt, packt den Ordner des Repositorys | Seiten mit ihrem Titel als Namen, Ordner wie die Seitenadressen (mit dem Titel der Seite gleicher Adresse), eine Seite mit Unterseiten wird die Ordnerseite; weitere Sprachen in einem eigenen Ordner (`en/`); hochgeladene Bilder und Dateien bleiben, wo sie waren; Beschreibung, Tags, Erstellt/Geändert kommen ins Frontmatter, unveröffentlichte Seiten mit `published: false`; Hinweisboxen (`{.is-info}` …) werden Hinweisboxen, `{.class}`-Angaben und Bildgrößen fallen weg; Seiten aus dem visuellen Editor und HTML-Seiten werden Markdown (ohne Skripte), AsciiDoc-Seiten ein Codeblock. Links folgen den Regeln von Wiki.js (`/de/…`, Kindseiten); ein relativer Link, der in Wiki.js ins Leere zeigte, aber eine gleichnamige Nachbarseite meint, wird auf sie gesetzt – der Bericht nennt das; Links auf Schlagwörter (`/t/…`) werden Text. Der Git-Speicher ergibt dieselbe Ordnung wie „Dump all content to disk“ (die Hauptsprache ohne eigenen Ordner). Zeitgesteuertes Veröffentlichen steht nicht im Export |
-| **Markdown-Ordner** | einen Ordner mit `.md`-Dateien (gern mit Unterordnern und Bildern) als ZIP packen | Ordner, Notizen und Dateien, wie sie sind; relative Links bleiben, `[[Name]]`-Links werden normale Links; versteckte Dateien und Ordner (`.git`, `.vscode` …) bleiben draußen |
+| **Markdown-Ordner** | einen Ordner mit `.md`-Dateien (gern mit Unterordnern und Bildern) als ZIP packen | Ordner, Seiten und Dateien, wie sie sind; relative Links bleiben, `[[Name]]`-Links werden normale Links; versteckte Dateien und Ordner (`.git`, `.vscode` …) bleiben draußen |
 
-**Namen und Links:** Datei- und Ordnernamen schreibt Kaveyl Wiki in der üblichen Unicode-Form (NFC) – ZIP-Dateien vom Mac speichern Umlaute manchmal anders. Markdown-Links finden ihr Ziel auch, wenn es dort anders geschrieben ist oder sich nur in Groß- und Kleinschreibung unterscheidet (`notiz.md` → `Notiz.md`), wie es `[[Links]]` schon taten.
+**Namen und Links:** Datei- und Ordnernamen schreibt Kaveyl Wiki in der üblichen Unicode-Form (NFC) – ZIP-Dateien vom Mac speichern Umlaute manchmal anders. Markdown-Links finden ihr Ziel auch, wenn es dort anders geschrieben ist oder sich nur in Groß- und Kleinschreibung unterscheidet (`notiz.md` → `Seite.md`), wie es `[[Links]]` schon taten.
 
 **Bilder bei HedgeDoc:** Der Export enthält die hochgeladenen Bilder nicht, sie liegen weiter auf dem HedgeDoc-Server.
 Die Vorschau bietet deshalb **„Bilder vom alten Server holen“** an (der Server steht dabei): Kaveyl Wiki lädt sie beim
 Importieren einmal von dort und legt sie in `assets/`, benannt nach ihrem Bildtext. Dazu muss der alte Server noch
 laufen und vom Kaveyl-Wiki-Server aus erreichbar sein. Geholt werden nur Dateien unter `/uploads/` (Bilder und PDFs),
 ohne Weiterleitungen und nie über Loopback- oder Link-Local-Adressen (`127.0.0.1`, `169.254.…`); höchstens 10 Minuten lang. Was nicht ankommt, bleibt ein Web-Link,
-und der Import-Bericht nennt die Notizen.
+und der Import-Bericht nennt die Seiten.
 
 **Grenzen bei HedgeDoc:** Der Export enthält keine Adressen der Notizen. Links auf andere HedgeDoc-Notizen zeigen
-deshalb weiter auf den alten Server – der Import-Bericht nennt jede betroffene Notiz. Folien (`type: slide`) erscheinen
+deshalb weiter auf den alten Server – der Import-Bericht nennt jede betroffene Seite. Folien (`type: slide`) erscheinen
 als normaler Text.
 
 **Wikis, die schon ein Git-Repository mit Markdown sind** – Gollum, die Wikis von Gitea, GitHub und GitLab
@@ -1132,8 +1132,8 @@ als normaler Text.
 
 ### Ziehen und Ablegen im Baum
 
-- Eine Notiz oder einen Ordner **auf einen Ordner** ziehen verschiebt sie dorthin (Links werden
-  repariert, wie beim Umbenennen). Auf den Namen einer Quelle ziehen = oberste Ebene. Notizen
+- Eine Seite oder einen Ordner **auf einen Ordner** ziehen verschiebt sie dorthin (Links werden
+  repariert, wie beim Umbenennen). Auf den Namen einer Quelle ziehen = oberste Ebene. Seiten
   lassen sich auch in eine **andere Quelle** ziehen (sie wird dort angelegt und hier gelöscht).
 - **Zwischen** zwei Einträge ziehen (Linie über/unter dem Eintrag) legt die **Reihenfolge**
   fest. Sie wird in `.kaveyl-wiki.yml` des Ordners gespeichert (`order:`) und ist damit für alle
@@ -1160,19 +1160,19 @@ als normaler Text.
 - **Web-Adressen:** `www.beispiel.de` reicht beim Eingeben – Kaveyl Wiki speichert `https://www.beispiel.de`
   (eine E-Mail-Adresse wird zu `mailto:`). Auch Links, die anderswo ohne `https://` geschrieben wurden,
   öffnen die Webseite und gelten nicht als kaputter Link. Eine getippte oder eingefügte Adresse wird von selbst
-  zum Link; Dateinamen wie `Notiz.md` oder `bilder.zip` bleiben Text, obwohl die Endungen auch Web-Endungen sind
+  zum Link; Dateinamen wie `Seite.md` oder `bilder.zip` bleiben Text, obwohl die Endungen auch Web-Endungen sind
   (mit `https://` davor werden sie zum Link).
-- **Klick** öffnet die Notiz (mit Strg/⌘ oder mittlerer Maustaste in einem neuen Tab), eine Datei als
+- **Klick** öffnet die Seite (mit Strg/⌘ oder mittlerer Maustaste in einem neuen Tab), eine Datei als
   Vorschau oder Download, eine Web-Adresse in einem neuen Browser-Tab. **Rechtsklick** auf einen Link
-  zeigt das Link-Menü von Kaveyl Wiki: Öffnen bzw. Im Browser öffnen, In neuem Tab öffnen (Notizen), Link kopieren,
+  zeigt das Link-Menü von Kaveyl Wiki: Öffnen bzw. Im Browser öffnen, In neuem Tab öffnen (Seiten), Link kopieren,
   Link bearbeiten …, Link entfernen (der Text bleibt). Rechtsklick auf normalen Text zeigt weiter das Menü
   des Browsers (z. B. für Rechtschreibvorschläge).
 
 ![Link-Menü](handbuch/108-link-menue.webp)
-- Unter jeder Notiz zeigt **„Verlinkt von“**, welche Notizen auf sie verweisen.
-- **Sehr große Notizen:** Eine Notiz über 256 KB – oder eine, die so verschachtelt ist, dass der Server sie nicht in
+- Unter jeder Seite zeigt **„Verlinkt von“**, welche Seiten auf sie verweisen.
+- **Sehr große Seiten:** Eine Seite über 256 KB – oder eine, die so verschachtelt ist, dass der Server sie nicht in
   wenigen Sekunden lesen kann – liest Kaveyl Wiki nicht als Markdown. Sie bleibt in der Volltextsuche und lässt sich
-  bearbeiten, erscheint aber nur in der Markdown-Ansicht (mit einem Hinweis oben); ihre Links auf andere Notizen zählen
+  bearbeiten, erscheint aber nur in der Markdown-Ansicht (mit einem Hinweis oben); ihre Links auf andere Seiten zählen
   nicht für „Verlinkt von“ und die Link-Prüfung, und beim Umbenennen eines Ziels passt Kaveyl Wiki sie darin nicht an.
   Ihre Bilder und Anhänge erkennt Kaveyl Wiki trotzdem – sie gelten nie als unbenutzt und gehen beim Verschieben und
   Exportieren mit. Ein
@@ -1184,41 +1184,41 @@ als normaler Text.
   - Umbenennen/Verschieben **in Kaveyl Wiki** → Links werden sofort angepasst, jeweils im Stil
     der Datei (relativ bleibt relativ, Wiki.js-Stil bleibt Wiki.js-Stil).
   - Umbenennen **außerhalb** (VS Code, Wiki.js, `git mv`) in einem Repository → Kaveyl Wiki
-    erkennt die Notiz wieder und repariert die Links in einem eigenen Commit
+    erkennt die Seite wieder und repariert die Links in einem eigenen Commit
     `fix(links): …`.
   - In **lokalen Ordnern ohne automatischen Commit** wird nichts von selbst geändert; die
     Sync-Übersicht bietet „**Links reparieren**“ an.
   - Links, die schon vorher ins Leere zeigten, fasst Kaveyl Wiki nicht an – die findet die
     [Prüfung](#prüfung).
-- **Links ins Leere** sind in der Notiz **rot und gestrichelt** markiert („Ziel fehlt“) – sofort beim
-  Schreiben, nicht erst nach dem Speichern. Ein Klick darauf öffnet das Link-Menü mit **Notiz anlegen**
-  (legt die Notiz dort an, wohin der Link zeigt, und öffnet sie in einem neuen Tab), **Link bearbeiten …**
+- **Links ins Leere** sind auf der Seite **rot und gestrichelt** markiert („Ziel fehlt“) – sofort beim
+  Schreiben, nicht erst nach dem Speichern. Ein Klick darauf öffnet das Link-Menü mit **Seite anlegen**
+  (legt die Seite dort an, wohin der Link zeigt, und öffnet sie in einem neuen Tab), **Link bearbeiten …**
   und **Link entfernen**. Mit Strg/⌘+Klick wird der Link trotzdem geöffnet. Die Datei ändert die Markierung
-  nicht; als fehlend gilt auch ein Ziel, das du nicht lesen darfst. In verschlüsselten Notizen wird nicht
+  nicht; als fehlend gilt auch ein Ziel, das du nicht lesen darfst. In verschlüsselten Seiten wird nicht
   geprüft (ihre Links verlassen den Browser nicht).
 
 ![Link ins Leere](handbuch/110-link-ins-leere.webp)
 
 ## Versionen und Papierkorb
 
-**Versionen** (Notiz-Menü „…“ → „Versionen“, nur in Git-Quellen): Liste aller Commits der
-Notiz, auch über Umbenennungen hinweg. Pro Version „Änderungen dieser Version“ oder
+**Versionen** (Seiten-Menü „…“ → „Versionen“, nur in Git-Quellen): Liste aller Commits der
+Seite, auch über Umbenennungen hinweg. Pro Version „Änderungen dieser Version“ oder
 „Unterschied zur aktuellen Fassung“. **„Diese Version wiederherstellen“** macht den alten
 Stand zur aktuellen Fassung – als neue Änderung, die Historie bleibt vollständig.
 
 ![Versionen](handbuch/16-versionen.webp)
 
-**„Speichern als …“** legt die ausgewählte Version stattdessen als **neue Notiz** ab; die aktuelle
+**„Speichern als …“** legt die ausgewählte Version stattdessen als **neue Seite** ab; die aktuelle
 Fassung bleibt, wie sie ist. Im Fenster wählst du den **Ordner** – vorgeschlagen ist der Ordner des
 Originals, du kannst aber in jeden Ordner jeder Quelle wechseln, in die du schreiben darfst (die Liste
 lässt sich durchsuchen) – und den **Dateinamen**; `.md` hängt Kaveyl Wiki an. Vorgeschlagen wird
 „Name (Version 03.10.2026)“. Gibt es den Namen im Ordner schon, sagt das Fenster es sofort und bietet
 einen freien an („Name (2)“); übernimmst du ihn, bleibst du im Namensfeld und kannst weitertippen oder mit
-Enter speichern – überschrieben wird nie etwas. Die neue Notiz bekommt eine eigene `id`;
+Enter speichern – überschrieben wird nie etwas. Die neue Seite bekommt eine eigene `id`;
 Bilder und Anhänge, auf die die alte Fassung verweist, kommen mit (auch solche, die inzwischen gelöscht
 sind – sie werden aus der Git-Historie geholt), und Links werden so angepasst, dass sie vom neuen Ort aus
-dieselben Notizen erreichen. In einer anderen Quelle funktionieren Links auf Notizen der alten Quelle
-nicht mehr. Danach öffnet sich die neue Notiz.
+dieselben Seiten erreichen. In einer anderen Quelle funktionieren Links auf Seiten der alten Quelle
+nicht mehr. Danach öffnet sich die neue Seite.
 
 Dasselbe Fenster kommt beim [Papierkorb](#versionen-und-papierkorb) („Speichern als“ an einem Eintrag)
 und bei [Sicherungen](#sicherungen) („Speichern als …“).
@@ -1230,27 +1230,27 @@ und bei [Sicherungen](#sicherungen) („Speichern als …“).
 Quelle. Wo Gelöschtes liegt, hängt von der Quelle ab:
 
 - **Quellen ohne automatischen Commit** (lokale Ordner ohne Versionen): Kaveyl Wiki verschiebt gelöschte
-  Notizen in den versteckten Ordner `.kaveyl-wiki/trash/` der Quelle, statt sie zu löschen. Liegt der
+  Seiten in den versteckten Ordner `.kaveyl-wiki/trash/` der Quelle, statt sie zu löschen. Liegt der
   Ordner in einem Git-Repository, ignoriert Git den Papierkorb (eigene `.gitignore` darin).
 - **Git-Quellen mit automatischem Commit** (Repositories, lokale Ordner mit Versionen): Gelöschtes steht in der
   Git-Historie; der Papierkorb zeigt es von dort an. Beim Löschen in Kaveyl Wiki wartet das nicht auf die Pause bis zum
-  nächsten Commit: Die Notiz kommt mit ihrem letzten Stand sofort in den Verlauf und steht gleich im Papierkorb – auch eine,
-  die du eben erst angelegt hast. Auch außerhalb gelöschte und committete Notizen erscheinen hier.
+  nächsten Commit: Die Seite kommt mit ihrem letzten Stand sofort in den Verlauf und steht gleich im Papierkorb – auch eine,
+  die du eben erst angelegt hast. Auch außerhalb gelöschte und committete Seiten erscheinen hier.
   Was vor dem Einschalten der Versionen gelöscht wurde, bleibt im Papierkorb-Ordner und steht weiter in der Liste.
 
-Ein gelöschter **Ordner** ist ein Eintrag („plan/Unterordner (3 Notizen)“) – **„Alle
-wiederherstellen“** holt alles zurück, ein Klick auf den Namen zeigt die einzelnen Notizen zum
-einzeln Zurückholen. Bei Git-Quellen werden Notizen, die mit demselben Commit gelöscht wurden,
+Ein gelöschter **Ordner** ist ein Eintrag („plan/Unterordner (3 Seiten)“) – **„Alle
+wiederherstellen“** holt alles zurück, ein Klick auf den Namen zeigt die einzelnen Seiten zum
+einzeln Zurückholen. Bei Git-Quellen werden Seiten, die mit demselben Commit gelöscht wurden,
 genauso zusammengefasst. Liegt am alten Platz inzwischen eine andere Datei, wird nichts
 überschrieben.
 
 - **Speichern als:** das Symbol mit dem Stift neben „Wiederherstellen“ (bei einem Ordner-Eintrag auch an
-  jeder einzelnen Notiz). Es öffnet das Fenster **Speichern als** wie bei den Versionen: Ordner in einer
+  jeder einzelnen Seite). Es öffnet das Fenster **Speichern als** wie bei den Versionen: Ordner in einer
   beliebigen Quelle, in die du schreiben darfst, und Name – vorgeschlagen „Name (wiederhergestellt)“ am
-  alten Platz. Ein ganzer Ordner-Eintrag kommt als neuer Ordner mit allen Notizen und Unterordnern
+  alten Platz. Ein ganzer Ordner-Eintrag kommt als neuer Ordner mit allen Seiten und Unterordnern
   zurück. Liegt am alten Platz schon etwas, bietet Kaveyl Wiki dieses Fenster beim normalen
-  „Wiederherstellen“ von selbst an – so wird nie etwas überschrieben. Hat die Notiz eine `id:`, bekommt
-  die wiederhergestellte Fassung eine neue (die alte gehört der Notiz, die jetzt dort liegt).
+  „Wiederherstellen“ von selbst an – so wird nie etwas überschrieben. Hat die Seite eine `id:`, bekommt
+  die wiederhergestellte Fassung eine neue (die alte gehört der Seite, die jetzt dort liegt).
 
 ![Speichern als aus dem Papierkorb](handbuch/93-unter-anderem-namen.webp)
 
@@ -1293,16 +1293,16 @@ nicht zurück.
 
 ![Konflikt](handbuch/21-konflikt.webp)
 
-Ändert sich eine **gerade offene** Notiz außerhalb, während du sie bearbeitest, erscheint
+Ändert sich eine **gerade offene** Seite außerhalb, während du sie bearbeitest, erscheint
 direkt im Editor ein Hinweis. **Zusammenführen** bringt beide Änderungen zusammen, wenn sie an verschiedenen Stellen
-stehen (andere Absätze, Zeilen oder Listenpunkte): die Notiz enthält danach beides, nichts geht verloren. Haben beide
+stehen (andere Absätze, Zeilen oder Listenpunkte): die Seite enthält danach beides, nichts geht verloren. Haben beide
 dieselbe Stelle geändert, sagt Kaveyl Wiki das und ändert nichts – dann wählst du eine Fassung.
 **Unterschiede ansehen** zeigt, was nur in der fremden Version steht (rot, „-“) und was
 nur in deiner Fassung (grün, „+“). **Meine Version speichern** ersetzt die fremde Änderung durch deine Fassung.
-**Fremde Version laden** verwirft deine ungespeicherten Änderungen – Kaveyl Wiki fragt vorher nach. Wurde die Notiz
-außerhalb **gelöscht oder verschoben**, sicherst du deine Fassung mit **Als neue Notiz speichern …**: Ordner und Namen
-wählst du wie bei „Speichern als“; vorhandene Notizen werden nie überschrieben. Bei verschlüsselten Notizen gibt es
-weder das Zusammenführen noch den Vergleich noch das Speichern als neue Notiz.
+**Fremde Version laden** verwirft deine ungespeicherten Änderungen – Kaveyl Wiki fragt vorher nach. Wurde die Seite
+außerhalb **gelöscht oder verschoben**, sicherst du deine Fassung mit **Als neue Seite speichern …**: Ordner und Namen
+wählst du wie bei „Speichern als“; vorhandene Seiten werden nie überschrieben. Bei verschlüsselten Seiten gibt es
+weder das Zusammenführen noch den Vergleich noch das Speichern als neue Seite.
 
 ![Hinweis mit Zusammenführen](handbuch/21b-zusammenfuehren.webp)
 
@@ -1335,20 +1335,20 @@ Eingebundene Quellen des Repositorys werden vorher ausgehängt.
 ## Berechtigungen
 
 Wer was sehen und ändern darf, legst du mit **Regeln** fest – auf einer ganzen Quelle, einem
-Ordner oder einer einzelnen Notiz. Rechtsklick → **„Berechtigungen …“** (bei einer Notiz auch „…“ →
+Ordner oder einer einzelnen Seite. Rechtsklick → **„Berechtigungen …“** (bei einer Seite auch „…“ →
 „Berechtigungen …“). Der Menüpunkt erscheint für Admins und für alle, die an dieser Stelle das Recht
 „verwalten“ haben.
 
 | Recht | Bedeutung |
 |---|---|
-| **kein Zugriff** | Die Notiz bzw. der Ordner ist unsichtbar – im Baum, in der Suche, bei „Zuletzt“, in Rückverweisen. |
+| **kein Zugriff** | Die Seite bzw. der Ordner ist unsichtbar – im Baum, in der Suche, bei „Zuletzt“, in Rückverweisen. |
 | **lesen** | Ansehen, durchsuchen, Versionen ansehen. Der Editor ist gesperrt, Umbenennen/Löschen/Anlegen fehlen. |
 | **lesen & schreiben** | Zusätzlich ändern, anlegen, verschieben, löschen, Anhänge, Reihenfolge. |
 | **verwalten** | Zusätzlich Regeln für diesen Bereich vergeben. Nicht für [Gäste](#konten-einladungen-und-teilen-per-e-mail). |
 
 Eine Regel gilt für **Alle**, eine **Gruppe** oder eine **Person**. So wird ausgewertet:
 
-- Die **genaueste** Regel gewinnt: Notiz vor Ordner vor übergeordnetem Ordner vor Quelle. Auf derselben
+- Die **genaueste** Regel gewinnt: Seite vor Ordner vor übergeordnetem Ordner vor Quelle. Auf derselben
   Ebene gilt eine Personen-Regel vor einer Gruppen-Regel vor „Alle“.
 - **„Kein Zugriff“ für eine Person oder Gruppe gilt immer**, auch wenn weiter unten mehr erlaubt ist.
   „Kein Zugriff“ für **Alle** ist dagegen nur die Grundeinstellung und lässt sich darunter oder per
@@ -1358,15 +1358,15 @@ Eine Regel gilt für **Alle**, eine **Gruppe** oder eine **Person**. So wird aus
   „Ohne Freigabe dürfen Benutzer“; Vorgabe „nichts sehen“ – Quellen gibst du mit einer Regel frei, etwa „Alle: lesen & schreiben“ auf der
   Quelle). Administratoren sehen und dürfen immer alles.
 - Der Dialog zeigt die Regeln an dieser Stelle und darunter die **geerbten** von oben. Regeln auf
-  Notizen hängen an deren ID und überstehen Umbenennen; Notiz- und Ordner-Regeln wandern beim Verschieben in der
+  Seiten hängen an deren ID und überstehen Umbenennen; Seiten- und Ordner-Regeln wandern beim Verschieben in der
   App mit, auch in eine andere Quelle (nach einem Umbenennen oder Löschen außerhalb der App erscheinen sie an der Quelle unter „Regeln ohne
   Ziel“). Eine Ordner-Regel hängt am Ordnernamen: Sie bleibt dort stehen und gilt wieder, sobald es einen Ordner mit
   diesem Namen gibt – entferne sie, wenn sie nicht mehr gebraucht wird. Bleiben beim Verschieben eines Ordners in eine andere Quelle Dateien am alten Ort zurück (z. B. PDFs),
   gelten seine Regeln an beiden Orten. Bricht ein solches Verschieben mittendrin ab, bleibt der alte Ort geschützt
-  wie vorher, und was am Ziel schon angekommen ist, trägt dieselben Regeln (im Dialog als Regeln der jeweiligen Notiz).
+  wie vorher, und was am Ziel schon angekommen ist, trägt dieselben Regeln (im Dialog als Regeln der jeweiligen Seite).
 - **Ganze Ordner löschen oder in eine andere Quelle verschieben** (und einen Papierkorb-Eintrag
-  endgültig löschen) geht nur mit Schreibrecht auf **alles** darin – auch auf Notizen, die du
-  nicht siehst, und auf Unterordner, in denen nur Bilder oder PDFs liegen. Sonst meldet Kaveyl Wiki „Der Ordner enthält Notizen, auf die du keine Schreibrechte
+  endgültig löschen) geht nur mit Schreibrecht auf **alles** darin – auch auf Seiten, die du
+  nicht siehst, und auf Unterordner, in denen nur Bilder oder PDFs liegen. Sonst meldet Kaveyl Wiki „Der Ordner enthält Seiten, auf die du keine Schreibrechte
   hast“.
 - **Synchronisieren** („Jetzt synchronisieren“, „Alle synchronisieren“) braucht lesen & schreiben
   auf der ganzen Quelle; „Alle synchronisieren“ nimmt nur diese Quellen.
@@ -1390,7 +1390,7 @@ wie „lesen & schreiben“ – ebenso eine ältere Regel „verwalten“ für e
 **Neue Benutzer sehen erst, was du freigibst**, solange die Grundeinstellung „nichts sehen“ ist (Vorgabe);
 ihre Willkommensseite sagt ihnen das.
 
-**Sprache der Mails.** Wer schon ein Konto hat, bekommt Mails (Zurücksetzen, geteilte Notiz, Benachrichtigungen) in
+**Sprache der Mails.** Wer schon ein Konto hat, bekommt Mails (Zurücksetzen, geteilte Seite, Benachrichtigungen) in
 der Sprache seines Kontos – ist keine gewählt („Automatisch“), in der Sprache, die seine Oberfläche zuletzt gezeigt hat.
 Einladungen an neue Personen gehen in der Sprache dessen, der einlädt – die eingeladene Person hat ja noch keine
 eingestellt.
@@ -1410,21 +1410,21 @@ Hände geraten sein könnte.
 
 ![Einladung annehmen](handbuch/84-einladung.webp)
 
-**Zugriff per E-Mail geben.** Rechtsklick auf eine Notiz, einen Ordner oder eine Quelle (bei einer Notiz auch „…“ in der
-Notiz) → **Teilen ▸ „Zugriff per E-Mail geben …“** – sichtbar für Administratoren und alle, die dort *verwalten* dürfen.
-Mehrere [markierte](#mehrere-markieren) Notizen und Ordner einer Quelle gehen in einer Einladung. Beim Annehmen gilt nur,
+**Zugriff per E-Mail geben.** Rechtsklick auf eine Seite, einen Ordner oder eine Quelle (bei einer Seite auch „…“ in der
+Seite) → **Teilen ▸ „Zugriff per E-Mail geben …“** – sichtbar für Administratoren und alle, die dort *verwalten* dürfen.
+Mehrere [markierte](#mehrere-markieren) Seiten und Ordner einer Quelle gehen in einer Einladung. Beim Annehmen gilt nur,
 was die einladende Person dann noch teilen darf – wurde ihr das Recht inzwischen genommen, fällt dieser Teil weg. E-Mail (und
 optional Name) eingeben, **lesen** oder **lesen & schreiben** wählen, **Einladen**. Ein Ordner oder eine Quelle gilt
 mit allem, was darin liegt, auch mit dem, was später dazukommt.
 - Hat die Adresse schon ein Konto, darf die Person **sofort** lesen bzw. bearbeiten und bekommt eine Hinweis-Mail mit
   Link (bei einem Ordner oder einer Quelle zeigt der Link sie aufgeklappt im Baum). Wer dort schon mehr durfte, behält
   seine Rechte – Teilen nimmt nie etwas weg.
-- Sonst geht eine **Einladung** raus. Beim Annehmen entsteht ein **Gast-Konto** mit genau diesem Recht; die Notiz
+- Sonst geht eine **Einladung** raus. Beim Annehmen entsteht ein **Gast-Konto** mit genau diesem Recht; die Seite
   öffnet sich gleich bzw. der Ordner steht offen im Baum. Im Baum sieht der Gast nur das Geteilte und den Ordnerpfad
   dorthin. „Verwalten“ bekommen Gäste nie – sie können nicht weiter teilen.
 - Ist die Person dort ausdrücklich gesperrt („kein Zugriff“, auch über eine Gruppe), meldet Kaveyl Wiki, dass die
   Freigabe nicht greifen würde – erst die Sperre unter „Berechtigungen …“ aufheben. Teilen hebt eine Sperre nie auf.
-  Eine Sperre auf einer einzelnen Notiz *im* geteilten Ordner bleibt bestehen.
+  Eine Sperre auf einer einzelnen Seite *im* geteilten Ordner bleibt bestehen.
 - **Steht ein Proxy mit Anmeldung davor** (Cloudflare Access, Authentik, Pangolin): Die Einladung legt das Konto in
   Kaveyl Wiki an, aber zum Link kommt die Person nur, wenn der Proxy sie durchlässt. Lass sie dort zusätzlich zu (siehe
   [SSO & Proxy](#sso--proxy)) – sonst endet der Link beim Anmeldebildschirm des Proxys.
@@ -1435,7 +1435,7 @@ Rechte oder mach ihn unter Benutzer → Stift zum normalen Benutzer.
 
 ![Ordner per E-Mail teilen](handbuch/85b-ordner-teilen.webp)
 
-![Notiz per E-Mail teilen](handbuch/85-notiz-teilen.webp)
+![Seite per E-Mail teilen](handbuch/85-notiz-teilen.webp)
 
 ![Ansicht eines Gastes](handbuch/86-gast.webp)
 
@@ -1445,51 +1445,51 @@ Rechte oder mach ihn unter Benutzer → Stift zum normalen Benutzer.
 
 ### Per Mail versenden
 
-Für Leute **ohne Konto**: Rechtsklick auf eine Notiz (oder „…“ in der Notiz) → **Teilen ▸ „Per Mail versenden …“**,
+Für Leute **ohne Konto**: Rechtsklick auf eine Seite (oder „…“ auf der Seite) → **Teilen ▸ „Per Mail versenden …“**,
 eine oder mehrere Adressen (mit Komma getrennt, höchstens 10) → **Senden**. Jede Adresse bekommt eine eigene Mail – die
-Empfänger sehen einander nicht. Darin steht, wer die Notiz geschickt hat; die Notiz hängt als Markdown-Datei (`.md`) an,
+Empfänger sehen einander nicht. Darin steht, wer die Seite geschickt hat; die Seite hängt als Markdown-Datei (`.md`) an,
 mit Bildern oder Dateien als ZIP – dieselbe Datei wie beim Knopf **Herunterladen**. Es gibt **keinen Link**: Die Mail
-gibt keinen Zugriff auf Kaveyl Wiki. Antworten gehen an deine Adresse. Mehrere [markierte](#mehrere-markieren) Notizen
+gibt keinen Zugriff auf Kaveyl Wiki. Antworten gehen an deine Adresse. Mehrere [markierte](#mehrere-markieren) Seiten
 gehen zusammen in einer Mail.
 
-- Versenden darf jeder, der die Notiz **lesen** darf – herunterladen könnte er sie ohnehin. **Gäste** nicht.
-- **Verschlüsselte Notizen** nie (der Server kennt ihren Inhalt nicht).
+- Versenden darf jeder, der die Seite **lesen** darf – herunterladen könnte er sie ohnehin. **Gäste** nicht.
+- **Verschlüsselte Seiten** nie (der Server kennt ihren Inhalt nicht).
 - Ohne eingerichteten [E-Mail-Versand](#e-mail) ist der Eintrag ausgegraut.
-- Gegen Massenversand: höchstens 30 Adressen pro Stunde und Person und 200 für die ganze Instanz, höchstens 50 Notizen
+- Gegen Massenversand: höchstens 30 Adressen pro Stunde und Person und 200 für die ganze Instanz, höchstens 50 Seiten
   und 10 MB je Mail. Lange Namen werden in Betreff und Text gekürzt.
-- Das [Protokoll](#protokoll) hält fest, wer welche Notizen an welche Adressen geschickt hat.
+- Das [Protokoll](#protokoll) hält fest, wer welche Seiten an welche Adressen geschickt hat.
 
-![Zwei Notizen per Mail versenden](handbuch/89b-per-mail-versenden.webp)
+![Zwei Seiten per Mail versenden](handbuch/89b-per-mail-versenden.webp)
 
 ## Im Team arbeiten
 
-Mehrere Personen können dieselben Quellen, Ordner und Notizen bearbeiten – in der App, über die API oder MCP (ein Agent,
+Mehrere Personen können dieselben Quellen, Ordner und Seiten bearbeiten – in der App, über die API oder MCP (ein Agent,
 eine KI) und von außen (Git, VS Code, ein Programm im Ordner). Kaveyl Wiki überschreibt dabei nie still etwas: Jede
 Änderung kommt mit dem Namen dessen, der sie gemacht hat, und wer später speichert, entscheidet über Abweichungen. Was
 **nicht** geht: gleichzeitiges Tippen Buchstabe für Buchstabe wie in einem Online-Office – Kaveyl Wiki arbeitet mit
 gespeicherten Fassungen, und haben zwei dieselbe Stelle geändert, wählt einer von beiden eine Fassung.
 
-### Gemeinsam an einer Notiz
+### Gemeinsam an einer Seite
 
-Ein Beispiel: Maria und Tom haben die Notiz „Wochenplan“ offen.
+Ein Beispiel: Maria und Tom haben die Seite „Wochenplan“ offen.
 
 1. **Maria tippt.** Bei Tom steht oben „Maria bearbeitet gerade“ (orange). Speichert Maria (automatisch, kurz nach dem
    Tippen), sieht Tom ihre Änderung sofort – sein Cursor und die Stelle, an der er liest, bleiben, wo sie waren.
 2. **Tom fängt auch an zu tippen,** während Maria noch dabei ist. Kaveyl Wiki fragt ihn einmal, ob er trotzdem
    bearbeiten will (Bild unter [Bearbeiten](#bearbeiten)). Er wählt **Trotzdem bearbeiten** und ändert einen anderen
    Absatz als Maria.
-3. **Wer später speichert,** bekommt im Editor den Hinweis, dass die Notiz inzwischen geändert wurde. **Zusammenführen**
+3. **Wer später speichert,** bekommt im Editor den Hinweis, dass die Seite inzwischen geändert wurde. **Zusammenführen**
    übernimmt beides, weil die Änderungen an verschiedenen Stellen stehen. Hätten beide denselben Satz geändert, sagt
    Kaveyl Wiki das: Tom sieht mit **Unterschiede ansehen**, was abweicht, und wählt seine oder Marias Fassung –
    was nur in der anderen steht, fehlt danach (siehe [Konflikte auflösen](#konflikte-auflösen)).
-4. **Benennt Maria die Notiz um oder verschiebt sie,** während Tom tippt, folgt Toms Tab der Notiz, und sein Text landet
+4. **Benennt Maria die Seite um oder verschiebt sie,** während Tom tippt, folgt Toms Tab der Seite, und sein Text landet
    an der neuen Stelle.
 5. **In den Versionen** steht danach, wer was geändert hat – siehe nächster Abschnitt.
 
 Dasselbe gilt für Änderungen von außen: Ein Kollege, der im Git-Repository arbeitet, oder ein Programm, das in einen
 eingebundenen Ordner schreibt, erscheint genauso – bei einem eingebundenen Ordner sofort, bei einem Git-Server mit dem
-nächsten Abgleich. Ein Agent über API oder MCP liest vor dem Schreiben den Stand der Notiz und bekommt einen Konflikt
-statt etwas zu überschreiben; er sieht auch, wer die Notiz gerade bearbeitet, und kann damit warten.
+nächsten Abgleich. Ein Agent über API oder MCP liest vor dem Schreiben den Stand der Seite und bekommt einen Konflikt
+statt etwas zu überschreiben; er sieht auch, wer die Seite gerade bearbeitet, und kann damit warten.
 
 ### Wer hat was geändert
 
@@ -1503,19 +1503,19 @@ außen“.
 
 ### Beobachten
 
-Willst du wissen, wenn andere etwas ändern – in einer Notiz, einem Ordner oder einer ganzen Quelle –, dann
+Willst du wissen, wenn andere etwas ändern – in einer Seite, einem Ordner oder einer ganzen Quelle –, dann
 **beobachte** es: Rechtsklick (auf Touch-Geräten: lange drücken) → **Beobachten …** (bei einer Quelle **Quelle
 beobachten …**). Du wählst, wie du davon
 erfährst:
 
-- **Punkt in der Seitenleiste:** Neben der Notiz erscheint ein farbiger Punkt, Ordner und Quelle darüber zeigen die
-  Anzahl. Oben in der Seitenleiste listet **Neu für dich** alles Neue mit Person und Zeit. Öffnest du die Notiz,
+- **Punkt in der Seitenleiste:** Neben der Seite erscheint ein farbiger Punkt, Ordner und Quelle darüber zeigen die
+  Anzahl. Oben in der Seitenleiste listet **Neu für dich** alles Neue mit Person und Zeit. Öffnest du die Seite,
   verschwindet ihr Punkt; **Alles als gelesen markieren** leert die Liste.
 - **E-Mail:** wie oft, wählst du einmal für alles unter [Einstellungen → Konto → Beobachten](#beobachten-und-pushover):
   **Gebündelt** (Standard – die erste Änderung startet 2 Minuten Wartezeit, alles darin steht in einer Mail),
   **Höchstens einmal pro Stunde** oder **Einmal am Tag** (eine Zusammenfassung zu deiner Uhrzeit, ab Werk 7 Uhr, Zeitzone
   des Servers). Je
-  Notiz steht der neueste Stand drin, mit Link direkt zur Notiz. Dazu gelten höchstens 20 Nachrichten in der Stunde
+  Seite steht der neueste Stand drin, mit Link direkt zur Seite. Dazu gelten höchstens 20 Nachrichten in der Stunde
   und die Tagesgrenze des Admins (ab Werk 100): Ist eine erreicht, wartet die nächste Nachricht und bringt alles mit –
   nichts geht verloren, auch nicht bei einem Neustart oder Update. Braucht eingerichteten E-Mail-Versand.
 - **Pushover:** dieselbe Nachricht als Push aufs Handy. Dafür richtet ein Admin Pushover ein, und du trägst unter
@@ -1532,8 +1532,8 @@ oder MCP schreibt, steht mit dem Namen des Kontos, dem sein Token gehört. Ein A
 beobachtest, ohne dass es gerade Neues gibt. **Nicht mehr beobachten** geht im selben Dialog oder unter Einstellungen →
 Konto → Beobachten.
 
-Wird eine beobachtete Notiz oder ein beobachteter Ordner (oder ein Ordner darüber) in der App verschoben oder umbenannt –
-auch in eine andere Quelle –, zieht das Beobachten mit; eine Notiz, die außerhalb umbenannt wird (Git, VS Code), ebenso.
+Wird eine beobachtete Seite oder ein beobachteter Ordner (oder ein Ordner darüber) in der App verschoben oder umbenannt –
+auch in eine andere Quelle –, zieht das Beobachten mit; eine Seite, die außerhalb umbenannt wird (Git, VS Code), ebenso.
 Wird eine Quelle ausgehängt, endet das Beobachten darin.
 
 ![Beobachten: Punkte im Baum und „Neu für dich“](handbuch/120-beobachten.webp)
@@ -1545,10 +1545,10 @@ Beobachten ist auch der Weg, auf dem ein **Agent** dich erreicht – siehe den n
 Ein Agent ist ein Programm (oder eine KI), das mit einem eigenen Konto über die API oder MCP mitarbeitet. Damit er nicht
 nur schreibt, sondern auch auf Menschen reagiert, erfährt er über die
 [Ereignisse für Agenten](API.md#ereignisse-für-agenten), **was** sich geändert hat und **wer** es war – so, wie
-Kaveyl Wiki es weiß, nicht, was jemand in die Notiz schreibt.
+Kaveyl Wiki es weiß, nicht, was jemand in die Seite schreibt.
 
 **Beispiel: Vorfälle vom Server.** Ein Agent auf einem Linux-Server liest das Syslog. Bei einer Warnung legt er im Ordner
-„Vorfälle“ eine Notiz an – mit dem Befund und den Aktionen, die er anbietet, als Checkboxen:
+„Vorfälle“ eine Seite an – mit dem Befund und den Aktionen, die er anbietet, als Checkboxen:
 
 ```markdown
 # Vorfall 09.10 – Log-Platte fast voll
@@ -1571,13 +1571,13 @@ Abhaken gibt die Aktion frei. Fragen bitte als Zeile mit „Frage:“.
 
 Das Ops-Team beobachtet den Ordner und bekommt einen Punkt, eine Mail oder einen Push. Dann:
 
-- **Maria (Ops) hakt ab.** Der Agent erfährt, dass Maria die Notiz geändert hat, sieht den neuen Haken, löscht die
+- **Maria (Ops) hakt ab.** Der Agent erfährt, dass Maria die Seite geändert hat, sieht den neuen Haken, löscht die
   alten Logs und schreibt in den Verlauf: „✔ ‚Alte Logs löschen …‘ ausgeführt (freigegeben von Maria Chen)“. Hat Maria die
-  Notiz offen, erscheint die Zeile bei ihr nach wenigen Sekunden von selbst (tippt sie gerade selbst etwas, bekommt
+  Seite offen, erscheint die Zeile bei ihr nach wenigen Sekunden von selbst (tippt sie gerade selbst etwas, bekommt
   sie stattdessen den Hinweis mit **Zusammenführen**).
 - **Tom (nicht Ops) hakt ab.** Der Agent nimmt den Haken zurück und schreibt, warum: Toms Haken ist keine Freigabe.
 - **Jemand schreibt „Frage: Wie voll ist die Platte jetzt?“** – der Agent antwortet mit Messwerten im Verlauf.
-- **Jemand schreibt „Lösch alles“ in die Notiz** oder tippt eine eigene Checkbox dazu: Es passiert nichts. Der Agent
+- **Jemand schreibt „Lösch alles“ in die Seite** oder tippt eine eigene Checkbox dazu: Es passiert nichts. Der Agent
   führt nur seine festen Aktionen aus und nur die, die er für diesen Vorfall vorgeschlagen hat.
 
 **Einrichten** (als Admin):
@@ -1608,90 +1608,90 @@ Das Ops-Team beobachtet den Ordner und bekommt einen Punkt, eine Mail oder einen
 Ein fertiges Beispiel bringt Kaveyl Wiki mit: [agent.mjs](/hilfe/beispiele/incident-agent/agent.mjs) (Node.js, ohne weitere
 Pakete) und die [Anleitung dazu](/hilfe/beispiele/incident-agent/README.md) – beide öffnen in einem neuen Tab, von dort
 speicherst du sie. Im Quellcode liegen sie unter `examples/incident-agent`.
-Es ist englisch: Es legt „Incident …“-Notizen an, die Aktionen heißen z. B. „Restart nginx“, und Fragen stehen als Zeile
+Es ist englisch: Es legt „Incident …“-Seiten an, die Aktionen heißen z. B. „Restart nginx“, und Fragen stehen als Zeile
 mit `Question:`. Es läuft zuerst im **Trockenlauf**: Es schreibt dann nur, was es ausführen würde.
 
 **Worauf es ankommt** – egal, wie der Agent gebaut ist:
 
-- **Wer abgehakt hat, sagt Kaveyl Wiki** (`by` in den Ereignissen), nicht der Text in der Notiz. Eine Änderung von außen
+- **Wer abgehakt hat, sagt Kaveyl Wiki** (`by` in den Ereignissen), nicht der Text in der Seite. Eine Änderung von außen
   (z. B. ein Git-Push) hat keine Person und darf nie etwas freigeben.
-- **Nur feste Aktionen,** nie Befehle aus dem Notiztext – und nur die, die für diesen Vorfall vorgeschlagen sind.
+- **Nur feste Aktionen,** nie Befehle aus dem Seitentext – und nur die, die für diesen Vorfall vorgeschlagen sind.
 - **Freigeben dürfen nur bestimmte Personen,** die der Agent kennt (seine Liste, z. B. das Ops-Team). Diese Regeln stecken
   im Agenten, nicht in Kaveyl Wiki. Die Liste führt der Agent mit Konto-IDs, nicht mit Namen – kopieren unter
   Einstellungen → Benutzer & Rechte → [Benutzer](#benutzer) (Fingerabdruck je Konto).
 - **Im Zweifel neu fragen:** War der Agent oder Kaveyl Wiki zu lange weg, lässt sich nicht mehr sagen, wer einen Haken
-  gesetzt hat. Dasselbe gilt, wenn zwischen zwei Abfragen mehrere Personen die Notiz geändert haben und nicht alle
+  gesetzt hat. Dasselbe gilt, wenn zwischen zwei Abfragen mehrere Personen die Seite geändert haben und nicht alle
   freigeben dürfen. Dann nimmt der Agent den Haken zurück und bittet, erneut abzuhaken.
-- **Eine KI als Agent** (etwa Claude über MCP) liest Notizen und Logs als Daten. Gib ihr für den Server nur Werkzeuge zum
+- **Eine KI als Agent** (etwa Claude über MCP) liest Seiten und Logs als Daten. Gib ihr für den Server nur Werkzeuge zum
   Lesen; ausführen sollte nur ein fester Agent nach einer Freigabe durch Menschen. Ein Haken der KI zählt dann nie als
-  Freigabe – auch nicht, wenn jemand sie in einer Notiz dazu überredet.
+  Freigabe – auch nicht, wenn jemand sie in einer Seite dazu überredet.
 
-## Verschlüsselte Notizen und Ordner
+## Verschlüsselte Seiten und Ordner
 
-**Eine Notiz verschlüsseln.** Über „…“ oben rechts → **„Verschlüsseln …“** gibst du zweimal eine
+**Eine Seite verschlüsseln.** Über „…“ oben rechts → **„Verschlüsseln …“** gibst du zweimal eine
 Passphrase ein (mindestens 8 Zeichen). Der Inhalt wird **in deinem Browser** mit
 [age](https://age-encryption.org) verschlüsselt; auf dem Server, in Git und in VS Code steht danach nur
 ein Block `-----BEGIN AGE ENCRYPTED FILE-----`. Verlinkte Anhänge (Bilder und Dateien in `assets/`)
-werden mit verschlüsselt und heißen dann z. B. `bild.png.age`. Zeigt eine andere Notiz dasselbe Bild,
+werden mit verschlüsselt und heißen dann z. B. `bild.png.age`. Zeigt eine andere Seite dasselbe Bild,
 bleibt das unverschlüsselte Original für sie erhalten. Über „…“ → **„Verschlüsselung entfernen …“**
-wird die Notiz wieder im Klartext gespeichert, und ihre Anhänge kommen als normale Dateien zurück.
+wird die Seite wieder im Klartext gespeichert, und ihre Anhänge kommen als normale Dateien zurück.
 
-**Einen Ordner verschlüsseln.** Rechtsklick auf den Ordner → **„Ordner verschlüsseln …“**. Alle Notizen
-darin bekommen dieselbe Passphrase, **neue Notizen im Ordner werden automatisch verschlüsselt**, und
-Klartext-Notizen lassen sich nicht hineinschieben. Ein Schloss neben dem Ordnernamen zeigt das an.
-Kaveyl Wiki verschlüsselt die Notizen so, wie sie gerade auf der Platte liegen – auch solche, die während
+**Einen Ordner verschlüsseln.** Rechtsklick auf den Ordner → **„Ordner verschlüsseln …“**. Alle Seiten
+darin bekommen dieselbe Passphrase, **neue Seiten im Ordner werden automatisch verschlüsselt**, und
+Klartext-Seiten lassen sich nicht hineinschieben. Ein Schloss neben dem Ordnernamen zeigt das an.
+Kaveyl Wiki verschlüsselt die Seiten so, wie sie gerade auf der Platte liegen – auch solche, die während
 des Vorgangs dazukommen. Bricht der Vorgang ab, oder legt jemand von außen (VS Code, Git) eine
-unverschlüsselte Notiz in den Ordner, bietet das Kontextmenü des Ordners **„Ordner fertig verschlüsseln“**
-an; die Notiz selbst zeigt oben einen Hinweis mit **„Jetzt verschlüsseln“**, der auch noch nicht
-gespeicherte Änderungen mitnimmt. Die Prüfung unter Einstellungen → Werkzeuge meldet solche Notizen
+unverschlüsselte Seite in den Ordner, bietet das Kontextmenü des Ordners **„Ordner fertig verschlüsseln“**
+an; die Seite selbst zeigt oben einen Hinweis mit **„Jetzt verschlüsseln“**, der auch noch nicht
+gespeicherte Änderungen mitnimmt. Die Prüfung unter Einstellungen → Werkzeuge meldet solche Seiten
 ebenfalls. **„Verschlüsselung aufheben …“** macht den ganzen Ordner samt Anhängen wieder lesbar.
 
-**Öffnen und sperren.** Eine verschlüsselte Notiz fragt nach der Passphrase. Bei einer noch leeren Notiz
-in einem verschlüsselten Ordner prüft Kaveyl Wiki die Eingabe an einer anderen Notiz des Ordners – ein
+**Öffnen und sperren.** Eine verschlüsselte Seite fragt nach der Passphrase. Bei einer noch leeren Seite
+in einem verschlüsselten Ordner prüft Kaveyl Wiki die Eingabe an einer anderen Seite des Ordners – ein
 Tippfehler wird also abgewiesen und nicht für den Ordner übernommen; gibt es dort noch nichts zum Prüfen,
-fragt Kaveyl Wiki die Passphrase zur Sicherheit zweimal ab. Lässt sich die Notiz zum Prüfen gerade nicht laden
-(etwa bei einem Serverausfall), meldet Kaveyl Wiki das, statt die Eingabe ungeprüft zu übernehmen. Entsperren gilt für diese Notiz bzw. den ganzen
+fragt Kaveyl Wiki die Passphrase zur Sicherheit zweimal ab. Lässt sich die Seite zum Prüfen gerade nicht laden
+(etwa bei einem Serverausfall), meldet Kaveyl Wiki das, statt die Eingabe ungeprüft zu übernehmen. Entsperren gilt für diese Seite bzw. den ganzen
 Ordner, bis eine Weile lang nichts passiert; Tippen zählt dabei als Benutzung. Die Zeit stellst du unter
 Einstellungen → **Konto** ein (5 / 15 / 30 / 60 Minuten oder erst beim Schließen der Seite). „…“ →
 **„Jetzt sperren“** sperrt sofort, Neuladen der Seite ebenfalls; was du zuletzt getippt hast, wird vorher
 noch verschlüsselt gespeichert. Oben steht „verschlüsselt“; bearbeitet wird ganz normal, gespeichert wird
-verschlüsselt. Den KI-Assistenten gibt es in verschlüsselten Notizen nicht – der Server bekommt ihren
+verschlüsselt. Den KI-Assistenten gibt es in verschlüsselten Seiten nicht – der Server bekommt ihren
 Inhalt nie zu sehen.
 
 **Ältere Versionen, Papierkorb, Konflikte.** Eine Version von vor der Verschlüsselung lässt sich nicht in
-die verschlüsselte Notiz zurückholen, und aus dem Papierkorb kommt keine Klartext-Notiz in einen
+die verschlüsselte Seite zurückholen, und aus dem Papierkorb kommt keine Klartext-Seite in einen
 verschlüsselten Ordner; mit „Speichern als“ legst du sie an einem anderen Ort ab. Gibt es beim Abgleich
-einen Konflikt in einer verschlüsselten Notiz, übernimmst du eine der beiden Fassungen ganz – zusammenführen
+einen Konflikt in einer verschlüsselten Seite, übernimmst du eine der beiden Fassungen ganz – zusammenführen
 lässt sich ein verschlüsselter Block nicht. Beim Verschieben oder Kopieren wandern die verschlüsselten
 Anhänge und die Ordner-Markierung mit.
 
 **Grenzen – bitte lesen.** Ohne Passphrase sind die Inhalte **verloren**, niemand kann sie
 wiederherstellen. Lesbar bleiben das Frontmatter (Tags, Icon, die Liste der Anhänge, ein selbst gesetzter
 `title:` und z. B. eine Beschreibung aus Wiki.js) sowie Datei- und Ordnernamen. Die erste Überschrift wird
-**nicht** als Titel übernommen – wähle den Dateinamen also so, dass er nichts verrät. Notizen, die mit einer
+**nicht** als Titel übernommen – wähle den Dateinamen also so, dass er nichts verrät. Seiten, die mit einer
 älteren Version verschlüsselt wurden, tragen ihre Überschrift noch als `title:` im Klartext; beim
 Entschlüsseln entfernt Kaveyl Wiki diesen übernommenen Titel wieder (ein selbst gesetzter, abweichender Titel
 bleibt). Frühere, unverschlüsselte Versionen bleiben in der Git-Historie – auch in einem lokalen Ordner mit Versionen. Die Suche findet verschlüsselte
-Notizen nur über den Namen (bzw. einen gesetzten Titel), „Verlinkt von“ kennt ihre Links nicht. Eine Passphrase lässt sich nicht ändern; der Weg dahin ist „Verschlüsselung entfernen“ und neu
+Seiten nur über den Namen (bzw. einen gesetzten Titel), „Verlinkt von“ kennt ihre Links nicht. Eine Passphrase lässt sich nicht ändern; der Weg dahin ist „Verschlüsselung entfernen“ und neu
 verschlüsseln – dabei landet der Klartext kurz in der Git-Historie.
 
 **Neuinstallation, anderes Repository.** Alles zum Entschlüsseln steckt in der Datei selbst (age-Block mit
 Salt und Parametern) und in deiner Passphrase – Kaveyl Wiki speichert keinen Schlüssel. Nach einer
-Neuinstallation oder in einem neu eingebundenen Repository öffnen sich die Notizen mit derselben Passphrase
+Neuinstallation oder in einem neu eingebundenen Repository öffnen sich die Seiten mit derselben Passphrase
 wie vorher; die Ordner-Markierung (`.kaveyl-wiki.yml`) und die `.age`-Anhänge wandern mit. Ohne Kaveyl Wiki:
 `awk 'f;/^---$/&&++n==2{f=1}' notiz.md | age -d` (Frontmatter abtrennen, dann
 [age](https://age-encryption.org)), Anhänge mit `age -d bild.png.age > bild.png`.
 
-![Verschlüsselte Notiz](handbuch/47-verschluesselt.webp)
+![Verschlüsselte Seite](handbuch/47-verschluesselt.webp)
 
 ## Einstellungen im Überblick
 
 Zahnrad oben rechts (auf dem Handy: Konto-Menü → Einstellungen).
 
-**So verhalten sich alle Dialoge** (Einstellungen, Quelle einbinden, Neue Notiz, Umbenennen,
+**So verhalten sich alle Dialoge** (Einstellungen, Quelle einbinden, Neue Seite, Umbenennen,
 Berechtigungen, KI-Freigabe, Zeichnung …):
 
-- Hat der Dialog ein Eingabefeld (Neue Notiz, Umbenennen …), steht der Cursor beim Öffnen gleich
+- Hat der Dialog ein Eingabefeld (Neue Seite, Umbenennen …), steht der Cursor beim Öffnen gleich
   darin – du kannst sofort tippen und mit Enter bestätigen.
 - Ein **Klick neben den Dialog** schließt ihn nicht – Eingaben gehen so nicht verloren.
 - **Esc** oder **×** schließen den Dialog. Esc schließt immer nur den obersten: Aus den
@@ -1800,7 +1800,7 @@ ob 0 „nie“ heißt und – wenn du abweichst – der Standard. Die Tabelle al
 
 ![Einstellungen → Werkzeuge → Aufräumen](handbuch/90-einstellungen-aufraeumen.webp)
 
-Hier steht auch der **Papierkorb der Notizen**: **Gelöschte Notizen aufbewahren** (Standard 30 Tage, 0 =
+Hier steht auch der **Papierkorb der Seiten**: **Gelöschte Seiten aufbewahren** (Standard 30 Tage, 0 =
 nie automatisch löschen) gilt für die Papierkörbe aller Quellen. Ältere Einträge löscht Kaveyl Wiki nachts
 endgültig; bei Git-Quellen werden sie nur ausgeblendet, die Historie bleibt. Den Papierkorb selbst öffnest
 du in der Seitenleiste, siehe [Versionen und Papierkorb](#versionen-und-papierkorb).
@@ -1817,19 +1817,19 @@ Sicherheitseinträge (365) – jede mit eigenem **Speichern**. Es sind dieselben
 #### Prüfung
 
 Gleicht Index, Dateien und Git ab und meldet: **gebrochene Links**, **doppelte IDs**, fehlende oder
-verwaiste Index-Einträge, hängende Rebases, **verwaiste Anhänge** (von keiner Notiz mehr verlinkt) und
-Notizen, die **unverschlüsselt in einem verschlüsselten Ordner** liegen. Die verschlüsselten Anhänge
-(`.age`) einer verschlüsselten Notiz gelten als verlinkt. Die Prüfung **ändert nichts**. **Jetzt prüfen** startet sie; zusätzlich läuft sie jede Nacht um 3 Uhr.
+verwaiste Index-Einträge, hängende Rebases, **verwaiste Anhänge** (von keiner Seite mehr verlinkt) und
+Seiten, die **unverschlüsselt in einem verschlüsselten Ordner** liegen. Die verschlüsselten Anhänge
+(`.age`) einer verschlüsselten Seite gelten als verlinkt. Die Prüfung **ändert nichts**. **Jetzt prüfen** startet sie; zusätzlich läuft sie jede Nacht um 3 Uhr.
 Pro Quelle eine zugeklappte Zeile mit der Anzahl je Art („2 Gebrochene Links“) – ein Klick zeigt die
-Einträge, ein Klick auf einen Eintrag öffnet die Notiz. Es gibt nur den **letzten** Bericht; das
+Einträge, ein Klick auf einen Eintrag öffnet die Seite. Es gibt nur den **letzten** Bericht; das
 Protokoll vermerkt jede Prüfung.
 
 **Verwaiste Anhänge löschen:** Im aufgeklappten Bericht einer Quelle löscht der Papierkorb an einem verwaisten Anhang
 diesen einen, **Alle verwaisten Anhänge löschen** alle der Quelle – jeweils nach einer Rückfrage. Kurz vor dem Löschen
-prüft Kaveyl Wiki noch einmal, ob inzwischen eine Notiz darauf verlinkt; dann bleibt die Datei. Liegt die Quelle in Git,
+prüft Kaveyl Wiki noch einmal, ob inzwischen eine Seite darauf verlinkt; dann bleibt die Datei. Liegt die Quelle in Git,
 bleibt die Datei im Verlauf erhalten; in einem Ordner ohne Git ist sie endgültig weg (die Rückfrage sagt, welcher Fall
-vorliegt). Ein Link aus einer anderen Quelle, die denselben Ordner zeigt, zählt mit. Hat eine Quelle eine Notiz über 2 MB,
-meldet die Prüfung dort keine verwaisten Anhänge (solche Notizen haben keine Links im Index) und nennt die Notiz im Bericht.
+vorliegt). Ein Link aus einer anderen Quelle, die denselben Ordner zeigt, zählt mit. Hat eine Quelle eine Seite über 2 MB,
+meldet die Prüfung dort keine verwaisten Anhänge (solche Seiten haben keine Links im Index) und nennt die Seite im Bericht.
 
 ![Prüfung](handbuch/24-fsck.webp)
 
@@ -1944,10 +1944,10 @@ Passwort sein – oder eine untergeschobene. Erst nach **Trotzdem ohne Passwort 
 Ersteinrichtung nimmt Kaveyl Wiki mit Backup-Passwort nur eine ganz verschlüsselte ZIP-Datei an.
 
 **Öffnen** zeigt links den Inhalt der Sicherung als Baum (versteckte Dateien wie `.kaveyl-wiki` auf Wunsch),
-rechts, was mit der Auswahl geschehen kann. Bei einer Notiz steht dabei, wie sie **jetzt** ist:
+rechts, was mit der Auswahl geschehen kann. Bei einer Seite steht dabei, wie sie **jetzt** ist:
 unverändert, geändert oder gelöscht.
 
-- **Vergleichen** (Notiz geändert): beide Fassungen nebeneinander, links die Sicherung, rechts der
+- **Vergleichen** (Seite geändert): beide Fassungen nebeneinander, links die Sicherung, rechts der
   jetzige Stand. Gleiche Zeilen sind zusammengefasst; jeder geänderte Abschnitt hat **Aus der Sicherung
   übernehmen** und **Kopieren**. So holst du genau die Absätze zurück, die du brauchst, oder kopierst nur
   Text heraus. **Speichern** schreibt die gemischte Fassung, **Abbrechen** lässt alles, wie es ist.
@@ -1959,12 +1959,12 @@ unverändert, geändert oder gelöscht.
 - **Überschreiben**: ersetzt den jetzigen Stand (mit Rückfrage). Bei Git-Quellen bleibt der alte Stand in
   den [Versionen](#versionen-und-papierkorb). Bei einem Ordner werden vorhandene Dateien ersetzt, neuere
   Dateien bleiben, gelöscht wird nichts.
-- Bei einer einzelnen Notiz kommen **Anhänge**, auf die sie verweist und die inzwischen fehlen, mit
+- Bei einer einzelnen Seite kommen **Anhänge**, auf die sie verweist und die inzwischen fehlen, mit
   zurück (vorhandene werden nie überschrieben). Andere Dateien lassen sich einzeln **herunterladen**.
 
 Der Papierkorb einer Quelle kommt nie zurück. Datenbank-Sicherungen lassen sich hier nur herunterladen; zurück kommt
 eine Datenbank in der Ersteinrichtung eines neuen Servers ([Auf einem neuen Server](#auf-einem-neuen-server)).
-Schneller geht es aus der Seitenleiste: Rechtsklick auf eine Notiz oder einen Ordner → **Aus Backup
+Schneller geht es aus der Seitenleiste: Rechtsklick auf eine Seite oder einen Ordner → **Aus Backup
 wiederherstellen …** öffnet diesen Reiter für die Quelle, und in der geöffneten Sicherung ist die Stelle
 schon ausgewählt. Rechtsklick auf eine Quelle → **Backup** ▸ **Jetzt sichern** sichert sie mit allen
 aktiven Zeitplänen, die sie enthalten – nur diese Quelle, ohne die Kaveyl-Wiki-Datenbank.
@@ -1975,7 +1975,7 @@ aktiven Zeitplänen, die sie enthalten – nur diese Quelle, ohne die Kaveyl-Wik
 
 #### Datenbank
 
-Sicherungen der Kaveyl-Wiki-Datenbank im Container (nicht deiner Notizen): jede Nacht um 3 Uhr eine,
+Sicherungen der Kaveyl-Wiki-Datenbank im Container (nicht deiner Seiten): jede Nacht um 3 Uhr eine,
 sonntags zusätzlich eine wöchentliche, abgelegt unter `/config/backups` – also auf demselben Datenträger.
 Für eine Kopie auf ein anderes Gerät nimm in einem [Zeitplan](#zeitpläne) die Kaveyl-Wiki-Datenbank dazu. Oben
 die [Löschregeln](#löschregeln) dafür: wie viele tägliche (Standard 7) und wöchentliche (4) Sicherungen
@@ -2048,7 +2048,7 @@ ein Klick sperrt bzw. entsperrt. Der letzte aktive Admin ist geschützt.
   „E-Mail oder Passwort falsch“, damit niemand ausprobieren kann, welche Konten es gibt.
 - **Löschen** entfernt das Konto mit Sitzungen, Einstellungen, KI-Chats, Tokens, Gruppen-Mitgliedschaften, seinen
   Rechte-Regeln, seinen Beobachtungen samt Pushover-User-Key, den Ereignis-Webhooks in seinem Namen und den Einladungen, die es verschickt hat und die noch niemand angenommen hat. Im [Protokoll](#protokoll) werden Name, Anzeigename und Adresse zu „gelöschtes Konto“, die eigenen
-  Einträge verlieren die IP-Adresse – was geschah, bleibt lesbar, wer es war, nicht. **Notizen bleiben**, ebenso der
+  Einträge verlieren die IP-Adresse – was geschah, bleibt lesbar, wer es war, nicht. **Seiten bleiben**, ebenso der
   Name als Autor in der Git-Historie (die lässt sich nicht nachträglich ändern). Ein Konto löscht immer ein
   Administrator – ein Benutzer beantragt das bei ihm (so steht es auch in seinem Konto); das genügt dem Recht auf
   Löschung.
@@ -2085,7 +2085,7 @@ ist dieselbe Regel wie per Rechtsklick auf die Quelle → „Berechtigungen …�
   die Person aus („gesperrt über Gruppe …“), lässt sich das nur an der Gruppe ändern – oder indem du die Person aus
   der Gruppe nimmst.
 - **Administratoren** dürfen in allen Quellen alles („alles (Admin)“); Freigaben brauchen sie nicht.
-- **„+2 Ausnahmen“** unter einer Zelle: Freigaben weiter unten, auf Ordnern oder einzelnen Notizen (z. B. eine
+- **„+2 Ausnahmen“** unter einer Zelle: Freigaben weiter unten, auf Ordnern oder einzelnen Seiten (z. B. eine
   per E-Mail geteilte). Ein Klick öffnet die Person.
 - **Viele Quellen:** Das Raster scrollt in sich, Namensspalte und Quellen-Zeile bleiben stehen. **Quelle suchen**
   blendet die übrigen Spalten aus, **Person suchen** die übrigen Zeilen. Ein Klick auf eine **Quelle** zeigt alle
@@ -2104,7 +2104,7 @@ gelöscht wird nichts von selbst:
 - Konten, die seit über 90 Tagen nicht aktiv waren → *Sperren* oder *Konto löschen*
 - Konten, die sich noch nie angemeldet haben (z. B. angelegt, aber nie benutzt) → *Konto löschen*. *Zuletzt aktiv*
   steht auch in der Benutzerliste, auf die Stunde genau.
-- Freigaben, deren Ordner oder Notiz es nicht mehr gibt → *Freigabe entfernen*
+- Freigaben, deren Ordner oder Seite es nicht mehr gibt → *Freigabe entfernen*
 - Gruppen ohne Mitglieder → *Gruppe löschen*
 
 ![Rechte](handbuch/99b-rechte.webp)
@@ -2124,7 +2124,7 @@ an – siehe [Zugriff über das Netz](#zugriff-über-das-netz).
   Access über die E-Mail-Adresse, bei Authentik über die einmal verbundene Kennung, siehe
   [Konto](#konto)). Alle anderen sehen die normale Anmeldung.
 - **Was der Proxy davor durchlässt, entscheidet der Proxy.** Wer dort nicht zugelassen ist, erreicht Kaveyl Wiki gar
-  nicht – auch nicht die Anmeldeseite oder einen Einladungslink. Teilst du eine Notiz mit jemandem
+  nicht – auch nicht die Anmeldeseite oder einen Einladungslink. Teilst du eine Seite mit jemandem
   ([Teilen per E-Mail](#konten-einladungen-und-teilen-per-e-mail)), musst du die Person deshalb **zusätzlich beim
   Proxy zulassen** (Cloudflare: E-Mail in die Access-Richtlinie, z. B. mit Einmal-Code; Pangolin: Benutzer oder
   E-Mail-Freigabe der Ressource; Authentik: Benutzer anlegen und, falls die Anwendung dort an Gruppen oder Richtlinien
@@ -2305,7 +2305,7 @@ gilt genau deine Auswahl.
 | Ereignis | Wann Kaveyl Wiki meldet |
 |---|---|
 | Sync-Probleme | eine Quelle kann nicht synchronisieren (höchstens alle 6 Stunden je Quelle), ein Konflikt wartet auf Auflösung – und „wieder synchron“, sobald es nach einem gemeldeten Fehler wieder geht |
-| Nachtlauf | Prüfung, Aufräumen oder Sicherung um 3 Uhr ist fehlgeschlagen, die Prüfung hat **etwas Neues** gefunden (z. B. einen Link ins Leere – mit Quelle und Notiz, höchstens zehn aufgezählt; was schon gemeldet ist und bleibt, kommt nicht jede Nacht wieder, was behoben war und zurückkommt, gilt als neu) oder der Speicherplatz für `/data` oder `/config` wird knapp (unter 1 GB oder 5 %) – **eine** Nachricht pro Nacht, nur wenn etwas ist |
+| Nachtlauf | Prüfung, Aufräumen oder Sicherung um 3 Uhr ist fehlgeschlagen, die Prüfung hat **etwas Neues** gefunden (z. B. einen Link ins Leere – mit Quelle und Seite, höchstens zehn aufgezählt; was schon gemeldet ist und bleibt, kommt nicht jede Nacht wieder, was behoben war und zurückkommt, gilt als neu) oder der Speicherplatz für `/data` oder `/config` wird knapp (unter 1 GB oder 5 %) – **eine** Nachricht pro Nacht, nur wenn etwas ist |
 | Backup | eine geplante oder von Hand gestartete [Sicherung](#zeitpläne) ist ganz oder teilweise fehlgeschlagen – mit Quelle und Grund. Schlägt derselbe Zeitplan weiter fehl, kommt höchstens **eine Nachricht am Tag**; klappt er danach wieder, einmal „wieder in Ordnung“ |
 | Sicherheit | 10 fehlgeschlagene Anmeldungen in 15 Minuten (höchstens stündlich), ein neuer Administrator, ein neuer API-Token |
 
@@ -2349,7 +2349,7 @@ nicht erreichbar (etwa weil der Server bewusst nicht ins Internet darf), steht d
 
 ### KI & APIs
 
-Alles, womit Programme an die Notizen kommen: der KI-Assistent und persönliche Tokens für Skripte und KI-Werkzeuge.
+Alles, womit Programme an die Seiten kommen: der KI-Assistent und persönliche Tokens für Skripte und KI-Werkzeuge.
 
 #### KI
 
@@ -2357,16 +2357,16 @@ Der Reiter hat zwei Abschnitte: **Für alle: Anbieter und Aufbewahrung** (nur f�
 Benutzer) und **Mein KI-Assistent** (für jeden das eigene).
 
 - **KI-Anbieter** (Admins): Liste der Anbieter mit Name, Art, Modell, „☁ Cloud-Anbieter“ und – bei Anbietern, die
-  private Notizen sehen dürfen – **privat**; der
+  private Seiten sehen dürfen – **privat**; der
   Auswahlknopf **Standard** legt fest, welcher Anbieter gilt, wenn jemand keinen eigenen wählt. Sind mehrere Anbieter
-  für private Notizen zugelassen, legt **Standard privat** fest, welcher davon sie bekommt. „+ Ollama“, „+ Ollama Cloud“, „+ Anthropic“, „+ OpenRouter“,
+  für private Seiten zugelassen, legt **Standard privat** fest, welcher davon sie bekommt. „+ Ollama“, „+ Ollama Cloud“, „+ Anthropic“, „+ OpenRouter“,
   „+ OpenAI-kompatibel“ öffnen das Formular: **Name**, **Adresse**, **API-Key** (verschlüsselt, nie
   wieder angezeigt), **Modell** – „Verbindung testen“ listet die Modelle –, bei Anthropic **Aufwand** und das Häkchen
-  **Für private Notizen zulassen**. Details: [KI einrichten](#ki-einrichten).
+  **Für private Seiten zulassen**. Details: [KI einrichten](#ki-einrichten).
 - **Unbenutzte Chats aufbewahren** (Admins): Standard **90 Tage** seit der letzten Nachricht, 0 = nie.
   Je Quelle abweichend: [Quelle bearbeiten](#eine-quelle-bearbeiten) → „KI-Chats aufbewahren“.
 - **Mein KI-Assistent** (alle): **Mein Anbieter** (sonst der Standard), bei mehreren zugelassenen Anbietern
-  **Meine KI für private Notizen** (sonst „Standard privat“), **Persönliche Anweisungen**
+  **Meine KI für private Seiten** (sonst „Standard privat“), **Persönliche Anweisungen**
   (gehen bei jeder Anfrage mit, z. B. „antworte knapp, auf Deutsch“) und **eigene Chats löschen**.
 - Was die KI sehen darf, stellst du nicht hier ein, sondern per Rechtsklick → **KI-Freigabe …** –
   siehe [KI-Freigaben](#ki-freigaben).
@@ -2415,10 +2415,10 @@ gültig.
 #### Ereignis-Webhooks
 
 Nur für Administratoren. Ein Ereignis-Webhook schickt Änderungen **sofort** an ein anderes System – typischerweise an
-einen Agenten, der auf Antworten in einer Notiz wartet –, statt dass der Agent ständig nachfragt. **Neuer
+einen Agenten, der auf Antworten in einer Seite wartet –, statt dass der Agent ständig nachfragt. **Neuer
 Ereignis-Webhook**: **Name**, **Adresse des Empfängers** (http oder https; Weiterleitungen werden nicht befolgt),
 **Mit den Rechten von** (meist das Konto des Agenten – es geht nur hinaus, was diese Person lesen darf), optional eine
-**Quelle** und ein **Ordner oder eine Notiz**. Die eigenen Änderungen dieser Person bleiben draußen (sonst hörte ein
+**Quelle** und ein **Ordner oder eine Seite**. Die eigenen Änderungen dieser Person bleiben draußen (sonst hörte ein
 Agent seine eigenen), außer du setzt den Haken dafür.
 
 Nach dem Anlegen steht das **Geheimnis** einmal da; der Empfänger prüft damit die Kopfzeile `X-Kaveyl-Signature`
@@ -2426,7 +2426,7 @@ Nach dem Anlegen steht das **Geheimnis** einmal da; der Empfänger prüft damit 
 alte gilt dann nicht mehr) und **Löschen** stehen an jedem Eintrag. Kaveyl Wiki bündelt Änderungen, die innerhalb einer
 Sekunde zusammenkommen, versucht eine misslungene Lieferung noch dreimal (nach 10 Sekunden, 1 und 5 Minuten) und
 schaltet einen Webhook ab, wenn fünf Lieferungen in Folge auch so nicht ankommen (Eintrag im Protokoll; ein
-misslungenes „Testen“ schaltet nichts ab). Ein gewählter Ordner oder eine Notiz zieht beim Verschieben und Umbenennen
+misslungenes „Testen“ schaltet nichts ab). Ein gewählter Ordner oder eine Seite zieht beim Verschieben und Umbenennen
 mit wie beim [Beobachten](#beobachten); wird die gewählte Quelle ausgehängt, schaltet Kaveyl Wiki den Webhook ab (Eintrag
 im Protokoll). Aufbau der Lieferung: API-Referenz, „Ereignisse für Agenten“. Wann was wohin geht – Push-Webhook, Ereignis-Webhook, E-Mails – zeigt die Grafik unter
 [So funktioniert der Abgleich](#so-funktioniert-der-abgleich).
@@ -2440,9 +2440,9 @@ Drei Karten:
 - **Farbthema:** je ein Thema für hell (**Lavendel-Indigo** als Standard, **Amethyst**, **Pflaume**,
   **Flieder-Schiefer**) und für dunkel (**Klassisch** – neutrales Anthrazit – als Standard, **Nacht-Indigo**,
   **OLED-Schwarz**). Welches gerade gilt, entscheidet das Farbschema. Auch die Farbthemen gelten für diesen Browser.
-- **Editor:** die **Werkzeugleiste** – **Schwebend unten** (Standard: eine Leiste am unteren Rand der Notiz, darüber
+- **Editor:** die **Werkzeugleiste** – **Schwebend unten** (Standard: eine Leiste am unteren Rand der Seite, darüber
   die Formatzeile mit Überschriften, fett, kursiv usw., die du mit **Aa** ein- und ausblendest) oder **Oben** (eine
-  Leiste über der Notiz; ist sie zu breit, etwa bei größerer Schrift, bricht sie in eine zweite Zeile um). Auf dem Handy steht sie immer oben. Dazu **Editorbreite** (Normal, Breit, Voll oder eigener
+  Leiste über der Seite; ist sie zu breit, etwa bei größerer Schrift, bricht sie in eine zweite Zeile um). Auf dem Handy steht sie immer oben. Dazu **Editorbreite** (Normal, Breit, Voll oder eigener
   Prozentwert) und **Inhaltsverzeichnis** an/aus. Werkzeugleiste, Breite und Inhaltsverzeichnis gehören zu deinem Konto
   (auf allen Geräten gleich).
 
@@ -2452,21 +2452,21 @@ Drei Karten:
 
 #### Sprache
 
-Hier stellst du die Sprache der Oberfläche ein: Deutsch oder English. Weil die Seite dafür kurz neu lädt, fragt
-Kaveyl Wiki vorher nach; danach bist du wieder auf dieser Seite der Einstellungen, und deine offenen Notizen sind noch da.
+Hier stellst du die Sprache der Oberfläche ein: Deutsch oder English. Weil die App dafür kurz neu lädt, fragt
+Kaveyl Wiki vorher nach; danach bist du wieder an dieser Stelle der Einstellungen, und deine offenen Seiten sind noch da.
 Dasselbe geht über die Befehlspalette (Strg K, „English“ bzw. „Deutsch“) und vor dem Anmelden mit **DE | EN** oben
 rechts.
 
 Die Sprache gehört zu deinem Konto und gilt damit auf allen Geräten. Sie gilt für die ganze Oberfläche, für Meldungen
-des Servers und für E-Mails an dich (Benachrichtigungen, geteilte Notizen); Einladungen an neue Leute gehen in der
-Sprache dessen, der einlädt. Auch dieses Handbuch gibt es auf Deutsch und Englisch. Schon gespeicherte Einträge im Protokoll erscheinen übersetzt, soweit Kaveyl Wiki sie kennt. Notizen
+des Servers und für E-Mails an dich (Benachrichtigungen, geteilte Seiten); Einladungen an neue Leute gehen in der
+Sprache dessen, der einlädt. Auch dieses Handbuch gibt es auf Deutsch und Englisch. Schon gespeicherte Einträge im Protokoll erscheinen übersetzt, soweit Kaveyl Wiki sie kennt. Seiten
 selbst werden nie übersetzt.
 
 #### Schriftgröße
 
 Vier Schieberegler von 80 bis 150 %: **Oberfläche** (Menüs, Knöpfe, Dialoge, Tabs – alles rund um die
-Notiz, auch die Seitenleiste), **Seitenleiste** (Baum, Favoriten, Zuletzt, KI-Freigaben – zusätzlich zur
-Oberfläche), **Notiztext** (Notizen, Leseansicht, Hilfe) und **Code** (Codeblöcke, `Code` im Text, die Ansicht
+Seite, auch die Seitenleiste), **Seitenleiste** (Baum, Favoriten, Zuletzt, KI-Freigaben – zusätzlich zur
+Oberfläche), **Seitentext** (Seiten, Leseansicht, Hilfe) und **Code** (Codeblöcke, `Code` im Text, die Ansicht
 „Markdown“). Jede Änderung wirkt **sofort** in ganz Kaveyl Wiki, auch hinter dem Fenster; unter jedem Regler
 steht ein Beispiel. **Alle auf 100 % zurücksetzen** stellt den Standard wieder her. Gespeichert wird für
 dein Konto (auf allen Geräten gleich).
@@ -2478,7 +2478,7 @@ dein Konto (auf allen Geräten gleich).
 Zeigt deine **Anmelde-Adresse**. **Passwort ändern**: aktuelles Passwort, neues Passwort zweimal (nach
 den [Passwortregeln](#anmelden-und-oberfläche)) – beendet alle anderen Anmeldungen, bei eingerichtetem
 Mail-Versand kommt eine Hinweis-Mail. **Automatisch sperren nach**: wann entsperrte
-[verschlüsselte Notizen](#verschlüsselte-notizen-und-ordner) wieder gesperrt werden (5 / 15 / 30 / 60
+[verschlüsselte Seiten](#verschlüsselte-seiten-und-ordner) wieder gesperrt werden (5 / 15 / 30 / 60
 Minuten oder erst beim Schließen der Seite). **Konto löschen**: das macht ein Administrator – bitte dort beantragen;
 was dabei entfernt wird und was bleibt, steht unter [Benutzer](#benutzer).
 
@@ -2524,7 +2524,7 @@ Bearbeiten, Markdown-Spickzettel, Menüs, Tastenkürzel, KI, Quellen, Fehlerbehe
 [Hilfe in Kaveyl Wiki](#hilfe-in-kaveyl-wiki).
 
 Hast du die Willkommensseite ausgeblendet, holt **„Willkommensseite wieder anzeigen“** sie zurück – sie erscheint, sobald
-keine Notiz offen ist.
+keine Seite offen ist.
 
 ## Zugriff über das Netz
 
@@ -2640,7 +2640,7 @@ auf dem Server zeigen, steht in der `docker-compose.yml` (Beispiel: `./kaveyl-wi
 
 | Was | Im Container |
 |---|---|
-| Notizen | in deinen Repositories bzw. Ordnern – als `.md`-Dateien |
+| Seiten | in deinen Repositories bzw. Ordnern – als `.md`-Dateien |
 | Lokale Arbeitskopien der Repositories | `/data/repos` |
 | Lokale Ordner (mit Versionen: eigenes `.git` im Ordner) | `/docs` |
 | Kaveyl-Wiki-Datenbank (Benutzer, Quellen, verschlüsselte Tokens, Einstellungen, Protokoll, KI-Chats, Suchindex) | `/config/kaveyl-wiki.db` |
@@ -2659,9 +2659,9 @@ auf dem Server zeigen, steht in der `docker-compose.yml` (Beispiel: `./kaveyl-wi
   IP-Adresse), Abmeldung, Passwortänderung, Quellen, Verbindungen (angelegt, geändert, gelöscht), Löschen und
   Wiederherstellen, abgelehnte Webhooks.
 - *System:* Start, nächtliche Prüfung, Sicherungen, Aufräumen.
-- **Nie im Protokoll:** Passwörter, Tokens, Cookies, Notizinhalte. Inhaltliche Änderungen
+- **Nie im Protokoll:** Passwörter, Tokens, Cookies, Seiteninhalte. Inhaltliche Änderungen
   stehen in der Git-Historie (Versionen).
-- **Ordner-Rechte gelten auch hier:** Wer nicht jede genannte Notiz lesen darf, sieht Einträge ohne die
+- **Ordner-Rechte gelten auch hier:** Wer nicht jede genannte Seite lesen darf, sieht Einträge ohne die
   Dateilisten; Einträge, deren Text selbst Dateinamen nennt (Konflikt, Konflikt aufgelöst, Commit,
   Wiederherstellung), fehlen dann ganz. Ebenso nennt der Konflikt-Hinweis einer Quelle nur Dateien, die man lesen darf.
   Fehler (Abgleich, Index, Dateiüberwachung, Backup …) sehen Benutzer ohne Administratorrechte nur als allgemeinen
@@ -2686,19 +2686,19 @@ gibt es den Bereich [Backup](#backup).
 
 ### Was steht in der Datenbank?
 
-Die Datei `/config/kaveyl-wiki.db` (SQLite) hält alles, was **nicht** in deinen Notizen steht:
+Die Datei `/config/kaveyl-wiki.db` (SQLite) hält alles, was **nicht** in deinen Seiten steht:
 
 | In der Datenbank | Anmerkung |
 |---|---|
 | Benutzer, Gruppen, Rechte, Gäste | Passwörter nur als Prüfsumme (scrypt) |
 | Anmeldungen, Links aus Mails, API-Tokens | Tokens nur als Prüfsumme – niemand kann sie wieder auslesen |
 | Eingebundene Quellen, Verbindungen, alle Einstellungen | Zugangsdaten (Tokens, SMTP-Schlüssel, Pushover-Schlüssel, KI-API-Keys) **verschlüsselt** mit `secret.key` |
-| Protokoll | ohne Passwörter, Tokens und Notizinhalte; Aufbewahrung nach den [Löschregeln](#löschregeln) |
+| Protokoll | ohne Passwörter, Tokens und Seiteninhalte; Aufbewahrung nach den [Löschregeln](#löschregeln) |
 | KI-Chats, KI-Freigaben, KI-Vorschläge, Gedächtnis pro Quelle | Chats nach den Löschregeln |
 | Repository-Papierkorb, eigene Symbole, persönliche Merker (offene Tabs, Editorbreite) | |
-| Suchindex und Links zwischen Notizen | wird aus den Notizen neu aufgebaut, falls er fehlt |
+| Suchindex und Links zwischen Seiten | wird aus den Seiten neu aufgebaut, falls er fehlt |
 
-**Nicht in der Datenbank:** die Notizen und Anhänge selbst – sie liegen in deinen Repositories bzw.
+**Nicht in der Datenbank:** die Seiten und Anhänge selbst – sie liegen in deinen Repositories bzw.
 Ordnern und sind über Git versioniert. Die lokalen Kopien unter `/data/repos` holt Kaveyl Wiki bei Bedarf neu.
 Für eine vollständige Wiederherstellung brauchst du also: eine Datenbank-Sicherung **und** `secret.key`
 (ohne ihn sind die gespeicherten Zugangsdaten unbrauchbar und müssen neu eingetragen werden) – und deine
@@ -2709,7 +2709,7 @@ Repositories bzw. Ordner.
 Damit im Container nichts unbegrenzt wächst, hat alles, was Kaveyl Wiki selbst ablegt, eine Löschregel mit
 einem Standardwert. Alle stehen unter **Einstellungen → Werkzeuge → Aufräumen** (mit dem aktuellen Stand und
 **Jetzt aufräumen**), die meisten zusätzlich dort, wo sie hingehören. Angewendet werden sie **jede Nacht
-um 3 Uhr** (vor der Datenbank-Sicherung) oder sofort mit „Jetzt aufräumen“. **Deine Notizen und die
+um 3 Uhr** (vor der Datenbank-Sicherung) oder sofort mit „Jetzt aufräumen“. **Deine Seiten und die
 Git-Historie löscht keine dieser Regeln.**
 
 | Was wächst | Regel (Standard) | 0 = nie? | Auch einstellbar unter |
@@ -2717,7 +2717,7 @@ Git-Historie löscht keine dieser Regeln.**
 | Protokoll: normale Einträge | 30 Tage | – | Werkzeuge → Protokoll |
 | Protokoll: Warnungen und Fehler | 90 Tage | – | Werkzeuge → Protokoll |
 | Protokoll: Sicherheit | 365 Tage | – | Werkzeuge → Protokoll |
-| Papierkorb der Notizen (`.kaveyl-wiki/trash`; Git-Quellen: nur ausblenden) | 30 Tage | ja | – |
+| Papierkorb der Seiten (`.kaveyl-wiki/trash`; Git-Quellen: nur ausblenden) | 30 Tage | ja | – |
 | KI-Chats (ab der letzten Nachricht) | 90 Tage, **je Quelle abweichend** | ja | KI; Quelle bearbeiten → „KI-Chats aufbewahren“ |
 | Repositories im Repository-Papierkorb | 30 Tage, dann endgültig gelöscht | ja | Quellen → Eingebundene Quellen |
 | Git-Sicherungen (Bundles) | 30 Tage | ja | Quellen → Eingebundene Quellen |
@@ -2777,15 +2777,15 @@ ebenfalls als Cloud, weil Ollama es an ollama.com weiterleitet.
 nachdenken, dafür langsamer und teurer. Zur Wahl stehen nur die Stufen, die das gewählte Modell kann (nach
 „Verbindung testen“); kennt es keine, steht das im Formular. Die Liste zeigt die Stufe hinter dem Modell.
 
-**Für private Notizen zulassen:** Mit diesem Häkchen behandelt Kaveyl Wiki einen Anbieter wie eine KI im eigenen
-Netz: Er darf Notizen sehen, die **nur für private KI** freigegeben sind ([KI-Freigaben](#ki-freigaben)). Eine KI im
+**Für private Seiten zulassen:** Mit diesem Häkchen behandelt Kaveyl Wiki einen Anbieter wie eine KI im eigenen
+Netz: Er darf Seiten sehen, die **nur für private KI** freigegeben sind ([KI-Freigaben](#ki-freigaben)). Eine KI im
 eigenen Netz hat das Häkchen von selbst (abschaltbar). Bei einem Cloud-Anbieter setzt du es bewusst – etwa bei einem
 Anbieter mit Zero Data Retention (ZDR); das Formular nennt dann, wohin die Inhalte gehen, denn ob dort wirklich nichts
-gespeichert wird, kann Kaveyl Wiki nicht prüfen. Notizen, die nur für private KI freigegeben sind, gehen **immer** an
+gespeichert wird, kann Kaveyl Wiki nicht prüfen. Seiten, die nur für private KI freigegeben sind, gehen **immer** an
 eine private KI – beim Zusammenfassen, Weiterschreiben und Fragen –, egal welcher Anbieter Standard ist: zuerst die
-eigene Wahl („Meine KI für private Notizen“), dann **Standard privat**, sonst der erste zugelassene Anbieter. Wird
-dort ausdrücklich ein Anbieter ohne Häkchen gewählt, lehnt Kaveyl Wiki ab, statt die Notiz zu schicken. Nimmst du das
-Häkchen weg, sieht dieser Anbieter die privaten Notizen sofort nicht mehr.
+eigene Wahl („Meine KI für private Seiten“), dann **Standard privat**, sonst der erste zugelassene Anbieter. Wird
+dort ausdrücklich ein Anbieter ohne Häkchen gewählt, lehnt Kaveyl Wiki ab, statt die Seite zu schicken. Nimmst du das
+Häkchen weg, sieht dieser Anbieter die privaten Seiten sofort nicht mehr.
 
 Ein Anbieter ist der **Standard**; jeder
 Benutzer kann unter Einstellungen → KI einen anderen wählen und **persönliche Anweisungen**
@@ -2798,7 +2798,7 @@ Keys werden verschlüsselt gespeichert und nie wieder angezeigt.
 ### KI-Freigaben
 
 **Freigeben (Admins):** Ohne Freigabe sieht die KI **nichts** – das ist der Standard. Rechtsklick auf
-eine Quelle, einen Ordner oder eine Notiz → **KI-Freigabe …**:
+eine Quelle, einen Ordner oder eine Seite → **KI-Freigabe …**:
 
 | Wahl | Bedeutung |
 |---|---|
@@ -2806,14 +2806,14 @@ eine Quelle, einen Ordner oder eine Notiz → **KI-Freigabe …**:
 | **Freigegeben** | Die KI darf die Inhalte lesen (Fragen, Zusammenfassen) und Änderungen **vorschlagen** – übernommen wird nur, was du bestätigst. Der Dialog nennt, an welche Anbieter die Inhalte dafür gehen. |
 | **Nicht freigegeben (Ausnahme)** | Sperrt hier, auch wenn darüber etwas freigegeben ist – z. B. die ganze Quelle frei, nur der Ordner „Tagebuch“ nicht. Eine Sperre gewinnt immer. |
 
-**Privat oder nicht – nur, wenn du beides hast:** „Private KI“ sind die Anbieter mit dem Häkchen **Für private Notizen
+**Privat oder nicht – nur, wenn du beides hast:** „Private KI“ sind die Anbieter mit dem Häkchen **Für private Seiten
 zulassen** ([KI einrichten](#ki-einrichten)) – eine KI im eigenen Netz von selbst, ein Cloud-Anbieter nur, wenn du es
 setzt. Sind alle Anbieter Cloud ohne Häkchen (z. B. nur Ollama Cloud), heißt „Freigegeben“: geht an Ollama Cloud.
 Sind alle privat, bleibt es dabei. Erst wenn **beide** Arten eingerichtet sind, gibt es zusätzlich **„Freigegeben – nur
 private KI“**: die privaten Anbieter sehen die Inhalte, die anderen nie (z. B. für ein Tagebuch). Der Dialog nennt, wer
 welche Seite ist. Was du freigibst, solange es nur private Anbieter gibt, gilt nur für private KI – kommt später ein
 anderer dazu, geht dadurch nichts von selbst zu ihm. Zusätzlich gilt: `ai: false` im Frontmatter sperrt
-eine Notiz, verschlüsselte Notizen sind immer tabu, und die KI bekommt nie mehr, als der fragende
+eine Seite, verschlüsselte Seiten sind immer tabu, und die KI bekommt nie mehr, als der fragende
 Benutzer lesen darf.
 
 ![KI-Freigabe](handbuch/61-ki-freigabe.webp)
@@ -2822,16 +2822,16 @@ Benutzer lesen darf.
 
 **Überblick über alle Freigaben (Admins):** Der Umschalter oben in der Seitenleiste zeigt mit **KI-Freigaben** alle
 Regeln (ein Klick auf eine Zeile zeigt die Stelle im Baum und schaltet dabei zurück auf „Baum“). Jede Zeile ist eine
-Regel: Quelle, Ordner oder Notiz (die Quelle in Klammern), rechts **freigegeben** oder **nicht freigegeben**
+Regel: Quelle, Ordner oder Seite (die Quelle in Klammern), rechts **freigegeben** oder **nicht freigegeben**
 (rot); mit privater und anderer KI auch **nur private KI**. Orange **wirkt nicht** heißt: nur für private KI
-freigegeben, aber kein Anbieter ist für private Notizen zugelassen – niemand sieht es (Häkchen setzen oder Freigabe
+freigegeben, aber kein Anbieter ist für private Seiten zugelassen – niemand sieht es (Häkchen setzen oder Freigabe
 bearbeiten → „Freigegeben“). Oben filterst du nach **alle**, **aktiv** (freigegeben), **gesperrt** und – wenn es solche
-Regeln gibt – **privat** (ein zugeklappter Abschnitt klappt dabei auf). Ein Klick zeigt die Stelle im Baum (eine Notiz wird geöffnet);
+Regeln gibt – **privat** (ein zugeklappter Abschnitt klappt dabei auf). Ein Klick zeigt die Stelle im Baum (eine Seite wird geöffnet);
 Rechtsklick (auf dem Handy lange drücken): **Freigabe bearbeiten …**, **Im Baum anzeigen**, **Freigabe
-entfernen**. Grau mit „verwaist“ sind Regeln, deren Notiz es nicht mehr gibt – die gelten nirgends und
-können weg. Im Baum selbst trägt jede Quelle, jeder Ordner und jede Notiz mit eigener Regel ein kleines
+entfernen**. Grau mit „verwaist“ sind Regeln, deren Seite es nicht mehr gibt – die gelten nirgends und
+können weg. Im Baum selbst trägt jede Quelle, jeder Ordner und jede Seite mit eigener Regel ein kleines
 **✦** (rot bei einer Sperre, orange wenn die Freigabe derzeit nicht wirkt); mit der Maus darauf steht, was gilt. Ein **Klick auf das ✦** öffnet ein
-kleines Menü: **KI fragen …** (mit genau dieser Quelle, diesem Ordner bzw. dieser Notiz als Bezug) und
+kleines Menü: **KI fragen …** (mit genau dieser Quelle, diesem Ordner bzw. dieser Seite als Bezug) und
 **KI-Freigabe bearbeiten …**; bei einer Sperre nur Letzteres. Das ✦ steht immer am rechten Rand der
 Zeile und verrutscht nicht, wenn beim Überfahren weitere Knöpfe erscheinen.
 
@@ -2842,21 +2842,21 @@ Zeile und verrutscht nicht, wenn beim Überfahren weitere Knöpfe erscheinen.
 Text markieren → **KI** im Auswahlmenü: Umformulieren, Kürzen, Ausbauen,
 Rechtschreibung korrigieren, Übersetzen, eigene Anweisung und **KI fragen …**. Ohne Markierung
 (KI-Knopf in der Werkzeugleiste): **Zusammenfassen**, **Weiterschreiben** und **KI fragen …** (siehe
-unten, mit dieser Notiz als Bezug). Das Notiz-Menü „…“ zeigt die KI-Punkte nur, wo es keine
-Werkzeugleiste gibt – bei Notizen, die du nur lesen darfst, und in der Markdown-Ansicht.
+unten, mit dieser Seite als Bezug). Das Seiten-Menü „…“ zeigt die KI-Punkte nur, wo es keine
+Werkzeugleiste gibt – bei Seiten, die du nur lesen darfst, und in der Markdown-Ansicht.
 
 Der Vorschlag erscheint in einem Fenster: bei markiertem Text **Ersetzen** oder **Darunter
 einfügen**, bei Zusammenfassen **Am Anfang einfügen** oder **Am Ende einfügen**, bei Weiterschreiben
 **Am Ende einfügen** – dazu immer **Kopieren** und **Verwerfen**. Links, Inline-Code und Formeln bleiben dabei
 erhalten (die KI ist angewiesen, sie nicht umzuschreiben).
 
-Ist die Notiz für die KI nicht freigegeben (KI-Freigaben, `ai: false`, verschlüsselt), ist der **KI**-Knopf grau; beim
+Ist die Seite für die KI nicht freigegeben (KI-Freigaben, `ai: false`, verschlüsselt), ist der **KI**-Knopf grau; beim
 Darüberfahren steht der Grund. Darf die KI nur lesen, bietet das Menü nur **Zusammenfassen** und **KI fragen …**.
 
-- **Zusammenfassen** liefert wenige kurze Stichpunkte in der Sprache der Notiz. Code und Tabellen
+- **Zusammenfassen** liefert wenige kurze Stichpunkte in der Sprache der Seite. Code und Tabellen
   werden nicht abgeschrieben, sondern in einem Satz beschrieben; Offenes, Geplantes und nicht
   Entschiedenes bleibt als solches gekennzeichnet.
-- **Weiterschreiben** setzt am Ende der Notiz an. Bricht sie mitten im Satz ab (oder nach einer
+- **Weiterschreiben** setzt am Ende der Seite an. Bricht sie mitten im Satz ab (oder nach einer
   Nummer wie „3.“), wird der Satz im selben Absatz fortgesetzt, ohne Wiederholung. Was nicht aus dem
   Text hervorgeht – Daten, Namen, Preise, eine weitere Neuigkeit –, erfindet die KI nicht, sondern
   setzt **Platzhalter in eckigen Klammern** wie [Datum]; das Fenster weist dann darauf hin. Bitte
@@ -2867,28 +2867,28 @@ Darüberfahren steht der Grund. Darf die KI nur lesen, bietet das Menü nur **Zu
 ### Frag die Wissensbasis
 
 Öffnen über ✦ oben in der Seitenleiste, (für Admins) ✦ an einer freigegebenen Stelle im Baum, „KI fragen …“ im KI-Menü des Editors
-(bzw. im Notiz-Menü „…“, wo es keine Werkzeugleiste gibt) oder in der Befehlspalette. Bezug wählen – diese Notiz, dieser Ordner, diese Quelle, alles Freigegebene oder
+(bzw. im Seiten-Menü „…“, wo es keine Werkzeugleiste gibt) oder in der Befehlspalette. Bezug wählen – diese Seite, dieser Ordner, diese Quelle, alles Freigegebene oder
 allgemein (ohne Wiki). Die KI arbeitet hier als **Agent**: Sie sucht selbst, sieht sich Ordner an
-und liest Notizen, bis sie antworten kann – live siehst du die Schritte („Sucht …“, „Liest …“),
+und liest Seiten, bis sie antworten kann – live siehst du die Schritte („Sucht …“, „Liest …“),
 danach steht die Antwort Wort für Wort da. Über der Antwort lassen sich die „n Schritte“ aufklappen;
 darunter stehen **nur die Quellen, auf die sich die Antwort stützt** ([1], [2] …), dazu Anbieter und
 Modell.
 
-Antworten erscheinen **formatiert wie eine Notiz** – Überschriften, Listen, Tabellen, Code mit
+Antworten erscheinen **formatiert wie eine Seite** – Überschriften, Listen, Tabellen, Code mit
 Hervorhebung, Formeln. Bilder zeigt die Antwort nur aus Kaveyl Wiki selbst; ein Bild von einer anderen
 Webseite erscheint als Link und lädt erst, wenn du ihn anklickst. Unter jeder Antwort:
 
-- **Kopieren** – der Knopf zeigt kurz **„Kopiert“**; in eine Kaveyl-Wiki-Notiz eingefügt (Strg+V) kommt die Antwort genau so formatiert an
+- **Kopieren** – der Knopf zeigt kurz **„Kopiert“**; in eine Kaveyl-Wiki-Seite eingefügt (Strg+V) kommt die Antwort genau so formatiert an
   (auch Hinweiskästen, Formeln, Tabellen); in Word oder eine Mail formatiert, in einen Texteditor als
   Markdown.
 - **Markdown** / **Formatiert** – schaltet die Ansicht um, etwa um nur einen Teil als Markdown zu markieren
   und zu kopieren.
-- **In Notiz einfügen** – nur wenn gerade eine Notiz offen ist, die du bearbeiten darfst: die Antwort kommt unter den
-  Absatz (bzw. die Liste oder Tabelle), in dem die Schreibmarke stand; ohne gesetzte Schreibmarke (ganz am Anfang der Notiz) ans Ende; zitierte Quellen
-  kommen als Links mit, die von dieser Notiz aus stimmen. Danach schließt sich der Chat; Strg+Z nimmt es zurück. Stützt sich der Chat
-  auf Notizen, die nur für private KI freigegeben sind, und dürfen die Notiz auch andere KIs lesen, fragt Kaveyl Wiki vorher nach.
-- **Als Notiz speichern …** – Titel (vorbelegt mit der Frage) und Ordner wählen; die Antwort wird eine
-  neue Notiz, ihre Quellen stehen als Links am Ende. Gespeichert wird in deinem Namen, nicht als KI;
+- **In Seite einfügen** – nur wenn gerade eine Seite offen ist, die du bearbeiten darfst: die Antwort kommt unter den
+  Absatz (bzw. die Liste oder Tabelle), in dem die Schreibmarke stand; ohne gesetzte Schreibmarke (ganz am Anfang der Seite) ans Ende; zitierte Quellen
+  kommen als Links mit, die von dieser Seite aus stimmen. Danach schließt sich der Chat; Strg+Z nimmt es zurück. Stützt sich der Chat
+  auf Seiten, die nur für private KI freigegeben sind, und dürfen die Seite auch andere KIs lesen, fragt Kaveyl Wiki vorher nach.
+- **Als Seite speichern …** – Titel (vorbelegt mit der Frage) und Ordner wählen; die Antwort wird eine
+  neue Seite, ihre Quellen stehen als Links am Ende. Gespeichert wird in deinem Namen, nicht als KI;
   in verschlüsselten Ordnern geht das nicht (dort kopieren und einfügen).
 
 ### Chats und Aufbewahrung
@@ -2898,7 +2898,7 @@ neuen, der Papierkorb an einem Eintrag löscht ihn nach einer Rückfrage (auf To
 löschen …** fest unter der Liste löscht wie im Browser die Chats der **letzten Stunde**, der **letzten
 24 Stunden**, **7** oder **30 Tage** oder **alle** – nach einer Rückfrage. Gelöscht ist gelöscht: Fragen,
 Antworten und Vorschläge verschwinden aus der Datenbank, die Datei wird an den Stellen überschrieben;
-das Protokoll hält nur fest, *welche Notizen* an welchen Anbieter gingen, nicht die Fragen. (Nur
+das Protokoll hält nur fest, *welche Seiten* an welchen Anbieter gingen, nicht die Fragen. (Nur
 ältere Datenbank-Sicherungen enthalten sie noch, bis diese ablaufen.) **Strg+Enter** sendet die Frage. Solange
 die KI arbeitet, steht statt „Fragen“ **Stopp**: Es bricht ab, die Frage bleibt im Feld, gespeichert wird nichts, und
 Kaveyl Wiki fragt den Anbieter nicht weiter. Das Schließen des Fensters bricht ebenso ab. In
@@ -2909,7 +2909,7 @@ Löschen des gewählten Chats und für **Verlauf löschen …** (Uhr-Symbol).
 
 **Automatisch gelöscht** werden Chats, die länger als **90 Tage** (Standard, Einstellungen → KI →
 „Unbenutzte Chats aufbewahren“, 0 = nie) nicht benutzt wurden – gezählt ab der letzten Nachricht. Für
-Chats über eine bestimmte Quelle (Bezug: eine Notiz, ein Ordner oder die Quelle) kann jede Quelle eine
+Chats über eine bestimmte Quelle (Bezug: eine Seite, ein Ordner oder die Quelle) kann jede Quelle eine
 **eigene Frist** haben: Quelle bearbeiten → **„KI-Chats aufbewahren“** (z. B. 7 Tage für ein Tagebuch
 oder „nie löschen“ für ein Projekt); „wie in Einstellungen → KI“ nimmt die allgemeine Regel. Chats mit
 Bezug „alles Freigegebene“ oder „allgemein“ folgen immer der allgemeinen Regel.
@@ -2918,56 +2918,56 @@ Bezug „alles Freigegebene“ oder „allgemein“ folgen immer der allgemeinen
 
 
 **Bezug „Allgemein (ohne Wiki)“:** eine freie Frage an das Sprachmodell, wie in einem normalen
-KI-Chat. Es geht **keine Notiz** an den Anbieter, deshalb braucht es dafür keine Freigabe; die
+KI-Chat. Es geht **keine Seite** an den Anbieter, deshalb braucht es dafür keine Freigabe; die
 Antwort kommt aus dem Wissen des Modells, hat keine Quellen und kann veraltet oder falsch sein. Die KI
-sagt, wenn sie unsicher ist, erfindet keine Quellen und verweist bei Fragen nach deinen Notizen auf
+sagt, wenn sie unsicher ist, erfindet keine Quellen und verweist bei Fragen nach deinen Seiten auf
 einen anderen Bezug. Deine persönlichen Anweisungen (Einstellungen → KI) gelten auch hier.
 
-Die KI hält sich bei Fragen streng an die Notizen: Sie gibt nur wieder, was dort steht, zitiert
+Die KI hält sich bei Fragen streng an die Seiten: Sie gibt nur wieder, was dort steht, zitiert
 Ideen, Wünsche und Bedingungen wörtlich statt sie umzudeuten, sucht mehrteilige Fragen Teil für Teil
-und sagt ausdrücklich, wenn etwas – oder eine Annahme in der Frage – nicht in den Notizen steht.
+und sagt ausdrücklich, wenn etwas – oder eine Annahme in der Frage – nicht in den Seiten steht.
 Eine Garantie ist das bei Sprachmodellen nicht: Prüfe Wichtiges über die verlinkten Quellen.
 
-- **Klick** auf eine Quelle öffnet die Notiz und schließt das Fenster.
+- **Klick** auf eine Quelle öffnet die Seite und schließt das Fenster.
 - **Rechtsklick** (Touch: lange drücken) → **In neuem Tab öffnen** – das Fenster bleibt offen, so
   öffnest du mehrere Quellen nacheinander; außerdem „Öffnen und Dialog schließen“, „Rechts daneben
   öffnen“ (schließt das Fenster) und „Pfad kopieren“. Die mittlere Maustaste öffnet ebenfalls im
   Hintergrund.
 - **Alle n in Tabs öffnen** (bei mehreren Quellen) öffnet jede in einem eigenen Tab (die erste
-  vorn) und schließt das Fenster. Schon offene Notizen bekommen keinen zweiten Tab.
+  vorn) und schließt das Fenster. Schon offene Seiten bekommen keinen zweiten Tab.
 
 ![Frag die Wissensbasis](handbuch/63-ki-fragen.webp)
 
-**Private Notizen beim Fragen:** Fragst du über einen Bereich, in dem auch Notizen „nur für private KI“ liegen,
-antwortet dein Standard-Anbieter – ohne diese Notizen. Gibt es passende, steht unter der Antwort ein Hinweis wie
-„Gefunden wird nur, was für Claude freigegeben ist – 2 passende private Notizen sind nicht dabei.“ mit dem Knopf
-**„Mit … fragen“**: Er stellt dieselbe Frage im selben Chat an die private KI, die die Notizen dann mit einbezieht.
+**Private Seiten beim Fragen:** Fragst du über einen Bereich, in dem auch Seiten „nur für private KI“ liegen,
+antwortet dein Standard-Anbieter – ohne diese Seiten. Gibt es passende, steht unter der Antwort ein Hinweis wie
+„Gefunden wird nur, was für Claude freigegeben ist – 2 passende private Seiten sind nicht dabei.“ mit dem Knopf
+**„Mit … fragen“**: Er stellt dieselbe Frage im selben Chat an die private KI, die die Seiten dann mit einbezieht.
 Ab da bleibt der Chat bei der privaten KI, denn sein Verlauf enthält private Inhalte; für einen anderen Anbieter
-beginnst du einen neuen Chat. Fragst du direkt über eine Notiz oder einen Ordner „nur für private KI“, geht die Frage
+beginnst du einen neuen Chat. Fragst du direkt über eine Seite oder einen Ordner „nur für private KI“, geht die Frage
 gleich an die private KI.
 
-![Hinweis auf private Notizen](handbuch/ki-fragen-privat-hinweis.webp)
+![Hinweis auf private Seiten](handbuch/ki-fragen-privat-hinweis.webp)
 
 ### Aufträge und Vorschläge
 
 Bittest du die KI um eine Änderung, legt sie **Vorschläge** an statt
-selbst zu schreiben: neue Notiz, Text einer Notiz ändern, Notiz/Ordner verschieben oder sich etwas
+selbst zu schreiben: neue Seite, Text einer Seite ändern, Seite/Ordner verschieben oder sich etwas
 merken. Jeder Vorschlag erscheint als Karte unter der Antwort – **Vorschau** zeigt den neuen Text
 bzw. die Änderungen (rot/grün), **Übernehmen** führt ihn aus, ✕ verwirft ihn. Übernommen wird mit
 dem Autor **„Kaveyl Wiki KI (im Auftrag von dir)“** und einer Commit-Nachricht `ai(…): …`; die
 Änderung ist ein eigener Commit und über „Versionen“ jederzeit zurückzuholen. Vorschläge gibt es
 nur, wo die KI freigegeben ist und du selbst schreiben darfst – bei einem Ordner gilt das für alles
-darin, wie beim Verschieben im Baum; wurde die Notiz inzwischen geändert, überschreibt Kaveyl Wiki nichts (dann die KI neu fragen). Löschen kann die KI
+darin, wie beim Verschieben im Baum; wurde die Seite inzwischen geändert, überschreibt Kaveyl Wiki nichts (dann die KI neu fragen). Löschen kann die KI
 nicht.
 
-Hat die private KI in diesem Chat private Notizen gelesen, kann ein Vorschlag deren Inhalt enthalten. Liegt das Ziel an
-einem Ort, den auch KIs ohne „Für private Notizen zulassen“ lesen dürfen, zeigt die Karte einen gelben Hinweis – ebenso, wenn
-ein Vorschlag eine Notiz oder einen Ordner mit „Freigegeben – nur private KI“ an so einen Ort verschiebt. Übernehmen geht
+Hat die private KI in diesem Chat private Seiten gelesen, kann ein Vorschlag deren Inhalt enthalten. Liegt das Ziel an
+einem Ort, den auch KIs ohne „Für private Seiten zulassen“ lesen dürfen, zeigt die Karte einen gelben Hinweis – ebenso, wenn
+ein Vorschlag eine Seite oder einen Ordner mit „Freigegeben – nur private KI“ an so einen Ort verschiebt. Übernehmen geht
 trotzdem; der Hinweis sagt nur, dass der Inhalt danach nicht mehr privat ist.
 
-Damit Vorschläge als normale Notizen taugen, räumt Kaveyl Wiki sie auf: Quellen-Nummern wie „[1]“ aus
-dem Chat landen nicht in der Notiz, und Links, die die KI ab der Quellenwurzel schreibt
-(`Besprechungen/…`), werden passend zum Ordner der Notiz umgerechnet (`../Besprechungen/…`). Alle
+Damit Vorschläge als normale Seiten taugen, räumt Kaveyl Wiki sie auf: Quellen-Nummern wie „[1]“ aus
+dem Chat landen nicht in der Seite, und Links, die die KI ab der Quellenwurzel schreibt
+(`Besprechungen/…`), werden passend zum Ordner der Seite umgerechnet (`../Besprechungen/…`). Alle
 KI-Antworten bekommen normale Bindestriche und Leerzeichen statt typografischer Sonderzeichen, die
 manche Modelle einstreuen – sonst fände die Suche „Eis-Angebot“ nicht. Eine Korrektur eines
 einzelnen Absatzes bleibt ein Absatz.
@@ -2975,7 +2975,7 @@ einzelnen Absatzes bleibt ein Absatz.
 ![Vorschlag der KI](handbuch/64-ki-agent-vorschlag.webp)
 
 **Modelle ohne Werkzeuge:** Kleine lokale Modelle können oft keine Werkzeuge aufrufen. Dann sucht
-Kaveyl Wiki wie bisher selbst passende Notizen und die KI antwortet daraus (ohne Schritte und ohne
+Kaveyl Wiki wie bisher selbst passende Seiten und die KI antwortet daraus (ohne Schritte und ohne
 Vorschläge).
 
 ### Gedächtnis pro Quelle
@@ -2992,7 +2992,7 @@ Code oder Hermes lesbar. Es geht bei jeder KI-Anfrage zu dieser Quelle mit – s
 ### Protokoll der KI
 
 Jede Anfrage steht im Protokoll (wer, welcher Anbieter und welches Modell, welche
-Notizen mit Pfad und Stand, beim Agenten auch die Schritte), ebenso jeder übernommene Vorschlag –
+Seiten mit Pfad und Stand, beim Agenten auch die Schritte), ebenso jeder übernommene Vorschlag –
 Inhalte selbst nicht.
 
 ## API und MCP (Claude, Hermes, Skripte)
@@ -3008,7 +3008,7 @@ mit dir als Autor in Git übertragen und im Protokoll vermerkt („API: …“ b
 **MCP** (für KI-Werkzeuge). Nach dem Erstellen steht der Token einmal da – bei „MCP“ zusätzlich
 der fertige Befehl für Claude Code zum Kopieren.
 
-**Claude Code / Claude Desktop (MCP):** Token mit „MCP“ (und „schreiben“, wenn Claude Notizen
+**Claude Code / Claude Desktop (MCP):** Token mit „MCP“ (und „schreiben“, wenn Claude Seiten
 ändern soll), dann im Terminal:
 
 ```
@@ -3018,14 +3018,14 @@ claude mcp add --transport http kaveyl-wiki https://wiki.example.org/mcp --heade
 Claude Desktop verbindet sich über die kleine Brücke `mcp-remote` – Einstellungen dafür in der
 [API-Referenz](API.md#mcp-clients-einrichten).
 
-Claude kann dann Quellen auflisten, suchen (auch nur in einer Quelle), den Baum ansehen, Notizen
-lesen, schreiben, anlegen, kopieren, verschieben und löschen, sehen, wer eine Notiz gerade bearbeitet, nachfragen, was
+Claude kann dann Quellen auflisten, suchen (auch nur in einer Quelle), den Baum ansehen, Seiten
+lesen, schreiben, anlegen, kopieren, verschieben und löschen, sehen, wer eine Seite gerade bearbeitet, nachfragen, was
 sich seit dem letzten Mal geändert hat und von wem ([Agenten im Team](#agenten-im-team)), Ordner anlegen, Bilder und Dateien hochladen
-(landen wie beim Einfügen im Editor im Ordner `assets` neben der Notiz), Rückverweise und Versionen
+(landen wie beim Einfügen im Editor im Ordner `assets` neben der Seite), Rückverweise und Versionen
 abrufen, den Abgleich-Status ansehen und einen Abgleich anstoßen. Vor dem Schreiben liest es die
-Notiz; hat jemand sie inzwischen geändert, bekommt es einen Konflikt statt etwas zu überschreiben.
+Seite; hat jemand sie inzwischen geändert, bekommt es einen Konflikt statt etwas zu überschreiben.
 Gelöschtes landet im [Papierkorb](#versionen-und-papierkorb) und lässt sich dort zurückholen.
-Verschlüsselte Notizen sieht es nur mit ihrem Namen und kann sie nicht ändern. Änderungen
+Verschlüsselte Seiten sieht es nur mit ihrem Namen und kann sie nicht ändern. Änderungen
 werden – wie in der App – nach einer kurzen Pause gebündelt zu einer Git-Version; erst dann stehen
 sie in den Versionen („Jetzt abgleichen“ geht sofort). Quellen einbinden oder aushängen und
 Einstellungen ändern geht über MCP bewusst nicht – das bleibt in der App.
@@ -3039,7 +3039,7 @@ Einrichtung je Client in [docs/API.md](API.md#mcp-clients-einrichten).
 **REST-API für Skripte:** `https://<deine Adresse>/api/v1/…` mit derselben Kopfzeile. Die vollständige
 Beschreibung (OpenAPI) liegt unter `/api/v1/openapi.json`, z. B. zum Einlesen in Postman oder
 Bruno. Beispiele: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
-`GET /api/v1/notes/<Quelle>/<Pfad>` (liefert Markdown und `hash`), `PUT` derselben Adresse mit
+`GET /api/v1/pages/<Quelle>/<Pfad>` (liefert Markdown und `hash`), `PUT` derselben Adresse mit
 `{"markdown": "…", "baseHash": "<hash>"}`.
 
 ## Tastenkürzel
@@ -3047,18 +3047,18 @@ Bruno. Beispiele: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | Kürzel | Wirkung |
 |---|---|
 | F1 | Hilfe – im Einstellungsbereich oder Dialog genau dazu |
-| Strg+K | Befehlspalette (Notizen und Befehle) |
+| Strg+K | Befehlspalette (Seiten und Befehle) |
 | Strg+P | Sofort-Suche in der Seitenleiste |
 | Strg+S | Sofort speichern und übertragen |
 | Strg+B / Strg+I / Strg+E | fett / kursiv / Code |
 | Strg+Z / Strg+Umschalt+Z | Rückgängig / Wiederholen |
 | Alt+↑ / Alt+↓ (im Editor) | Absatz, Überschrift oder Block mit der Schreibmarke eine Stelle nach oben / unten schieben; ein Listen- oder Checklistenpunkt bleibt in seiner Liste, mehrere markierte wandern zusammen |
 | `/` am Zeilenanfang oder nach einem Leerzeichen | Slash-Befehle |
-| `[[` | Notiz suchen und verlinken |
+| `[[` | Seite suchen und verlinken |
 | `:` + Wort | Emoji einfügen |
 | Mittlere Maustaste (unter Favoriten und Zuletzt auch Strg+Klick) | in neuem Tab öffnen |
 | Strg+Klick / Umschalt+Klick (im Baum) | eine Zeile / einen Bereich [markieren](#mehrere-markieren); Esc hebt auf |
-| Strg+C / Strg+X / Strg+V (im Baum) | Notiz/Ordner kopieren / ausschneiden / einfügen |
+| Strg+C / Strg+X / Strg+V (im Baum) | Seite/Ordner kopieren / ausschneiden / einfügen |
 | ↑ / ↓ (im Baum) | vorige / nächste sichtbare Zeile; Pos1 / Ende springen zur ersten / letzten |
 | → / ← (im Baum) | Quelle oder Ordner aufklappen bzw. zur ersten Zeile darin / zuklappen bzw. zum übergeordneten Ordner |
 | Enter (im Baum, unter Favoriten und Zuletzt) | öffnen – wie ein Klick |
@@ -3066,7 +3066,7 @@ Bruno. Beispiele: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | ← / → (auf einem Reiter) | vorigen / nächsten Reiter öffnen; Pos1 / Ende öffnen den ersten / letzten |
 
 Mit Tab erreichst du den Baum der Quellen als einen einzigen Halt – auf der zuletzt benutzten bzw.
-der geöffneten Notiz –, danach bewegen die Pfeiltasten. Die Köpfe „Favoriten“, „Zuletzt“ und
+der geöffneten Seite –, danach bewegen die Pfeiltasten. Die Köpfe „Favoriten“, „Zuletzt“ und
 „KI-Freigaben“ und die Einträge darunter sind ebenfalls per Tab erreichbar; Enter oder Leertaste
 klappt einen Kopf auf und zu.
 
@@ -3078,21 +3078,21 @@ Häufig: Server nicht erreichbar oder Token ungültig (Einstellungen → Quellen
 und Hochladen nach 2 Minuten ab (Klonen nach 5), damit Speichern und der Abgleich anderer Quellen nicht unbegrenzt warten; der nächste Abgleich
 versucht es erneut. Im Protokoll steht, seit wann der Fehler besteht.
 
-**Oben rechts steht eine rote Meldung statt „Gespeichert“.** Die Notiz ließ sich nicht speichern; die Meldung nennt den
+**Oben rechts steht eine rote Meldung statt „Gespeichert“.** Die Seite ließ sich nicht speichern; die Meldung nennt den
 Grund, ein Klick darauf zeigt, was zu tun ist. **Keine Verbindung:** Deine Änderungen bleiben im Tab, Kaveyl Wiki speichert
 von selbst, sobald der Server wieder erreichbar ist – den Tab bis dahin offen lassen. **Abgemeldet:** Die Sitzung ist
 abgelaufen; über **In neuem Tab anmelden** anmelden, danach speichert Kaveyl Wiki im ursprünglichen Tab von selbst.
-**Notiz nicht mehr vorhanden:** Sie wurde gelöscht oder verschoben; der Hinweis über dem Text bietet
-[„Als neue Notiz speichern …“](#konflikte-auflösen) an. **Serverfehler:** Kaveyl Wiki versucht es von selbst erneut; hält der
+**Seite nicht mehr vorhanden:** Sie wurde gelöscht oder verschoben; der Hinweis über dem Text bietet
+[„Als neue Seite speichern …“](#konflikte-auflösen) an. **Serverfehler:** Kaveyl Wiki versucht es von selbst erneut; hält der
 Fehler an, findet ein Administrator die Ursache im Server-Protokoll. **Nicht gespeichert** mit einer Meldung (z. B. fehlende
 Schreibrechte): Die Meldung nennt den Grund.
 
 **„Dieser Teil der App konnte nicht geladen werden“ oder „… nicht angezeigt werden“.** Meist ist der Tab von vor einem
-Update oder das Netz war kurz weg. **Neu laden** lädt die aktuelle Fassung. Betrifft es eine Notiz mit nicht gespeicherten
+Update oder das Netz war kurz weg. **Neu laden** lädt die aktuelle Fassung. Betrifft es eine Seite mit nicht gespeicherten
 Änderungen, nennt die Meldung sie – vorher **Inhalte kopieren** und den Text woanders einfügen; die übrigen Tabs bleiben
 offen und speichern wie gewohnt.
 
-**Eine Notiz erscheint nicht im Baum.** Nur `.md`-Dateien werden angezeigt; versteckte Ordner
+**Eine Seite erscheint nicht im Baum.** Nur `.md`-Dateien werden angezeigt; versteckte Ordner
 (`.git`, `.obsidian` …) und `node_modules` sind ausgeblendet; außerdem gilt die Inhaltsauswahl
 der Quelle (Rechtsklick → „Quelle bearbeiten …“).
 
@@ -3100,13 +3100,13 @@ der Quelle (Rechtsklick → „Quelle bearbeiten …“).
 Repositories: nach dem nächsten Abgleich (5 Min), mit Webhook sofort, oder „Jetzt synchronisieren“.
 
 **Wiki.js zeigt meine Änderung noch nicht.** Prüfen, ob sie übertragen wurde (Sync-Symbol
-grün, Versionen der Notiz); Wiki.js holt im eigenen Intervall.
+grün, Versionen der Seite); Wiki.js holt im eigenen Intervall.
 
 **„Datei ist kein gültiges UTF-8“.** Die Datei hat eine andere Zeichenkodierung und wird zum
 Schutz nicht geöffnet – in VS Code als UTF-8 speichern.
 
 **Ein Link zeigt ins Leere.** Einstellungen → Werkzeuge → Prüfung → „Jetzt prüfen“ listet alle gebrochenen
-Links mit Sprung zur Notiz.
+Links mit Sprung zur Seite.
 
 **Passwort vergessen.** Auf der Anmeldeseite **„Passwort vergessen?“** – der Link kommt per E-Mail.
 Ohne eingerichteten E-Mail-Versand setzt ein Administrator unter Einstellungen → Benutzer & Rechte → **Benutzer** → Stift
@@ -3121,10 +3121,10 @@ einmal; bei mehreren Anfragen gilt nur der neueste Link. Einfach neu anfordern b
 
 **Der Server-Speicher wird knapp.** Einstellungen → Werkzeuge → **Aufräumen** zeigt, was wie viel Platz belegt
 (Protokoll, Papierkorb, KI-Chats, Sicherungen, lokale Kopien), mit den [Löschregeln](#löschregeln);
-**Jetzt aufräumen** wendet sie sofort an. Notizen und Git-Historie wachsen mit dem Inhalt – große Anhänge
+**Jetzt aufräumen** wendet sie sofort an. Seiten und Git-Historie wachsen mit dem Inhalt – große Anhänge
 machen ein Repository dauerhaft größer (Git vergisst nichts).
 
-**Eine Notiz mit vielen Bildern lädt langsam.** Neue Bilder verkleinert Kaveyl Wiki beim Einfügen
+**Eine Seite mit vielen Bildern lädt langsam.** Neue Bilder verkleinert Kaveyl Wiki beim Einfügen
 ([Große Bilder](#bearbeiten)). Ältere, sehr große Bilder im Repository: einmal herunterladen, verkleinern
 und neu einfügen – oder die Breite am Bild kleiner ziehen (das ändert nur die Anzeige).
 
@@ -3137,36 +3137,36 @@ nicht mit dem Benutzernamen.
 
 ## Exportieren und Drucken
 
-Exportiert wird über **Exportieren** – im Notiz-Menü „…“, per Rechtsklick auf eine Notiz, einen Ordner
-oder den Namen einer Quelle im Baum, und in der Befehlspalette („Notiz exportieren …“). Dort wählst du
+Exportiert wird über **Exportieren** – im Seiten-Menü „…“, per Rechtsklick auf eine Seite, einen Ordner
+oder den Namen einer Quelle im Baum, und in der Befehlspalette („Seite exportieren …“). Dort wählst du
 das Format:
 
-- **HTML** – zum Lesen ohne Kaveyl Wiki. Eine Notiz wird eine einzelne **HTML-Datei** mit eingebetteten
+- **HTML** – zum Lesen ohne Kaveyl Wiki. Eine Seite wird eine einzelne **HTML-Datei** mit eingebetteten
   Bildern, zum Verschicken oder Archivieren. Ein Ordner oder eine ganze Quelle wird ein **ZIP**: Jede
-  Notiz wird eine HTML-Datei an derselben Stelle, Links zwischen ihnen funktionieren weiter, verlinkte
+  Seite wird eine HTML-Datei an derselben Stelle, Links zwischen ihnen funktionieren weiter, verlinkte
   Bilder und Dateien sind dabei, eine Übersicht (`index.html`, bzw. `inhalt.html`, wenn der Ordner
-  selbst eine `index.md` hat) listet alles. Verschlüsselte Notizen bleiben draußen.
+  selbst eine `index.md` hat) listet alles. Verschlüsselte Seiten bleiben draußen.
 - **Markdown** – die Dateien selbst, zum Weiterverwenden in einem anderen Werkzeug oder als
-  Kopie. Die Notizen kommen Byte für Byte so, wie sie in der Quelle liegen, dazu die Bilder und Dateien,
+  Kopie. Die Seiten kommen Byte für Byte so, wie sie in der Quelle liegen, dazu die Bilder und Dateien,
   auf die sie verweisen; die Ordnerstruktur bleibt erhalten. Ein Ordner oder eine Quelle kommt als **ZIP**. Eine
-  einzelne Notiz kommt als **`.md`-Datei**; verweist sie auf Bilder oder Dateien, als ZIP mit Notiz und Bildern.
-  Verschlüsselte Notizen kommen beim Ordner mit – verschlüsselt, wie sie in der Datei stehen.
+  einzelne Seite kommt als **`.md`-Datei**; verweist sie auf Bilder oder Dateien, als ZIP mit Seite und Bildern.
+  Verschlüsselte Seiten kommen beim Ordner mit – verschlüsselt, wie sie in der Datei stehen.
 
-  Am schnellsten geht es mit dem Knopf **Herunterladen** (Pfeil nach unten) in der Kopfzeile der Notiz, neben der
+  Am schnellsten geht es mit dem Knopf **Herunterladen** (Pfeil nach unten) in der Kopfzeile der Seite, neben der
   Breite.
 
-Mehrere [markierte](#mehrere-markieren) Notizen und Ordner einer Quelle kommen zusammen in **einem ZIP**; die Pfade
+Mehrere [markierte](#mehrere-markieren) Seiten und Ordner einer Quelle kommen zusammen in **einem ZIP**; die Pfade
 darin beginnen beim Ordner, in dem alle liegen.
 
 Bei beiden Formaten gilt: Exportiert wird nur, was du lesen darfst. Bilder und Dateien, die außerhalb des
 exportierten Ordners liegen, sind nicht dabei.
 
-- **Drucken und PDF:** Notiz-Menü „…“ → **Drucken / als PDF …** öffnet den Druckdialog des
-  Browsers mit einer sauberen Seite (nur die Notiz, ohne Seitenleiste und Menüs). Für ein PDF
+- **Drucken und PDF:** Seiten-Menü „…“ → **Drucken / als PDF …** öffnet den Druckdialog des
+  Browsers mit einer sauberen Seite (nur die Seite, ohne Seitenleiste und Menüs). Für ein PDF
   dort „Als PDF speichern“ wählen. Auch der Druckbefehl im Menü des Browsers druckt nur die
-  Notiz (ohne Seitenleiste); so druckst du verschlüsselte Notizen, die nur in deinem Browser
+  Seite (ohne Seitenleiste); so druckst du verschlüsselte Seiten, die nur in deinem Browser
   entschlüsselt sind. (Strg+P ist in Kaveyl Wiki die Suche.)
-- Rohes HTML in einer Notiz erscheint im Export als Text und wird nie ausgeführt; Formeln
+- Rohes HTML in einer Seite erscheint im Export als Text und wird nie ausgeführt; Formeln
   stehen als LaTeX-Text, Mermaid-Diagramme als Code. Links, die Code ausführen würden
   (`javascript:` u. ä.), bleiben im Export als Text ohne Ziel – wie in Kaveyl Wiki selbst.
 
@@ -3192,7 +3192,7 @@ ohne Adress- und Menüleisten. So geht es je nach Gerät:
 
 Die Willkommensseite zeigt dir den Weg für dein Gerät gleich mit; läuft Kaveyl Wiki schon als App, ist der Schritt
 dort abgehakt. Wieder entfernen lässt sich die App wie jede andere (lange auf das Symbol drücken bzw. in den
-Einstellungen des Browsers); deine Notizen bleiben davon unberührt, sie liegen auf dem Server.
+Einstellungen des Browsers); deine Seiten bleiben davon unberührt, sie liegen auf dem Server.
 
 Das Symbol heißt **Kaveyl Wiki**, Status- und Navigationsleiste haben die Farbe der Seite (hell oder dunkel, wie unter
 Darstellung eingestellt). Ein Symbol, das vor Version 0.2.15 abgelegt wurde, kann noch „Kaveyl“ heißen und eine lila Leiste
@@ -3202,18 +3202,18 @@ zeigen – dann die App entfernen und neu ablegen.
 ist. Über `http://…` legen die meisten Browser höchstens ein Lesezeichen-Symbol an. Für https sorgt der Reverse-Proxy,
 den der Admin einrichtet (siehe [Reverse-Proxy](#reverse-proxy)).
 
-**Ohne Verbindung.** Notizen werden bewusst nicht auf dem Gerät gespeichert – wegen der Rechte und des Datenschutzes.
+**Ohne Verbindung.** Seiten werden bewusst nicht auf dem Gerät gespeichert – wegen der Rechte und des Datenschutzes.
 Ohne Netz startet die App mit dem Hinweis „Offline“ und dem Knopf „Erneut versuchen“.
 
 **Auf dem Handy und in schmalen Fenstern** ist die Seitenleiste eine Schublade: Das Seitenleisten-Symbol links in der
-Tab-Leiste („Seitenleiste einblenden“) öffnet sie, das Antippen einer Notiz oder der Fläche daneben schließt sie
+Tab-Leiste („Seitenleiste einblenden“) öffnet sie, das Antippen einer Seite oder der Fläche daneben schließt sie
 wieder. Auf Touch-Geräten stehen „+“ und Auf-/Zuklappen an der Quelle immer da – Überfahren mit der Maus ist nie
 nötig –, an Ordnern beim gewählten Ordner; langes Drücken öffnet das Kontextmenü (z. B. „Anordnen“). Die
 Formatierungsleiste lässt sich seitlich wischen.
 
 ![Handy: Seitenleiste als Schublade](handbuch/67-mobil-baum.webp)
 
-![Handy: Notiz](handbuch/68-mobil-notiz.webp)
+![Handy: Seite](handbuch/68-mobil-notiz.webp)
 
 
 ## Technik und Komponenten
@@ -3247,13 +3247,13 @@ dass unveränderte Abschnitte Byte für Byte erhalten bleiben. Formeln zeigt **K
 
 **Server, Daten und Suche.** Der Server ist **Fastify** mit WebSockets für Live-Meldungen. Was Kaveyl Wiki
 selbst speichert – Benutzer, Rechte, Einstellungen, Protokoll und den Suchindex –, liegt in einer
-**SQLite**-Datenbank; die Notizen selbst bleiben Dateien. Die Sofort-Suche nutzt den Volltextindex von
+**SQLite**-Datenbank; die Seiten selbst bleiben Dateien. Die Sofort-Suche nutzt den Volltextindex von
 SQLite (FTS5) für Wortanfänge und einen Trigramm-Index für Teilwörter. Git-Repositories bedient Kaveyl Wiki
 über das ganz normale `git`-Programm, Änderungen an Dateien bemerkt es über eine Dateiüberwachung.
 
 **Sicherheit.** Passwörter werden mit scrypt gespeichert, hinterlegte Zugangsdaten (Tokens, SMTP,
 KI-Schlüssel) mit AES-256-GCM verschlüsselt – beides mit den Bordmitteln von Node.js. Verschlüsselte
-Notizen nutzen das offene **age**-Format und werden nur im Browser ent- und verschlüsselt.
+Seiten nutzen das offene **age**-Format und werden nur im Browser ent- und verschlüsselt.
 
 **KI und Schnittstellen.** Der KI-Assistent spricht zwei verbreitete Protokolle: die OpenAI-kompatible
 Schnittstelle (Ollama, Ollama Cloud, OpenRouter, OpenAI und ähnliche) und die Anthropic-Schnittstelle.
@@ -3276,8 +3276,8 @@ Paketnamen und die Lizenz.
 | Zustand | Zustand der Oberfläche (Tabs, Dialoge, Hilfe) | `zustand` | MIT |
 | Radix UI | Dialoge, Menüs, Kontextmenüs, Aufklapp-Fenster | `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-context-menu`, `@radix-ui/react-popover` | MIT |
 | Tailwind CSS | Gestaltung, Farben, Hell/Dunkel | `tailwindcss`, `@tailwindcss/vite` | MIT |
-| Lucide | Symbole in der Oberfläche und für Notizen | `lucide-react` | ISC |
-| Inter | Schrift der Oberfläche und der Notizen | `@fontsource-variable/inter` | OFL-1.1 |
+| Lucide | Symbole in der Oberfläche und für Seiten | `lucide-react` | ISC |
+| Inter | Schrift der Oberfläche und der Seiten | `@fontsource-variable/inter` | OFL-1.1 |
 | Vite | baut die Web-App | `vite`, `@vitejs/plugin-react` | MIT |
 
 **Editor und Inhalte**
@@ -3292,7 +3292,7 @@ Paketnamen und die Lizenz.
 | Mermaid | Diagramme aus Text | `mermaid` | MIT |
 | Excalidraw | Zeichnungen | `@excalidraw/excalidraw` | MIT |
 | YAML | Frontmatter und Vorlagen | `yaml` | ISC |
-| age | verschlüsselte Notizen | `age-encryption` | BSD-3-Clause |
+| age | verschlüsselte Seiten | `age-encryption` | BSD-3-Clause |
 
 **Server**
 

@@ -97,7 +97,7 @@ export function registerImportRoutes(server: FastifyInstance, ctx: AppContext, i
       }
     });
     await imports.drop(p.token);
-    audit(req, 'imported', `Import aus ${result.label}: ${mount.name} / ${result.folder} (${result.notes} Notizen, ${result.files} Dateien)`, { mount: mountRef(mount) });
+    audit(req, 'imported', `Import aus ${result.label}: ${mount.name} / ${result.folder} (${result.notes} Seiten, ${result.files} Dateien)`, { mount: mountRef(mount) });
     return { folder: result.folder, report: `${result.folder}/${REPORT_NAME}`, notes: result.notes, files: result.files, skipped: result.skipped.length };
   });
 

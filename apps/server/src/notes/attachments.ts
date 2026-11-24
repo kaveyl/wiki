@@ -92,21 +92,21 @@ export async function storeAttachment(
 ): Promise<StoredAttachment> {
   if (mount.options.readonly) throw new ForbiddenError('Mount ist schreibgeschützt');
   const note = cleanRelPath(notePath);
-  if (!note.endsWith('.md')) throw new AttachmentError('Anhänge gehören zu einer Notiz');
+  if (!note.endsWith('.md')) throw new AttachmentError('Anhänge gehören zu einer Seite');
   const noteSt = await lstat(absPath(mount, dataPath, note)).catch(() => null);
-  if (!noteSt?.isFile()) throw new AttachmentError('Notiz nicht gefunden');
+  if (!noteSt?.isFile()) throw new AttachmentError('Seite nicht gefunden');
   if (data.length === 0) throw new AttachmentError('Die Datei ist leer');
   if (data.length > maxBytes) throw new AttachmentError(`Die Datei ist größer als ${Math.round(maxBytes / 1024 / 1024)} MB (Einstellungen → Anhänge)`);
   // Encrypted note (or folder): the browser encrypts attachments before the upload – never store a plain file there.
   const encrypted = isEncryptedNote(await readFile(absPath(mount, dataPath, note), 'utf8')) || (await inEncryptedFolder(mount, dataPath, note));
   if (encrypted && !data.subarray(0, AGE_HEADER.length).equals(AGE_HEADER)) {
-    throw new ForbiddenError('Verschlüsselte Notiz: Anhänge werden nur verschlüsselt gespeichert – Notiz entsperren und die Datei erneut hinzufügen');
+    throw new ForbiddenError('Verschlüsselte Seite: Anhänge werden nur verschlüsselt gespeichert – Seite entsperren und die Datei erneut hinzufügen');
   }
 
   const name = attachmentName(originalName);
   const ext = extensionOf(name);
   if (blocked.has(ext)) throw new AttachmentError(`Dateien vom Typ .${ext} können nicht angehängt werden (gesperrt unter Einstellungen → Anhänge)`);
-  if (ext === 'md') throw new AttachmentError('Markdown-Dateien bitte als Notiz anlegen');
+  if (ext === 'md') throw new AttachmentError('Markdown-Dateien bitte als Seite anlegen');
 
   const dir = posix.join(posix.dirname(note) === '.' ? '' : posix.dirname(note), ASSETS_DIR);
   await mkdir(absPath(mount, dataPath, dir), { recursive: true });

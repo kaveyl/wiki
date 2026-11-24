@@ -46,7 +46,7 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
         .map((e) => e.path);
       const { name, zip, count, only } = await exportMarkdown(mount, rel, notesHere, exportDeps(req, mount));
       if (!count) throw new NotFoundError(rel || mount.id);
-      audit(req, 'exported', `Markdown-Export: ${mount.name}${rel ? ` / ${rel}` : ''} (${count} Notiz${count === 1 ? '' : 'en'})`, { mount: mountRef(mount) });
+      audit(req, 'exported', `Markdown-Export: ${mount.name}${rel ? ` / ${rel}` : ''} (${count} Seite${count === 1 ? '' : 'n'})`, { mount: mountRef(mount) });
       if (only) return reply.header('content-type', 'text/markdown; charset=utf-8').header('x-content-type-options', 'nosniff').header('content-disposition', download(name, 'md')).send(Buffer.from(only));
       return reply.header('content-type', 'application/zip').header('content-disposition', download(name, 'zip')).send(Buffer.from(zip));
     }
@@ -65,7 +65,7 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
       .map((e) => e.path);
     const { name, zip, count } = await exportFolder(mount, rel, notesHere, exportDeps(req, mount));
     if (!count) throw new NotFoundError(rel || mount.id);
-    audit(req, 'exported', `HTML-Export: ${mount.name}${rel ? ` / ${rel}` : ''} (${count} Notizen)`, { mount: mountRef(mount) });
+    audit(req, 'exported', `HTML-Export: ${mount.name}${rel ? ` / ${rel}` : ''} (${count} Seiten)`, { mount: mountRef(mount) });
     return reply.header('content-type', 'application/zip').header('content-disposition', download(name, 'zip')).send(Buffer.from(zip));
   });
 
@@ -77,7 +77,7 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
     const raw = Array.isArray(req.body?.paths) ? req.body.paths : [];
     if (raw.length > MAX_PICK) throw new PathError(`Höchstens ${MAX_PICK} Einträge auf einmal`);
     const pick = [...new Set(raw.map((p) => cleanRelPath(String(p))).filter(Boolean))];
-    if (!pick.length) throw new PathError('Keine Notiz gewählt');
+    if (!pick.length) throw new PathError('Keine Seite gewählt');
     const mount = visibleMount(req, req.params.mountId);
     const notesHere = visibleEntries(req, mount.id)
       .filter((e) => e.kind === 'file' && pick.some((p) => e.path === p || e.path.startsWith(`${p}/`)))
@@ -86,7 +86,7 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
     const md = req.body?.format === 'md';
     const { name, zip, count } = md ? await exportMarkdown(mount, base, notesHere, exportDeps(req, mount)) : await exportFolder(mount, base, notesHere, exportDeps(req, mount));
     if (!count) throw new NotFoundError(pick[0]!);
-    audit(req, 'exported', `${md ? 'Markdown' : 'HTML'}-Export: ${mount.name}, Auswahl (${count} Notiz${count === 1 ? '' : 'en'})`, { mount: mountRef(mount) });
+    audit(req, 'exported', `${md ? 'Markdown' : 'HTML'}-Export: ${mount.name}, Auswahl (${count} Seite${count === 1 ? '' : 'n'})`, { mount: mountRef(mount) });
     return reply.header('content-type', 'application/zip').header('content-disposition', download(name, 'zip')).send(Buffer.from(zip));
   });
 
@@ -262,7 +262,7 @@ export function registerNoteRoutes(server: FastifyInstance, ctx: AppContext) {
     const mount = access(req, req.params.mountId, from, 'read', false);
     const dst = access(req, String(req.body.toMountId || mount.id), cleanRelPath(String(req.body.to ?? '')), 'write', false);
     // Same guard as saving: what claims to be encrypted must be an age block.
-    if (isEncryptedNote(raw) && !isAgeBody(raw)) throw new PathError('Verschlüsselte Notiz: Inhalt ist kein age-Block');
+    if (isEncryptedNote(raw) && !isAgeBody(raw)) throw new PathError('Verschlüsselte Seite: Inhalt ist kein age-Block');
     const res = await notes.saveNoteAs(mount, from, raw, dst, String(req.body.to ?? ''), author(req), `docs: ${from} gespeichert als ${String(req.body.to)} (Kaveyl Wiki)`, undefined, (ref) =>
       canRead(req, mount.id, ref),
     );

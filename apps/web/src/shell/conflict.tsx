@@ -100,7 +100,7 @@ export function ConflictDialog({ mountId, onClose }: { mountId: string; onClose:
                 ))}
             </div>
             {sealed(file) && (
-              <p className="text-xs text-fg-muted">{t('Verschlüsselte Notiz: nur eine Fassung ganz übernehmen. Was in der anderen stand, lässt sich danach über die Versionen der Notiz zurückholen.')}</p>
+              <p className="text-xs text-fg-muted">{t('Verschlüsselte Seite: nur eine Fassung ganz übernehmen. Was in der anderen stand, lässt sich danach über die Versionen der Seite zurückholen.')}</p>
             )}
             {state.choice === 'manual' && (
               <textarea

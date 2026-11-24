@@ -35,7 +35,7 @@ export function PassphraseHost() {
   const missing = [a.length < (ask.confirm ? 8 : 1) && t('Passphrase'), ask.confirm && a !== b && t('Passphrase wiederholen')].filter((x): x is string => !!x);
   const ok = missing.length === 0;
   return (
-    <Modal help="verschlüsselte-notizen-und-ordner" open onOpenChange={(o) => !o && done(null)} title={ask.title}>
+    <Modal help="verschlüsselte-seiten-und-ordner" open onOpenChange={(o) => !o && done(null)} title={ask.title}>
       <form
         className="space-y-3 text-sm"
         onSubmit={(e) => {

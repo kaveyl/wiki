@@ -41,9 +41,9 @@ export function useMarkedActions(mount: Mount | undefined): MarkedAction[] {
     const why = !session?.mail
       ? t('E-Mail-Versand ist nicht eingerichtet')
       : notes.length < items.length
-        ? t('Nur Notizen lassen sich per Mail versenden, keine Ordner')
+        ? t('Nur Seiten lassen sich per Mail versenden, keine Ordner')
         : notes.some((n) => n.encrypted)
-          ? t('Verschlüsselte Notizen lassen sich nicht per Mail versenden')
+          ? t('Verschlüsselte Seiten lassen sich nicht per Mail versenden')
           : undefined;
     out.push({ key: 'mail', label: t('Per Mail versenden …'), icon: <Mail />, disabled: !!why, hint: why, run: () => openAction({ kind: 'mail-notes', mountId: mount.id, notes }) });
     if (items.every((i) => i.access === 'admin')) {
@@ -74,7 +74,7 @@ export function useMarkedActions(mount: Mount | undefined): MarkedAction[] {
     label: t('Exportieren: HTML (ZIP)'),
     icon: <FileDown />,
     disabled: onlyEncrypted,
-    hint: onlyEncrypted ? t('Verschlüsselte Notizen gibt es nur als Markdown') : undefined,
+    hint: onlyEncrypted ? t('Verschlüsselte Seiten gibt es nur als Markdown') : undefined,
     run: () => void downloadPicked(mount.id, paths),
   });
   if (writable) out.push({ key: 'delete', label: t('Löschen …'), icon: <Trash2 />, danger: true, apart: true, run: () => openAction({ kind: 'delete-many', mountId: mount.id, items }) });

@@ -1,5 +1,5 @@
 // Interface languages and the colour scheme switch (AD-046). The rest of the suite runs in German (locale de-DE);
-// here browsers ask for English. Runs after the other specs in the seeded workspace (admin + "Notizen").
+// here browsers ask for English. Runs after the other specs in the seeded workspace (admin + "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { openSettingsPage } from './settings-nav';
 

@@ -4,19 +4,19 @@ import type { Dictionary } from '@kaveyl-wiki/core';
 export default {
   // FontSizes.tsx
   Oberfläche: 'Interface',
-  'Menüs, Knöpfe, Dialoge, Tabs – alles rund um die Notiz (auch die Seitenleiste)':
-    'Menus, buttons, dialogs, tabs – everything around the note (including the sidebar)',
+  'Menüs, Knöpfe, Dialoge, Tabs – alles rund um die Seite (auch die Seitenleiste)':
+    'Menus, buttons, dialogs, tabs – everything around the page (including the sidebar)',
   Seitenleiste: 'Sidebar',
   'Baum, Favoriten, Zuletzt und KI-Freigaben – zusätzlich zur Oberfläche':
     'Tree, favourites, recent and AI shares – on top of the interface size',
-  Notiztext: 'Note text',
-  'der Text in Notizen, in der Leseansicht und in der Hilfe': 'the text in notes, in the reading view and in the help',
+  Seitentext: 'Page text',
+  'der Text auf Seiten, in der Leseansicht und in der Hilfe': 'the text in pages, in the reading view and in the help',
   Code: 'Code',
   'Codeblöcke, `Code` im Text und die Ansicht „Markdown“': 'Code blocks, `code` in text and the “Markdown” view',
   Projekte: 'Projects',
   'Besprechung Montag': 'Monday meeting',
-  'So sieht der Text in einer Notiz aus, mit {fett} und {kursiv} Stellen.':
-    'This is how text in a note looks, with {fett} and {kursiv} parts.',
+  'So sieht der Text auf einer Seite aus, mit {fett} und {kursiv} Stellen.':
+    'This is how text in a page looks, with {fett} and {kursiv} parts.',
   fetten: 'bold',
   kursiven: 'italic',
   'const gruss = "Hallo";': 'const greeting = "Hello";',
@@ -59,13 +59,13 @@ export default {
   'Jetzt prüfen': 'Check now',
   '„{path}“ aus „{name}“ löschen?': 'Delete “{path}” from “{name}”?',
   '{n} verwaiste Anhänge aus „{name}“ löschen?': 'Delete {n} orphaned attachments from “{name}”?',
-  'Keine Notiz verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.': 'No note links to them. They stay in the source’s Git history.',
-  'Keine Notiz verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.': 'No note links to them. The source has no Git history – deleted files are gone for good.',
+  'Keine Seite verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.': 'No page links to them. They stay in the source’s Git history.',
+  'Keine Seite verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.': 'No page links to them. The source has no Git history – deleted files are gone for good.',
   '{n} Anhang gelöscht': '{n} attachment deleted',
   '{n} Anhänge gelöscht': '{n} attachments deleted',
   '{n} wird inzwischen wieder verlinkt und bleibt.': '{n} is linked again by now and stays.',
   '{n} werden inzwischen wieder verlinkt und bleiben.': '{n} are linked again by now and stay.',
-  'Verwaiste Anhänge verlinkt keine Notiz mehr – sie lassen sich hier löschen.': 'No note links to orphaned attachments any more – they can be deleted here.',
+  'Verwaiste Anhänge verlinkt keine Seite mehr – sie lassen sich hier löschen.': 'No page links to orphaned attachments any more – they can be deleted here.',
   'Alle verwaisten Anhänge löschen': 'Delete all orphaned attachments',
   '„{path}“ löschen': 'Delete “{path}”',
   'Letzte Prüfung: {when}': 'Last check: {when}',
@@ -88,8 +88,8 @@ export default {
   'Ältere laden': 'Load older',
   'Verlauf: {name}': 'History: {name}',
   Verlauf: 'History',
-  'Was Kaveyl Wiki getan hat: Synchronisierungen, Konflikte, Link-Reparaturen, Fehler, Anmeldungen und Änderungen an Quellen. Inhaltliche Änderungen stehen in der Git-Historie (Versionen). Passwörter, Tokens und Notizinhalte werden nie protokolliert.':
-    'What Kaveyl Wiki has done: syncs, conflicts, link repairs, errors, sign-ins and changes to sources. Changes to content are in the Git history (versions). Passwords, tokens and note contents are never logged.',
+  'Was Kaveyl Wiki getan hat: Synchronisierungen, Konflikte, Link-Reparaturen, Fehler, Anmeldungen und Änderungen an Quellen. Inhaltliche Änderungen stehen in der Git-Historie (Versionen). Passwörter, Tokens und Seiteninhalte werden nie protokolliert.':
+    'What Kaveyl Wiki has done: syncs, conflicts, link repairs, errors, sign-ins and changes to sources. Changes to content are in the Git history (versions). Passwords, tokens and page contents are never logged.',
   Aufbewahrung: 'Retention',
   Speichern: 'Save',
   'Ältere Einträge werden jede Nacht um 3 Uhr gelöscht. Alle Löschregeln: Werkzeuge → Aufräumen.':
@@ -145,8 +145,8 @@ export default {
   'Fehler bei: {list} – siehe Protokoll': 'Failed: {list} – see the log',
   'Aufräumen fehlgeschlagen': 'Clean-up failed',
   'Übersicht konnte nicht geladen werden.': 'The overview could not be loaded.',
-  'Kaveyl Wiki läuft im Container und legt neben deinen Notizen eigene Daten ab: Protokoll, Papierkorb, KI-Chats, Sicherungen, lokale Kopien der Repositories. Damit nichts unbegrenzt wächst, gilt für jede Art eine Löschregel. Aufgeräumt wird jede Nacht um 3 Uhr – oder hier auf Knopfdruck. Deine Notizen und die Git-Historie löscht keine dieser Regeln.':
-    'Kaveyl Wiki runs in a container and keeps data of its own next to your notes: log, trash, AI chats, backups, local copies of the repositories. So that nothing grows without limit, each kind has a deletion rule. Clean-up runs every night at 3 am – or here at the press of a button. None of these rules deletes your notes or the Git history.',
+  'Kaveyl Wiki läuft im Container und legt neben deinen Seiten eigene Daten ab: Protokoll, Papierkorb, KI-Chats, Sicherungen, lokale Kopien der Repositories. Damit nichts unbegrenzt wächst, gilt für jede Art eine Löschregel. Aufgeräumt wird jede Nacht um 3 Uhr – oder hier auf Knopfdruck. Deine Seiten und die Git-Historie löscht keine dieser Regeln.':
+    'Kaveyl Wiki runs in a container and keeps data of its own next to your pages: log, trash, AI chats, backups, local copies of the repositories. So that nothing grows without limit, each kind has a deletion rule. Clean-up runs every night at 3 am – or here at the press of a button. None of these rules deletes your pages or the Git history.',
   'Jetzt aufräumen': 'Clean up now',
   'Wendet alle Regeln sofort an (ohne Sicherung und Prüfung, die laufen nachts).':
     'Applies all rules at once (without backup and check, which run at night).',
@@ -160,13 +160,13 @@ export default {
   'Anmeldungen, Rechte, Löschungen – für Nachweise eher lang.': 'Sign-ins, permissions, deletions – rather long, for audit purposes.',
   'Auch unter {link}.': 'Also under {link}.',
   'Werkzeuge → Protokoll': 'Tools → Log',
-  'Papierkorb der Notizen': 'Trash of notes',
+  'Papierkorb der Seiten': 'Trash of pages',
   '{n} Eintrag · {size} in .kaveyl-wiki/trash': '{n} entry · {size} in .kaveyl-wiki/trash',
   '{n} Einträge · {size} in .kaveyl-wiki/trash': '{n} entries · {size} in .kaveyl-wiki/trash',
   'Nur Git-Quellen: der Papierkorb ist die Git-Historie': 'Git sources only: the trash is the Git history',
-  'Gelöschte Notizen und Ordner landen im Papierkorb ihrer Quelle (Symbol unten in der Seitenleiste oder Rechtsklick auf die Quelle). Quellen ohne Auto-Commit bewahren sie im versteckten Ordner {ordner} auf; bei Git-Quellen mit Auto-Commit ist die Git-Historie der Papierkorb. Liegt am alten Platz inzwischen eine andere Datei, lässt sich ein Eintrag mit „Speichern als“ unter anderem Namen, in einem anderen Ordner oder einer anderen Quelle wiederherstellen.':
-    'Deleted notes and folders go to the trash of their source (icon at the bottom of the sidebar, or right-click the source). Sources without auto-commit keep them in the hidden folder {ordner}; for Git sources with auto-commit the Git history is the trash. If another file now sits in the old place, you can restore an entry with “Save as” under a different name, in a different folder or in a different source.',
-  'Gelöschte Notizen aufbewahren': 'Keep deleted notes',
+  'Gelöschte Seiten und Ordner landen im Papierkorb ihrer Quelle (Symbol unten in der Seitenleiste oder Rechtsklick auf die Quelle). Quellen ohne Auto-Commit bewahren sie im versteckten Ordner {ordner} auf; bei Git-Quellen mit Auto-Commit ist die Git-Historie der Papierkorb. Liegt am alten Platz inzwischen eine andere Datei, lässt sich ein Eintrag mit „Speichern als“ unter anderem Namen, in einem anderen Ordner oder einer anderen Quelle wiederherstellen.':
+    'Deleted pages and folders go to the trash of their source (icon at the bottom of the sidebar, or right-click the source). Sources without auto-commit keep them in the hidden folder {ordner}; for Git sources with auto-commit the Git history is the trash. If another file now sits in the old place, you can restore an entry with “Save as” under a different name, in a different folder or in a different source.',
+  'Gelöschte Seiten aufbewahren': 'Keep deleted pages',
   'Ordner ohne Auto-Commit: danach endgültig gelöscht. Git-Quellen: nur ausgeblendet, die Historie bleibt.':
     'Folders without auto-commit: deleted for good afterwards. Git sources: only hidden, the history stays.',
   'KI-Chats': 'AI chats',
@@ -287,8 +287,8 @@ export default {
   Gast: 'Guest',
   'Filter::Benutzer': 'Users',
   'Konto löschen': 'Delete account',
-  'Löschen kann ein Administrator: bitte dort beantragen. Gelöscht werden Konto, Einstellungen, KI-Chats, Tokens und dein Name im Protokoll; deine Notizen bleiben, in der Git-Historie bleibt dein Name als Autor.':
-    'An administrator can delete it: please ask them. Deleted are the account, settings, AI chats, tokens and your name in the log; your notes stay, and your name stays as author in the Git history.',
+  'Löschen kann ein Administrator: bitte dort beantragen. Gelöscht werden Konto, Einstellungen, KI-Chats, Tokens und dein Name im Protokoll; deine Seiten bleiben, in der Git-Historie bleibt dein Name als Autor.':
+    'An administrator can delete it: please ask them. Deleted are the account, settings, AI chats, tokens and your name in the log; your pages stay, and your name stays as author in the Git history.',
   Admins: 'Admins',
   Gesperrt: 'Locked',
   'Benutzer filtern': 'Filter users',
@@ -308,8 +308,8 @@ export default {
   '{name} entsperren': 'Unlock {name}',
   '{name} sperren': 'Lock {name}',
   '{name} löschen': 'Delete {name}',
-  'Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Notizen und Git-Historie bleiben.':
-    'Delete account {name} for good? Its permission rules go too, and its name is removed from the log. Notes and Git history stay.',
+  'Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Seiten und Git-Historie bleiben.':
+    'Delete account {name} for good? Its permission rules go too, and its name is removed from the log. Pages and Git history stay.',
   'Einladung an {email} verschickt – das Konto erscheint, sobald sie angenommen ist.':
     'Invitation sent to {email} – the account appears once it has been accepted.',
   'Konto {email} angelegt – beim ersten Anmelden muss das Startpasswort geändert werden.':
@@ -407,8 +407,8 @@ export default {
     'Saved – sending still needs a server, a sender or the public address.',
   'Testmail an {to} verschickt – bitte Postfach (und Spam-Ordner) prüfen.':
     'Test e-mail sent to {to} – please check the inbox (and spam folder).',
-  'Für „Passwort vergessen?“, Einladungen neuer Benutzer, das Teilen von Notizen per E-Mail und den Hinweis nach einer Passwortänderung – und für Benachrichtigungen an die Admins, wenn unter „Ereignisse“ eingeschaltet. Ohne Einrichtung funktioniert Kaveyl Wiki normal; diese Funktionen sind dann aus.':
-    'For “Forgot password?”, invitations of new users, sharing notes by e-mail and the notice after a password change – and for notifications to the admins, when switched on under “Events”. Without it Kaveyl Wiki works as usual; these functions are then off.',
+  'Für „Passwort vergessen?“, Einladungen neuer Benutzer, das Teilen von Seiten per E-Mail und den Hinweis nach einer Passwortänderung – und für Benachrichtigungen an die Admins, wenn unter „Ereignisse“ eingeschaltet. Ohne Einrichtung funktioniert Kaveyl Wiki normal; diese Funktionen sind dann aus.':
+    'For “Forgot password?”, invitations of new users, sharing pages by e-mail and the notice after a password change – and for notifications to the admins, when switched on under “Events”. Without it Kaveyl Wiki works as usual; these functions are then off.',
   'E-Mail-Versand ist eingerichtet': 'E-mail sending is set up',
   'E-Mail-Versand ist nicht eingerichtet': 'E-mail sending is not set up',
   'SMTP-Server': 'SMTP server',
@@ -537,19 +537,19 @@ export default {
   Bearbeiten: 'Edit',
   'Noch keine Quelle eingebunden.': 'No source added yet.',
   'Quelle einbinden': 'Add source',
-  'Dateien und Bilder, die in eine Notiz gezogen, eingefügt oder über die Büroklammer angehängt werden, landen im Ordner {ordner} neben der Notiz und werden mit committet. Große Dateien machen Repositories dauerhaft größer (Git vergisst nichts) – deshalb gibt es ein Limit.':
-    'Files and images dragged into a note, pasted or attached with the paper clip go into the {ordner} folder next to the note and are committed with it. Large files make repositories bigger for good (Git forgets nothing) – hence the limit.',
+  'Dateien und Bilder, die in eine Seite gezogen, eingefügt oder über die Büroklammer angehängt werden, landen im Ordner {ordner} neben der Seite und werden mit committet. Große Dateien machen Repositories dauerhaft größer (Git vergisst nichts) – deshalb gibt es ein Limit.':
+    'Files and images dragged into a page, pasted or attached with the paper clip go into the {ordner} folder next to the page and are committed with it. Large files make repositories bigger for good (Git forgets nothing) – hence the limit.',
   'Größte erlaubte Datei (MB)': 'Largest allowed file (MB)',
   'Große Bilder beim Einfügen verkleinern': 'Shrink large images when inserting',
-  'Fotos und Bildschirmfotos werden vor dem Hochladen im Browser auf diese Kantenlänge verkleinert und als WebP gespeichert – Notizen laden und scrollen schneller, das Repository bleibt klein. GPS- und Kameradaten fallen dabei weg. GIF und SVG bleiben unverändert.':
-    'Photos and screenshots are shrunk to this edge length in the browser before uploading and saved as WebP – notes load and scroll faster, the repository stays small. GPS and camera data are dropped. GIF and SVG stay unchanged.',
+  'Fotos und Bildschirmfotos werden vor dem Hochladen im Browser auf diese Kantenlänge verkleinert und als WebP gespeichert – Seiten laden und scrollen schneller, das Repository bleibt klein. GPS- und Kameradaten fallen dabei weg. GIF und SVG bleiben unverändert.':
+    'Photos and screenshots are shrunk to this edge length in the browser before uploading and saved as WebP – pages load and scroll faster, the repository stays small. GPS and camera data are dropped. GIF and SVG stay unchanged.',
   'Auf 1600 Pixel (klein)': 'To 1600 pixels (small)',
   'Auf 2400 Pixel (Standard)': 'To 2400 pixels (default)',
   'Auf {px} Pixel': 'To {px} pixels',
   'Auf 4000 Pixel (groß)': 'To 4000 pixels (large)',
   'Nicht verkleinern (Originale)': 'Do not shrink (originals)',
-  'In Notizen nimmt ein Bild ohne eigene Breite höchstens etwa zwei Drittel der Fensterhöhe ein; die Lupe (oder ein Klick in der Leseansicht) zeigt es groß. Die Breite lässt sich mit dem Anfasser unten rechts am ausgewählten Bild ändern.':
-    'In notes, an image without its own width takes up at most about two thirds of the window height; the magnifier (or a click in the reading view) shows it large. You can change the width with the handle at the bottom right of the selected image.',
+  'Auf Seiten nimmt ein Bild ohne eigene Breite höchstens etwa zwei Drittel der Fensterhöhe ein; die Lupe (oder ein Klick in der Leseansicht) zeigt es groß. Die Breite lässt sich mit dem Anfasser unten rechts am ausgewählten Bild ändern.':
+    'In pages, an image without its own width takes up at most about two thirds of the window height; the magnifier (or a click in the reading view) shows it large. You can change the width with the handle at the bottom right of the selected image.',
   'Gleichnamige Dateien werden durchnummeriert, nie überschrieben. Nicht mehr verlinkte Anhänge meldet die Prüfung (Einstellungen → Werkzeuge → Prüfung).':
     'Files with the same name are numbered, never overwritten. Attachments no longer linked are reported by the check (Settings → Tools → Check).',
   'Gesperrte Dateiendungen': 'Blocked file endings',
@@ -594,10 +594,10 @@ export default {
   Eigene: 'Custom',
   '{pct} % des Bereichs': '{pct} % of the area',
   'Editorbreite in Prozent': 'Editor width in per cent',
-  'Prozentwerte skalieren mit dem Fenster. Schnell umschalten: Symbol ⤢ oben rechts in jeder Notiz.':
-    'Percentages scale with the window. Quick toggle: the ⤢ icon at the top right of every note.',
-  'Inhaltsverzeichnis rechts neben der Notiz anzeigen (ab 2 Überschriften, wenn genug Platz ist)':
-    'Show the table of contents to the right of the note (from 2 headings, when there is enough space)',
+  'Prozentwerte skalieren mit dem Fenster. Schnell umschalten: Symbol ⤢ oben rechts auf jeder Seite.':
+    'Percentages scale with the window. Quick toggle: the ⤢ icon at the top right of every page.',
+  'Inhaltsverzeichnis rechts neben der Seite anzeigen (ab 2 Überschriften, wenn genug Platz ist)':
+    'Show the table of contents to the right of the page (from 2 headings, when there is enough space)',
   'Neue Passwörter stimmen nicht überein': 'New passwords do not match',
   'Passwort geändert. Andere Sitzungen wurden abgemeldet.': 'Password changed. Other sessions have been signed out.',
   'Anmeldung mit {email}': 'Signed in as {email}',
@@ -608,30 +608,30 @@ export default {
   '{n} Minuten': '{n} minutes',
   '1 Stunde': '1 hour',
   'erst beim Schließen der Seite': 'only when the page is closed',
-  'Verschlüsselte Notizen wieder sperren nach': 'Lock encrypted notes again after',
+  'Verschlüsselte Seiten wieder sperren nach': 'Lock encrypted pages again after',
   'Automatisch sperren nach': 'Lock automatically after',
   'Automatisch sperren': 'Automatic lock',
   'Gezählt wird ab der letzten Nutzung. Neu laden oder Schließen der Seite sperrt immer; „…“ → „Jetzt sperren“ sofort.':
     'Counted from the last use. Reloading or closing the page always locks; “…” → “Lock now” locks at once.',
   'Was ist Kaveyl Wiki?': 'What is Kaveyl Wiki?',
   Willkommensseite: 'Welcome page',
-  'Ausgeblendet. Sie zeigt erste Schritte und was Kaveyl Wiki kann, solange keine Notiz offen ist.':
-    'Hidden. It shows first steps and what Kaveyl Wiki can do while no note is open.',
-  'Wird angezeigt, solange keine Notiz offen ist – mit ersten Schritten und dem, was Kaveyl Wiki kann.':
-    'Shown while no note is open – with first steps and what Kaveyl Wiki can do.',
+  'Ausgeblendet. Sie zeigt erste Schritte und was Kaveyl Wiki kann, solange keine Seite offen ist.':
+    'Hidden. It shows first steps and what Kaveyl Wiki can do while no page is open.',
+  'Wird angezeigt, solange keine Seite offen ist – mit ersten Schritten und dem, was Kaveyl Wiki kann.':
+    'Shown while no page is open – with first steps and what Kaveyl Wiki can do.',
   'Willkommensseite wieder anzeigen': 'Show welcome page again',
   'Dateien statt Datenbank.': 'Files instead of a database.',
-  'Kaveyl Wiki ist ein Wiki für ganz normale Markdown-Dateien – eine eigene Datenbank für Inhalte gibt es nicht. Die Notizen liegen in Git-Repositories (Gitea, GitHub, GitLab oder jede Git-Adresse) oder in Ordnern, die in den Container eingehängt sind. Jede Quelle erscheint links als eigener Baum; die Sofort-Suche und die Befehlspalette (Strg+K) finden alles.':
-    'Kaveyl Wiki is a wiki for plain Markdown files – there is no database of its own for content. The notes live in Git repositories (Gitea, GitHub, GitLab or any Git address) or in folders mounted into the container. Each source appears on the left as a tree of its own; instant search and the command palette (Ctrl+K) find everything.',
+  'Kaveyl Wiki ist ein Wiki für ganz normale Markdown-Dateien – eine eigene Datenbank für Inhalte gibt es nicht. Die Seiten liegen in Git-Repositories (Gitea, GitHub, GitLab oder jede Git-Adresse) oder in Ordnern, die in den Container eingehängt sind. Jede Quelle erscheint links als eigener Baum; die Sofort-Suche und die Befehlspalette (Strg+K) finden alles.':
+    'Kaveyl Wiki is a wiki for plain Markdown files – there is no database of its own for content. The pages live in Git repositories (Gitea, GitHub, GitLab or any Git address) or in folders mounted into the container. Each source appears on the left as a tree of its own; instant search and the command palette (Ctrl+K) find everything.',
   'Schreiben und Abgleichen.': 'Writing and syncing.',
   'Geschrieben wird in einem Editor, der die Formatierung direkt zeigt, oder im Markdown-Quelltext. Gespeichert wird sofort; in Repositories macht Kaveyl Wiki daraus Commits mit dir als Autor und überträgt sie. Was du in VS Code, Wiki.js oder per git änderst, erscheint ebenso in Kaveyl Wiki – nichts wird still überschrieben, Konflikte zeigt Kaveyl Wiki an.':
     'You write in an editor that shows the formatting directly, or in the Markdown source. Saving is instant; in repositories Kaveyl Wiki turns it into commits with you as author and pushes them. What you change in VS Code, Wiki.js or with git shows up in Kaveyl Wiki as well – nothing is silently overwritten, Kaveyl Wiki shows conflicts.',
   'Schutz und Rechte.': 'Protection and permissions.',
-  'Versionen, Papierkorb, Backups auf ein NAS oder einen eigenen Ordner, Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Notizen regeln, wer was sehen und ändern darf.':
-    'Versions, trash, backups to a NAS or a folder of your own, link repair and a nightly check protect against loss and broken links. Permissions, groups, guests and encrypted notes control who may see and change what.',
+  'Versionen, Papierkorb, Backups auf ein NAS oder einen eigenen Ordner, Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Seiten regeln, wer was sehen und ändern darf.':
+    'Versions, trash, backups to a NAS or a folder of your own, link repair and a nightly check protect against loss and broken links. Permissions, groups, guests and encrypted pages control who may see and change what.',
   'KI und Schnittstellen.': 'AI and interfaces.',
-  'Ein KI-Assistent hilft beim Schreiben und beantwortet Fragen aus freigegebenen Notizen – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und KI-Werkzeuge wie Claude mit denselben Rechten mit.':
-    'An AI assistant helps with writing and answers questions from shared notes – it only suggests, you decide. Through the REST API and MCP, scripts and AI tools such as Claude work along with the same permissions.',
+  'Ein KI-Assistent hilft beim Schreiben und beantwortet Fragen aus freigegebenen Seiten – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und KI-Werkzeuge wie Claude mit denselben Rechten mit.':
+    'An AI assistant helps with writing and answers questions from shared pages – it only suggests, you decide. Through the REST API and MCP, scripts and AI tools such as Claude work along with the same permissions.',
   'Wo finde ich Hilfe?': 'Where do I find help?',
   '{hier}: oben rechts in jedem Bereich und Reiter „Hilfe“ – erklärt jeden Eintrag dort.':
     '{hier}: at the top right of every area and the “Help” tab – explains every entry there.',
@@ -688,8 +688,8 @@ export default {
   'Der jetzige Stand bleibt in den Versionen (Git) erhalten.': 'The current state is kept in the versions (Git).',
   'Dieser Ordner führt keine Versionen – was ersetzt wird, ist danach nicht mehr da.': 'This folder keeps no versions – what is replaced is gone afterwards.',
   'Ersetzt den jetzigen Stand – dieser Ordner führt keine Versionen, er ist danach nicht mehr da.': 'Replaces the current state – this folder keeps no versions, it is gone afterwards.',
-  'Ersetzt den jetzigen Stand – dieser Ordner führt keine Versionen, er ist danach nicht mehr da. Fehlende Anhänge, auf die die Notiz verweist, kommen mit.':
-    'Replaces the current state – this folder keeps no versions, it is gone afterwards. Missing attachments the note refers to come along.',
+  'Ersetzt den jetzigen Stand – dieser Ordner führt keine Versionen, er ist danach nicht mehr da. Fehlende Anhänge, auf die die Seite verweist, kommen mit.':
+    'Replaces the current state – this folder keeps no versions, it is gone afterwards. Missing attachments the page refers to come along.',
   'Die ganze Quelle „{name}“ mit dem Stand vom {when} zurückspielen? Vorhandene Dateien werden ersetzt, neuere Dateien bleiben, nichts wird gelöscht. Dieser Ordner führt keine Versionen – was ersetzt wird, ist danach nicht mehr da.':
     'Restore the whole source “{name}” as of {when}? Existing files are replaced, newer files stay, nothing is deleted. This folder keeps no versions – what is replaced is gone afterwards.',
   '„{name}“ zurückgespielt ({n} Datei)': '“{name}” restored ({n} file)',
@@ -855,19 +855,19 @@ export default {
   'Speichern als': 'Save as',
   'Als neuer Ordner – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.':
     'As a new folder – you choose source, folder and name; “… (Backup {date})” next to the original is suggested. Nothing is overwritten.',
-  'Als neue Notiz – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.':
-    'As a new note – you choose source, folder and name; “… (Backup {date})” next to the original is suggested. Nothing is overwritten.',
+  'Als neue Seite – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.':
+    'As a new page – you choose source, folder and name; “… (Backup {date})” next to the original is suggested. Nothing is overwritten.',
   'Als neue Datei – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.':
     'As a new file – you choose source, folder and name; “… (Backup {date})” next to the original is suggested. Nothing is overwritten.',
   'Speichern als …': 'Save as …',
   'Ersetzt den jetzigen Stand (bleibt in den Versionen).': 'Replaces the current state (which stays in the versions).',
-  'Ersetzt den jetzigen Stand (bleibt in den Versionen). Fehlende Anhänge, auf die die Notiz verweist, kommen mit.':
-    'Replaces the current state (which stays in the versions). Missing attachments the note refers to come along.',
+  'Ersetzt den jetzigen Stand (bleibt in den Versionen). Fehlende Anhänge, auf die die Seite verweist, kommen mit.':
+    'Replaces the current state (which stays in the versions). Missing attachments the page refers to come along.',
   'Ersetzt vorhandene Dateien, löscht nichts.': 'Replaces existing files, deletes nothing.',
   'Nur diese Datei aus der Sicherung.': 'Only this file from the backup.',
   Datei: 'File',
-  'Die Datei mit dem Stand vom {when} kommt als Kopie zurück, mit den Bildern und Anhängen, auf die die Notiz verweist. Das Original bleibt, wie es ist.':
-    'The file as of {when} comes back as a copy, with the images and attachments the note refers to. The original stays as it is.',
+  'Die Datei mit dem Stand vom {when} kommt als Kopie zurück, mit den Bildern und Anhängen, auf die die Seite verweist. Das Original bleibt, wie es ist.':
+    'The file as of {when} comes back as a copy, with the images and attachments the page refers to. The original stays as it is.',
   'Die Datei mit dem Stand vom {when} kommt als Kopie zurück. Das Original bleibt, wie es ist.':
     'The file as of {when} comes back as a copy. The original stays as it is.',
   'Sicherung {date}': 'Backup {date}',
@@ -875,8 +875,8 @@ export default {
   unverändert: 'unchanged',
   geändert: 'changed',
   Gespeichert: 'Saved',
-  'Die Notiz wurde inzwischen geändert – Vergleich schließen und neu öffnen.':
-    'The note has been changed in the meantime – close the comparison and open it again.',
+  'Die Seite wurde inzwischen geändert – Vergleich schließen und neu öffnen.':
+    'The page has been changed in the meantime – close the comparison and open it again.',
   'Vergleichen: {name}': 'Compare: {name}',
   'Sicherung vom {when}': 'Backup of {when}',
   'Jetziger Stand': 'Current state',
@@ -890,8 +890,8 @@ export default {
   'Text aus der Sicherung': 'Text from the backup',
   'Ganze Quelle ({n} Datei)': 'Whole source ({n} file)',
   'Ganze Quelle ({n} Dateien)': 'Whole source ({n} files)',
-  '{n} unverschlüsselte Notiz im verschlüsselten Ordner ausgelassen.': '{n} unencrypted note in the encrypted folder skipped.',
-  '{n} unverschlüsselte Notizen im verschlüsselten Ordner ausgelassen.': '{n} unencrypted notes in the encrypted folder skipped.',
+  '{n} unverschlüsselte Seite im verschlüsselten Ordner ausgelassen.': '{n} unencrypted page in the encrypted folder skipped.',
+  '{n} unverschlüsselte Seiten im verschlüsselten Ordner ausgelassen.': '{n} unencrypted pages in the encrypted folder skipped.',
   'Als „{root}“ in „{mount}“ gespeichert ({n} Datei).': 'Saved as “{root}” in “{mount}” ({n} file).',
   'Als „{root}“ in „{mount}“ gespeichert ({n} Dateien).': 'Saved as “{root}” in “{mount}” ({n} files).',
   'Als „{root}“ gespeichert ({n} Datei).': 'Saved as “{root}” ({n} file).',
@@ -1013,7 +1013,7 @@ export default {
   'Öffne Kaveyl Wiki über {name}, dann geht es hier weiter.': 'Open Kaveyl Wiki through {name}, then continue here.',
   'verbunden mit {name}': 'connected to {name}',
   'Verbindung von {name} gelöst.': '{name} disconnected.',
-  'Hier legst du Gruppen an und bestimmst ihre Mitglieder. Was eine Gruppe darf, stellst du im Reiter „Rechte“ ein oder per Rechtsklick auf eine Quelle, einen Ordner oder eine Notiz → {menu}.': 'Create groups and choose their members here. What a group may do is set in the “Permissions” tab, or by right-clicking a source, folder or note → {menu}.',
+  'Hier legst du Gruppen an und bestimmst ihre Mitglieder. Was eine Gruppe darf, stellst du im Reiter „Rechte“ ein oder per Rechtsklick auf eine Quelle, einen Ordner oder eine Seite → {menu}.': 'Create groups and choose their members here. What a group may do is set in the “Permissions” tab, or by right-clicking a source, folder or page → {menu}.',
   'nichts sehen': 'see nothing',
   'Alle Benutzer': 'All users',
   'Unbekanntes Konto': 'Unknown account',
@@ -1064,7 +1064,7 @@ export default {
   '{name} in {source}': '{name} in {source}',
   '– Grundeinstellung': '– basic setting',
   '– keine Freigabe': '– no grant',
-  'Notiz': 'Note',
+  'Seite': 'Page',
   '(unbekannt)': '(unknown)',
   'Freigabe entfernen? {who} verliert „{level}“ auf {where}.': 'Remove the grant? {who} loses “{level}” on {where}.',
   'gibt es nicht mehr': 'no longer exists',
@@ -1077,7 +1077,7 @@ export default {
   'Freigabe auf {where} – das Ziel gibt es nicht mehr.': 'Grant on {where} – the target no longer exists.',
   'Hat keine Mitglieder.': 'Has no members.',
   'Hier sammelt die App, was vermutlich weg kann. Gelöscht wird nichts von selbst – du entscheidest je Zeile.': 'Here the app collects what can probably go. Nothing is deleted by itself – you decide line by line.',
-  'Angemeldet wird mit der E-Mail-Adresse; Änderungen erscheinen in Git mit dem Namen als Autor, ohne E-Mail-Adresse. {gaeste} sehen nur, was ihnen ausdrücklich freigegeben ist (z. B. eine per E-Mail geteilte Notiz). Gesperrte Konten können sich nicht anmelden, ihre Tokens werden ungültig. Was jemand sehen und ändern darf, stellst du im Reiter „Rechte“ ein (oder per Rechtsklick → „Berechtigungen …“).': 'Sign-in is with the e-mail address; changes appear in Git with the name as author, without the e-mail address. {gaeste} only see what was explicitly granted to them (e.g. a note shared by e-mail). Disabled accounts cannot sign in and their tokens stop working. What someone may see and change is set in the “Permissions” tab (or by right-click → “Permissions …”).',
+  'Angemeldet wird mit der E-Mail-Adresse; Änderungen erscheinen in Git mit dem Namen als Autor, ohne E-Mail-Adresse. {gaeste} sehen nur, was ihnen ausdrücklich freigegeben ist (z. B. eine per E-Mail geteilte Seite). Gesperrte Konten können sich nicht anmelden, ihre Tokens werden ungültig. Was jemand sehen und ändern darf, stellst du im Reiter „Rechte“ ein (oder per Rechtsklick → „Berechtigungen …“).': 'Sign-in is with the e-mail address; changes appear in Git with the name as author, without the e-mail address. {gaeste} only see what was explicitly granted to them (e.g. a page shared by e-mail). Disabled accounts cannot sign in and their tokens stop working. What someone may see and change is set in the “Permissions” tab (or by right-click → “Permissions …”).',
   'Ohne Freigabe sehen Benutzer nichts. Freigeben im Reiter „Rechte“ oder per Rechtsklick auf Quelle oder Ordner → {menu}.': 'Without a grant, users see nothing. Grant access in the “Permissions” tab or by right-clicking a source or folder → {menu}.',
   '+{n} Ausnahme': '+{n} exception',
   '+{n} Ausnahmen': '+{n} exceptions',

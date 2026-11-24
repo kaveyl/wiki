@@ -123,7 +123,7 @@ export function LogSettings() {
     <div className="space-y-5 text-sm">
       <p className="text-fg-muted">
         {t(
-          'Was Kaveyl Wiki getan hat: Synchronisierungen, Konflikte, Link-Reparaturen, Fehler, Anmeldungen und Änderungen an Quellen. Inhaltliche Änderungen stehen in der Git-Historie (Versionen). Passwörter, Tokens und Notizinhalte werden nie protokolliert.',
+          'Was Kaveyl Wiki getan hat: Synchronisierungen, Konflikte, Link-Reparaturen, Fehler, Anmeldungen und Änderungen an Quellen. Inhaltliche Änderungen stehen in der Git-Historie (Versionen). Passwörter, Tokens und Seiteninhalte werden nie protokolliert.',
         )}
       </p>
       <ActivityList isAdmin />

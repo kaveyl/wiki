@@ -87,7 +87,7 @@ function IconDialog({ action, onClose }: { action: Extract<Action, { kind: 'icon
   const qc = useQueryClient();
   const { busy, error, run } = useRun(onClose);
   return (
-    <Modal help="notizen-finden-und-lesen" open onOpenChange={(o) => !o && onClose()} title={t('Icon wählen')}>
+    <Modal help="seiten-finden-und-lesen" open onOpenChange={(o) => !o && onClose()} title={t('Icon wählen')}>
       <IconPicker
         value={action.icon}
         onPick={(icon) =>
@@ -163,7 +163,7 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
     });
   };
   return (
-    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.type === 'dir' ? t('Neuer Ordner') : t('Neue Notiz')} trackInput>
+    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.type === 'dir' ? t('Neuer Ordner') : t('Neue Seite')} trackInput>
       <form onSubmit={submit} className="space-y-3">
         <div className="flex items-start gap-2">
           {/* The icon right away (Owner 30.10.) – optional, the same picker as „Icon ändern“. Outside the <label>:
@@ -193,7 +193,7 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
           </Popover.Root>
           <div className="min-w-0 flex-1">
             <Field label={t('Titel')} hint={action.parent ? t('in {folder}/', { folder: action.parent }) : t('auf oberster Ebene')}>
-              <Input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={action.type === 'dir' ? t('Ordnername') : t('Titel der Notiz')} />
+              <Input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={action.type === 'dir' ? t('Ordnername') : t('Titel der Seite')} />
             </Field>
           </div>
         </div>
@@ -276,11 +276,11 @@ function SaveAnswerDialog({ action, onClose }: { action: Extract<Action, { kind:
       action.onSaved?.();
       openNote(current.mountId, path, title.trim());
       revealInTree(current.mountId, path);
-      toast({ kind: 'ok', title: t('Als Notiz gespeichert'), text: `${mountName(current.mountId)} / ${path}` });
+      toast({ kind: 'ok', title: t('Als Seite gespeichert'), text: `${mountName(current.mountId)} / ${path}` });
     });
   };
   return (
-    <Modal help="frag-die-wissensbasis" open onOpenChange={(o) => !o && onClose()} title={t('Antwort als Notiz speichern')} trackInput>
+    <Modal help="frag-die-wissensbasis" open onOpenChange={(o) => !o && onClose()} title={t('Antwort als Seite speichern')} trackInput>
       <form onSubmit={submit} className="space-y-3">
         <Field label={t('Titel')}>
           <Input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} onFocus={(e) => e.currentTarget.select()} />
@@ -367,7 +367,7 @@ function RenameDialog({ action, onClose }: { action: Extract<Action, { kind: 're
   }));
   const mountName = (id: string) => mounts.data?.find((m) => m.id === id)?.name ?? '';
   return (
-    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.isDir ? t('Ordner umbenennen / verschieben') : t('Notiz umbenennen / verschieben')} trackInput>
+    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.isDir ? t('Ordner umbenennen / verschieben') : t('Seite umbenennen / verschieben')} trackInput>
       <form onSubmit={submit} className="space-y-3">
         <Field
           label={action.isDir ? t('Ordnername') : t('Dateiname')}
@@ -380,7 +380,7 @@ function RenameDialog({ action, onClose }: { action: Extract<Action, { kind: 're
           <span className="block text-xs font-medium text-fg-muted">{t('Ziel')}</span>
           <FolderPicker groups={groups} value={dest} onChange={setDest} loading={mounts.isLoading || trees.some((q) => q.isLoading)} />
           {!otherMount && <span className="block text-xs text-fg-faint">
-              {action.isDir ? t('Links auf die Notizen werden automatisch angepasst.') : t('Links auf diese Notiz werden automatisch angepasst.')}
+              {action.isDir ? t('Links auf die Seiten werden automatisch angepasst.') : t('Links auf diese Seite werden automatisch angepasst.')}
             </span>}
         </div>
         {otherMount && (
@@ -388,11 +388,11 @@ function RenameDialog({ action, onClose }: { action: Extract<Action, { kind: 're
             {fillNodes(
               action.isDir
                 ? t(
-                    'Die Notizen werden nach {to} kopiert und in {from} gelöscht. Die Git-Historie bleibt in {source}. Verlinkte Bilder und Dateien werden mitkopiert, die Originale bleiben. Links aus {source} auf diese Notizen lassen sich nicht über Repo-Grenzen anpassen.',
+                    'Die Seiten werden nach {to} kopiert und in {from} gelöscht. Die Git-Historie bleibt in {source}. Verlinkte Bilder und Dateien werden mitkopiert, die Originale bleiben. Links aus {source} auf diese Seiten lassen sich nicht über Repo-Grenzen anpassen.',
                     { source: mountName(action.mountId) },
                   )
                 : t(
-                    'Die Notiz wird nach {to} kopiert und in {from} gelöscht. Die Git-Historie bleibt in {source}. Verlinkte Bilder und Dateien werden mitkopiert, die Originale bleiben. Links aus {source} auf diese Notiz lassen sich nicht über Repo-Grenzen anpassen.',
+                    'Die Seite wird nach {to} kopiert und in {from} gelöscht. Die Git-Historie bleibt in {source}. Verlinkte Bilder und Dateien werden mitkopiert, die Originale bleiben. Links aus {source} auf diese Seite lassen sich nicht über Repo-Grenzen anpassen.',
                     { source: mountName(action.mountId) },
                   ),
               { to: <b>{mountName(dest.mountId)}</b>, from: <b>{mountName(action.mountId)}</b> },
@@ -426,13 +426,13 @@ function DeleteDialog({ action, onClose }: { action: Extract<Action, { kind: 'de
   const question = !action.isDir || count === 0
     ? t('{title} wirklich löschen?')
     : count === null
-      ? t('{title} und alle Notizen darin wirklich löschen?')
-      : tn(count, '{title} und {n} Notiz darin wirklich löschen?', '{title} und alle {n} Notizen darin wirklich löschen?');
+      ? t('{title} und alle Seiten darin wirklich löschen?')
+      : tn(count, '{title} und {n} Seite darin wirklich löschen?', '{title} und alle {n} Seiten darin wirklich löschen?');
   return (
-    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.isDir ? t('Ordner löschen') : t('Notiz löschen')} returnFocus={() => next.current}>
+    <Modal help="anlegen-umbenennen-verschieben-löschen" open onOpenChange={(o) => !o && onClose()} title={action.isDir ? t('Ordner löschen') : t('Seite löschen')} returnFocus={() => next.current}>
       <p className="text-sm">{fillNodes(question, { title: <strong>{action.title}</strong> })}</p>
       <p className="mt-2 text-xs text-fg-muted">
-        {action.isDir ? `${t('Es werden nur Markdown-Notizen gelöscht; andere Dateien (Code, Bilder) im Ordner bleiben erhalten.')} ` : ''}
+        {action.isDir ? `${t('Es werden nur Markdown-Seiten gelöscht; andere Dateien (Code, Bilder) im Ordner bleiben erhalten.')} ` : ''}
         {t('Gelöschtes landet im Papierkorb der Quelle und lässt sich dort wiederherstellen.')}
       </p>
       <FormError className="mt-2">{error}</FormError>

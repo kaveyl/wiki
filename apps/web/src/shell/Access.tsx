@@ -24,7 +24,7 @@ function subjectName(rule: AclRule, subjects: ReturnType<typeof useSubjects>['da
   return subjects?.users.find((u) => u.id === rule.subjectId)?.name ?? t('Unbekannter Benutzer');
 }
 
-const targetLabel = (r: AclRule) => (r.target === 'mount' ? t('Quelle') : r.target === 'folder' ? t('Ordner {path}', { path: r.path }) : t('Notiz {path}', { path: r.path }));
+const targetLabel = (r: AclRule) => (r.target === 'mount' ? t('Quelle') : r.target === 'folder' ? t('Ordner {path}', { path: r.path }) : t('Seite {path}', { path: r.path }));
 
 /** Rules on one target, plus what is inherited from above. Only for users with `verwalten` there. */
 export function AclDialog({ mountId, target, path, title, onClose }: { mountId: string; target: AclTarget; path: string; title: string; onClose: () => void }) {
@@ -61,7 +61,7 @@ export function AclDialog({ mountId, target, path, title, onClose }: { mountId: 
       <span className="flex-1">
         {subjectName(r, subjects.data)}
         {!removable && <span className="ml-2 text-xs text-fg-faint">{t('von {target}', { target: targetLabel(r) })}</span>}
-        {r.orphan && <span className="ml-2 text-xs text-warn">{r.path ? t('Ziel fehlt ({path})', { path: r.path }) : t('Notiz gelöscht oder außerhalb umbenannt')}</span>}
+        {r.orphan && <span className="ml-2 text-xs text-warn">{r.path ? t('Ziel fehlt ({path})', { path: r.path }) : t('Seite gelöscht oder außerhalb umbenannt')}</span>}
       </span>
       <span className={cx('rounded px-1.5 py-0.5 text-xs', r.level === 'none' ? 'bg-danger/10 text-danger' : 'bg-subtle text-fg-muted')}>
         {r.level === 'admin' && r.subject === 'user' && isGuest(r.subjectId) ? t('lesen & schreiben (Gast)') : LEVEL_LABELS[r.level]}
@@ -130,7 +130,7 @@ export function AclDialog({ mountId, target, path, title, onClose }: { mountId: 
             </form>
             <p className="text-xs text-fg-faint">
               {t(
-                'Die genaueste Regel gilt (Notiz vor Ordner vor Quelle), eine Person vor ihrer Gruppe vor „Alle“. „Kein Zugriff“ für eine Person oder Gruppe gilt immer, auch wenn weiter unten mehr erlaubt ist. Administratoren sehen alles. Wer direkt mit Git arbeitet, ist davon nicht betroffen.',
+                'Die genaueste Regel gilt (Seite vor Ordner vor Quelle), eine Person vor ihrer Gruppe vor „Alle“. „Kein Zugriff“ für eine Person oder Gruppe gilt immer, auch wenn weiter unten mehr erlaubt ist. Administratoren sehen alles. Wer direkt mit Git arbeitet, ist davon nicht betroffen.',
               )}
             </p>
           </>
@@ -163,7 +163,7 @@ export function GroupsPanel() {
   return (
     <div className="space-y-5 text-sm">
       <p className="text-fg-muted">
-        {fillNodes(t('Hier legst du Gruppen an und bestimmst ihre Mitglieder. Was eine Gruppe darf, stellst du im Reiter „Rechte“ ein oder per Rechtsklick auf eine Quelle, einen Ordner oder eine Notiz → {menu}.'), {
+        {fillNodes(t('Hier legst du Gruppen an und bestimmst ihre Mitglieder. Was eine Gruppe darf, stellst du im Reiter „Rechte“ ein oder per Rechtsklick auf eine Quelle, einen Ordner oder eine Seite → {menu}.'), {
           menu: <b>{t('Berechtigungen …')}</b>,
         })}
       </p>

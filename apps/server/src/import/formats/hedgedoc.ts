@@ -83,7 +83,7 @@ export const hedgedoc: ImportFormat = {
     if (noteLinks.length)
       draft.warnings.push({ text: 'Links auf andere HedgeDoc-Notizen – HedgeDoc exportiert keine Notiz-Adressen, die Links zeigen weiter auf den alten Server', notes: noteLinks });
     if (slides.length) draft.warnings.push({ text: 'Folien – sie erscheinen als normaler Text', notes: slides });
-    if (empty.length) draft.warnings.push({ text: 'Leere Notizen – nicht übernommen', items: empty });
+    if (empty.length) draft.warnings.push({ text: 'Leere Seiten – nicht übernommen', items: empty });
     if (notText.length) draft.warnings.push({ text: 'Dateien, die kein Text sind – nicht übernommen', items: notText });
     return draft;
   },

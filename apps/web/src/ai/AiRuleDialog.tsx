@@ -77,7 +77,7 @@ export function AiRuleDialog({ mountId, target, path, title, onClose }: { mountI
       ? t('von der Quelle')
       : inh.from.target === 'folder'
         ? t('von Ordner „{path}“', { path: inh.from.path })
-        : t('von der Notiz')
+        : t('von der Seite')
     : null;
   const inheritedText = !inh || !from ? t('nicht freigegeben (Standard)') : t('{state} ({from})', { state: stateText(inh, kinds), from });
   // A block above wins over any release here (AD-011).
@@ -91,9 +91,9 @@ export function AiRuleDialog({ mountId, target, path, title, onClose }: { mountI
             ? t('Darf der KI-Assistent diese Quelle (und alles darin) verwenden?')
             : target === 'folder'
               ? t('Darf der KI-Assistent diesen Ordner (und alles darin) verwenden?')
-              : t('Darf der KI-Assistent diese Notiz verwenden?')}{' '}
+              : t('Darf der KI-Assistent diese Seite verwenden?')}{' '}
           {t('Ohne Freigabe sieht er nichts.')}{' '}
-          <Rich text={t('Verschlüsselte Notizen und {code} im Frontmatter bleiben immer tabu.')} parts={{ code: <code>ai: false</code> }} />
+          <Rich text={t('Verschlüsselte Seiten und {code} im Frontmatter bleiben immer tabu.')} parts={{ code: <code>ai: false</code> }} />
         </p>
         {data.isPending || !kinds.loaded ? (
           <Spinner />
@@ -114,7 +114,7 @@ export function AiRuleDialog({ mountId, target, path, title, onClose }: { mountI
               <Option value="local" choice={choice} set={setChoice} label={t('Freigegeben – nur private KI')}>
                 {kinds.local.length
                   ? t('Nur {local} sieht die Inhalte, nie {cloud}.', { local: list(kinds.local), cloud: list(kinds.cloud) })
-                  : t('Keine KI ist für private Notizen zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.', { cloud: list(kinds.cloud) })}
+                  : t('Keine KI ist für private Seiten zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.', { cloud: list(kinds.cloud) })}
               </Option>
             )}
             <Option value="blocked" choice={choice} set={setChoice} label={target === 'mount' ? t('Nicht freigegeben') : t('Nicht freigegeben (Ausnahme)')}>
@@ -180,7 +180,7 @@ function MemoryPanel({ mountId }: { mountId: string }) {
         <textarea
           className="mt-1 min-h-20 w-full rounded-md border border-line bg-bg p-2 font-normal"
           aria-label={t('Anweisungen für die KI')}
-          placeholder={t('z. B. „Fachbegriffe auf Englisch lassen. Neue Notizen immer mit Datum im Titel.“')}
+          placeholder={t('z. B. „Fachbegriffe auf Englisch lassen. Neue Seiten immer mit Datum im Titel.“')}
           value={instructions ?? data.data.instructions ?? ''}
           onChange={(e) => setInstructions(e.target.value)}
         />

@@ -96,7 +96,7 @@ describe('ACL evaluation (AD-020)', () => {
     expect(() => acl.createGroup('gäste')).toThrow(/gibt es schon/);
     acl.deleteGroup(g.id);
     expect(acl.rules('m')).toHaveLength(0);
-    expect(() => rule('note', 'fehlt.md', 'all', null, 'read')).toThrow(/Notiz nicht gefunden/);
+    expect(() => rule('note', 'fehlt.md', 'all', null, 'read')).toThrow(/Seite nicht gefunden/);
     expect(() => rule('mount', '', 'user', 'niemand', 'read')).toThrow(/Benutzer nicht gefunden/);
     expect(() => rule('mount', '', 'all', null, 'super' as Level)).toThrow(/Stufe/);
   });

@@ -6,9 +6,9 @@ import { Button, fillNodes } from '../ui';
 import { t } from '../i18n';
 
 const ROWS: { key: keyof FontScale; label: string; hint: string }[] = [
-  { key: 'ui', label: t('Oberfläche'), hint: t('Menüs, Knöpfe, Dialoge, Tabs – alles rund um die Notiz (auch die Seitenleiste)') },
+  { key: 'ui', label: t('Oberfläche'), hint: t('Menüs, Knöpfe, Dialoge, Tabs – alles rund um die Seite (auch die Seitenleiste)') },
   { key: 'tree', label: t('Seitenleiste'), hint: t('Baum, Favoriten, Zuletzt und KI-Freigaben – zusätzlich zur Oberfläche') },
-  { key: 'doc', label: t('Notiztext'), hint: t('der Text in Notizen, in der Leseansicht und in der Hilfe') },
+  { key: 'doc', label: t('Seitentext'), hint: t('der Text auf Seiten, in der Leseansicht und in der Hilfe') },
   { key: 'mono', label: t('Code'), hint: t('Codeblöcke, `Code` im Text und die Ansicht „Markdown“') },
 ];
 
@@ -28,7 +28,7 @@ function Sample({ k }: { k: keyof FontScale }) {
     return (
       <div className="prose-note">
         <p className="!my-0">
-          {fillNodes(t('So sieht der Text in einer Notiz aus, mit {fett} und {kursiv} Stellen.'), {
+          {fillNodes(t('So sieht der Text auf einer Seite aus, mit {fett} und {kursiv} Stellen.'), {
             fett: <strong>{t('fetten')}</strong>,
             kursiv: <em>{t('kursiven')}</em>,
           })}

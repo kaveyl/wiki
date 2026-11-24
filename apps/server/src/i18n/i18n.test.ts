@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { LANGUAGES, SOURCE_LANG, placeholders } from '@kaveyl-wiki/core';
 import { DICTIONARIES, translateFields, translateLines, translateMessage, tr } from './index.js';
 
@@ -35,5 +37,13 @@ describe('server messages in other languages (AD-046)', () => {
     expect(translateLines('en', '• Nicht gefunden\n• unbekannt')).toBe('• Not found\n• unbekannt');
     const body = translateFields('en', { error: 'Nicht gefunden', raw: 'Nicht gefunden', items: [{ message: 'Nicht gefunden', title: 'Nicht gefunden' }] });
     expect(body).toEqual({ error: 'Not found', raw: 'Nicht gefunden', items: [{ message: 'Not found', title: 'Nicht gefunden' }] });
+  });
+
+  it('every literal key of tr(lang, \'…\') in the server code has an English entry (diff review 0.2.16 code-001)', () => {
+    const src = join(import.meta.dirname, '..');
+    const files = (readdirSync(src, { recursive: true }) as string[]).filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts'));
+    const keys = files.flatMap((f) => [...readFileSync(join(src, f), 'utf8').matchAll(/\btr\(\w+, '((?:[^'\\]|\\.)*)'/g)].map((m) => m[1]!.replace(/\\(.)/g, (_, c: string) => (c === 'n' ? '\n' : c))));
+    expect(keys.length).toBeGreaterThan(5);
+    expect(keys.filter((k) => !(k in DICTIONARIES.en!))).toEqual([]);
   });
 });

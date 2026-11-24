@@ -98,7 +98,7 @@ export const logseq: ImportFormat = {
     const draft: Draft = { notes: notes.map(({ blocks: _b, ...n }) => n), files: out, warnings: [], wikiLinks: true };
     if (linked.length) draft.warnings.push({ text: 'Block-Verweise und Einbettungen – als Link auf die Seite mit dem Text des Blocks übernommen', notes: linked });
     if (lost.length) draft.warnings.push({ text: 'Block-Verweise auf Blöcke, die nicht im Export sind – sie bleiben als Text stehen', notes: lost });
-    if (queries.length) draft.warnings.push({ text: 'Abfragen von Logseq ({{query}}, #+BEGIN_QUERY) – sie stehen als Text bzw. Codeblock in der Notiz', notes: queries });
+    if (queries.length) draft.warnings.push({ text: 'Abfragen von Logseq ({{query}}, #+BEGIN_QUERY) – sie stehen als Text bzw. Codeblock in der Seite', notes: queries });
     if (org.length) draft.warnings.push({ text: 'Seiten im Org-Format – nicht übernommen', items: org });
     if (boards.length) draft.warnings.push({ text: 'Whiteboards und Zeichnungen – nicht übernommen', items: boards });
     if (empty.length) draft.warnings.push({ text: 'Leere Seiten – nicht übernommen', items: empty });

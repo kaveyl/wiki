@@ -49,7 +49,7 @@ it('the app and REST leave the same audit entries for move, copy and delete (cod
   const movedApi = await inject('POST', `/api/v1/move/${mountId}`, api, { from: 'c.md', to: 'd.md' });
   expect(movedApi.json()).toEqual({ sourceId: mountId, path: 'd.md', warnings: [] });
   expect((await inject('POST', `/api/v1/copy/${mountId}`, api, { from: 'd.md', toParent: 'ziel' })).json()).toMatchObject({ sourceId: mountId, path: 'ziel/d.md' });
-  expect((await inject('DELETE', `/api/v1/notes/${mountId}/d.md`, api, {})).json()).toEqual({ ok: true });
+  expect((await inject('DELETE', `/api/v1/pages/${mountId}/d.md`, api, {})).json()).toEqual({ ok: true });
   expect(existsSync(join(wiki, 'ziel', 'b.md')) && existsSync(join(wiki, 'ziel', 'd.md'))).toBe(true);
 
   const log = (await inject('GET', '/api/activity?category=audit&limit=50', { cookie: admin })).json() as { action: string; message: string; mountId: string | null }[];

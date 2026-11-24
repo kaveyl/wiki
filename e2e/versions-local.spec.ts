@@ -48,7 +48,7 @@ test('a new folder from the wizard, mounted with versions: every save becomes a 
   await page.getByRole('button', { name: /Annas Wiki/ }).click();
   await page.getByRole('button', { name: 'Diesen Ordner wählen' }).click();
   // Empty: taken as a whole (before, Weiter stayed grey).
-  await expect(page.getByText('Noch keine Notizen – der Ordner wird ganz eingebunden')).toBeVisible();
+  await expect(page.getByText('Noch keine Seiten – der Ordner wird ganz eingebunden')).toBeVisible();
   await page.getByRole('button', { name: 'Weiter' }).click();
   await expect(page.getByRole('checkbox', { name: /Versionen führen/ })).toBeChecked();
   await expect(page.getByText('Wann deine Änderungen nach Git schreiben?')).toBeVisible();

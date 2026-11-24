@@ -27,7 +27,7 @@ it('log entries, mount list and status hide paths of closed folders from normal 
   mkdirSync(join(ext, 'team'), { recursive: true });
   writeFileSync(join(ext, 'home.md'), '# Home\n');
   writeFileSync(join(ext, 'geheim', 'plan.md'), '# Plan\n\nBasis\n');
-  writeFileSync(join(ext, 'team', 'notiz.md'), '# Notiz\n\nBasis\n');
+  writeFileSync(join(ext, 'team', 'notiz.md'), '# Seite\n\nBasis\n');
   await git(ext, ['add', '-A']);
   await git(ext, ['commit', '-q', '-m', 'init'], { env: EXT });
   await git(ext, ['push', '-q', 'origin', 'main']);
@@ -67,9 +67,9 @@ it('log entries, mount list and status hide paths of closed folders from normal 
   ];
 
   // A conflict in a folder Eva may read: she sees it with its path, in the log and in the source status.
-  await conflictOn('team/notiz.md', '# Notiz\n\nLokal\n', '# Notiz\n\nServer\n');
+  await conflictOn('team/notiz.md', '# Seite\n\nLokal\n', '# Seite\n\nServer\n');
   for (const body of await views(eva)) expect(body).toContain('team/notiz.md');
-  expect((await resolve('team/notiz.md', '# Notiz\n\nAdmin\n')).statusCode).toBe(200);
+  expect((await resolve('team/notiz.md', '# Seite\n\nAdmin\n')).statusCode).toBe(200);
 
   // A conflict in her closed folder: no path anywhere – neither while it lasts nor after it was resolved. The
   // subfolder source shares the clone; its status names no file outside of it.
@@ -156,7 +156,7 @@ it('the answer to „sync now“ names only files of the source the user may rea
   mkdirSync(join(ext, 'team'), { recursive: true });
   writeFileSync(join(ext, 'home.md'), '# Home\n');
   writeFileSync(join(ext, 'geheim', 'plan.md'), '# Plan\n');
-  writeFileSync(join(ext, 'team', 'notiz.md'), '# Notiz\n');
+  writeFileSync(join(ext, 'team', 'notiz.md'), '# Seite\n');
   await git(ext, ['add', '-A']);
   await git(ext, ['commit', '-q', '-m', 'init'], { env: EXT });
   await git(ext, ['push', '-q', 'origin', 'main']);

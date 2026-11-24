@@ -70,8 +70,8 @@ export function describe(m: MountStatus): { level: Level; lines: string[] } {
     lines.push(
       tn(
         m.pending,
-        '{n} Änderung gespeichert, Übertragung beim Verlassen der Notiz oder nach {idle} Pause',
-        '{n} Änderungen gespeichert, Übertragung beim Verlassen der Notiz oder nach {idle} Pause',
+        '{n} Änderung gespeichert, Übertragung beim Verlassen der Seite oder nach {idle} Pause',
+        '{n} Änderungen gespeichert, Übertragung beim Verlassen der Seite oder nach {idle} Pause',
         { idle },
       ),
     );

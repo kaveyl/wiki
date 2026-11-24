@@ -24,7 +24,7 @@ vi.mock('./events', () => ({
 
 import { dropPrefetchedNotes, prefetchNote, takeNote } from './notePrefetch';
 
-const doc = (n: number) => ({ title: `Notiz ${n}` });
+const doc = (n: number) => ({ title: `Seite ${n}` });
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -38,14 +38,14 @@ afterEach(() => {
 
 describe('prefetchNote / takeNote', () => {
   it('NoteView gets the request started before, without asking again – and only once', async () => {
-    prefetchNote('m', 'a/Notiz.md');
-    prefetchNote('m', 'a/Notiz.md'); // shell: from the address, then as the active tab
+    prefetchNote('m', 'a/Seite.md');
+    prefetchNote('m', 'a/Seite.md'); // shell: from the address, then as the active tab
     expect(mocks.asked).toHaveLength(1);
-    expect(mocks.asked[0]).toEqual(['m', 'a/Notiz.md']);
-    await expect(takeNote('m', 'a/Notiz.md')).resolves.toEqual(doc(1));
+    expect(mocks.asked[0]).toEqual(['m', 'a/Seite.md']);
+    await expect(takeNote('m', 'a/Seite.md')).resolves.toEqual(doc(1));
     expect(mocks.asked).toHaveLength(1);
     // Reloading (refetch) asks the server again.
-    await expect(takeNote('m', 'a/Notiz.md')).resolves.toEqual(doc(2));
+    await expect(takeNote('m', 'a/Seite.md')).resolves.toEqual(doc(2));
     expect(mocks.asked).toHaveLength(2);
   });
 

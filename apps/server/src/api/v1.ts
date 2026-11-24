@@ -7,6 +7,9 @@ import { openapi } from './openapi.js';
 
 type P = { sourceId: string; '*': string };
 
+/** Old route names kept as hidden aliases until 0.3 (AD-081) – not in openapi.json. */
+export const LEGACY_V1 = ['/api/v1/notes'];
+
 export function registerApiV1(server: FastifyInstance, ops: Ops) {
   server.get('/api/v1/openapi.json', async () => openapi);
 
@@ -32,8 +35,8 @@ export function registerApiV1(server: FastifyInstance, ops: Ops) {
     ops.createFolder(req, 'api', req.params.sourceId, String(req.body?.parent ?? ''), String(req.body?.name ?? '')),
   );
 
-  server.post<{ Params: { sourceId: string }; Body: { note?: string; name?: string; contentBase64?: unknown; contentText?: unknown } }>('/api/v1/attachments/:sourceId', async (req) =>
-    ops.upload(req, 'api', req.params.sourceId, String(req.body?.note ?? ''), String(req.body?.name ?? ''), fileContent(req.body?.contentBase64, req.body?.contentText)),
+  server.post<{ Params: { sourceId: string }; Body: { page?: string; note?: string; name?: string; contentBase64?: unknown; contentText?: unknown } }>('/api/v1/attachments/:sourceId', async (req) =>
+    ops.upload(req, 'api', req.params.sourceId, String(req.body?.page ?? req.body?.note ?? ''), String(req.body?.name ?? ''), fileContent(req.body?.contentBase64, req.body?.contentText)),
   );
 
   server.get<{ Params: P }>('/api/v1/attachments/:sourceId/*', async (req) => ops.attachments(req, req.params.sourceId, req.params['*']));
@@ -42,17 +45,20 @@ export function registerApiV1(server: FastifyInstance, ops: Ops) {
 
   server.post<{ Params: { sourceId: string } }>('/api/v1/sync/:sourceId', async (req) => ops.sync(req, req.params.sourceId));
 
-  server.get<{ Params: P }>('/api/v1/notes/:sourceId/*', async (req) => ops.read(req, req.params.sourceId, req.params['*']));
+  // Pages (AD-081). /api/v1/notes is the old name: same routes, not in openapi.json, until 0.3.
+  for (const base of ['/api/v1/pages', ...LEGACY_V1]) {
+    server.get<{ Params: P }>(`${base}/:sourceId/*`, async (req) => ops.read(req, req.params.sourceId, req.params['*']));
 
-  server.put<{ Params: P; Body: { markdown: string; baseHash: string } }>('/api/v1/notes/:sourceId/*', async (req) =>
-    ops.write(req, 'api', req.params.sourceId, req.params['*'], req.body?.markdown, req.body?.baseHash),
-  );
+    server.put<{ Params: P; Body: { markdown: string; baseHash: string } }>(`${base}/:sourceId/*`, async (req) =>
+      ops.write(req, 'api', req.params.sourceId, req.params['*'], req.body?.markdown, req.body?.baseHash),
+    );
 
-  server.post<{ Params: { sourceId: string }; Body: { parent?: string; title: string; markdown?: string } }>('/api/v1/notes/:sourceId', async (req) =>
-    ops.create(req, 'api', req.params.sourceId, String(req.body?.parent ?? ''), String(req.body?.title ?? ''), req.body?.markdown),
-  );
+    server.post<{ Params: { sourceId: string }; Body: { parent?: string; title: string; markdown?: string } }>(`${base}/:sourceId`, async (req) =>
+      ops.create(req, 'api', req.params.sourceId, String(req.body?.parent ?? ''), String(req.body?.title ?? ''), req.body?.markdown),
+    );
 
-  server.delete<{ Params: P }>('/api/v1/notes/:sourceId/*', async (req) => ops.remove(req, 'api', req.params.sourceId, req.params['*']));
+    server.delete<{ Params: P }>(`${base}/:sourceId/*`, async (req) => ops.remove(req, 'api', req.params.sourceId, req.params['*']));
+  }
 
   server.post<{ Params: { sourceId: string }; Body: { from: string; to: string; toSourceId?: string } }>('/api/v1/move/:sourceId', async (req) =>
     ops.move(req, 'api', req.params.sourceId, String(req.body?.from ?? ''), String(req.body?.to ?? ''), req.body?.toSourceId || undefined),

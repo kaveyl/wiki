@@ -593,7 +593,7 @@ function InviteForm({ token, info, onDone, back }: { token: string; info: MailTo
     <Rich
       text={
         info.note
-          ? t('{inviter} hat die Notiz {note} mit dir geteilt.', { inviter: info.inviter ?? t('Jemand') })
+          ? t('{inviter} hat die Seite {note} mit dir geteilt.', { inviter: info.inviter ?? t('Jemand') })
           : info.folder
             ? t('{inviter} hat den Ordner {note} mit dir geteilt, mit allem, was darin liegt.', { inviter: info.inviter ?? t('Jemand') })
             : t('{inviter} hat die Quelle {note} mit dir geteilt, mit allem, was darin liegt.', { inviter: info.inviter ?? t('Jemand') })

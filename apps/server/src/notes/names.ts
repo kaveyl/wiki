@@ -66,5 +66,5 @@ export function fileNameFor(title: string): string {
     .replace(/^[.\s-]+|[.\s-]+$/g, '')
     .slice(0, 120)
     .replace(/[.\s-]+$/, '');
-  return name || 'Neue Notiz';
+  return name || 'Neue Seite';
 }

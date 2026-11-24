@@ -55,7 +55,7 @@ export async function loadLanguage(): Promise<void> {
   for (const [k, de] of callouts) document.documentElement.style.setProperty(`--callout-${k}`, JSON.stringify(t(de)));
 }
 
-/** Count-dependent text: tn(n, '{n} Notiz', '{n} Notizen') – {n} is filled in. */
+/** Count-dependent text: tn(n, '{n} Seite', '{n} Seiten') – {n} is filled in. */
 export function tn(n: number, one: string, other: string, vars?: Vars): string {
   return t(rules.select(n) === 'one' ? one : other, { n, ...vars });
 }

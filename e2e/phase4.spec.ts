@@ -173,7 +173,7 @@ test('presence: the admin sees that Maria has the note open and is typing', asyn
   };
   await open(admin);
   await open(maria);
-  await expect(admin.getByRole('status').filter({ hasText: 'Maria Muster hat die Notiz offen' })).toBeVisible({ timeout: 10_000 });
+  await expect(admin.getByRole('status').filter({ hasText: 'Maria Muster hat die Seite offen' })).toBeVisible({ timeout: 10_000 });
   await maria.locator('.prose-note').filter({ visible: true }).getByText('Suchwort').click();
   await maria.keyboard.press('End');
   await maria.keyboard.type(' (Maria)');
@@ -185,7 +185,7 @@ test('presence: the admin sees that Maria has the note open and is typing', asyn
   await adminNote.getByText('Suchwort').click();
   await admin.keyboard.press('End');
   await admin.keyboard.type('X');
-  await expect(ask).toContainText('Maria Muster bearbeitet diese Notiz gerade. Wenn ihr beide ändert');
+  await expect(ask).toContainText('Maria Muster bearbeitet diese Seite gerade. Wenn ihr beide ändert');
   await shot(admin, '45b-weiche-sperre');
   await ask.getByRole('button', { name: 'Abbrechen' }).click();
   await expect(ask).toHaveCount(0);
@@ -214,10 +214,10 @@ test('Beobachten: Maria follows a source – a dot and „Neu für dich“ when 
   const maria = await browser.newPage();
   await login(maria, 'maria@example.test', 'Maria-Passwort-0001');
   const tree = maria.locator('aside nav[aria-label="Quellen"]');
-  const source = tree.locator('[data-mount]', { hasText: 'Notizen' }).first();
+  const source = tree.locator('[data-mount]', { hasText: 'Projektwiki' }).first();
   await source.click({ button: 'right' });
   await maria.getByRole('menuitem', { name: 'Quelle beobachten …' }).click();
-  const dialog = maria.getByRole('dialog', { name: '„Notizen“ beobachten' });
+  const dialog = maria.getByRole('dialog', { name: '„Projektwiki“ beobachten' });
   await expect(dialog.getByLabel('Punkt in der Seitenleiste')).toBeChecked();
   // No mail server and no Pushover in this suite: both offered, but not available.
   await expect(dialog.getByRole('checkbox', { name: /E-Mail/ })).toBeDisabled();
@@ -229,7 +229,7 @@ test('Beobachten: Maria follows a source – a dot and „Neu für dich“ when 
   const admin = await browser.newPage();
   await login(admin, 'e2e@example.test', 'E2E-Passwort-12345');
   // A note Maria does not have open (an open note counts as read at once).
-  const id = await mountIdOf(admin, 'Notizen');
+  const id = await mountIdOf(admin, 'Projektwiki');
   const n = (await (await admin.request.get(`/api/notes/${id}/bausteine.md`)).json()) as { hash: string; raw: string };
   expect((await admin.request.put(`/api/notes/${id}/bausteine.md`, { data: { raw: n.raw + '\nNeu vom Admin.\n', baseHash: n.hash } })).status()).toBe(200);
   await expect(source.getByRole('img', { name: 'Neu: geändert von E2E Admin' })).toBeVisible({ timeout: 10_000 });
@@ -274,7 +274,7 @@ test('Beobachten: Maria follows a source – a dot and „Neu für dich“ when 
   await maria.getByRole('button', { name: 'Tab schließen' }).filter({ visible: true }).first().click();
   await source.click({ button: 'right' });
   await maria.getByRole('menuitem', { name: 'Beobachten ändern …' }).click();
-  await maria.getByRole('dialog', { name: '„Notizen“ beobachten' }).getByRole('button', { name: 'Nicht mehr beobachten' }).click();
+  await maria.getByRole('dialog', { name: '„Projektwiki“ beobachten' }).getByRole('button', { name: 'Nicht mehr beobachten' }).click();
   await expect(source.getByRole('img', { name: 'Beobachtet' })).toHaveCount(0);
   // How often messages come (AD-068): her own choice, kept; the admin's daily limit is named.
   await openSettingsPage(maria, 'Beobachten');
@@ -311,7 +311,7 @@ test('permissions: group, rules in the dialog; Maria reads one source, writes on
   await admin.keyboard.press('Escape');
 
   const tree = admin.locator('aside nav[aria-label="Quellen"]');
-  await tree.locator('[data-mount]', { hasText: 'Notizen' }).click({ button: 'right' });
+  await tree.locator('[data-mount]', { hasText: 'Projektwiki' }).click({ button: 'right' });
   await admin.getByRole('menuitem', { name: 'Berechtigungen …' }).click();
   const dialog = admin.getByRole('dialog');
   await dialog.getByLabel('Für', { exact: true }).selectOption({ label: 'Alle' });
@@ -332,11 +332,11 @@ test('permissions: group, rules in the dialog; Maria reads one source, writes on
   await expect(dialog.getByRole('listitem').filter({ hasText: 'lesen & schreiben' })).toBeVisible();
   await admin.keyboard.press('Escape');
 
-  // Maria: everything in "Notizen" read-only, except the folder "plan".
+  // Maria: everything in "Projektwiki" read-only, except the folder "plan".
   const maria = await browser.newPage();
   await login(maria, 'maria@example.test', 'Maria-Passwort-0001');
   const mtree = maria.locator('aside nav[aria-label="Quellen"]');
-  const notizen = mtree.locator('[data-mount]', { hasText: 'Notizen' });
+  const notizen = mtree.locator('[data-mount]', { hasText: 'Projektwiki' });
   if ((await notizen.getAttribute('aria-expanded')) !== 'true') await notizen.click();
   await mtree.getByText('trilium', { exact: true }).first().click();
   const editor = maria.locator('.prose-note').filter({ visible: true });
@@ -358,7 +358,7 @@ test('permissions: group, rules in the dialog; Maria reads one source, writes on
   await admin.getByRole('alertdialog').getByRole('button', { name: 'Löschen', exact: true }).click();
   await expect(admin.getByRole('button', { name: 'Gruppe Redaktion löschen' })).toHaveCount(0);
   await admin.keyboard.press('Escape');
-  await tree.locator('[data-mount]', { hasText: 'Notizen' }).click({ button: 'right' });
+  await tree.locator('[data-mount]', { hasText: 'Projektwiki' }).click({ button: 'right' });
   await admin.getByRole('menuitem', { name: 'Berechtigungen …' }).click();
   await dialog.getByRole('button', { name: 'Regel für Alle entfernen' }).click();
   await expect(dialog.getByText('Keine – es gilt, was von oben kommt.')).toBeVisible();
@@ -384,7 +384,7 @@ test('encryption: a note and a folder are encrypted in the browser; files hold o
   const tree = page.locator('aside nav[aria-label="Quellen"]');
   // Files written directly reach the index through the watcher, which can lag under load: wait for the
   // server to list them, then reload, instead of hoping the live update arrives within a fixed time.
-  await waitIndexed(page, 'Notizen', ['geheimnis.md', 'tresor/eins.md']);
+  await waitIndexed(page, 'Projektwiki', ['geheimnis.md', 'tresor/eins.md']);
   await page.reload();
   await expect(tree.getByText('geheimnis', { exact: true })).toBeVisible({ timeout: 15_000 });
   await tree.getByText('geheimnis', { exact: true }).click();
@@ -445,7 +445,7 @@ test('encryption: a note and a folder are encrypted in the browser; files hold o
   // The decrypted image is shown (unlocked via the folder).
   await expect(page.locator('.prose-note img[alt="punkt"]').filter({ visible: true })).toHaveJSProperty('naturalWidth', 1, { timeout: 10_000 });
   await tree.locator('[data-node$=":tresor"]').click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Neue Notiz hier' }).click();
+  await page.getByRole('menuitem', { name: 'Neue Seite hier' }).click();
   await page.getByLabel('Titel').fill('Zwei');
   await page.getByRole('button', { name: 'Anlegen' }).click();
   await expect(page.locator('.prose-note').filter({ visible: true })).toBeVisible();

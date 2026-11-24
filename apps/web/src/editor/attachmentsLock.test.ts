@@ -45,6 +45,6 @@ describe('uploadFiles into an encrypted note', () => {
     };
     await uploadFiles(editor, qc, mount, 'tresor/geheim.md', [new File(['geheim'], 'race.webp', { type: 'image/webp' })]);
     expect(mocks.uploaded).toEqual([]);
-    expect(mocks.toasts).toMatchObject([{ kind: 'error', text: 'Die Notiz wurde gesperrt – entsperren und die Datei erneut hinzufügen.' }]);
+    expect(mocks.toasts).toMatchObject([{ kind: 'error', text: 'Die Seite wurde gesperrt – entsperren und die Datei erneut hinzufügen.' }]);
   });
 });

@@ -80,7 +80,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
   await expect(tree()).toBeVisible();
-  await waitIndexed(page, 'Notizen', ['kiste/a.md', 'bilder/foto.md', 'bilder/andere.md']);
+  await waitIndexed(page, 'Projektwiki', ['kiste/a.md', 'bilder/foto.md', 'bilder/andere.md']);
   await page.reload();
   await expect(node('kiste')).toBeVisible({ timeout: 15_000 });
 });
@@ -101,7 +101,7 @@ test('folder: encrypted completely (also notes arriving later); a typo never unl
   // A plain note put into the folder from outside: the folder offers to finish, the note itself too.
   writeFileSync(join(NOTES, 'kiste', 'spaet.md'), '# Spät\n\nSpätwort.\n');
   writeFileSync(join(NOTES, 'kiste', 'offen.md'), '# Offen\n\nOffenwort.\n');
-  await waitIndexed(page, 'Notizen', ['kiste/spaet.md', 'kiste/offen.md']);
+  await waitIndexed(page, 'Projektwiki', ['kiste/spaet.md', 'kiste/offen.md']);
   await open('kiste/offen.md');
   await expect(page.getByText('liegt unverschlüsselt im verschlüsselten Ordner')).toBeVisible();
   await page.getByRole('button', { name: 'Jetzt verschlüsseln' }).click();
@@ -112,7 +112,7 @@ test('folder: encrypted completely (also notes arriving later); a typo never unl
 
   // A new note starts empty; after a reload (locked) a mistyped passphrase is refused, not taken for the folder.
   await node('kiste').click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Neue Notiz hier' }).click();
+  await page.getByRole('menuitem', { name: 'Neue Seite hier' }).click();
   await page.getByLabel('Titel').fill('Leer');
   await page.getByRole('button', { name: 'Anlegen' }).click();
   await expect(editor()).toBeVisible();
@@ -178,10 +178,10 @@ test('a note with a shared image: encrypted copy, moved along, plain again after
 
   // Moved into another folder: the encrypted image goes along.
   const mounts = (await (await page.request.get('/api/mounts')).json()) as { id: string; name: string }[];
-  const id = mounts.find((m) => m.name === 'Notizen')!.id;
+  const id = mounts.find((m) => m.name === 'Projektwiki')!.id;
   expect((await page.request.post(`/api/notes/${id}/move`, { data: { from: 'bilder/foto.md', to: 'ziel/foto.md' } })).ok()).toBe(true);
   expect(has('ziel/assets/p.png.age')).toBe(true);
-  await waitIndexed(page, 'Notizen', ['ziel/foto.md']);
+  await waitIndexed(page, 'Projektwiki', ['ziel/foto.md']);
   await page.reload();
   await open('ziel/foto.md');
   await unlockField().fill('foto-pass-1');

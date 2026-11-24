@@ -1,5 +1,5 @@
 // UX additions after Phase 3 (pinned tabs, favorites menu, manual order, icons, images).
-// Runs after the other specs in the same seeded workspace (admin + local mount "Notizen").
+// Runs after the other specs in the same seeded workspace (admin + local mount "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHmac } from 'node:crypto';
@@ -22,7 +22,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });
 
 const tree = () => page.locator('aside nav[aria-label="Quellen"]');
@@ -79,7 +79,7 @@ test('favorites: a folder without folder note, context menu in the favorites lis
   await tree().getByText('plan', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Zu Favoriten' }).click();
   const favs = aside.getByRole('list', { name: 'Favoriten' });
-  const row = favs.locator('[title="Notizen / plan"]');
+  const row = favs.locator('[title="Projektwiki / plan"]');
   await expect(row).toBeVisible();
   // Clicking shows the folder unfolded in the tree (there is nothing to open).
   await tree().getByText('plan', { exact: true }).first().click();
@@ -92,7 +92,7 @@ test('favorites: a folder without folder note, context menu in the favorites lis
   await page.getByRole('menuitem', { name: 'Aus Favoriten entfernen' }).click();
   await expect(row).toBeHidden();
   // Notes in the list get the full menu.
-  const note = favs.locator('[title^="Notizen / plan/"]').first();
+  const note = favs.locator('[title^="Projektwiki / plan/"]').first();
   await note.click({ button: 'right' });
   await expect(page.getByRole('menuitem', { name: 'Rechts daneben öffnen' })).toBeVisible();
   await page.keyboard.press('Escape');
@@ -147,7 +147,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 
 test('icons: all Lucide symbols by category and search, uploaded custom icons', async () => {
   await openNote('kolibri');
-  const iconButton = page.getByRole('button', { name: 'Icon der Notiz' }).filter({ visible: true });
+  const iconButton = page.getByRole('button', { name: 'Icon der Seite' }).filter({ visible: true });
   await iconButton.click();
   // Category "Wetter" loads the full set; an icon outside the common set.
   await page.getByLabel('Kategorie').selectOption({ label: 'Wetter' });
@@ -171,7 +171,7 @@ test('icons: all Lucide symbols by category and search, uploaded custom icons', 
   await page.reload();
   await expect(tree().locator('[data-node$=":kolibri.md"] img')).toBeVisible();
   // The picture: the own icon in the list – before the refused file below (no error message in the manual).
-  await page.getByRole('button', { name: 'Icon der Notiz' }).filter({ visible: true }).click();
+  await page.getByRole('button', { name: 'Icon der Seite' }).filter({ visible: true }).click();
   await page.getByRole('tab', { name: 'Eigene' }).click();
   await expect(page.getByRole('button', { name: 'Eigenes Icon kolibri-logo' })).toBeVisible();
   await shot(page, '54-eigene-icons');
@@ -228,7 +228,7 @@ test('images: align left/center/right, preset widths, drag the corner, back to o
 
 test('code blocks: the detected language is shown and adopted with one click; source icons', async () => {
   writeFileSync(join(NOTES, 'codeerkennung.md'), '# Codeerkennung\n\n```\nservices:\n  web:\n    image: nginx:latest\n    ports:\n      - "8080:80"\n```\n');
-  await waitIndexed(page, 'Notizen', ['codeerkennung.md']);
+  await waitIndexed(page, 'Projektwiki', ['codeerkennung.md']);
   await expect(tree().getByText('codeerkennung', { exact: true }).first()).toBeVisible({ timeout: 15_000 });
   await openNote('codeerkennung');
   await page.locator('.prose-note pre').filter({ visible: true }).getByText('services:').click();
@@ -241,7 +241,7 @@ test('code blocks: the detected language is shown and adopted with one click; so
   // The kind is always shown right of the name: the versioned test folder "Archiv" is a local folder with Git.
   const archiv = tree().locator('[data-mount]', { hasText: 'Archiv' });
   await expect(archiv.getByRole('img', { name: 'Lokaler Ordner mit Git' })).toBeVisible();
-  await expect(tree().locator('[data-mount]', { hasText: 'Notizen' }).first().getByRole('img', { name: 'Lokaler Ordner', exact: true })).toBeVisible();
+  await expect(tree().locator('[data-mount]', { hasText: 'Projektwiki' }).first().getByRole('img', { name: 'Lokaler Ordner', exact: true })).toBeVisible();
   await expect(archiv.getByText('Archiv', { exact: true })).toHaveAttribute('title', /^Lokaler Ordner in einem Git-Repository/);
 });
 
@@ -296,7 +296,7 @@ test('expand and collapse: everything, per source and per folder; "+" makes note
   await expect(tree().getByText('roadmap', { exact: true }).first()).toBeVisible();
   await shot(page, '58-alles-aufgeklappt');
   // Buttons in the row on hover (no context menu entries any more).
-  const header = tree().locator('[data-mount]', { hasText: 'Notizen' }).first();
+  const header = tree().locator('[data-mount]', { hasText: 'Projektwiki' }).first();
   await header.hover();
   await header.getByRole('button', { name: 'Alle Ordner zuklappen' }).click();
   await expect(tree().getByText('roadmap', { exact: true })).toHaveCount(0);
@@ -309,7 +309,7 @@ test('expand and collapse: everything, per source and per folder; "+" makes note
   // Same toolbar on every folder, also without sub-folders: there the toggle opens/closes the folder.
   await expect(plan.getByRole('button', { name: /Alles darunter (auf|zu)klappen/ })).toBeVisible();
   await plan.getByRole('button', { name: 'Neu …' }).click();
-  await expect(page.getByRole('menuitem', { name: 'Neue Notiz' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'Neue Seite' })).toBeVisible();
   await shot(page, '59-ordner-neu');
   await page.getByRole('menuitem', { name: 'Neuer Ordner' }).click();
   const dialog = page.getByRole('dialog');
@@ -342,8 +342,8 @@ test('trash: a deleted folder comes back from the sidebar trash; emptying asks f
   expect(existsSync(join(NOTES, '.kaveyl-wiki/trash'))).toBe(true);
   await page.locator('aside').getByRole('button', { name: 'Papierkorb', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Papierkorb' });
-  await dialog.getByLabel('Quelle').selectOption({ label: 'Notizen' });
-  await expect(dialog).toContainText('plan/Unterordner (1 Notiz)');
+  await dialog.getByLabel('Quelle').selectOption({ label: 'Projektwiki' });
+  await expect(dialog).toContainText('plan/Unterordner (1 Seite)');
   await shot(page, '60-papierkorb');
   await dialog.getByRole('button', { name: 'Wiederherstellen', exact: true }).click();
   await expect.poll(() => existsSync(join(NOTES, 'plan/Unterordner/index.md'))).toBe(true);
@@ -352,7 +352,7 @@ test('trash: a deleted folder comes back from the sidebar trash; emptying asks f
 
   await del();
   await page.locator('aside').getByRole('button', { name: 'Papierkorb', exact: true }).click();
-  await dialog.getByLabel('Quelle').selectOption({ label: 'Notizen' });
+  await dialog.getByLabel('Quelle').selectOption({ label: 'Projektwiki' });
   await dialog.getByRole('button', { name: 'Papierkorb leeren' }).click();
   await dialog.getByRole('button', { name: 'Ja, leeren' }).click();
   await expect(dialog).toContainText('Der Papierkorb ist leer.');
@@ -398,8 +398,8 @@ test('dialogs: a click beside closes nothing, Esc only the top one, "Zurück" to
   const plan = tree().locator('[data-node]', { hasText: 'plan' }).first();
   await plan.hover();
   await plan.getByRole('button', { name: 'Neu …' }).click();
-  await page.getByRole('menuitem', { name: 'Neue Notiz' }).click();
-  const create = page.getByRole('dialog', { name: 'Neue Notiz' });
+  await page.getByRole('menuitem', { name: 'Neue Seite' }).click();
+  const create = page.getByRole('dialog', { name: 'Neue Seite' });
   await create.getByRole('textbox').first().fill('nicht speichern');
   // Esc asks in a Kaveyl Wiki window; Esc again (or „Weiter bearbeiten“) keeps the input and the dialog.
   await page.keyboard.press('Escape');
@@ -421,11 +421,11 @@ test('dialogs: a click beside closes nothing, Esc only the top one, "Zurück" to
 
 test('dialogs from the tree menu: the field gets the focus, Esc returns it to the row', async () => {
   const plan = tree().locator('[data-node]', { hasText: 'plan' }).first();
-  const create = page.getByRole('dialog', { name: 'Neue Notiz' });
+  const create = page.getByRole('dialog', { name: 'Neue Seite' });
   const title = create.getByRole('textbox').first();
   const openCreate = async () => {
     await plan.click({ button: 'right' });
-    await page.getByRole('menuitem', { name: 'Neue Notiz hier', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Neue Seite hier', exact: true }).click();
     await expect(create).toBeVisible();
   };
   // The menu is still open while the dialog mounts – typing must land in the title field anyway.
@@ -649,7 +649,7 @@ test('Settings → Webhooks: address, secret, how per hoster, and what arrived (
   await page.keyboard.press('Escape');
 });
 
-test('links that lead nowhere: marked red while writing, „Notiz anlegen“ creates the target, then the mark goes', async () => {
+test('links that lead nowhere: marked red while writing, „Seite anlegen“ creates the target, then the mark goes', async () => {
   writeFileSync(join(NOTES, 'linkprobe.md'), '# Linkprobe\n\n[Da](plan/roadmap.md) und [Weg](neu-aus-link.md)\n');
   await expect(tree().getByText('linkprobe', { exact: true })).toBeVisible();
   await tree().getByText('linkprobe', { exact: true }).click();
@@ -663,7 +663,7 @@ test('links that lead nowhere: marked red while writing, „Notiz anlegen“ cre
   await broken.click();
   const menu = page.getByRole('menu', { name: 'Link' });
   await expect(menu).toContainText('Ziel fehlt');
-  await menu.getByRole('menuitem', { name: 'Notiz anlegen' }).click();
+  await menu.getByRole('menuitem', { name: 'Seite anlegen' }).click();
   await expect.poll(() => read('neu-aus-link.md')).toContain('# neu-aus-link');
   await expect(tabs().filter({ hasText: 'neu-aus-link' })).toBeVisible();
   await tabs().filter({ hasText: 'linkprobe' }).click();
@@ -690,7 +690,7 @@ test('font sizes: Darstellung → Schriftgröße, four sliders that act at once,
   const row = tree().locator('.text-tree').first();
   const before = { html: await px(page.locator('html')), note: await px(note), row: await px(row) };
   expect(before).toEqual({ html: 16, note: 16, row: 13 });
-  await dialog.getByLabel('Schriftgröße Notiztext').fill('130');
+  await dialog.getByLabel('Schriftgröße Seitentext').fill('130');
   await dialog.getByLabel('Schriftgröße Seitenleiste').fill('120');
   await dialog.getByLabel('Schriftgröße Oberfläche').fill('110');
   await dialog.getByLabel('Schriftgröße Code').fill('90');
@@ -763,7 +763,7 @@ test('owner finds 15.11.: many tabs shrink without a scroll bar and „Alle Tabs
   // Own notes for the many tabs – what other tests leave behind varies.
   const many = Array.from({ length: 9 }, (_, i) => `ordnerprobe/tab-${i + 1}.md`);
   for (const [i, p] of many.entries()) writeFileSync(join(NOTES, p), `# Tab ${i + 1}\n`);
-  await waitIndexed(page, 'Notizen', ['ordnerprobe/index.md', 'ordnerprobe/innen.md', ...many]);
+  await waitIndexed(page, 'Projektwiki', ['ordnerprobe/index.md', 'ordnerprobe/innen.md', ...many]);
   const row = (path: string) => tree().locator(`[data-node][data-path="${path}"]`).first();
   // The test before may leave Settings open (Esc in a settings page goes back to Settings first).
   for (let i = 0; i < 4 && (await page.getByRole('dialog').count()); i++) await page.keyboard.press('Escape');

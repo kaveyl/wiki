@@ -27,7 +27,7 @@ function decorate(doc: PMDocNode, broken: Set<string>): DecorationSet {
   doc.descendants((node, pos) => {
     if (!node.isText) return;
     const link = node.marks.find((m) => m.type.name === 'link' && broken.has(String(m.attrs.href ?? '')));
-    if (link) decos.push(Decoration.inline(pos, pos + node.nodeSize, { class: 'link-broken', 'data-broken-link': '', title: t('Ziel fehlt – Klick: Notiz anlegen oder Link bearbeiten') }));
+    if (link) decos.push(Decoration.inline(pos, pos + node.nodeSize, { class: 'link-broken', 'data-broken-link': '', title: t('Ziel fehlt – Klick: Seite anlegen oder Link bearbeiten') }));
   });
   return DecorationSet.create(doc, decos);
 }

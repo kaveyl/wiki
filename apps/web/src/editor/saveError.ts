@@ -24,10 +24,10 @@ export function saveFailure(e: unknown, online = typeof navigator === 'undefined
     return {
       kind: 'otherUser',
       label: t('Anderes Konto angemeldet'),
-      detail: t('In diesem Browser ist inzwischen ein anderes Konto angemeldet. Gespeichert wird nur unter dem Konto, mit dem die Notiz geöffnet wurde.'),
+      detail: t('In diesem Browser ist inzwischen ein anderes Konto angemeldet. Gespeichert wird nur unter dem Konto, mit dem die Seite geöffnet wurde.'),
     };
   if (e.status === 404)
-    return { kind: 'gone', label: t('Notiz nicht mehr vorhanden'), detail: t('Die Notiz wurde gelöscht oder verschoben – wie du deine Fassung sicherst, steht im Hinweis über dem Text.') };
+    return { kind: 'gone', label: t('Seite nicht mehr vorhanden'), detail: t('Die Seite wurde gelöscht oder verschoben – wie du deine Fassung sicherst, steht im Hinweis über dem Text.') };
   if (e.status >= 500)
     return {
       kind: 'server',

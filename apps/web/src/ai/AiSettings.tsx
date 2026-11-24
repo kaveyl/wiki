@@ -50,7 +50,7 @@ function cloudReason(p: { kind: AiProviderKind; baseUrl?: string; model?: string
       return p.baseUrl ?? '';
     }
   })();
-  if (ALWAYS_CLOUD.includes(p.kind)) return host ? t('Notizen gehen an {host}', { host }) : t('Notizen gehen an den Anbieter');
+  if (ALWAYS_CLOUD.includes(p.kind)) return host ? t('Seiten gehen an {host}', { host }) : t('Seiten gehen an den Anbieter');
   if (!isLocalAddress(p.baseUrl ?? '')) return t('die Adresse {host} liegt im Internet', { host });
   if (p.kind === 'ollama' && isCloudModel(p.model ?? '')) return t('{model} ist ein Cloud-Modell – Ollama leitet es an ollama.com weiter', { model: p.model ?? '' });
   return null;
@@ -71,7 +71,7 @@ export function AiProvidersPanel() {
       <p className="text-fg-muted">
         <Rich
           text={t(
-            'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).',
+            'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Seiten gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Seiten).',
           )}
           parts={{ nothing: <b>{t('nichts')}</b>, menu: <b>{t('KI-Freigabe …')}</b> }}
         />
@@ -87,7 +87,7 @@ export function AiProvidersPanel() {
                 {p.hasKey ? ` · ${t('Key gespeichert')}` : ''}
               </span>
               {p.private && (
-                <span className="ml-2 inline-flex items-center gap-1 rounded bg-accent-soft px-1.5 py-px text-xs text-fg" title={t('Darf Notizen sehen, die nur für private KI freigegeben sind.')}>
+                <span className="ml-2 inline-flex items-center gap-1 rounded bg-accent-soft px-1.5 py-px text-xs text-fg" title={t('Darf Seiten sehen, die nur für private KI freigegeben sind.')}>
                   <Lock className="h-3 w-3" aria-hidden="true" />
                   {t('privat')}
                 </span>
@@ -104,7 +104,7 @@ export function AiProvidersPanel() {
             </label>
             {/* Only when there is a choice (AD-079, AD-031): two or more providers for private notes. */}
             {privateCount > 1 && p.private && (
-              <label className="flex items-center gap-1 text-xs text-fg-muted" title={t('Wird für private Notizen genommen, wenn der Benutzer nichts anderes gewählt hat.')}>
+              <label className="flex items-center gap-1 text-xs text-fg-muted" title={t('Wird für private Seiten genommen, wenn der Benutzer nichts anderes gewählt hat.')}>
                 <input
                   type="radio"
                   name="ai-private-default"
@@ -276,11 +276,11 @@ function ProviderForm({ value, onDone }: { value: ProviderDraft; onDone: () => v
       <label className="flex items-start gap-2">
         <input type="checkbox" className="mt-0.5" checked={privateShown} onChange={(e) => (setP({ ...p, private: e.target.checked }), setPrivTouched(true))} />
         <span>
-          {t('Für private Notizen zulassen')}
+          {t('Für private Seiten zulassen')}
           <span className="block text-xs text-fg-muted">
             {cloud
-              ? t('Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.', { host: hostOf(p.baseUrl) })
-              : t('Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.')}
+              ? t('Diese KI sieht dann auch Seiten, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.', { host: hostOf(p.baseUrl) })
+              : t('Diese KI sieht dann auch Seiten, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.')}
           </span>
         </span>
       </label>
@@ -347,8 +347,8 @@ export function AiPersonalPanel() {
       )}
       {/* Only when there is a choice (AD-079): two or more providers may see private notes. */}
       {privates.length > 1 && (
-        <Field label={t('Für private Notizen')} hint={t('Notizen, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.')}>
-          <select className={cx('h-8 w-full rounded-md border border-line bg-bg px-2')} value={privateId} onChange={(e) => (setPrivateId(e.target.value), setTouched(true))} aria-label={t('Meine KI für private Notizen')}>
+        <Field label={t('Für private Seiten')} hint={t('Seiten, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.')}>
+          <select className={cx('h-8 w-full rounded-md border border-line bg-bg px-2')} value={privateId} onChange={(e) => (setPrivateId(e.target.value), setTouched(true))} aria-label={t('Meine KI für private Seiten')}>
             <option value="">{t('Standard ({name})', { name: privates.find((p) => p.id === providers.data?.privateDefaultId)?.name ?? '–' })}</option>
             {privates.map((p) => (
               <option key={p.id} value={p.id}>

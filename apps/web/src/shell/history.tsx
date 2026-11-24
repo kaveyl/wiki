@@ -54,7 +54,7 @@ export function HistoryDialog({ mountId, path, onClose }: { mountId: string; pat
       toast({
         kind: 'error',
         title: t('Wiederherstellen fehlgeschlagen'),
-        text: e instanceof ApiError && e.status === 409 ? t('Die Notiz wurde inzwischen geändert – bitte erneut versuchen.') : errorText(e),
+        text: e instanceof ApiError && e.status === 409 ? t('Die Seite wurde inzwischen geändert – bitte erneut versuchen.') : errorText(e),
       });
     } finally {
       setBusy(false);
@@ -128,7 +128,7 @@ export function HistoryDialog({ mountId, path, onClose }: { mountId: string; pat
         <SaveAsDialog
           help="versionen-und-papierkorb"
           kind="note"
-          intro={t('Der Stand vom {date} wird eine neue Notiz – die aktuelle Fassung bleibt, wie sie ist. Bilder und Anhänge, auf die er verweist, kommen mit.', { date: when(v.date) })}
+          intro={t('Der Stand vom {date} wird eine neue Seite – die aktuelle Fassung bleibt, wie sie ist. Bilder und Anhänge, auf die er verweist, kommen mit.', { date: when(v.date) })}
           start={{ mountId, folder: splitPath(path, 'note').folder }}
           name={nameWith(path, 'note', t('Version {date}', { date: day(v.date) }))}
           onBack={() => setSavingAs(false)}
@@ -137,7 +137,7 @@ export function HistoryDialog({ mountId, path, onClose }: { mountId: string; pat
             const r = await api.saveVersionAs(mountId, { commit: v.commit, versionPath: v.path, to: target.path, toMountId: target.mountId });
             await qc.invalidateQueries({ queryKey: ['tree', r.mountId] });
             const where = mounts.data?.find((m) => m.id === r.mountId)?.name ?? '';
-            toast({ kind: r.warnings.length ? 'warn' : 'ok', title: t('Als neue Notiz gespeichert'), text: [`${where} / ${r.path}`, ...r.warnings].join('\n') });
+            toast({ kind: r.warnings.length ? 'warn' : 'ok', title: t('Als neue Seite gespeichert'), text: [`${where} / ${r.path}`, ...r.warnings].join('\n') });
             onClose();
             openNote(r.mountId, r.path, noteNameIn(r.mountId, r.path));
             revealInTree(r.mountId, r.path);
@@ -252,8 +252,8 @@ export function TrashDialog({ mountId: initial, onClose }: { mountId: string; on
         <p className="min-w-0 flex-1 text-xs text-fg-muted">
           {data &&
             (folderMode
-              ? t('Gelöschte Notizen liegen im Ordner .kaveyl-wiki/trash dieser Quelle.')
-              : t('Gelöschte Notizen aus der Git-Historie dieser Quelle; Leeren blendet sie nur aus, in der Historie bleiben sie.'))}{' '}
+              ? t('Gelöschte Seiten liegen im Ordner .kaveyl-wiki/trash dieser Quelle.')
+              : t('Gelöschte Seiten aus der Git-Historie dieser Quelle; Leeren blendet sie nur aus, in der Historie bleiben sie.'))}{' '}
           {data &&
             (data.days
               ? folderMode
@@ -269,14 +269,14 @@ export function TrashDialog({ mountId: initial, onClose }: { mountId: string; on
           {data.items.map((d) => {
             const many = d.files.length > 1;
             const expanded = open.has(d.id);
-            const label = d.isDir ? tn(d.files.length, '{path} ({n} Notiz)', '{path} ({n} Notizen)', { path: d.path || t('Oberste Ebene') }) : d.path;
+            const label = d.isDir ? tn(d.files.length, '{path} ({n} Seite)', '{path} ({n} Seiten)', { path: d.path || t('Oberste Ebene') }) : d.path;
             return (
               <li key={d.id} className="px-3 py-2">
                 {/* narrow screens: name on its own line (wrapped, not cut), buttons below */}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <button
                     className={cx('flex h-5 w-5 shrink-0 items-center justify-center rounded', many ? 'hover:bg-hover' : 'pointer-events-none')}
-                    aria-label={expanded ? t('Notizen ausblenden') : t('Notizen zeigen')}
+                    aria-label={expanded ? t('Seiten ausblenden') : t('Seiten zeigen')}
                     aria-expanded={many ? expanded : undefined}
                     onClick={() => many && toggle(d.id)}
                   >
@@ -397,8 +397,8 @@ function TrashSaveAs({
         <>
           {taken ? `${t('Am alten Platz von „{what}“ liegt inzwischen eine andere Datei.', { what })} ` : ''}
           {kind === 'folder'
-            ? t('Der Ordner kommt mit allen Notizen darin unter dem neuen Namen zurück; die Unterordner bleiben erhalten.')
-            : t('Die Notiz kommt unter dem neuen Namen zurück. Nichts Bestehendes wird überschrieben.')}
+            ? t('Der Ordner kommt mit allen Seiten darin unter dem neuen Namen zurück; die Unterordner bleiben erhalten.')
+            : t('Die Seite kommt unter dem neuen Namen zurück. Nichts Bestehendes wird überschrieben.')}
         </>
       }
       start={{ mountId, folder: suggestion.folder }}

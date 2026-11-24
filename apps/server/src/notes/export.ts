@@ -137,7 +137,7 @@ export interface ExportDeps {
 export async function exportNote(mount: Mount, path: string, d: ExportDeps): Promise<{ name: string; html: string }> {
   const raw = (await d.readNote(mount, path)) ?? '';
   const name = noteName(path, mount.options.folderNote);
-  if (isEncryptedNote(raw)) return { name, html: page(name, `<h1>${esc(name)}</h1><p>Diese Notiz ist verschlüsselt und wird nicht exportiert.</p>`) };
+  if (isEncryptedNote(raw)) return { name, html: page(name, `<h1>${esc(name)}</h1><p>Diese Seite ist verschlüsselt und wird nicht exportiert.</p>`) };
   const inline = new Map<string, string>();
   // Images first (async), then the synchronous conversion uses the prepared data URLs – their sources from the tree.
   const tree = await treeOf(raw);
@@ -234,7 +234,7 @@ export async function exportFolder(mount: Mount, folder: string, notes: string[]
   const list = inside.filter((p) => files[htmlPath(p)]);
   const items = list.map((p) => `<li><a href="${encodeURI(htmlPath(p))}">${esc(rel(p).replace(/\.md$/i, ''))}</a></li>`).join('\n');
   const title = folder ? `${mount.name} / ${folder}` : mount.name;
-  files[listName] = strToU8(page(title, `<h1>${esc(title)}</h1>\n<p>${count} Notiz${count === 1 ? '' : 'en'}</p>\n<ul class="index">\n${items}\n</ul>`));
+  files[listName] = strToU8(page(title, `<h1>${esc(title)}</h1>\n<p>${count} Seite${count === 1 ? '' : 'n'}</p>\n<ul class="index">\n${items}\n</ul>`));
   const name = (folder ? posix.basename(folder) : mount.name).replace(/[\\/:*?"<>|]+/g, '-') || 'export';
   return { name, zip: zipSync(files, { level: 6 }), count };
 }

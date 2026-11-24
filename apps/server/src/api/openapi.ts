@@ -11,7 +11,7 @@ const errors = {
   404: { description: 'Nicht gefunden (oder nicht sichtbar)', ...json(ref('Error')) },
 };
 const sourceId = { name: 'sourceId', in: 'path', required: true, schema: { type: 'string' }, description: 'ID der Quelle (aus GET /sources)' };
-const notePath = { name: 'path', in: 'path', required: true, schema: { type: 'string' }, description: 'Pfad der Notiz in der Quelle, z. B. `plan/roadmap.md` (Schrägstriche bleiben)' };
+const notePath = { name: 'path', in: 'path', required: true, schema: { type: 'string' }, description: 'Pfad der Seite in der Quelle, z. B. `plan/roadmap.md` (Schrägstriche bleiben)' };
 const str = { type: 'string' };
 
 const spec = {
@@ -20,10 +20,10 @@ const spec = {
     title: 'Kaveyl Wiki API',
     version: '1',
     description:
-      'Notizen und Ordner aller eingebundenen Quellen lesen und ändern. Es gelten dieselben Rechte wie in der App (AD-020): ' +
+      'Seiten und Ordner aller eingebundenen Quellen lesen und ändern. Es gelten dieselben Rechte wie in der App (AD-020): ' +
       'unsichtbares ergibt 404, nur Leserecht ergibt 403 beim Schreiben. Anmeldung mit `Authorization: Bearer kw_…` ' +
       '(API-Token aus Einstellungen → Konto; Scope `read` zum Lesen, `write` zum Ändern). Änderungen werden mit dem ' +
-      'Token-Inhaber als Autor committet. Verschlüsselte Notizen liefern nur Name und Titel (`markdown: null`).',
+      'Token-Inhaber als Autor committet. Verschlüsselte Seiten liefern nur Name und Titel (`markdown: null`).',
   },
   servers: [{ url: '/api/v1' }],
   security: [{ bearer: [] }],
@@ -43,7 +43,7 @@ const spec = {
         type: 'object',
         properties: { sourceId: str, path: str, name: str, title: str, tags: { type: 'array', items: str }, mtime: { type: 'number' }, snippet: { ...str, description: 'Treffer in «…»' } },
       },
-      Note: {
+      Page: {
         type: 'object',
         properties: {
           sourceId: str,
@@ -54,8 +54,8 @@ const spec = {
           encrypted: { type: 'boolean' },
           readonly: { type: 'boolean' },
           access: str,
-          editingNow: { type: 'array', items: str, description: 'Wer die Notiz gerade in der App bearbeitet (tippt) – vor dem Schreiben besser warten oder nachfragen' },
-          markdown: { type: ['string', 'null'], description: 'Ganze Datei inkl. Frontmatter; null bei verschlüsselten Notizen' },
+          editingNow: { type: 'array', items: str, description: 'Wer die Seite gerade in der App bearbeitet (tippt) – vor dem Schreiben besser warten oder nachfragen' },
+          markdown: { type: ['string', 'null'], description: 'Ganze Datei inkl. Frontmatter; null bei verschlüsselten Seiten' },
         },
       },
       Moved: { type: 'object', properties: { sourceId: str, path: str, warnings: { type: 'array', items: str } } },
@@ -105,7 +105,7 @@ const spec = {
     '/sources': { get: { summary: 'Quellen auflisten', responses: { 200: ok({ type: 'array', items: ref('Source') }), 401: errors[401] } } },
     '/tree/{sourceId}': {
       get: {
-        summary: 'Ordner und Notizen einer Quelle',
+        summary: 'Ordner und Seiten einer Quelle',
         parameters: [
           sourceId,
           { name: 'path', in: 'query', schema: str, description: 'nur unterhalb dieses Ordners' },
@@ -126,19 +126,19 @@ const spec = {
         responses: { 200: ok({ type: 'array', items: ref('Hit') }) },
       },
     },
-    '/notes/{sourceId}': {
+    '/pages/{sourceId}': {
       post: {
-        summary: 'Notiz anlegen',
+        summary: 'Seite anlegen',
         description: 'Dateiname aus dem Titel (eindeutig gemacht). Ohne `markdown` entsteht `# Titel`.',
         parameters: [sourceId],
         requestBody: { required: true, ...json({ type: 'object', required: ['title'], properties: { parent: { ...str, description: 'Ordner, leer = oberste Ebene' }, title: str, markdown: str } }) },
         responses: { 200: ok({ type: 'object', properties: { sourceId: str, path: str, hash: str } }), ...errors },
       },
     },
-    '/notes/{sourceId}/{path}': {
-      get: { summary: 'Notiz lesen', parameters: [sourceId, notePath], responses: { 200: ok(ref('Note')), 404: errors[404] } },
+    '/pages/{sourceId}/{path}': {
+      get: { summary: 'Seite lesen', parameters: [sourceId, notePath], responses: { 200: ok(ref('Page')), 404: errors[404] } },
       put: {
-        summary: 'Notiz ersetzen',
+        summary: 'Seite ersetzen',
         description: 'Ersetzt die ganze Datei. `baseHash` = `hash` aus dem Lesen; hat sich die Datei inzwischen geändert, kommt 409 mit dem aktuellen Stand.',
         parameters: [sourceId, notePath],
         requestBody: { required: true, ...json({ type: 'object', required: ['markdown', 'baseHash'], properties: { markdown: str, baseHash: str } }) },
@@ -149,8 +149,8 @@ const spec = {
         },
       },
       delete: {
-        summary: 'Notiz oder Ordner löschen (in den Papierkorb)',
-        description: 'Bei einem Ordner alle Notizen darin; andere Dateien (Bilder, Code) bleiben. Wiederherstellen in der App über den Papierkorb.',
+        summary: 'Seite oder Ordner löschen (in den Papierkorb)',
+        description: 'Bei einem Ordner alle Seiten darin; andere Dateien (Bilder, Code) bleiben. Wiederherstellen in der App über den Papierkorb.',
         parameters: [sourceId, notePath],
         responses: { 200: ok({ type: 'object' }), ...errors },
       },
@@ -158,7 +158,7 @@ const spec = {
     '/folders/{sourceId}': {
       post: {
         summary: 'Ordner anlegen',
-        description: 'Wie in der App: mit Ordner-Notiz (z. B. `index.md`), weil Git keine leeren Ordner kennt. Name wird bei Bedarf eindeutig gemacht.',
+        description: 'Wie in der App: mit Ordnerseite (z. B. `index.md`), weil Git keine leeren Ordner kennt. Name wird bei Bedarf eindeutig gemacht.',
         parameters: [sourceId],
         requestBody: { required: true, ...json({ type: 'object', required: ['name'], properties: { parent: { ...str, description: 'Ordner, leer = oberste Ebene' }, name: str } }) },
         responses: { 200: ok({ type: 'object', properties: { sourceId: str, path: str, folderNote: str } }), ...errors },
@@ -166,13 +166,13 @@ const spec = {
     },
     '/attachments/{sourceId}': {
       post: {
-        summary: 'Datei zu einer Notiz hochladen',
+        summary: 'Datei zu einer Seite hochladen',
         description:
-          'Legt die Datei in `assets/` neben der Notiz ab (wie in der App: Größen-Einstellung, ausführbare Typen gesperrt, in verschlüsselten Notizen/Ordnern abgelehnt, gleicher Name bekommt eine Nummer). Inhalt als `contentBase64` oder bei Textformaten (SVG, CSV …) als `contentText`, höchstens 10 MB. Die Notiz selbst bleibt unverändert – `markdown` ist der fertige Link zum Einfügen.',
+          'Legt die Datei in `assets/` neben der Seite ab (wie in der App: Größen-Einstellung, ausführbare Typen gesperrt, in verschlüsselten Seiten/Ordnern abgelehnt, gleicher Name bekommt eine Nummer). Inhalt als `contentBase64` oder bei Textformaten (SVG, CSV …) als `contentText`, höchstens 10 MB. Die Seite selbst bleibt unverändert – `markdown` ist der fertige Link zum Einfügen.',
         parameters: [sourceId],
         requestBody: {
           required: true,
-          ...json({ type: 'object', required: ['note', 'name'], properties: { note: { ...str, description: 'Pfad der Notiz (.md)' }, name: { ...str, description: 'Dateiname mit Endung' }, contentBase64: str, contentText: str } }),
+          ...json({ type: 'object', required: ['page', 'name'], properties: { page: { ...str, description: 'Pfad der Seite (.md); früher `note` (geht bis 0.3 weiter)' }, name: { ...str, description: 'Dateiname mit Endung' }, contentBase64: str, contentText: str } }),
         },
         responses: {
           200: ok({ type: 'object', properties: { sourceId: str, path: str, href: str, name: str, size: { type: 'integer' }, image: { type: 'boolean' }, markdown: str } }),
@@ -182,8 +182,8 @@ const spec = {
     },
     '/attachments/{sourceId}/{path}': {
       get: {
-        summary: 'Anhänge einer Notiz',
-        description: 'Dateien, auf die die Notiz verlinkt, mit Größe; `size: null` = verlinkte Datei fehlt.',
+        summary: 'Anhänge einer Seite',
+        description: 'Dateien, auf die die Seite verlinkt, mit Größe; `size: null` = verlinkte Datei fehlt.',
         parameters: [sourceId, notePath],
         responses: { 200: ok({ type: 'array', items: { type: 'object', properties: { path: str, name: str, size: { type: ['integer', 'null'] }, kind: { enum: ['image', 'pdf', 'file'] } } } }), 404: errors[404] },
       },
@@ -192,11 +192,11 @@ const spec = {
       get: {
         summary: 'Änderungen seit einem Stand (für Agenten)',
         description:
-          'Was sich in lesbaren Notizen geändert hat, mit wem (`by`: Name, wie ihn der Server kennt; `null` = von außen, z. B. Git-Push) und auf welchem Weg (`via`). Ohne `after` nur der aktuelle `cursor` als Startpunkt; danach mit `after=<cursor>` abfragen und den neuen `cursor` merken. `wait` wartet bis zu 50 Sekunden auf die erste Änderung (Long Polling). Eigene Änderungen nur mit `own=true`. `reset: true`: Stand zu alt oder Server neu gestartet – einmal neu lesen.',
+          'Was sich in lesbaren Seiten geändert hat, mit wem (`by`: Name, wie ihn der Server kennt; `null` = von außen, z. B. Git-Push) und auf welchem Weg (`via`). Ohne `after` nur der aktuelle `cursor` als Startpunkt; danach mit `after=<cursor>` abfragen und den neuen `cursor` merken. `wait` wartet bis zu 50 Sekunden auf die erste Änderung (Long Polling). Eigene Änderungen nur mit `own=true`. `reset: true`: Stand zu alt oder Server neu gestartet – einmal neu lesen.',
         parameters: [
           { name: 'after', in: 'query', schema: str, description: 'Cursor aus der vorigen Antwort' },
           { name: 'source', in: 'query', schema: str, description: 'nur diese Quelle (ID)' },
-          { name: 'path', in: 'query', schema: str, description: 'nur diese Notiz bzw. alles unter diesem Ordner' },
+          { name: 'path', in: 'query', schema: str, description: 'nur diese Seite bzw. alles unter diesem Ordner' },
           { name: 'wait', in: 'query', schema: { type: 'integer', minimum: 0, maximum: 50 }, description: 'Sekunden auf die erste Änderung warten' },
           { name: 'own', in: 'query', schema: { type: 'boolean' }, description: 'auch eigene Änderungen' },
         ],
@@ -242,7 +242,7 @@ const spec = {
     },
     '/copy/{sourceId}': {
       post: {
-        summary: 'Kopieren (Notiz oder Ordner)',
+        summary: 'Kopieren (Seite oder Ordner)',
         description: 'Gleicher Name im Zielordner, bei Bedarf „(Kopie)“. Jede Kopie bekommt eine neue id.',
         parameters: [sourceId],
         requestBody: { required: true, ...json({ type: 'object', required: ['from'], properties: { from: str, toParent: str, toSourceId: str } }) },
@@ -251,7 +251,7 @@ const spec = {
     },
     '/backlinks/{sourceId}/{path}': {
       get: {
-        summary: 'Notizen, die auf diese verlinken',
+        summary: 'Seiten, die auf diese verlinken',
         parameters: [sourceId, notePath],
         responses: { 200: ok({ type: 'array', items: { type: 'object', properties: { path: str, name: str, title: str, count: { type: 'integer' } } } }), 404: errors[404] },
       },

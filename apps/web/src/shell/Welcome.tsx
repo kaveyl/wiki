@@ -75,11 +75,11 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
   const starred = usePersonal((p) => p.favorites.length > 0);
   const find: Step = hasMounts
     ? {
-        title: role === 'guest' ? t('Geteilte Notiz öffnen') : t('Notizen finden'),
+        title: role === 'guest' ? t('Geteilte Seite öffnen') : t('Seiten finden'),
         text:
           role === 'guest'
-            ? t('Links im Baum steht, was mit dir geteilt wurde. Mit Strg K suchst du darin – auch im Text der Notizen.')
-            : t('Links im Baum stöbern oder mit Strg K suchen – auch im Text der Notizen.'),
+            ? t('Links im Baum steht, was mit dir geteilt wurde. Mit Strg K suchst du darin – auch im Text der Seiten.')
+            : t('Links im Baum stöbern oder mit Strg K suchen – auch im Text der Seiten.'),
         done: opened,
         action: { label: t('Suchen'), run: onSearch },
       }
@@ -87,7 +87,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
         title: t('Auf eine Freigabe warten'),
         text:
           role === 'guest'
-            ? t('Noch ist nichts mit dir geteilt. Sobald dir jemand eine Notiz freigibt, steht sie links im Baum – du bekommst dazu eine E-Mail.')
+            ? t('Noch ist nichts mit dir geteilt. Sobald dir jemand eine Seite freigibt, steht sie links im Baum – du bekommst dazu eine E-Mail.')
             : t('Dir ist noch keine Quelle freigegeben. Ein Administrator gibt dir Quellen oder Ordner frei – danach erscheinen sie links im Baum.'),
       };
   // Admin-only lists (the routes answer 403 otherwise). Invited people count once they have accepted.
@@ -100,7 +100,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
     ? [
         {
           title: t('Quelle einbinden'),
-          text: t('Ein Repository von Gitea, GitHub oder GitLab – oder ein Ordner mit Markdown-Dateien. Deine Notizen bleiben ganz normale Dateien.'),
+          text: t('Ein Repository von Gitea, GitHub oder GitLab – oder ein Ordner mit Markdown-Dateien. Deine Seiten bleiben ganz normale Dateien.'),
           done: hasMounts,
           action: { label: t('Quelle einbinden'), run: onAddMount },
         },
@@ -113,7 +113,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
         {
           title: t('Reverse-Proxy mit https einrichten'),
           text: t(
-            'Ohne https gehen Passwörter und Notizen unverschlüsselt durchs Netz. Ein Reverse-Proxy (z. B. Nginx Proxy Manager, Pangolin, Cloudflare) sorgt für https und sagt Kaveyl Wiki, wer wirklich anfragt – wichtig für Protokoll und Anmeldebremse.',
+            'Ohne https gehen Passwörter und Seiten unverschlüsselt durchs Netz. Ein Reverse-Proxy (z. B. Nginx Proxy Manager, Pangolin, Cloudflare) sorgt für https und sagt Kaveyl Wiki, wer wirklich anfragt – wichtig für Protokoll und Anmeldebremse.',
           ),
           done: !!proxy.data?.https,
           action: { label: t('Reverse-Proxy'), run: () => openSettings('reverse-proxy') },
@@ -137,9 +137,9 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
           ? [
               {
                 title: t('Favoriten merken'),
-                text: t('Der Stern oben rechts in einer Notiz legt sie unter „Favoriten“ ganz oben in die Seitenleiste – auf jedem Gerät, mit dem du dich anmeldest.'),
+                text: t('Der Stern oben rechts auf einer Seite legt sie unter „Favoriten“ ganz oben in die Seitenleiste – auf jedem Gerät, mit dem du dich anmeldest.'),
                 done: starred,
-                action: { label: t('Mehr dazu'), run: () => openHelp('notizen-finden-und-lesen') },
+                action: { label: t('Mehr dazu'), run: () => openHelp('seiten-finden-und-lesen') },
               },
             ]
           : []),
@@ -160,7 +160,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
     {
       icon: <Sparkles />,
       title: t('KI-Assistent'),
-      text: t('Zusammenfassen, umformulieren, übersetzen und Fragen an deine Notizen stellen – mit einem KI-Anbieter deiner Wahl.'),
+      text: t('Zusammenfassen, umformulieren, übersetzen und Fragen an deine Seiten stellen – mit einem KI-Anbieter deiner Wahl.'),
       setup: () => openSettings('ai'),
       help: () => openHelp('ki-assistent'),
       for: ['admin', 'user'],
@@ -168,7 +168,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
     {
       icon: <Plug />,
       title: t('API und MCP'),
-      text: t('Claude, Hermes oder eigene Skripte lesen und schreiben Notizen – mit einem persönlichen Token und genau den Rechten, die du vergibst.'),
+      text: t('Claude, Hermes oder eigene Skripte lesen und schreiben Seiten – mit einem persönlichen Token und genau den Rechten, die du vergibst.'),
       setup: () => openSettings('tokens'),
       help: () => openHelp('api-und-mcp-claude-hermes-skripte'),
       for: ['admin', 'user'],
@@ -192,8 +192,8 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
     {
       icon: <Lock />,
       title: t('Verschlüsselung'),
-      text: t('Einzelne Notizen oder ganze Ordner im Browser verschlüsseln – im Repository liegt dann nur noch Geheimtext.'),
-      help: () => openHelp('verschlüsselte-notizen-und-ordner'),
+      text: t('Einzelne Seiten oder ganze Ordner im Browser verschlüsseln – im Repository liegt dann nur noch Geheimtext.'),
+      help: () => openHelp('verschlüsselte-seiten-und-ordner'),
       for: ['admin', 'user'],
     },
     {
@@ -228,7 +228,7 @@ export function Welcome({ user, hasMounts, onAddMount, onSearch }: { user: User;
         <p className="mt-2 text-[0.9375rem] leading-relaxed text-fg-muted">
           {role === 'guest'
             ? t('Als Gast siehst du nur, was ausdrücklich mit dir geteilt wurde – und kannst es lesen oder, wenn freigegeben, bearbeiten. Jede Änderung bleibt als Version erhalten.')
-            : t('Dein Wiki für Notizen und Wissen – gespeichert als Markdown-Dateien in Git. Hier und in jedem anderen Editor bearbeitbar, mit voller Versionsgeschichte.')}
+            : t('Dein Wiki für Doku und Teamwissen – gespeichert als Markdown-Dateien in Git. Hier und in jedem anderen Editor bearbeitbar, mit voller Versionsgeschichte.')}
         </p>
 
         <section className="mt-8" aria-labelledby="welcome-steps">

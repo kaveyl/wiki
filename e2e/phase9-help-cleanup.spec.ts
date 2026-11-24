@@ -1,6 +1,6 @@
 // Löschregeln (Einstellungen → Aufräumen), restoring from the trash under another name, large
 // images (scaled down on upload, capped height, full-size view) and the in-app help (owner
-// 2026-10-11). Runs after the other specs in the same seeded workspace (admin + "Notizen").
+// 2026-10-11). Runs after the other specs in the same seeded workspace (admin + "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -29,7 +29,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail', { exact: true }).fill('e2e@example.test');
   await page.getByLabel('Passwort', { exact: true }).fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });
 
 const tree = () => page.locator('aside nav[aria-label="Quellen"]');
@@ -46,11 +46,11 @@ async function closeAll() {
 test('Einstellungen → Aufräumen: every rule with its default and what it holds now; rules saved and applied', async () => {
   await openSettings('Aufräumen');
   const panel = settings();
-  for (const title of ['Protokoll', 'Papierkorb der Notizen', 'KI-Chats', 'Datenbank-Sicherungen', 'Gelöschte Repositories', 'Lokale Kopien der Repositories', 'Feste Regeln']) {
+  for (const title of ['Protokoll', 'Papierkorb der Seiten', 'KI-Chats', 'Datenbank-Sicherungen', 'Gelöschte Repositories', 'Lokale Kopien der Repositories', 'Feste Regeln']) {
     await expect(panel.getByRole('region', { name: title })).toBeVisible();
   }
   await expect(panel.getByLabel('Unbenutzte Chats aufbewahren', { exact: true })).toHaveValue('90');
-  await expect(panel.getByLabel('Gelöschte Notizen aufbewahren', { exact: true })).toHaveValue('30');
+  await expect(panel.getByLabel('Gelöschte Seiten aufbewahren', { exact: true })).toHaveValue('30');
   await expect(panel.getByLabel('Tägliche Sicherungen behalten', { exact: true })).toHaveValue('7');
   await expect(panel.getByLabel('Verwaiste Kopien aufbewahren', { exact: true })).toHaveValue('30');
   // Out of range: refused with the allowed range, nothing saved.
@@ -83,7 +83,7 @@ test('Einstellungen → Aufräumen: every rule with its default and what it hold
 test('settings tabs: own rules where they belong, image size for uploads, screenshots', async () => {
   // The trash has no tab of its own any more: its rule and explanation sit in Aufräumen (AD-035).
   await openSettings('Aufräumen');
-  await expect(settings().getByRole('region', { name: 'Papierkorb der Notizen' })).toContainText('„Speichern als“');
+  await expect(settings().getByRole('region', { name: 'Papierkorb der Seiten' })).toContainText('„Speichern als“');
   // DB-Backup: the list starts folded with a summary; what the database holds is in the help.
   await openSettings('Datenbank');
   const files = settings().getByRole('button', { name: 'Vorhandene Backups' });
@@ -131,7 +131,7 @@ test('settings tabs: own rules where they belong, image size for uploads, screen
 });
 
 test('a source keeps its AI chats for its own time (Quelle bearbeiten → „KI-Chats aufbewahren“)', async () => {
-  await tree().getByText('Notizen', { exact: true }).first().click({ button: 'right' });
+  await tree().getByText('Projektwiki', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Quelle bearbeiten …' }).click();
   const dialog = page.getByRole('dialog', { name: /bearbeiten/ });
   const select = dialog.getByLabel('KI-Chats aufbewahren', { exact: true });
@@ -143,15 +143,15 @@ test('a source keeps its AI chats for its own time (Quelle bearbeiten → „KI-
   await dialog.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(dialog).toHaveCount(0);
   const mounts = (await (await page.request.get('/api/mounts')).json()) as { name: string; options: { aiChatDays?: number } }[];
-  expect(mounts.find((m) => m.name === 'Notizen')!.options.aiChatDays).toBe(7);
+  expect(mounts.find((m) => m.name === 'Projektwiki')!.options.aiChatDays).toBe(7);
   // Back to the general rule.
-  await tree().getByText('Notizen', { exact: true }).first().click({ button: 'right' });
+  await tree().getByText('Projektwiki', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Quelle bearbeiten …' }).click();
   await page.getByRole('dialog', { name: /bearbeiten/ }).getByLabel('KI-Chats aufbewahren', { exact: true }).selectOption('-1');
   await page.getByRole('dialog', { name: /bearbeiten/ }).getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   const after = (await (await page.request.get('/api/mounts')).json()) as { name: string; options: { aiChatDays?: number } }[];
-  expect(after.find((m) => m.name === 'Notizen')!.options.aiChatDays).toBe(-1);
+  expect(after.find((m) => m.name === 'Projektwiki')!.options.aiChatDays).toBe(-1);
 });
 
 test('trash: restoring onto a taken name offers another name; nothing is overwritten', async () => {
@@ -165,7 +165,7 @@ test('trash: restoring onto a taken name offers another name; nothing is overwri
   writeFileSync(join(NOTES, 'entwurf.md'), '# Entwurf\n\nNeue Fassung.\n');
   await page.locator('aside').getByRole('button', { name: 'Papierkorb', exact: true }).click();
   const trash = page.getByRole('dialog', { name: 'Papierkorb' });
-  await trash.getByLabel('Quelle', { exact: true }).selectOption({ label: 'Notizen' });
+  await trash.getByLabel('Quelle', { exact: true }).selectOption({ label: 'Projektwiki' });
   await expect(trash).toContainText('entwurf.md');
   await trash.getByRole('button', { name: 'Wiederherstellen', exact: true }).click();
   const asDialog = page.getByRole('dialog', { name: 'Speichern als' });
@@ -325,7 +325,7 @@ test('help: the manual inside Kaveyl Wiki – chapters, search, links, from the 
   await expect(help().getByRole('heading', { name: 'Tastenkürzel', exact: true })).toBeVisible();
   await closeAll();
   // Dialogs carry their own „?“: the KI-Freigabe explains releases.
-  await tree().getByText('Notizen', { exact: true }).first().click({ button: 'right' });
+  await tree().getByText('Projektwiki', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Berechtigungen …' }).click();
   await page.getByRole('dialog', { name: /^Berechtigungen/ }).getByRole('button', { name: 'Hilfe zu diesem Fenster' }).click();
   await expect(help().getByRole('heading', { name: 'Berechtigungen', exact: true })).toBeVisible();
@@ -504,7 +504,7 @@ test('input windows inside Kaveyl Wiki (never the browser): link and formula fro
   await page.keyboard.press('Control+End');
   await page.keyboard.press('Enter');
   await page.keyboard.type('/link');
-  await page.getByRole('button', { name: /URL oder Pfad zu einer Notiz/ }).click();
+  await page.getByRole('button', { name: /URL oder Pfad zu einer Seite/ }).click();
   const link = page.getByRole('dialog', { name: 'Link einfügen' });
   await expect(link.getByLabel('Link-Ziel')).toBeFocused();
   await expect(link.getByRole('button', { name: 'Einfügen' })).toBeDisabled();
@@ -530,8 +530,8 @@ test('links: www.… without https:// opens the web page; right-click shows Kave
   // Never the real Google: answer any request there locally.
   await page.context().route('https://www.google.de/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>Google (Test)</title>ok' }));
   // A link written elsewhere without scheme.
-  writeFileSync(join(NOTES, 'weblinks.md'), '# Weblinks\n\nSuche bei [Google](www.google.de) oder [Notiz](stand.md).\n');
-  await waitIndexed(page, 'Notizen', ['weblinks.md']);
+  writeFileSync(join(NOTES, 'weblinks.md'), '# Weblinks\n\nSuche bei [Google](www.google.de) oder [Seite](stand.md).\n');
+  await waitIndexed(page, 'Projektwiki', ['weblinks.md']);
   await expect(tree().getByText('weblinks', { exact: true }).first()).toBeVisible({ timeout: 15_000 });
   await tree().getByText('weblinks', { exact: true }).first().click();
   const editor = page.locator('.prose-note[contenteditable="true"]').filter({ visible: true });
@@ -556,9 +556,9 @@ test('links: www.… without https:// opens the web page; right-click shows Kave
   await page.keyboard.press('Enter');
   await expect.poll(() => readFileSync(join(NOTES, 'weblinks.md'), 'utf8'), { timeout: 10_000 }).toContain('[Google](https://www.google.de/suche)');
   // A link to a note offers a new tab; „Link entfernen“ keeps the text.
-  await editor.getByRole('link', { name: 'Notiz' }).click({ button: 'right' });
+  await editor.getByRole('link', { name: 'Seite' }).click({ button: 'right' });
   await expect(page.getByRole('menu', { name: 'Link' }).getByRole('menuitem', { name: 'In neuem Tab öffnen' })).toBeVisible();
   await page.getByRole('menu', { name: 'Link' }).getByRole('menuitem', { name: 'Link entfernen' }).click();
-  await expect.poll(() => readFileSync(join(NOTES, 'weblinks.md'), 'utf8'), { timeout: 10_000 }).toContain('oder Notiz.');
+  await expect.poll(() => readFileSync(join(NOTES, 'weblinks.md'), 'utf8'), { timeout: 10_000 }).toContain('oder Seite.');
   await page.context().unroute('https://www.google.de/**');
 });

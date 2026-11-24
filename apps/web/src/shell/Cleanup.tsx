@@ -168,7 +168,7 @@ export function CleanupPanel({ onOpenTab }: { onOpenTab?: (page: CleanupLink) =>
     <div className="space-y-4 text-sm">
       <p className="text-fg-muted">
         {t(
-          'Kaveyl Wiki läuft im Container und legt neben deinen Notizen eigene Daten ab: Protokoll, Papierkorb, KI-Chats, Sicherungen, lokale Kopien der Repositories. Damit nichts unbegrenzt wächst, gilt für jede Art eine Löschregel. Aufgeräumt wird jede Nacht um 3 Uhr – oder hier auf Knopfdruck. Deine Notizen und die Git-Historie löscht keine dieser Regeln.',
+          'Kaveyl Wiki läuft im Container und legt neben deinen Seiten eigene Daten ab: Protokoll, Papierkorb, KI-Chats, Sicherungen, lokale Kopien der Repositories. Damit nichts unbegrenzt wächst, gilt für jede Art eine Löschregel. Aufgeräumt wird jede Nacht um 3 Uhr – oder hier auf Knopfdruck. Deine Seiten und die Git-Historie löscht keine dieser Regeln.',
         )}
       </p>
       <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +193,7 @@ export function CleanupPanel({ onOpenTab }: { onOpenTab?: (page: CleanupLink) =>
       </Section>
 
       <Section
-        title={t('Papierkorb der Notizen')}
+        title={t('Papierkorb der Seiten')}
         now={
           folderTrash.length
             ? tn(trashEntries, '{n} Eintrag · {size} in .kaveyl-wiki/trash', '{n} Einträge · {size} in .kaveyl-wiki/trash', { size: fmtBytes(trashSize) })
@@ -203,14 +203,14 @@ export function CleanupPanel({ onOpenTab }: { onOpenTab?: (page: CleanupLink) =>
         <p className="text-xs text-fg-muted">
           {fillNodes(
             t(
-              'Gelöschte Notizen und Ordner landen im Papierkorb ihrer Quelle (Symbol unten in der Seitenleiste oder Rechtsklick auf die Quelle). Quellen ohne Auto-Commit bewahren sie im versteckten Ordner {ordner} auf; bei Git-Quellen mit Auto-Commit ist die Git-Historie der Papierkorb. Liegt am alten Platz inzwischen eine andere Datei, lässt sich ein Eintrag mit „Speichern als“ unter anderem Namen, in einem anderen Ordner oder einer anderen Quelle wiederherstellen.',
+              'Gelöschte Seiten und Ordner landen im Papierkorb ihrer Quelle (Symbol unten in der Seitenleiste oder Rechtsklick auf die Quelle). Quellen ohne Auto-Commit bewahren sie im versteckten Ordner {ordner} auf; bei Git-Quellen mit Auto-Commit ist die Git-Historie der Papierkorb. Liegt am alten Platz inzwischen eine andere Datei, lässt sich ein Eintrag mit „Speichern als“ unter anderem Namen, in einem anderen Ordner oder einer anderen Quelle wiederherstellen.',
             ),
             { ordner: <code>.kaveyl-wiki/trash</code> },
           )}
         </p>
         <RuleRow
           rule="trashDays"
-          label={t('Gelöschte Notizen aufbewahren')}
+          label={t('Gelöschte Seiten aufbewahren')}
           hint={t('Ordner ohne Auto-Commit: danach endgültig gelöscht. Git-Quellen: nur ausgeblendet, die Historie bleibt.')}
         />
       </Section>

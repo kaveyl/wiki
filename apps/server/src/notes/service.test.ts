@@ -303,7 +303,7 @@ describe('commit message of a batch', () => {
     await notes.saveRaw(mount, 'home.md', '# Willkommen\n', (await notes.read(mount, 'home.md')).hash, USER);
     await notes.saveRaw(mount, path, '# Neu\n', (await notes.read(mount, path)).hash, USER);
     await manager.flush();
-    expect((await git(repoDir(mount, config.dataPath), ['log', '-1', '--format=%s'])).trim()).toBe('docs: 2 Notizen bearbeitet (Kaveyl Wiki)');
+    expect((await git(repoDir(mount, config.dataPath), ['log', '-1', '--format=%s'])).trim()).toBe('docs: 2 Seiten bearbeitet (Kaveyl Wiki)');
   });
 
   it('several people in one batch: each their own commit; a note both edited names the other as co-author', async () => {
@@ -346,7 +346,7 @@ describe('NoteService with a local mount', () => {
     mkdirSync(join(dir, 'src'), { recursive: true });
     writeFileSync(join(dir, 'README.md'), '# Lokal\n');
     writeFileSync(join(dir, 'src', 'code.ts'), 'export {}\n');
-    writeFileSync(join(dir, 'src', 'NOTES.md'), '# Notizen im Code\n');
+    writeFileSync(join(dir, 'src', 'NOTES.md'), '# Seiten im Code\n');
     mount = await manager.create({ name: 'Lokal', type: 'local', source: dir });
   });
 
@@ -726,7 +726,7 @@ describe('moving between mounts', () => {
   beforeEach(async () => {
     dirA = join(root, 'a');
     dirB = join(root, 'b');
-    write(join(dirA, 'plan/kickoff.md'), '# Kickoff\n\n![Bild](assets/foto.png) [Logo](../logo.svg) [Web](https://x.test/a.png) [Notiz](details.md)\n');
+    write(join(dirA, 'plan/kickoff.md'), '# Kickoff\n\n![Bild](assets/foto.png) [Logo](../logo.svg) [Web](https://x.test/a.png) [Seite](details.md)\n');
     write(join(dirA, 'plan/assets/foto.png'), Buffer.from([1, 2, 3]));
     write(join(dirA, 'logo.svg'), '<svg/>');
     write(join(dirA, 'plan/details.md'), '# Details\n\n![](assets/foto.png)\n');
@@ -820,7 +820,7 @@ describe('copying', () => {
   beforeEach(async () => {
     dirA = join(root, 'a');
     dirB = join(root, 'b');
-    write(join(dirA, 'plan/kickoff.md'), '---\nid: 01AAAAAAAAAAAAAAAAAAAAAAAA\n---\n# Kickoff\n\n![Bild](assets/foto.png) [Notiz](details.md) [Oben](../start.md)\n');
+    write(join(dirA, 'plan/kickoff.md'), '---\nid: 01AAAAAAAAAAAAAAAAAAAAAAAA\n---\n# Kickoff\n\n![Bild](assets/foto.png) [Seite](details.md) [Oben](../start.md)\n');
     write(join(dirA, 'plan/assets/foto.png'), Buffer.from([1, 2, 3]));
     write(join(dirA, 'plan/details.md'), '# Details\n\n[Kickoff](kickoff.md)\n');
     write(join(dirA, 'plan/.kaveyl-wiki.yml'), 'order:\n  - details.md\n');
@@ -835,7 +835,7 @@ describe('copying', () => {
     const r = await notes.copy(a, a, 'plan/kickoff.md', 'plan', USER);
     expect(r.path).toBe('plan/kickoff (Kopie).md');
     const copy = read(join(dirA, r.path));
-    expect(copy).toContain('[Notiz](details.md)');
+    expect(copy).toContain('[Seite](details.md)');
     expect(copy).not.toContain('01AAAAAAAAAAAAAAAAAAAAAAAA');
     expect(copy).toMatch(/^---\nid: \w{26}\n---\n# Kickoff/);
     expect((await notes.copy(a, a, 'plan/kickoff.md', 'plan', USER)).path).toBe('plan/kickoff (Kopie 2).md');
@@ -847,7 +847,7 @@ describe('copying', () => {
     expect(r.path).toBe('kickoff.md');
     const copy = read(join(dirA, 'kickoff.md'));
     expect(copy).toContain('![Bild](assets/foto.png)');
-    expect(copy).toContain('[Notiz](plan/details.md)');
+    expect(copy).toContain('[Seite](plan/details.md)');
     expect(copy).toContain('[Oben](start.md)');
     expect(readFileSync(join(dirA, 'assets/foto.png'))).toEqual(Buffer.from([1, 2, 3]));
     expect(read(join(dirA, 'plan/details.md'))).toContain('[Kickoff](kickoff.md)');
@@ -863,7 +863,7 @@ describe('copying', () => {
     expect(r.path).toBe('plan (Kopie)');
     for (const f of ['kickoff.md', 'details.md', 'assets/foto.png', '.kaveyl-wiki.yml', 'geheim/x.md']) expect(existsSync(join(dirA, 'plan (Kopie)', f))).toBe(true);
     for (const f of ['skripte/deploy.sh', '.env', 'daten.json']) expect(existsSync(join(dirA, 'plan (Kopie)', f))).toBe(false);
-    expect(r.warnings).toEqual(['3 andere Datei(en) wurden nicht mitkopiert – nur Notizen, Bilder und Anhänge']);
+    expect(r.warnings).toEqual(['3 andere Datei(en) wurden nicht mitkopiert – nur Seiten, Bilder und Anhänge']);
     for (const f of ['skripte/deploy.sh', '.env', 'daten.json']) rmSync(join(dirA, 'plan', f));
     expect(read(join(dirA, 'plan (Kopie)/details.md'))).toContain('[Kickoff](kickoff.md)');
     expect(read(join(dirA, 'plan (Kopie)/kickoff.md'))).toContain('[Oben](../start.md)');
@@ -874,7 +874,7 @@ describe('copying', () => {
     expect(r.path).toBe('neu/plan');
     expect(existsSync(join(dirB, 'neu/plan/geheim/x.md'))).toBe(false);
     expect(existsSync(join(dirB, 'neu/plan/kickoff.md'))).toBe(true);
-    expect(r.warnings).toEqual(['1 Notiz(en) ohne Leserecht wurden nicht mitkopiert']);
+    expect(r.warnings).toEqual(['1 Seite(n) ohne Leserecht wurden nicht mitkopiert']);
     expect(indexer.get(b.id, 'neu/plan/kickoff.md')).not.toBeNull();
   });
 
@@ -893,7 +893,7 @@ describe('saving as (AD-039)', () => {
   let dirA: string;
   let dirB: string;
   let first: string;
-  const v1 = '---\nid: 01AAAAAAAAAAAAAAAAAAAAAAAA\n---\n# Kickoff\n\n![Bild](assets/foto.png) [Notiz](details.md) [Oben](../start.md)\n';
+  const v1 = '---\nid: 01AAAAAAAAAAAAAAAAAAAAAAAA\n---\n# Kickoff\n\n![Bild](assets/foto.png) [Seite](details.md) [Oben](../start.md)\n';
   const write = (path: string, content: string | Buffer) => {
     mkdirSync(join(path, '..'), { recursive: true });
     writeFileSync(path, content);
@@ -930,7 +930,7 @@ describe('saving as (AD-039)', () => {
     expect(r).toEqual({ path: 'archiv/kickoff alt.md', warnings: [] });
     const saved = readFileSync(join(dirA, r.path), 'utf8');
     expect(saved).toContain('![Bild](assets/foto.png)');
-    expect(saved).toContain('[Notiz](../plan/details.md)');
+    expect(saved).toContain('[Seite](../plan/details.md)');
     expect(saved).toContain('[Oben](../start.md)');
     expect(saved).not.toContain('01AAAAAAAAAAAAAAAAAAAAAAAA');
     expect(readFileSync(join(dirA, 'archiv/assets/foto.png'))).toEqual(Buffer.from([1, 2, 255]));
@@ -944,7 +944,7 @@ describe('saving as (AD-039)', () => {
     const raw = await notes.version(a, first, 'plan/kickoff.md');
     const r = await notes.saveNoteAs(a, 'plan/kickoff.md', raw, a, 'plan/kickoff (alt)', USER, 'x', fromGit);
     expect(r.path).toBe('plan/kickoff (alt).md');
-    expect(readFileSync(join(dirA, 'plan/kickoff (alt).md'), 'utf8')).toContain('[Notiz](details.md)');
+    expect(readFileSync(join(dirA, 'plan/kickoff (alt).md'), 'utf8')).toContain('[Seite](details.md)');
     expect(readFileSync(join(dirA, 'plan/assets/foto.png'))).toEqual(Buffer.from([1, 2, 255]));
   });
 
@@ -984,7 +984,7 @@ describe('saving as (AD-039)', () => {
 describe('fileNameFor', () => {
   it('keeps names readable and safe', () => {
     expect(fileNameFor('  Ä/B\\C?  ')).toBe('Ä - B - C');
-    expect(fileNameFor('..')).toBe('Neue Notiz');
+    expect(fileNameFor('..')).toBe('Neue Seite');
   });
 });
 

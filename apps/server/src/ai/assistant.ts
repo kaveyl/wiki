@@ -21,7 +21,7 @@ export class AiAccessError extends Error {}
  * embellished: "dafür bräuchten wir eine eigene Backstube" became "Einführung einer Backstube").
  */
 export const GROUNDING =
-  'Halte dich streng an die Notizen: Gib nur wieder, was dort ausdrücklich steht, möglichst nah am Wortlaut. Ergänze, deute oder verallgemeinere nichts – Ideen bleiben Ideen, Fragen bleiben Fragen, Bedingungen bleiben Bedingungen (aus „dafür bräuchten wir …“ wird kein „wird eingeführt“), Vorschläge sind keine Beschlüsse. Keine Beispiele, Begründungen, Zahlen oder Details, die nicht in den Notizen stehen. Ideen, Wünsche, Bedingungen und Begründungen zitierst du wörtlich in Anführungszeichen statt sie umzuformulieren. Zieh keine eigenen Schlüsse (aus „seit 20.09. abgeschaltet“ wird kein „das Problem tritt nicht mehr auf“). Enthält die Frage eine Annahme, die die Notizen nicht stützen, sag das ausdrücklich. Eigene Einschätzungen nur, wenn ausdrücklich danach gefragt, und dann als „Einschätzung:“ gekennzeichnet.';
+  'Halte dich streng an die Seiten: Gib nur wieder, was dort ausdrücklich steht, möglichst nah am Wortlaut. Ergänze, deute oder verallgemeinere nichts – Ideen bleiben Ideen, Fragen bleiben Fragen, Bedingungen bleiben Bedingungen (aus „dafür bräuchten wir …“ wird kein „wird eingeführt“), Vorschläge sind keine Beschlüsse. Keine Beispiele, Begründungen, Zahlen oder Details, die nicht in den Seiten stehen. Ideen, Wünsche, Bedingungen und Begründungen zitierst du wörtlich in Anführungszeichen statt sie umzuformulieren. Zieh keine eigenen Schlüsse (aus „seit 20.09. abgeschaltet“ wird kein „das Problem tritt nicht mehr auf“). Enthält die Frage eine Annahme, die die Seiten nicht stützen, sag das ausdrücklich. Eigene Einschätzungen nur, wenn ausdrücklich danach gefragt, und dann als „Einschätzung:“ gekennzeichnet.';
 
 export const ACTIONS = ['rewrite', 'shorten', 'expand', 'grammar', 'translate', 'summarize', 'continue', 'custom'] as const;
 export type AiAction = (typeof ACTIONS)[number];
@@ -163,7 +163,7 @@ export function createAssistant(d: AssistantDeps) {
     if (priv) return priv;
     // Named by the caller, or no private AI: a place released for private AI only is not worked on at all –
     // not even its name goes to this provider (matrix 16.11.: the agent named the source in its task).
-    throw new AiAccessError(`${place.dir ? 'Dieser Bereich' : 'Diese Notiz'} ist ${PRIVATE_ONLY}.`);
+    throw new AiAccessError(`${place.dir ? 'Dieser Bereich' : 'Diese Seite'} ist ${PRIVATE_ONLY}.`);
   };
 
   /** Released, but for private AI only (AD-079): content from here makes a chat private. */
@@ -180,7 +180,7 @@ export function createAssistant(d: AssistantDeps) {
   const keepChatPrivate = (req: FastifyRequest, p: ProviderConfig, chatId: string | undefined, explicit: boolean): ProviderConfig => {
     if (!chatId || isPrivate(p) || !chatPrivate(chatId)) return p;
     const priv = explicit ? null : privateProvider(req);
-    if (!priv) throw new AiAccessError(`Dieser Chat enthält Inhalte aus privaten Notizen und geht nur an eine private KI – für ${p.name} einen neuen Chat beginnen.`);
+    if (!priv) throw new AiAccessError(`Dieser Chat enthält Inhalte aus privaten Seiten und geht nur an eine private KI – für ${p.name} einen neuen Chat beginnen.`);
     return priv;
   };
 
@@ -227,10 +227,10 @@ export function createAssistant(d: AssistantDeps) {
   const noteFor = async (req: FastifyRequest, p: ProviderConfig, mountId: string, path: string, need: AiLevel) => {
     const mount = d.visibleMount(req, mountId);
     const why = blocked(req, p, mount.id, cleanRelPath(path), need);
-    if (why) throw new AiAccessError(`Diese Notiz ist ${why}.`);
+    if (why) throw new AiAccessError(`Diese Seite ist ${why}.`);
     const note = await d.notes.read(mount, path);
-    if (note.frontmatter.ai === false) throw new AiAccessError('Diese Notiz ist mit „ai: false“ für die KI gesperrt.');
-    if (isEncryptedNote(note.raw)) throw new AiAccessError('Verschlüsselte Notizen sind für die KI tabu.');
+    if (note.frontmatter.ai === false) throw new AiAccessError('Diese Seite ist mit „ai: false“ für die KI gesperrt.');
+    if (isEncryptedNote(note.raw)) throw new AiAccessError('Verschlüsselte Seiten sind für die KI tabu.');
     return { mount, note };
   };
 
@@ -247,7 +247,7 @@ export function createAssistant(d: AssistantDeps) {
   };
 
   const auditCall = (req: FastifyRequest, p: ProviderConfig, model: string, what: string, notes: { mountId: string; path: string; hash: string }[], extra: Record<string, unknown> = {}) =>
-    d.audit(req, 'ai-request', `KI (${p.name}, ${model}): ${what}${notes.length ? ` – ${notes.length} Notiz${notes.length === 1 ? '' : 'en'}` : ''}`, {
+    d.audit(req, 'ai-request', `KI (${p.name}, ${model}): ${what}${notes.length ? ` – ${notes.length} Seite${notes.length === 1 ? '' : 'n'}` : ''}`, {
       provider: p.name,
       kind: p.kind,
       cloud: p.cloud,
@@ -338,7 +338,7 @@ export function createAssistant(d: AssistantDeps) {
       } else if (input.action === 'translate') {
         task = `${PROMPTS.translate} Zielsprache: ${input.language?.trim() || 'Englisch'}. Gib nur die Übersetzung aus.`;
       } else task = `${PROMPTS[input.action]} Gib nur das Ergebnis aus.`;
-      // QA 24.11.: „Umformulieren“ machte aus einem Notiz-Link Inline-Code, die Zusammenfassung aus $…$ \(…\).
+      // QA 24.11.: „Umformulieren“ machte aus einem Seiten-Link Inline-Code, die Zusammenfassung aus $…$ \(…\).
       task += `\n${KEEP_MARKDOWN}`;
       const res = await d.providers.chat(p, { system: system(req, task), messages: [{ role: 'user', content: text }], temperature: input.action === 'custom' ? 0.3 : 0.1 });
       auditCall(req, p, res.model, `Aktion „${input.action}“`, [{ mountId: mount.id, path: note.path, hash: note.hash }]);
@@ -386,9 +386,9 @@ export function createAssistant(d: AssistantDeps) {
         : '';
       const task =
         scope.kind === 'general'
-          ? 'Beantworte die Frage frei aus deinem Allgemeinwissen – Wiki-Inhalte stehen dir hier nicht zur Verfügung. Sag offen, wenn du dir unsicher bist oder dein Wissen veraltet sein kann, und erfinde keine Quellen, Links oder Zitate. Fragt der Benutzer nach seinen eigenen Notizen oder Daten, sag, dass du im Bezug „Allgemein“ keinen Zugriff darauf hast und er einen anderen Bezug wählen kann. Antworte in der Sprache der Frage.'
+          ? 'Beantworte die Frage frei aus deinem Allgemeinwissen – Wiki-Inhalte stehen dir hier nicht zur Verfügung. Sag offen, wenn du dir unsicher bist oder dein Wissen veraltet sein kann, und erfinde keine Quellen, Links oder Zitate. Fragt der Benutzer nach seinen eigenen Seiten oder Daten, sag, dass du im Bezug „Allgemein“ keinen Zugriff darauf hast und er einen anderen Bezug wählen kann. Antworte in der Sprache der Frage.'
           : `Beantworte die Frage anhand der nummerierten Quellen aus dem Wiki. Belege Aussagen mit [1], [2] … Steht die Antwort nicht in den Quellen, sag das ehrlich und rate nicht. ${GROUNDING} Antworte in der Sprache der Frage.`;
-      const content = context ? `Quellen:\n\n${context}\n\n---\n\nFrage: ${question}` : scope.kind === 'general' ? question : `Es wurden keine freigegebenen Notizen zu dieser Frage gefunden.\n\nFrage: ${question}`;
+      const content = context ? `Quellen:\n\n${context}\n\n---\n\nFrage: ${question}` : scope.kind === 'general' ? question : `Es wurden keine freigegebenen Seiten zu dieser Frage gefunden.\n\nFrage: ${question}`;
       let res;
       try {
         res = await d.providers.chat(p, { system: system(req, task), messages: [...history, { role: 'user', content }], maxTokens: 2048, temperature: scope.kind === 'general' ? 0.3 : 0.1, signal });

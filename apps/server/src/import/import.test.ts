@@ -124,7 +124,7 @@ describe('names, files and links (all formats)', () => {
       files: [],
       warnings: [],
     });
-    expect(plan.notes.map((x) => x.path)).toEqual(['Ordner - eins/Plan - v2.md', 'Ordner - eins/plan - v2 2.md', 'Import-Bericht 2.md', 'Neue Notiz.md']);
+    expect(plan.notes.map((x) => x.path)).toEqual(['Ordner - eins/Plan - v2.md', 'Ordner - eins/plan - v2 2.md', 'Import-Bericht 2.md', 'Neue Seite.md']);
     expect(plan.folders).toBe(1);
   });
 
@@ -327,10 +327,10 @@ describe('HedgeDoc', () => {
     expect(note(plan, 'Code und Formeln.md')).toContain('```mermaid');
     expect(plan.warnings.map((w) => [w.text, w.notes.length + w.items.length])).toEqual([
       ['Links auf Seiten oder Dateien, die nicht im Export sind', 1],
-      ['Notizen mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links', 3],
+      ['Seiten mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links', 3],
       ['Links auf andere HedgeDoc-Notizen – HedgeDoc exportiert keine Notiz-Adressen, die Links zeigen weiter auf den alten Server', 44],
       ['Folien – sie erscheinen als normaler Text', 1],
-      ['Leere Notizen – nicht übernommen', 1],
+      ['Leere Seiten – nicht übernommen', 1],
     ]);
     expect(plan.remote).toEqual({ count: 4, servers: ['127.0.0.1:8097'] });
   });
@@ -355,7 +355,7 @@ describe('HedgeDoc', () => {
     expect(note(plan, 'Touren 2026 – Alpen.md')).toContain('![Gipfelfoto](assets/Gipfelfoto.jpg)');
     const medien = note(plan, 'Medien.md')!;
     expect(medien).toMatch(/!\[GIF\]\(http:\/\/127\.0\.0\.1:8097\/uploads\/[\w-]+\.gif\)/);
-    expect(plan.warnings.find((w) => w.text.startsWith('Notizen mit Bildern, die sich vom alten Server nicht holen ließen'))!.notes).toEqual(['Medien.md']);
+    expect(plan.warnings.find((w) => w.text.startsWith('Seiten mit Bildern, die sich vom alten Server nicht holen ließen'))!.notes).toEqual(['Medien.md']);
     expect(plan.remote.count).toBe(1);
   });
 
@@ -533,7 +533,7 @@ describe('Logseq', () => {
     expect(plan.warnings.map((w) => [w.text, w.notes.length + w.items.length])).toEqual([
       ['[[Links]] auf Seiten, die nicht im Export sind – sie bleiben als Text stehen', 2],
       ['Block-Verweise und Einbettungen – als Link auf die Seite mit dem Text des Blocks übernommen', 2],
-      ['Abfragen von Logseq ({{query}}, #+BEGIN_QUERY) – sie stehen als Text bzw. Codeblock in der Notiz', 1],
+      ['Abfragen von Logseq ({{query}}, #+BEGIN_QUERY) – sie stehen als Text bzw. Codeblock in der Seite', 1],
       ['Seiten im Org-Format – nicht übernommen', 1],
       ['Leere Seiten – nicht übernommen', 1],
       ['Einstellungen von Logseq (Ordner logseq/, versteckte Dateien) – nicht übernommen', 2],
@@ -601,7 +601,7 @@ describe('SilverBullet', () => {
     expect(plan.warnings.map((w) => [w.text, w.notes.length + w.items.length])).toEqual([
       ['[[Links]] auf Seiten, die nicht im Export sind – sie bleiben als Text stehen', 1],
       ['Einstellungen und Erweiterungen von SilverBullet (CONFIG, Bibliothek, Plugs) – nicht übernommen', 1],
-      ['Lua-Ausdrücke und Abfragen von SilverBullet – sie stehen als Text in der Notiz und werden nicht ausgeführt', 5],
+      ['Lua-Ausdrücke und Abfragen von SilverBullet – sie stehen als Text in der Seite und werden nicht ausgeführt', 5],
     ]);
   });
 });
@@ -654,9 +654,9 @@ describe('Obsidian', () => {
       ['Callouts – auf die fünf Arten von Kaveyl Wiki abgebildet, einklappbare als aufklappbarer Abschnitt', 7],
       ['Aufgaben mit eigenem Zustand ([/], [>], [?] …) – als offen übernommen, [-] (abgebrochen) als erledigt', 1],
       ['Hervorhebungen (==Text==) – als fett übernommen', 2],
-      ['Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Notiz', 2],
+      ['Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Seite', 2],
       ['Kommentare (%%…%%) – als unsichtbare HTML-Kommentare übernommen', 2],
-      ['Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Notiz', 2],
+      ['Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Seite', 2],
     ]);
   });
 
@@ -699,9 +699,9 @@ describe('Obsidian', () => {
     expect(plan.warnings.map((w) => [w.text, w.notes.length + w.items.length])).toEqual([
       ['Einstellungen von Obsidian (Ordner .obsidian: Plugins, Themes, Arbeitsbereich) – nicht übernommen', 0],
       ['Hervorhebungen (==Text==) – als fett übernommen', 1],
-      ['Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Notiz', 2],
+      ['Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Seite', 2],
       ['Kommentare (%%…%%) – als unsichtbare HTML-Kommentare übernommen', 1],
-      ['Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Notiz', 1],
+      ['Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Seite', 1],
     ]);
   });
 });
@@ -758,7 +758,7 @@ describe('Trilium', () => {
       ['Labels und Beziehungen von Trilium – als Eigenschaften im Frontmatter übernommen', 14],
       ['Leinwände, Mindmaps und Beziehungskarten – als Datei (JSON) übernommen, Leinwände mit ihrem Bild', 3],
       ['Suchen, Render-, Webseiten- und Karten-Notizen von Trilium – nicht übernommen', 3],
-      ['Links auf Notizen, die nicht im Export sind – nur der Text bleibt', 1],
+      ['Links auf Seiten, die nicht im Export sind – nur der Text bleibt', 1],
       ['Tabellen mit verbundenen Zellen oder Absätzen – vereinfacht als Markdown-Tabelle, bitte prüfen', 1],
     ]);
   });
@@ -812,7 +812,7 @@ describe('Wiki.js', () => {
       ['Seiten aus dem visuellen Editor oder mit HTML – in Markdown umgewandelt, bitte Aussehen prüfen', 7],
       ['AsciiDoc-Seiten – als Codeblock übernommen', 2],
       ['Unveröffentlichte Seiten – übernommen, im Frontmatter steht published: false', 1],
-      ['Zeichnungen (draw.io) – stehen als Codeblock in der Notiz', 1],
+      ['Zeichnungen (draw.io) – stehen als Codeblock in der Seite', 1],
     ]);
     // A link to Wiki.js's tag page is text (code-010c).
     expect(note(plan, 'Veranstaltungen/index.md')).toContain('Alle Termine mit Tag: lesung. Archiv: [Sommerfest 2024](Archiv/Sommerfest%202024.md).');
@@ -963,7 +963,7 @@ describe('crafted exports (Diff-Prüfung 0.2.6)', () => {
 
     const tooMany = Array.from({ length: IMPORT_LIMITS.entries + 1 }, (_, i) => ({ noteId: `n${i}`, title: `T${i}`, type: 'text', dataFileName: 'A.md' }));
     const file = await zipFile(triliumZip(tooMany, { 'A.md': 'x' }));
-    await expect(convertExport({ file, format: 'trilium', folderNote: 'index.md', blocked: [], fetch: false })).rejects.toThrow(`mehr als ${IMPORT_LIMITS.entries} Notizen und Dateien`);
+    await expect(convertExport({ file, format: 'trilium', folderNote: 'index.md', blocked: [], fetch: false })).rejects.toThrow(`mehr als ${IMPORT_LIMITS.entries} Seiten und Dateien`);
   }, 60_000);
 
   it('Wiki.js: leaves the Git folder of the storage out', async () => {

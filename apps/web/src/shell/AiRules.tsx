@@ -136,7 +136,7 @@ export function AiRulesSection({ mounts }: { mounts: Mount[] }) {
           <RuleRow key={r.id} rule={r} mount={mounts.find((m) => m.id === r.mountId)} kinds={kinds} />
         ))}
         {all.length === 0 ? (
-          <p className="px-2 py-1 text-xs text-fg-faint">{t('Noch keine KI-Freigaben. Rechtsklick auf eine Quelle, einen Ordner oder eine Notiz → „KI-Freigabe …“.')}</p>
+          <p className="px-2 py-1 text-xs text-fg-faint">{t('Noch keine KI-Freigaben. Rechtsklick auf eine Quelle, einen Ordner oder eine Seite → „KI-Freigabe …“.')}</p>
         ) : (
           shown.length === 0 && <div className="flex h-7 items-center pl-2 text-xs text-fg-faint">{t('Keine passende Freigabe')}</div>
         )}

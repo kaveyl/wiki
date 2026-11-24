@@ -108,7 +108,7 @@ export function WatchDialog({ mountId, path, isDir, title, onClose }: { mountId:
     e.preventDefault();
     void save({ badge, mail, pushover: push });
   };
-  const what = !path ? t('alles in dieser Quelle') : isDir ? t('alles in diesem Ordner') : t('diese Notiz');
+  const what = !path ? t('alles in dieser Quelle') : isDir ? t('alles in diesem Ordner') : t('diese Seite');
   const openSettings = () => {
     onClose();
     openSettingsPage('watching');
@@ -124,7 +124,7 @@ export function WatchDialog({ mountId, path, isDir, title, onClose }: { mountId:
             <input type="checkbox" className="mt-0.5" checked={badge} onChange={(e) => setBadge(e.target.checked)} />
             <span>
               <span className="font-medium">{t('Punkt in der Seitenleiste')}</span>
-              <span className="block text-xs text-fg-muted">{t('Bis du die Notiz öffnest; Neues steht auch unter „Neu für dich“.')}</span>
+              <span className="block text-xs text-fg-muted">{t('Bis du die Seite öffnest; Neues steht auch unter „Neu für dich“.')}</span>
             </span>
           </label>
           <label className={cx('flex items-start gap-2', !ch?.mail && 'opacity-60')}>
@@ -281,7 +281,7 @@ export function WatchingPanel({ mounts }: { mounts: Mount[] }) {
     <div className="max-w-2xl space-y-6 text-sm">
       <section className="space-y-2">
         <p className="text-fg-muted">
-          {fillNodes(t('Beobachten startest du mit einem Rechtsklick auf eine Notiz, einen Ordner oder eine Quelle → {cmd}.'), { cmd: <b className="text-fg">{t('Beobachten …')}</b> })}
+          {fillNodes(t('Beobachten startest du mit einem Rechtsklick auf eine Seite, einen Ordner oder eine Quelle → {cmd}.'), { cmd: <b className="text-fg">{t('Beobachten …')}</b> })}
         </p>
         {!d.watches.length ? (
           <p className="text-fg-faint">{t('Du beobachtest noch nichts.')}</p>

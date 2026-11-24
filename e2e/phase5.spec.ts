@@ -1,5 +1,5 @@
 // Phase 5: AI assistant in the UI against a fake OpenAI-compatible provider started here.
-// Runs after phase1–4 in the same seeded workspace (admin + local mount "Notizen").
+// Runs after phase1–4 in the same seeded workspace (admin + local mount "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -40,7 +40,7 @@ function agentStep(messages: { role: string; content: string | null }[], res: im
   const say = (text: string) => res.end(JSON.stringify({ model: 'test-modell', choices: [{ message: { content: text } }] }));
   if (user.includes('Übersicht')) {
     if (!lastTool) return call('list_sources', {});
-    const src = /sourceId=(\S+) name="Notizen"/.exec(lastTool);
+    const src = /sourceId=(\S+) name="Projektwiki"/.exec(lastTool);
     if (src) return call('propose_create_note', { sourceId: src[1], parent: 'plan', title: 'Übersicht', markdown: '# Übersicht\n\n- [Roadmap](roadmap.md)\n', reason: 'Wie gewünscht' });
     return say('Ich habe eine Übersicht für „plan“ vorgeschlagen.');
   }
@@ -65,7 +65,7 @@ test.beforeAll(async ({ browser }) => {
         ? 'Die Roadmap verweist auf Trilium [1].'
         : last.trimEnd().endsWith('und dann')
           ? 'und dann folgt [Termin].' // „Weiterschreiben“ after a broken-off sentence, repeating its last words
-          : 'Siehe dazu die **Trilium**-Notiz.';
+          : 'Siehe dazu die **Trilium**-Seite.';
       res.end(JSON.stringify({ model: 'test-modell', choices: [{ message: { content: text } }] }));
     });
   });
@@ -76,7 +76,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });
 
 test.afterAll(async () => {
@@ -103,7 +103,7 @@ test('admin sets up a provider; without a release the AI sees nothing', async ()
   // The AI button is grey with the reason instead of a menu whose actions all fail (QA 24.11.).
   const ai = page.getByRole('toolbar', { name: 'Formatierung' }).filter({ visible: true }).getByRole('button', { name: 'KI' });
   await expect(ai).toBeDisabled();
-  await expect(ai).toHaveAttribute('title', 'Für diese Notiz ist die KI nicht freigegeben');
+  await expect(ai).toHaveAttribute('title', 'Für diese Seite ist die KI nicht freigegeben');
   expect(prompts).toHaveLength(0);
 });
 
@@ -124,17 +124,17 @@ test('release a folder, rewrite a selection as a suggestion, replace it', async 
   await page.getByRole('button', { name: 'KI' }).filter({ visible: true }).last().click();
   await page.getByRole('menuitem', { name: 'Umformulieren' }).click();
   // Shown formatted like the note (bold is bold), not as raw Markdown.
-  await expect(page.getByLabel('KI-Vorschlag')).toContainText('Siehe dazu die Trilium-Notiz.');
+  await expect(page.getByLabel('KI-Vorschlag')).toContainText('Siehe dazu die Trilium-Seite.');
   await expect(page.getByLabel('KI-Vorschlag').locator('strong')).toHaveText('Trilium');
   expect(prompts.at(-1)).toContain('Siehe');
   await shot(page, '62-ki-vorschlag');
   await page.getByRole('button', { name: 'Ersetzen' }).click();
-  await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toContain('Siehe dazu die **Trilium**-Notiz.');
+  await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toContain('Siehe dazu die **Trilium**-Seite.');
 });
 
 test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', async () => {
   const rules = page.getByRole('list', { name: 'KI-Freigaben' });
-  const mountRow = tree().locator('[data-mount]').filter({ hasText: 'Notizen' }).first();
+  const mountRow = tree().locator('[data-mount]').filter({ hasText: 'Projektwiki' }).first();
   // The folder released above: ✦ in the tree, a row in the overview.
   const planMark = tree().locator('[data-node]').filter({ has: page.getByText('plan', { exact: true }) }).getByRole('button', { name: /KI-Freigabe: freigegeben/ });
   await expect(planMark).toBeVisible();
@@ -159,7 +159,7 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   // The overview is a view of the sidebar of its own (redesign 23.11.).
   await sidebarView(page, 'KI-Freigaben');
   await expect(rules.getByRole('listitem')).toHaveCount(1);
-  await expect(rules.getByRole('listitem').first()).toContainText('plan (Notizen)');
+  await expect(rules.getByRole('listitem').first()).toContainText('plan (Projektwiki)');
   // Block the whole source: second row, ✦ at the source.
   await sidebarView(page, 'Baum');
   await mountRow.click({ button: 'right' });
@@ -174,10 +174,10 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   const section = page.locator('aside').getByRole('region', { name: 'KI-Freigaben' });
   await section.getByRole('button', { name: 'gesperrt' }).click();
   await expect(rules.getByRole('listitem')).toHaveCount(1);
-  await expect(rules.getByRole('listitem').first()).toContainText('Notizen');
+  await expect(rules.getByRole('listitem').first()).toContainText('Projektwiki');
   await section.getByRole('button', { name: 'aktiv' }).click();
   await expect(rules.getByRole('listitem')).toHaveCount(1);
-  await expect(rules.getByRole('listitem').first()).toContainText('plan (Notizen)');
+  await expect(rules.getByRole('listitem').first()).toContainText('plan (Projektwiki)');
   // „nur private KI“ only matters with providers both with and without the private tick (AD-079).
   await expect(section.getByRole('button', { name: 'privat' })).toHaveCount(0);
   await section.getByRole('button', { name: 'alle' }).click();
@@ -278,12 +278,12 @@ test('"KI fragen …" also in the editor\'s KI menu, with this note as the scope
   await page.getByRole('menuitem', { name: 'KI fragen …' }).click();
   const dialog = page.getByRole('dialog', { name: 'Frag die Wissensbasis' });
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByLabel('Bezug').locator('option:checked')).toHaveText('Diese Notiz (roadmap)');
-  // „In Notiz einfügen“ (owner 24.11.): below the paragraph with the cursor, the cited source as a link from this note.
+  await expect(dialog.getByLabel('Bezug').locator('option:checked')).toHaveText('Diese Seite (roadmap)');
+  // „In Seite einfügen“ (owner 24.11.): below the paragraph with the cursor, the cited source as a link from this note.
   await dialog.getByRole('textbox', { name: 'Frage' }).fill('Worauf verweist die Roadmap hier?');
   await dialog.getByRole('button', { name: 'Fragen' }).click();
   await expect(dialog.getByText('Die Roadmap verweist auf Trilium [1].')).toBeVisible();
-  await dialog.getByRole('button', { name: 'In Notiz einfügen' }).click();
+  await dialog.getByRole('button', { name: 'In Seite einfügen' }).click();
   await expect(dialog).toHaveCount(0);
   const editor = page.locator('.prose-note').filter({ visible: true });
   await expect(editor.getByText('Die Roadmap verweist auf Trilium [1].')).toBeVisible();
@@ -296,7 +296,7 @@ test('"KI fragen …" also in the editor\'s KI menu, with this note as the scope
 
 test('Alt+↑/↓ moves a list item inside its list and a paragraph past its neighbour (owner 24.11.)', async () => {
   writeFileSync(join(NOTES, 'plan/Reihenfolge.md'), '# Reihenfolge\n\nErster Absatz\n\nZweiter Absatz\n\n- eins\n- zwei\n- drei\n');
-  await waitIndexed(page, 'Notizen', ['plan/Reihenfolge.md']);
+  await waitIndexed(page, 'Projektwiki', ['plan/Reihenfolge.md']);
   await tree().getByText('Reihenfolge', { exact: true }).first().click();
   const editor = page.locator('.prose-note').filter({ visible: true });
   // A moment after each click: the editor takes the clicked place over on mouse-up, a key at once would still move
@@ -339,7 +339,7 @@ test('agent proposes a new note; it is created only after "Übernehmen"', async 
   await page.getByRole('textbox', { name: 'Frage' }).fill('Leg im Ordner plan eine Übersicht an');
   await page.getByRole('button', { name: 'Fragen' }).click();
   const card = page.getByLabel('Vorschlag');
-  await expect(card).toContainText('Neue Notiz „Übersicht“ in Notizen / plan');
+  await expect(card).toContainText('Neue Seite „Übersicht“ in Projektwiki / plan');
   expect(read('plan/Übersicht.md')).toBe('');
   await card.getByRole('button', { name: 'Vorschau' }).click();
   await expect(card).toContainText('- [Roadmap](roadmap.md)');
@@ -381,17 +381,17 @@ test('chats: answers formatted like a note, a general question has a hint, the h
   await tools.getByRole('button', { name: 'Markdown' }).click();
   await expect(dialog.getByLabel('Antwort als Markdown').last()).toBeVisible();
   await tools.getByRole('button', { name: 'Formatiert' }).click();
-  await tools.getByRole('button', { name: 'Als Notiz speichern …' }).click();
-  const save = page.getByRole('dialog', { name: 'Antwort als Notiz speichern' });
+  await tools.getByRole('button', { name: 'Als Seite speichern …' }).click();
+  const save = page.getByRole('dialog', { name: 'Antwort als Seite speichern' });
   await save.getByLabel('Titel').fill('KI-Antwort Test');
   await save.getByRole('button', { name: 'Speichern' }).click();
-  await expect(page.getByText('Als Notiz gespeichert')).toBeVisible();
+  await expect(page.getByText('Als Seite gespeichert')).toBeVisible();
   await expect(page.locator('.prose-note h1').filter({ visible: true })).toHaveText('KI-Antwort Test');
   await page.locator('aside').getByRole('button', { name: 'KI fragen' }).click();
   await dialog.getByRole('button', { name: 'Neuer Chat' }).click();
   const general = await dialog.getByLabel('Bezug').locator('option', { hasText: 'Allgemein (ohne Wiki)' }).getAttribute('value');
   await dialog.getByLabel('Bezug').selectOption(general!);
-  await expect(dialog.getByText('Es geht keine Notiz an den Anbieter')).toBeVisible();
+  await expect(dialog.getByText('Es geht keine Seite an den Anbieter')).toBeVisible();
   // „Verlauf löschen …“: the last 24 hours (all test chats), after asking.
   await history.getByRole('button', { name: 'Verlauf löschen …' }).click();
   await page.getByRole('menuitem', { name: 'Letzte 24 Stunden' }).click();

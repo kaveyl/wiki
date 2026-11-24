@@ -152,7 +152,7 @@ export const wikijs: ImportFormat = {
     w('Seiten aus dem visuellen Editor oder mit HTML – in Markdown umgewandelt, bitte Aussehen prüfen', html);
     w('AsciiDoc-Seiten – als Codeblock übernommen', adoc);
     w('Unveröffentlichte Seiten – übernommen, im Frontmatter steht published: false', drafts);
-    w('Zeichnungen (draw.io) – stehen als Codeblock in der Notiz', diagrams);
+    w('Zeichnungen (draw.io) – stehen als Codeblock in der Seite', diagrams);
     if (notText.length) draft.warnings.push({ text: 'Dateien, die kein Text sind – nicht übernommen', items: notText });
     if (hidden.length) draft.warnings.push({ text: 'Versteckte Dateien (Einstellungen anderer Programme) – nicht übernommen', items: hidden });
     return draft;

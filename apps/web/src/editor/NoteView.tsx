@@ -147,7 +147,7 @@ export function NoteView({
     return (
       <div className="mx-auto max-w-xl p-10 text-center">
         <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-warn" />
-        <p className="font-medium">{missing ? t('Diese Notiz existiert nicht (mehr).') : t('Notiz konnte nicht geladen werden.')}</p>
+        <p className="font-medium">{missing ? t('Diese Seite existiert nicht (mehr).') : t('Seite konnte nicht geladen werden.')}</p>
         <p className="mt-1 text-sm text-fg-muted">{e instanceof ApiError && !missing ? e.message : path}</p>
         {missing && <p className="mt-2 text-sm text-fg-muted">{t('Vielleicht wurde sie verschoben oder gelöscht.')}</p>}
         <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -441,7 +441,7 @@ function Loaded({
     await save();
     try {
       if (await (action === 'encrypt' ? encryptNote(mount.id, note.path) : decryptNote(mount.id, note.path))) {
-        toast({ kind: 'ok', title: action === 'encrypt' ? t('Notiz verschlüsselt') : t('Verschlüsselung entfernt') });
+        toast({ kind: 'ok', title: action === 'encrypt' ? t('Seite verschlüsselt') : t('Verschlüsselung entfernt') });
         void qc.invalidateQueries({ queryKey: ['attachments', mount.id, note.path] });
         await onReload();
       }
@@ -458,7 +458,7 @@ function Loaded({
       const content = snap?.raw ?? (snap?.doc ? saveMarkdown(loadMarkdown(note.raw).source, snap.doc) : undefined);
       if (await encryptIntoFolder(mount.id, encryptedFolder!, note.path, content)) {
         s.current.dirty = false;
-        toast({ kind: 'ok', title: t('Notiz verschlüsselt') });
+        toast({ kind: 'ok', title: t('Seite verschlüsselt') });
         await onReload();
       }
     } catch (e) {
@@ -496,8 +496,8 @@ function Loaded({
       void confirmDialog(
         tn(
           editors.length,
-          '{names} bearbeitet diese Notiz gerade. Wenn ihr beide ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der beiden Fassungen gewählt werden – was nur in der anderen steht, fehlt dann in der Notiz.',
-          '{names} bearbeiten diese Notiz gerade. Wenn ihr gleichzeitig ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der Fassungen gewählt werden – was nur in den anderen steht, fehlt dann in der Notiz.',
+          '{names} bearbeitet diese Seite gerade. Wenn ihr beide ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der beiden Fassungen gewählt werden – was nur in der anderen steht, fehlt dann auf der Seite.',
+          '{names} bearbeiten diese Seite gerade. Wenn ihr gleichzeitig ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der Fassungen gewählt werden – was nur in den anderen steht, fehlt dann auf der Seite.',
           { names },
         ),
         { confirmLabel: t('Trotzdem bearbeiten') },
@@ -681,7 +681,7 @@ function Loaded({
       setConflict(null);
       const now = captureCaret(rootRef.current);
       caret.current = now?.focused ? now : (caretAtConflict.current ?? now);
-      toast({ kind: 'ok', title: t('Zusammengeführt'), text: t('Deine Änderungen und die der anderen Seite sind beide in der Notiz.') });
+      toast({ kind: 'ok', title: t('Zusammengeführt'), text: t('Deine Änderungen und die der anderen stehen jetzt beide auf der Seite.') });
       await onReload();
     } catch (e) {
       toast({ kind: 'error', title: t('Nicht zusammengeführt'), text: errorText(e) });
@@ -717,7 +717,7 @@ function Loaded({
     }
   };
   const loadTheirs = async () => {
-    const ok = await confirmDialog(t('Deine ungespeicherten Änderungen an dieser Notiz gehen dabei verloren. Fremde Version trotzdem laden?'), {
+    const ok = await confirmDialog(t('Deine ungespeicherten Änderungen an dieser Seite gehen dabei verloren. Fremde Version trotzdem laden?'), {
       confirmLabel: t('Verwerfen und laden'),
       danger: true,
     });
@@ -756,14 +756,14 @@ function Loaded({
           <span className="flex-1">
             {conflict.kind === 'deleted'
               ? plainNote
-                ? t('Diese Notiz wurde außerhalb gelöscht oder verschoben. Deine Fassung kannst du als neue Notiz sichern.')
-                : t('Diese Notiz wurde außerhalb gelöscht oder verschoben.')
-              : t('Die Notiz wurde außerhalb geändert, während du sie bearbeitet hast.')}
+                ? t('Diese Seite wurde außerhalb gelöscht oder verschoben. Deine Fassung kannst du als neue Seite sichern.')
+                : t('Diese Seite wurde außerhalb gelöscht oder verschoben.')
+              : t('Die Seite wurde außerhalb geändert, während du sie bearbeitet hast.')}
           </span>
           {conflict.kind === 'deleted' ? (
             plainNote && (
               <Button size="sm" variant="primary" onClick={() => setSavingAs(true)}>
-                {t('Als neue Notiz speichern …')}
+                {t('Als neue Seite speichern …')}
               </Button>
             )
           ) : (
@@ -805,7 +805,7 @@ function Loaded({
         <SaveAsDialog
           help="konflikte-auflösen"
           kind="note"
-          intro={t('Deine Fassung wird eine neue Notiz. Bilder und Anhänge, auf die sie verweist, kommen mit.')}
+          intro={t('Deine Fassung wird eine neue Seite. Bilder und Anhänge, auf die sie verweist, kommen mit.')}
           start={{ mountId: mount.id, folder: splitPath(note.path, 'note').folder }}
           name={splitPath(note.path, 'note').name}
           onClose={() => setSavingAs(false)}
@@ -816,7 +816,7 @@ function Loaded({
             s.current.savedKey = snapshot.current()?.key ?? null;
             s.current.dirty = false;
             await qc.invalidateQueries({ queryKey: ['tree', r.mountId] });
-            toast({ kind: r.warnings.length ? 'warn' : 'ok', title: t('Als neue Notiz gespeichert'), text: [r.path, ...r.warnings].join('\n') });
+            toast({ kind: r.warnings.length ? 'warn' : 'ok', title: t('Als neue Seite gespeichert'), text: [r.path, ...r.warnings].join('\n') });
             setSavingAs(false);
             openNote(r.mountId, r.path, noteNameIn(r.mountId, r.path));
             revealInTree(r.mountId, r.path);
@@ -826,7 +826,7 @@ function Loaded({
       {inEncryptedFolder && !seal && !readonly && (
         <div className="flex flex-wrap items-center gap-2 border-b border-line bg-[color-mix(in_srgb,var(--warn)_12%,var(--bg))] px-4 py-2 text-sm">
           <AlertTriangle className="h-4 w-4 text-warn" />
-          <span className="flex-1">{t('Diese Notiz liegt unverschlüsselt im verschlüsselten Ordner „{folder}“ und lässt sich so nicht speichern.', { folder: encryptedFolder ?? '' })}</span>
+          <span className="flex-1">{t('Diese Seite liegt unverschlüsselt im verschlüsselten Ordner „{folder}“ und lässt sich so nicht speichern.', { folder: encryptedFolder ?? '' })}</span>
           <Button size="sm" variant="primary" onClick={() => void sealIntoFolder()}>
             {t('Jetzt verschlüsseln')}
           </Button>
@@ -835,7 +835,7 @@ function Loaded({
       {!note.doc && (
         <p className="flex items-start gap-2 border-b border-line bg-muted/40 px-4 py-1.5 text-xs text-fg-muted" role="note">
           <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0 text-warn" />
-          {t('Diese Notiz ist zu groß (über 256 KB) oder zu verschachtelt für den Editor und erscheint als Markdown-Quelltext. Ihre Links auf andere Notizen zählen nicht für Rückverweise und die Link-Prüfung.')}
+          {t('Diese Seite ist zu groß (über 256 KB) oder zu verschachtelt für den Editor und erscheint als Markdown-Quelltext. Ihre Links auf andere Seiten zählen nicht für Rückverweise und die Link-Prüfung.')}
         </p>
       )}
       {mode === 'rich' && note.doc ? (
@@ -1007,7 +1007,7 @@ function RichEditor({
   const [editorDom, setEditorDom] = useState<HTMLElement | null>(null);
   const [linkMenu, setLinkMenu] = useState<LinkMenuAt | null>(null);
   openLinkMenu.current = setLinkMenu;
-  /** „Notiz anlegen“ for a link that leads nowhere: created where it points, then opened in a new tab. */
+  /** „Seite anlegen“ for a link that leads nowhere: created where it points, then opened in a new tab. */
   const createLinkTarget = async (at: LinkMenuAt) => {
     const target = resolveHref(at.href, note.path);
     const want = target && noteCandidates(target.path, mount.options.folderNote)[0];
@@ -1022,7 +1022,7 @@ function RichEditor({
       void qc.invalidateQueries({ queryKey: ['tree', mount.id] });
       void openInternal(mount, path, openNote, true);
     } catch (e) {
-      toast({ kind: 'error', title: t('Notiz nicht angelegt'), text: errorText(e) });
+      toast({ kind: 'error', title: t('Seite nicht angelegt'), text: errorText(e) });
     }
   };
   useEffect(() => {
@@ -1413,7 +1413,7 @@ function NoteHeader({
     <div ref={headerRef} className="@container flex h-[46px] shrink-0 items-center gap-1 border-b border-line-soft px-2 text-[0.8125rem] sm:gap-1.5 sm:px-3 md:px-[22px]" data-print="hide">
       <Popover.Root open={iconOpen} onOpenChange={setIconOpen}>
         <Popover.Trigger asChild disabled={!canWrite}>
-          <button className="-ml-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg hover:bg-hover" aria-label={t('Icon der Notiz')} title={canWrite ? t('Icon ändern') : undefined}>
+          <button className="-ml-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg hover:bg-hover" aria-label={t('Icon der Seite')} title={canWrite ? t('Icon ändern') : undefined}>
             <EntryIcon icon={icon} isDir={false} />
           </button>
         </Popover.Trigger>
@@ -1440,7 +1440,7 @@ function NoteHeader({
               type="button"
               className="flex min-w-0 max-w-full items-center gap-1 rounded-lg px-1 text-left text-fg-muted hover:bg-hover [@media(hover:none)]:min-h-8"
               title={`${mount.name} / ${note.path}`}
-              aria-label={t('Pfad der Notiz')}
+              aria-label={t('Pfad der Seite')}
             >
               {/* "…" via CSS, so the text of the crumbs stays the bare path */}
               <span aria-hidden className={cx("shrink-0 text-fg-faint before:content-['…']", crumbs.length > 2 ? '@3xl:hidden' : '@lg:hidden')} />
@@ -1463,7 +1463,7 @@ function NoteHeader({
             </button>
           </Popover.Trigger>
           <Popover.Portal>
-            <PopoverContent align="start" sideOffset={4} aria-label={t('Pfad der Notiz')} className="z-50 p-2 text-sm">
+            <PopoverContent align="start" sideOffset={4} aria-label={t('Pfad der Seite')} className="z-50 p-2 text-sm">
               <ol>
                 {crumbs.map((c, i) => (
                   <li key={i} className={cx('break-words py-0.5', i === crumbs.length - 1 ? 'text-fg' : 'text-fg-muted')} style={{ paddingLeft: `${Math.min(i, 6) * 0.75}rem` }}>
@@ -1485,7 +1485,7 @@ function NoteHeader({
       )}
       {lockable && (
         // Locked: a clearly coloured pill, not a quiet button – it is the only hint that the note cannot be edited (QA 24.11.).
-        <Button size="sm" variant="ghost" className={unlocked ? undefined : 'rounded-full bg-warn-soft text-warn hover:bg-warn-soft hover:opacity-90'} onClick={onToggleLock} title={unlocked ? t('Wieder sperren') : t('Notiz ist als schreibgeschützt markiert – zum Bearbeiten entsperren')}>
+        <Button size="sm" variant="ghost" className={unlocked ? undefined : 'rounded-full bg-warn-soft text-warn hover:bg-warn-soft hover:opacity-90'} onClick={onToggleLock} title={unlocked ? t('Wieder sperren') : t('Seite ist als schreibgeschützt markiert – zum Bearbeiten entsperren')}>
           {unlocked ? <LockOpen className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
           {unlocked ? t('Entsperrt') : t('Nur lesen')}
         </Button>
@@ -1546,7 +1546,7 @@ function NoteHeader({
                       <DM.Item
                         onSelect={() => openAction({ kind: 'mail-notes', mountId: mount.id, notes: [{ path: note.path, title: displayName }] })}
                         disabled={!session?.mail || encrypted}
-                        title={!session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : encrypted ? t('Verschlüsselte Notizen lassen sich nicht per Mail versenden') : undefined}
+                        title={!session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : encrypted ? t('Verschlüsselte Seiten lassen sich nicht per Mail versenden') : undefined}
                         className={MENU_ITEM}
                       >
                         <Mail className="h-4 w-4 text-fg-muted" /> {t('Per Mail versenden …')}
@@ -1745,7 +1745,7 @@ function PresenceChip({ users }: { users: PresenceUser[] }) {
   const names = (list: PresenceUser[]) => list.map((u) => u.name).join(', ');
   const text = editing.length
     ? tn(editing.length, '{names} bearbeitet gerade', '{names} bearbeiten gerade', { names: names(editing) })
-    : tn(users.length, '{names} hat die Notiz offen', '{names} haben die Notiz offen', { names: names(users) });
+    : tn(users.length, '{names} hat die Seite offen', '{names} haben die Seite offen', { names: names(users) });
   return (
     <span className={cx('flex max-w-[40%] items-center gap-1 truncate rounded-full px-2 py-0.5 text-xs', editing.length ? 'bg-[color-mix(in_srgb,var(--warn)_15%,var(--bg))] text-warn' : 'bg-muted text-fg-muted')} title={text} role="status">
       <Users className="h-3.5 w-3.5 shrink-0" />

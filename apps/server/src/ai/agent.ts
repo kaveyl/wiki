@@ -136,7 +136,7 @@ const str = { type: 'string' } as const;
 const TOOLS: ToolDef[] = [
   {
     name: 'search',
-    description: 'Volltextsuche in den für dich freigegebenen Notizen. Operatoren: "Phrase", -wort, tag:x, in:ordner. Liefert Quelle (sourceId), Pfad, Titel und Ausschnitt.',
+    description: 'Volltextsuche in den für dich freigegebenen Seiten. Operatoren: "Phrase", -wort, tag:x, in:ordner. Liefert Quelle (sourceId), Pfad, Titel und Ausschnitt.',
     parameters: { type: 'object', properties: { query: str, limit: { type: 'number', description: 'höchstens so viele Treffer (Standard 10)' } }, required: ['query'] },
   },
   {
@@ -146,32 +146,32 @@ const TOOLS: ToolDef[] = [
   },
   {
     name: 'list_tree',
-    description: 'Ordner und Notizen einer Quelle unterhalb von path (leer = oberste Ebene), zwei Ebenen tief.',
+    description: 'Ordner und Seiten einer Quelle unterhalb von path (leer = oberste Ebene), zwei Ebenen tief.',
     parameters: { type: 'object', properties: { sourceId: str, path: str }, required: ['sourceId'] },
   },
   {
     name: 'read_note',
-    description: 'Liest eine Notiz als Markdown. Die Antwort nennt die Quellen-Nummer [n], mit der du Aussagen belegst.',
+    description: 'Liest eine Seite als Markdown. Die Antwort nennt die Quellen-Nummer [n], mit der du Aussagen belegst.',
     parameters: { type: 'object', properties: { sourceId: str, path: str }, required: ['sourceId', 'path'] },
   },
   {
     name: 'get_backlinks',
-    description: 'Welche Notizen auf diese Notiz verlinken.',
+    description: 'Welche Seiten auf diese Seite verlinken.',
     parameters: { type: 'object', properties: { sourceId: str, path: str }, required: ['sourceId', 'path'] },
   },
   {
     name: 'propose_create_note',
-    description: 'Schlägt eine neue Notiz vor (wird erst nach Bestätigung des Benutzers angelegt). parent = Ordner ("" = oberste Ebene), title = Dateiname ohne .md.',
+    description: 'Schlägt eine neue Seite vor (wird erst nach Bestätigung des Benutzers angelegt). parent = Ordner ("" = oberste Ebene), title = Dateiname ohne .md.',
     parameters: { type: 'object', properties: { sourceId: str, parent: str, title: str, markdown: str, reason: str }, required: ['sourceId', 'parent', 'title', 'markdown'] },
   },
   {
     name: 'propose_edit_note',
-    description: 'Schlägt neuen Inhalt für eine bestehende Notiz vor (ganzer Markdown-Text, Frontmatter darf fehlen – er bleibt erhalten). Lies die Notiz vorher. Wird erst nach Bestätigung geändert.',
+    description: 'Schlägt neuen Inhalt für eine bestehende Seite vor (ganzer Markdown-Text, Frontmatter darf fehlen – er bleibt erhalten). Lies die Seite vorher. Wird erst nach Bestätigung geändert.',
     parameters: { type: 'object', properties: { sourceId: str, path: str, markdown: str, reason: str }, required: ['sourceId', 'path', 'markdown'] },
   },
   {
     name: 'propose_move_note',
-    description: 'Schlägt vor, eine Notiz oder einen Ordner umzubenennen/zu verschieben (to = neuer Pfad in derselben Quelle). Links werden beim Ausführen angepasst.',
+    description: 'Schlägt vor, eine Seite oder einen Ordner umzubenennen/zu verschieben (to = neuer Pfad in derselben Quelle). Links werden beim Ausführen angepasst.',
     parameters: { type: 'object', properties: { sourceId: str, from: str, to: str, reason: str }, required: ['sourceId', 'from', 'to'] },
   },
   {
@@ -377,7 +377,7 @@ export function createAgent(d: AgentDeps) {
           case 'get_backlinks':
             return `Sucht Links auf ${s(a.path)}`;
           case 'propose_create_note':
-            return `Schlägt eine neue Notiz „${s(a.title)}“ vor`;
+            return `Schlägt eine neue Seite „${s(a.title)}“ vor`;
           case 'propose_edit_note':
             return `Schlägt eine Änderung an ${s(a.path)} vor`;
           case 'propose_move_note':
@@ -409,9 +409,9 @@ export function createAgent(d: AgentDeps) {
                     hits.push(h);
                   }
               hits = hits.slice(0, limit);
-              note = `Keine Notiz enthält alle Wörter zusammen; Treffer für einzelne Wörter (${words.join(', ')}):\n`;
+              note = `Keine Seite enthält alle Wörter zusammen; Treffer für einzelne Wörter (${words.join(', ')}):\n`;
             }
-            if (!hits.length) return 'Keine Treffer in den freigegebenen Notizen.';
+            if (!hits.length) return 'Keine Treffer in den freigegebenen Seiten.';
             return note + hits.map((h) => `- sourceId=${h.sourceId} (${name(h.sourceId)}) path=${h.path} titel="${h.title}"${h.snippet ? ` … ${h.snippet} …` : ''}`).join('\n');
           }
           case 'list_sources': {
@@ -437,7 +437,7 @@ export function createAgent(d: AgentDeps) {
           case 'read_note': {
             const sourceId = s(a.sourceId);
             const path = cleanRelPath(s(a.path));
-            if (!inScope(sourceId, path)) return 'Diese Notiz liegt außerhalb des Bezugs.';
+            if (!inScope(sourceId, path)) return 'Diese Seite liegt außerhalb des Bezugs.';
             const { mount, note } = await noteFor(req, p, sourceId, path, 'read');
             touched(mount.id, note.path);
             let n = sources.find((x) => x.mountId === mount.id && x.path === note.path)?.n;
@@ -450,9 +450,9 @@ export function createAgent(d: AgentDeps) {
           }
           case 'get_backlinks': {
             const sourceId = s(a.sourceId);
-            if (!mayRead(sourceId, cleanRelPath(s(a.path)))) return 'Diese Notiz ist nicht freigegeben.';
+            if (!mayRead(sourceId, cleanRelPath(s(a.path)))) return 'Diese Seite ist nicht freigegeben.';
             const links = await visible(await d.ops.backlinks(req, sourceId, s(a.path)), (b) => [sourceId, b.path]);
-            return links.length ? links.map((b) => `- ${b.path}`).join('\n') : 'Keine Notiz verlinkt hierher.';
+            return links.length ? links.map((b) => `- ${b.path}`).join('\n') : 'Keine Seite verlinkt hierher.';
           }
           case 'propose_create_note': {
             const parent = s(a.parent) ? cleanRelPath(s(a.parent)) : '';
@@ -511,7 +511,7 @@ export function createAgent(d: AgentDeps) {
         touched(mount.id, note.path);
         sources.push({ n: 1, mountId: mount.id, path: note.path, title: note.title });
         read.push({ mountId: mount.id, path: note.path, hash: note.hash });
-        preface.push(`Notiz im Fokus – Quelle [1]: ${mount.name} / ${note.path} („${note.title}“)\n\n${cut(note.raw)}`);
+        preface.push(`Seite im Fokus – Quelle [1]: ${mount.name} / ${note.path} („${note.title}“)\n\n${cut(note.raw)}`);
       }
       const instructions = await d.memory.context(req, p, scope, (mountId) => !!d.rules.anyReleased(mountId) && sourceInScope(mountId), seen);
       // A source with nothing released for this AI (e.g. only a subfolder „nur private KI“): not even its name or the
@@ -526,15 +526,15 @@ export function createAgent(d: AgentDeps) {
             ? `die Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`
             : scope.kind === 'folder'
               ? `den Ordner „${scope.path}“ der Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`
-              : `die Notiz im Fokus und ihre Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`;
+              : `die Seite im Fokus und ihre Quelle „${name(scope.mountId)}“ (sourceId=${scope.mountId})`;
       const task = [
         `Du arbeitest mit Werkzeugen auf dem Wiki. Bezug dieser Unterhaltung: ${where}.`,
-        'Stütze Antworten auf Notizen: suche (search), sieh dich um (list_tree) und lies (read_note), bevor du dich auf eine Notiz beziehst. Belege Aussagen mit der Quellen-Nummer [n] aus read_note. Rate nicht – steht etwas nicht in den Notizen, sag das.',
-        'Hat die Frage mehrere Teile, suche jeden Teil einzeln (kurze Suchbegriffe, z. B. „Ideen“ und „2027“ statt alles in einer Suche). Sage erst, dass etwas nicht in den Notizen steht, wenn du gezielt danach gesucht und den Ordnerbaum (list_tree) angesehen hast.',
+        'Stütze Antworten auf Seiten: suche (search), sieh dich um (list_tree) und lies (read_note), bevor du dich auf eine Seite beziehst. Belege Aussagen mit der Quellen-Nummer [n] aus read_note. Rate nicht – steht etwas nicht in den Seiten, sag das.',
+        'Hat die Frage mehrere Teile, suche jeden Teil einzeln (kurze Suchbegriffe, z. B. „Ideen“ und „2027“ statt alles in einer Suche). Sage erst, dass etwas nicht in den Seiten steht, wenn du gezielt danach gesucht und den Ordnerbaum (list_tree) angesehen hast.',
         GROUNDING,
         'Du kannst nichts direkt ändern. Nur wenn der Benutzer darum bittet, legst du mit propose_create_note, propose_edit_note, propose_move_note oder propose_remember Vorschläge an; der Benutzer prüft und bestätigt sie. Löschen ist nicht möglich.',
         // Seen in the live test (2026-10-08): "[1]" and "{{date}}" ended up in a proposed note.
-        `Der Inhalt vorgeschlagener Notizen steht für sich: keine Quellen-Nummern [n] (die gelten nur in deiner Antwort im Chat; verweise in der Notiz stattdessen mit einem Markdown-Link auf die Notiz, z. B. [Kassensystem](Kassensystem.md)) und keine Platzhalter wie {{date}} – schreibe echte Werte. Heute ist der ${new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}.`,
+        `Der Inhalt vorgeschlagener Seiten steht für sich: keine Quellen-Nummern [n] (die gelten nur in deiner Antwort im Chat; verweise in der Seite stattdessen mit einem Markdown-Link auf die Seite, z. B. [Kassensystem](Kassensystem.md)) und keine Platzhalter wie {{date}} – schreibe echte Werte. Heute ist der ${new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}.`,
         // A closing summary of the answer re-condensed it and drifted from the notes (live test 2026-10-08).
         'Hast du Vorschläge angelegt, nenne am Ende kurz, was du vorgeschlagen hast. Sonst keine Zusammenfassung oder Kurzfassung am Ende – die Antwort nicht wiederholen. Antworte in der Sprache der Frage.',
         instructions,
@@ -679,7 +679,7 @@ export function createAgent(d: AgentDeps) {
           await d.notes.saveRaw(mount, pr.path, pr.content ?? '', base, ai);
           result = pr.path;
         } else if (pr.kind === 'create') {
-          result = await d.notes.create(mount, pr.path, pr.title ?? 'Neue Notiz', 'file', ai);
+          result = await d.notes.create(mount, pr.path, pr.title ?? 'Neue Seite', 'file', ai);
           const created = await d.notes.read(mount, result);
           const nid = created.frontmatter.id;
           const content = typeof nid === 'string' && !/^---\n[\s\S]*?\bid:/.test(pr.content ?? '') ? setFrontmatterKeys(pr.content ?? '', { id: nid }) : (pr.content ?? '');
@@ -693,8 +693,8 @@ export function createAgent(d: AgentDeps) {
         }
       } catch (e) {
         if (e instanceof ConflictError) {
-          d.db.prepare("UPDATE ai_proposals SET status = 'failed', result = ?, decided_at = ? WHERE id = ?").run('Notiz wurde inzwischen geändert', now(), id);
-          throw new ProposalError('Die Notiz wurde seit dem Vorschlag geändert – bitte die KI neu fragen.', 409);
+          d.db.prepare("UPDATE ai_proposals SET status = 'failed', result = ?, decided_at = ? WHERE id = ?").run('Seite wurde inzwischen geändert', now(), id);
+          throw new ProposalError('Die Seite wurde seit dem Vorschlag geändert – bitte die KI neu fragen.', 409);
         }
         throw e;
       }

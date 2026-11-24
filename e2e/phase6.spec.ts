@@ -1,5 +1,5 @@
 // Phase 6: Excalidraw drawings, HTML export, print view.
-// Runs after phase1–5 in the same seeded workspace (admin + local mount "Notizen").
+// Runs after phase1–5 in the same seeded workspace (admin + local mount "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -19,8 +19,8 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
-  mountId = ((await (await page.request.get('/api/mounts')).json()) as { id: string; name: string }[]).find((m) => m.name === 'Notizen')!.id;
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
+  mountId = ((await (await page.request.get('/api/mounts')).json()) as { id: string; name: string }[]).find((m) => m.name === 'Projektwiki')!.id;
 });
 
 const tree = () => page.locator('aside nav[aria-label="Quellen"]');
@@ -142,5 +142,5 @@ test('export: HTML or Markdown from one „Exportieren“ submenu (note, folder)
   await expect(page.locator('h1')).toHaveText('Roadmap');
   await page.screenshot({ path: join(SHOTS, '66-html-export.png') });
   await page.goto('/');
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });

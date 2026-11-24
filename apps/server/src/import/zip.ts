@@ -132,7 +132,7 @@ export class ImportZip {
             if (!asText.has(path)) {
               asText.add(path);
               textBytes += entry.uncompressedSize;
-              if (textBytes > IMPORT_LIMITS.text) throw new ImportError('Die Notizen im ZIP sind zusammen größer als 300 MB');
+              if (textBytes > IMPORT_LIMITS.text) throw new ImportError('Die Seiten im ZIP sind zusammen größer als 300 MB');
             }
             const data = await bytes();
             if (data.includes(0)) return null;

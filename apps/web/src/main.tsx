@@ -31,7 +31,7 @@ void reloadingOnce('kaveyl-wiki-app-reload', loadLanguage().then(() => import('.
   () =>
     root.render(
       <div role="alert" className="flex h-full flex-col items-center justify-center gap-3 p-10 text-center text-sm text-fg-muted">
-        <p>{t('Dieser Teil der App konnte nicht geladen werden. Bitte die Seite neu laden.')}</p>
+        <p>{t('Dieser Teil der App konnte nicht geladen werden. Bitte die App neu laden.')}</p>
         <button type="button" className="h-7 rounded-md bg-accent px-2 text-xs font-medium text-accent-fg hover:opacity-90" onClick={() => location.reload()}>
           {t('Neu laden')}
         </button>

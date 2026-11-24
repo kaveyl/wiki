@@ -33,6 +33,6 @@ export async function importFiles(qc: QueryClient, mountId: string, parent: stri
   }
   await qc.invalidateQueries({ queryKey: ['tree', mountId] });
   if (done.length === 1) useWorkspace.getState().revealInTree(mountId, done[0]!);
-  if (done.length) toast({ kind: 'ok', title: tn(done.length, '{n} Notiz importiert', '{n} Notizen importiert'), text: done.join('\n') });
+  if (done.length) toast({ kind: 'ok', title: tn(done.length, '{n} Seite importiert', '{n} Seiten importiert'), text: done.join('\n') });
   if (failed.length) toast({ kind: 'error', title: tn(failed.length, '{n} Datei nicht importiert', '{n} Dateien nicht importiert'), text: failed.join('\n') });
 }

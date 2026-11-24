@@ -28,7 +28,7 @@ export async function uploadFiles(editor: Editor, qc: QueryClient, mount: Mount,
       const sealed = sealedAtStart || isSealed(mount.id, notePath);
       const passphrase = sealed ? passphraseFor(mount.id, notePath) : null;
       // Locked in the meantime: never fall back to a plain upload.
-      if (sealed && !passphrase) throw new Error(t('Die Notiz wurde gesperrt – entsperren und die Datei erneut hinzufügen.'));
+      if (sealed && !passphrase) throw new Error(t('Die Seite wurde gesperrt – entsperren und die Datei erneut hinzufügen.'));
       const a = passphrase
         ? await api.upload(mount.id, notePath, new File([(await encryptBytes(passphrase, new Uint8Array(await file.arrayBuffer()))) as BlobPart], `${file.name}.age`))
         : await api.upload(mount.id, notePath, file);

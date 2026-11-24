@@ -110,15 +110,15 @@ export const SLASH_ITEMS: SlashItem[] = [
   },
   { title: t('Trennlinie'), hint: t('Horizontale Linie'), keywords: ['hr', 'divider', 'linie', 'trennlinie', 'line', 'rule'], icon: <Minus />, run: (e, r) => chain(e, r).setHorizontalRule().run() },
   {
-    title: t('Notiz verlinken'),
-    hint: t('Notiz suchen und verlinken (auch mit [[)'),
-    keywords: ['notiz', 'note', 'link', 'verlinken', 'wiki', '[['],
+    title: t('Seite verlinken'),
+    hint: t('Seite suchen und verlinken (auch mit [[)'),
+    keywords: ['seite', 'page', 'notiz', 'note', 'link', 'verlinken', 'wiki', '[['],
     icon: <FileSymlink />,
     run: (e, r) => chain(e, r).insertContent('[[').run(),
   },
   {
     title: t('Datei oder Bild'),
-    hint: t('Hochladen nach assets/ neben der Notiz'),
+    hint: t('Hochladen nach assets/ neben der Seite'),
     keywords: ['bild', 'image', 'datei', 'file', 'anhang', 'attachment', 'upload', 'pdf'],
     icon: <Paperclip />,
     run: (e, r) => {
@@ -170,7 +170,7 @@ export const SLASH_ITEMS: SlashItem[] = [
   },
   {
     title: t('Link'),
-    hint: t('URL oder Pfad zu einer Notiz'),
+    hint: t('URL oder Pfad zu einer Seite'),
     keywords: ['link', 'url', 'verweis'],
     icon: <Link2 />,
     run: (e, r) =>
@@ -180,7 +180,7 @@ export const SLASH_ITEMS: SlashItem[] = [
           confirmLabel: t('Einfügen'),
           help: 'links-und-verlinkt-von',
           fields: [
-            { name: 'href', label: t('Link-Ziel'), placeholder: t('https://… oder ../notiz.md'), hint: t('Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Notiz. Notizen per Suche: [[ tippen.'), required: true, mono: true },
+            { name: 'href', label: t('Link-Ziel'), placeholder: t('https://… oder ../seite.md'), hint: t('Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Seite. Seiten per Suche: [[ tippen.'), required: true, mono: true },
             { name: 'text', label: t('Linktext'), placeholder: t('leer = das Link-Ziel') },
           ],
         });

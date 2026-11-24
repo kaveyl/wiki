@@ -221,7 +221,7 @@ export function createOps(d: OpsDeps) {
     /** Replaces the whole file; `baseHash` from read() guards against overwriting newer changes (409). */
     async write(req: FastifyRequest, via: Via, sourceId: string, path: string, markdown: string, baseHash: string) {
       if (typeof markdown !== 'string') throw new PathError('markdown fehlt');
-      if (typeof baseHash !== 'string' || !baseHash) throw new PathError('baseHash fehlt (aus dem Lesen der Notiz)');
+      if (typeof baseHash !== 'string' || !baseHash) throw new PathError('baseHash fehlt (aus dem Lesen der Seite)');
       const mount = d.access(req, sourceId, path, 'write', false);
       const res = await d.notes.saveRaw(mount, path, markdown, baseHash, d.author(req));
       if (res.changed) done(req, via, 'note-saved', `Gespeichert: ${cleanRelPath(path)}`, mount);

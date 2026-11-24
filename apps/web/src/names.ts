@@ -20,7 +20,7 @@ export function rememberFolderNotes(mounts: { id: string; name?: string; options
   }
 }
 
-/** „Pfad kopieren“: the full path with the source in front, as a person names it (owner 25.10.) – `Quelle/Ordner/Notiz.md`. */
+/** „Pfad kopieren“: the full path with the source in front, as a person names it (owner 25.10.) – `Quelle/Ordner/Seite.md`. */
 export function fullPath(mountId: string, path: string): string {
   const source = sourceNames.get(mountId);
   if (!source) return path;

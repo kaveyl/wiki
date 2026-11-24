@@ -209,7 +209,7 @@ function CustomTab({ value, onPick }: { value: string | null; onPick: (icon: str
       )}
       {confirm && (
         <div className="flex items-center gap-2 rounded bg-subtle px-2 py-1.5 text-xs">
-          <span className="flex-1">{t('Icon „{name}“ löschen? Notizen damit zeigen dann ein leeres Feld.', { name: icons.data?.find((i) => i.id === confirm)?.name ?? '' })}</span>
+          <span className="flex-1">{t('Icon „{name}“ löschen? Seiten damit zeigen dann ein leeres Feld.', { name: icons.data?.find((i) => i.id === confirm)?.name ?? '' })}</span>
           <button className="rounded px-1.5 py-0.5 text-danger hover:bg-hover" onClick={() => void remove(confirm)}>
             {t('Löschen')}
           </button>

@@ -2,6 +2,7 @@
 // touching this file): nothing without a login, a token never does more than its scopes and its owner allow,
 // no CSRF way in with the session cookie, no tricks with paths or URLs. AD-020 (access), AD-023 (tokens, MCP).
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { LEGACY_V1 } from './api/v1.js';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import type { InjectOptions, Response } from 'light-my-request';
@@ -184,7 +185,7 @@ describe('without a login', () => {
 
   it('URL tricks do not slip past the login check', async () => {
     const leaks: string[] = [];
-    const targets = ['/api/mounts', `/api/v1/notes/${mountId}/docs/home.md`, `/api/notes/${mountId}/docs/home.md`, `/api/files/${mountId}/docs/home.md`, '/api/admin/users', '/api/tokens'];
+    const targets = ['/api/mounts', `/api/v1/pages/${mountId}/docs/home.md`, `/api/notes/${mountId}/docs/home.md`, `/api/files/${mountId}/docs/home.md`, '/api/admin/users', '/api/tokens'];
     for (const t of targets) {
       const rest = t.slice('/api'.length);
       for (const url of [
@@ -464,9 +465,9 @@ describe('tokens', () => {
     const onlyMcp = await token(admin, ['mcp']);
     const onlyRead = await token(admin, ['read']);
     expect((await inject({ method: 'GET', url: '/api/v1/sources', headers: bearer(onlyMcp.token) })).statusCode).toBe(403);
-    expect((await inject({ method: 'GET', url: `/api/v1/notes/${mountId}/docs/home.md`, headers: bearer(onlyMcp.token) })).statusCode).toBe(403);
+    expect((await inject({ method: 'GET', url: `/api/v1/pages/${mountId}/docs/home.md`, headers: bearer(onlyMcp.token) })).statusCode).toBe(403);
     const call = (t: string) =>
-      inject({ method: 'POST', url: '/mcp', payload: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'read_note', arguments: { source_id: mountId, path: 'docs/home.md' } } }), headers: { 'content-type': 'application/json', ...bearer(t) } });
+      inject({ method: 'POST', url: '/mcp', payload: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'read_page', arguments: { source_id: mountId, path: 'docs/home.md' } } }), headers: { 'content-type': 'application/json', ...bearer(t) } });
     expect((await call(onlyRead.token)).statusCode).toBe(403);
     expect((await call(onlyMcp.token)).body).not.toContain('Trilium');
   });
@@ -679,15 +680,15 @@ describe('paths', () => {
       if (/GEHEIM-AUSSERHALB|root:x:/.test(body)) leaks.push(`${what} → ${status}`);
     };
     for (const p of [...tricks, 'docs/link-raus.md', 'docs/ordner-raus/passwort.md', 'docs/bild-raus.png', 'docs/ordner-raus/bild.png']) {
-      for (const url of [`/api/v1/notes/${mountId}/${p}`, `/api/notes/${mountId}/${p}`, `/api/files/${mountId}/${p}`, `/api/v1/attachments/${mountId}/${p}`, `/api/export/${mountId}/${p}`, `/api/history/${mountId}/${p}`]) {
+      for (const url of [`/api/v1/pages/${mountId}/${p}`, `/api/notes/${mountId}/${p}`, `/api/files/${mountId}/${p}`, `/api/v1/attachments/${mountId}/${p}`, `/api/export/${mountId}/${p}`, `/api/history/${mountId}/${p}`]) {
         const res = await inject({ method: 'GET', url, headers: bearer(t.token) });
         look(url, res.statusCode, res.body);
         const res2 = await inject({ method: 'GET', url, headers: { cookie: admin } });
         look(`${url} (session)`, res2.statusCode, res2.body);
       }
       const decoded = decodeURIComponent(p);
-      const mcp = await inject({ method: 'POST', url: '/mcp', payload: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'read_note', arguments: { source_id: mountId, path: decoded } } }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
-      look(`MCP read_note ${decoded}`, mcp.statusCode, mcp.body);
+      const mcp = await inject({ method: 'POST', url: '/mcp', payload: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'read_page', arguments: { source_id: mountId, path: decoded } } }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
+      look(`MCP read_page ${decoded}`, mcp.statusCode, mcp.body);
     }
     const tree = await inject({ method: 'GET', url: `/api/v1/tree/${mountId}`, headers: bearer(t.token) });
     look('tree', tree.statusCode, tree.body);
@@ -701,18 +702,18 @@ describe('paths', () => {
     const h = { 'content-type': 'application/json', ...bearer(t.token) };
     const outcomes: string[] = [];
     for (const p of [...tricks.map(decodeURIComponent), 'docs/link-raus.md', 'docs/ordner-raus/neu.md']) {
-      const put = await inject({ method: 'PUT', url: `/api/v1/notes/${mountId}/${p}`, payload: JSON.stringify({ markdown: '# kaputt\n', baseHash: 'x' }), headers: h });
+      const put = await inject({ method: 'PUT', url: `/api/v1/pages/${mountId}/${p}`, payload: JSON.stringify({ markdown: '# kaputt\n', baseHash: 'x' }), headers: h });
       if (put.statusCode < 300) outcomes.push(`PUT ${p} → ${put.statusCode}`);
       // A leading slash or a strange name just lands inside the source – only the file system check below matters.
-      await inject({ method: 'POST', url: `/api/v1/notes/${mountId}`, payload: JSON.stringify({ parent: p, title: 'neu' }), headers: h });
+      await inject({ method: 'POST', url: `/api/v1/pages/${mountId}`, payload: JSON.stringify({ parent: p, title: 'neu' }), headers: h });
       await inject({ method: 'POST', url: `/api/v1/folders/${mountId}`, payload: JSON.stringify({ parent: p, name: 'neu' }), headers: h });
-      const up = await inject({ method: 'POST', url: `/api/v1/attachments/${mountId}`, payload: JSON.stringify({ note: p, name: 'x.svg', contentText: '<svg/>' }), headers: h });
+      const up = await inject({ method: 'POST', url: `/api/v1/attachments/${mountId}`, payload: JSON.stringify({ page: p, name: 'x.svg', contentText: '<svg/>' }), headers: h });
       if (up.statusCode < 300) outcomes.push(`upload to ${p} → ${up.statusCode} ${up.body}`);
       const up2 = await inject({ method: 'POST', url: `/api/v1/attachments/${mountId}`, payload: JSON.stringify({ note: 'docs/home.md', name: p.split('/').join('_') === p ? '../../x.svg' : p, contentText: '<svg/>' }), headers: h });
       if (up2.statusCode < 300 && !(up2.json() as { path: string }).path.startsWith('docs/assets/')) outcomes.push(`upload name ${p} → ${up2.body}`);
       const mv = await inject({ method: 'POST', url: `/api/v1/move/${mountId}`, payload: JSON.stringify({ from: 'docs/home.md', to: p }), headers: h });
       if (mv.statusCode < 300) outcomes.push(`move to ${p} → ${mv.statusCode} ${mv.body}`);
-      const del = await inject({ method: 'DELETE', url: `/api/v1/notes/${mountId}/${p}`, headers: bearer(t.token) });
+      const del = await inject({ method: 'DELETE', url: `/api/v1/pages/${mountId}/${p}`, headers: bearer(t.token) });
       if (del.statusCode < 300 && !p.startsWith('/')) outcomes.push(`DELETE ${p} → ${del.statusCode}`); // „/etc/passwd“ = etc/passwd inside, made above
     }
     expect(outcomes).toEqual([]);
@@ -743,7 +744,7 @@ describe('paths', () => {
       [`/api/notes/${id}/passwort.md`, { cookie: admin }],
       [`/api/files/${id}/bild.png`, { cookie: admin }],
       [`/api/order/${id}`, { cookie: admin }],
-      [`/api/v1/notes/${id}/passwort.md`, bearer(t.token)],
+      [`/api/v1/pages/${id}/passwort.md`, bearer(t.token)],
       [`/api/v1/tree/${id}`, bearer(t.token)],
       ['/api/v1/search?q=GEHEIM', bearer(t.token)],
     ] as const) {
@@ -751,8 +752,8 @@ describe('paths', () => {
       if (/GEHEIM-AUSSERHALB/.test(res.body) || (url.includes('/tree/') && res.body.includes('passwort.md'))) leaks.push(`${url} → ${res.statusCode}`);
     }
     expect(leaks).toEqual([]);
-    await inject({ method: 'PUT', url: `/api/v1/notes/${id}/neu.md`, payload: JSON.stringify({ markdown: '# kaputt\n', baseHash: 'x' }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
-    await inject({ method: 'POST', url: `/api/v1/notes/${id}`, payload: JSON.stringify({ parent: '', title: 'neu' }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
+    await inject({ method: 'PUT', url: `/api/v1/pages/${id}/neu.md`, payload: JSON.stringify({ markdown: '# kaputt\n', baseHash: 'x' }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
+    await inject({ method: 'POST', url: `/api/v1/pages/${id}`, payload: JSON.stringify({ parent: '', title: 'neu' }), headers: { 'content-type': 'application/json', ...bearer(t.token) } });
     expect(readdirSync(join(root, 'draussen')).sort()).toEqual(['bild.png', 'passwort.md']);
     await inject({ method: 'DELETE', url: `/api/mounts/${id}`, headers: { cookie: admin } });
     rmSync(repo, { recursive: true, force: true });
@@ -769,7 +770,7 @@ describe('access rules through API and MCP', () => {
     const shows: string[] = [];
     for (const r of all()) {
       if (PUBLIC[label(r)] || r.url === '/mcp' || !/:(mountId|sourceId)|\*$/.test(r.url) || r.url.startsWith('/api/backup') || r.url.startsWith('/api/admin')) continue;
-      const res = await send(r, bearer(t.token), JSON.stringify({ from: 'docs/home.md', to: 'docs/x.md', toParent: 'docs', parent: 'docs', title: 'x', name: 'x', note: 'docs/home.md', contentText: '<svg/>', markdown: '# x\n', baseHash: 'x' }));
+      const res = await send(r, bearer(t.token), JSON.stringify({ from: 'docs/home.md', to: 'docs/x.md', toParent: 'docs', parent: 'docs', title: 'x', name: 'x', page: 'docs/home.md', contentText: '<svg/>', markdown: '# x\n', baseHash: 'x' }));
       if (res.statusCode < 400 || /Trilium|home\.md|Wiki/.test(res.body)) shows.push(`${label(r)} → ${res.statusCode} ${res.body.slice(0, 80)}`);
     }
     for (const url of ['/api/v1/sources', '/api/v1/status', '/api/v1/search?q=Trilium', '/api/mounts', '/api/search?q=Trilium', '/api/recent', '/api/tags']) {
@@ -782,14 +783,14 @@ describe('access rules through API and MCP', () => {
       ['list_sources', {}],
       ['search', { query: 'Trilium' }],
       ['list_tree', { source_id: mountId }],
-      ['read_note', { source_id: mountId, path: 'docs/home.md' }],
-      ['write_note', { source_id: mountId, path: 'docs/home.md', markdown: '# x', base_hash: 'x' }],
-      ['create_note', { source_id: mountId, parent: 'docs', title: 'x' }],
+      ['read_page', { source_id: mountId, path: 'docs/home.md' }],
+      ['write_page', { source_id: mountId, path: 'docs/home.md', markdown: '# x', base_hash: 'x' }],
+      ['create_page', { source_id: mountId, parent: 'docs', title: 'x' }],
       ['create_folder', { source_id: mountId, parent: '', name: 'x' }],
-      ['move_note', { source_id: mountId, from: 'docs/home.md', to: 'docs/x.md' }],
-      ['copy_note', { source_id: mountId, from: 'docs/home.md', to_parent: '' }],
-      ['delete_note', { source_id: mountId, path: 'docs/home.md' }],
-      ['upload_file', { source_id: mountId, note: 'docs/home.md', name: 'x.svg', content_text: '<svg/>' }],
+      ['move_page', { source_id: mountId, from: 'docs/home.md', to: 'docs/x.md' }],
+      ['copy_page', { source_id: mountId, from: 'docs/home.md', to_parent: '' }],
+      ['delete_page', { source_id: mountId, path: 'docs/home.md' }],
+      ['upload_file', { source_id: mountId, page: 'docs/home.md', name: 'x.svg', content_text: '<svg/>' }],
       ['list_changes', { source_id: mountId }],
       ['list_attachments', { source_id: mountId, path: 'docs/home.md' }],
       ['get_backlinks', { source_id: mountId, path: 'docs/home.md' }],
@@ -863,8 +864,12 @@ describe('API description', () => {
   it('every /api/v1 route is in openapi.json and every described operation exists', async () => {
     const spec = (await inject({ method: 'GET', url: '/api/v1/openapi.json' })).json() as { paths: Record<string, Record<string, unknown>> };
     const asSpec = (url: string) => url.replace(/^\/api\/v1/, '').replace(/\/\*$/, '/{path}').replace(/:([a-zA-Z]+)/g, '{$1}');
-    const registered = all()
-      .filter((r) => r.url.startsWith('/api/v1/') && r.url !== '/api/v1/openapi.json')
+    // Hidden aliases (AD-081): left out only where the same route exists under /api/v1/pages.
+    const all_ = all();
+    const isAlias = (r: { method: string; url: string }) =>
+      LEGACY_V1.some((l) => r.url.startsWith(`${l}/`) && all_.some((o) => o.method === r.method && o.url === r.url.replace(l, '/api/v1/pages')));
+    const registered = all_
+      .filter((r) => r.url.startsWith('/api/v1/') && r.url !== '/api/v1/openapi.json' && !isAlias(r))
       .map((r) => `${r.method.toLowerCase()} ${asSpec(r.url)}`)
       .sort();
     const described = Object.entries(spec.paths)

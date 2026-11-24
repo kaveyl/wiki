@@ -155,7 +155,7 @@ export function SourceEditor({
     <>
       <div className="min-w-0 flex-1">
         <div className="mx-auto px-4 py-6 md:px-8" style={{ maxWidth: editorWidth === 'normal' ? '820px' : editorMaxWidth(editorWidth) }}>
-          {plain && <p className="mb-2 text-xs text-fg-muted">{t('Große Notiz: ohne Hervorhebung und Inhaltsverzeichnis, damit die Ansicht flüssig bleibt.')}</p>}
+          {plain && <p className="mb-2 text-xs text-fg-muted">{t('Große Seite: ohne Hervorhebung und Inhaltsverzeichnis, damit die Ansicht flüssig bleibt.')}</p>}
           {toolbar === 'top' && dock}
           <div className="overflow-hidden rounded-2xl border border-line bg-bg">
           <div className="flex h-9 items-center gap-2 border-b border-line-soft bg-accent-tint px-4 text-xs text-fg-muted">

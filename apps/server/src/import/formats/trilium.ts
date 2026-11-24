@@ -163,11 +163,11 @@ export const trilium: ImportFormat = {
     w('Labels und Beziehungen von Trilium – als Eigenschaften im Frontmatter übernommen', report.props);
     w('Leinwände, Mindmaps und Beziehungskarten – als Datei (JSON) übernommen, Leinwände mit ihrem Bild', report.drawings, true);
     w('Suchen, Render-, Webseiten- und Karten-Notizen von Trilium – nicht übernommen', report.dynamic, true);
-    w('Links auf Notizen, die nicht im Export sind – nur der Text bleibt', report.outside);
+    w('Links auf Seiten, die nicht im Export sind – nur der Text bleibt', report.outside);
     w('Tabellen mit verbundenen Zellen oder Absätzen – vereinfacht als Markdown-Tabelle, bitte prüfen', report.simplified);
     // The HTML export loses tasks, boxes, marks, <details> and code languages on the way – the Markdown export keeps them.
     if (report.html.length && !markdownTexts) draft.warnings.unshift({ text: 'Trilium-Export im HTML-Format – Aufgaben, Hinweisboxen, Markierungen, aufklappbare Abschnitte und die Sprache von Codeblöcken kommen nicht richtig an, besser in Trilium als „Markdown“ exportieren' });
-    w('Notizen im HTML-Format – in Markdown umgewandelt, bitte Aussehen prüfen', report.html);
+    w('Seiten im HTML-Format – in Markdown umgewandelt, bitte Aussehen prüfen', report.html);
     w('Dateien, die im Export fehlen oder kein Text sind – nicht übernommen', report.missing, true);
     return draft;
   },

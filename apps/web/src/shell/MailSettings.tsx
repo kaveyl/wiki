@@ -71,7 +71,7 @@ export function MailPanel() {
     <form className="max-w-xl space-y-4 text-sm" onSubmit={save}>
       <p className="text-fg-muted">
         {t(
-          'Für „Passwort vergessen?“, Einladungen neuer Benutzer, das Teilen von Notizen per E-Mail und den Hinweis nach einer Passwortänderung – und für Benachrichtigungen an die Admins, wenn unter „Ereignisse“ eingeschaltet. Ohne Einrichtung funktioniert Kaveyl Wiki normal; diese Funktionen sind dann aus.',
+          'Für „Passwort vergessen?“, Einladungen neuer Benutzer, das Teilen von Seiten per E-Mail und den Hinweis nach einer Passwortänderung – und für Benachrichtigungen an die Admins, wenn unter „Ereignisse“ eingeschaltet. Ohne Einrichtung funktioniert Kaveyl Wiki normal; diese Funktionen sind dann aus.',
         )}
       </p>
       <div className="flex flex-wrap items-center gap-2">

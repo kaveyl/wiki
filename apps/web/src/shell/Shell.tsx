@@ -52,7 +52,7 @@ const SettingsBody = lazyPart<SettingsProps>(() => loadSettings().then((m) => m.
 function SettingsUnavailable({ open, onClose }: Pick<SettingsProps, 'open' | 'onClose'>) {
   useEffect(() => {
     if (!open) return;
-    toast({ kind: 'error', title: t('Die Einstellungen konnten nicht geladen werden. Bitte die Seite neu laden.') });
+    toast({ kind: 'error', title: t('Die Einstellungen konnten nicht geladen werden. Bitte die App neu laden.') });
     onClose();
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
@@ -70,7 +70,7 @@ const AiSuggestionDialog = lazyPart(() => import('../ai/AiAssist').then((m) => m
 /** A tab opened before an update asks for files the new build no longer has. */
 function AiUnavailable() {
   useEffect(() => {
-    toast({ kind: 'error', title: t('Dieser Teil der App konnte nicht geladen werden. Bitte die Seite neu laden.') });
+    toast({ kind: 'error', title: t('Dieser Teil der App konnte nicht geladen werden. Bitte die App neu laden.') });
     useAi.getState().close();
   }, []);
   return null;
@@ -145,7 +145,7 @@ export function Shell({ user }: { user: User }) {
     // Signing out drops what the editors have not saved yet: only after asking (code-012).
     const unsaved = countUnsaved(useUnsaved.getState().notes);
     if (unsaved) {
-      const text = tn(unsaved, '{n} Notiz ist noch nicht gespeichert. Abmelden und die Änderungen verwerfen?', '{n} Notizen sind noch nicht gespeichert. Abmelden und die Änderungen verwerfen?');
+      const text = tn(unsaved, '{n} Seite ist noch nicht gespeichert. Abmelden und die Änderungen verwerfen?', '{n} Seiten sind noch nicht gespeichert. Abmelden und die Änderungen verwerfen?');
       if (!(await confirmDialog(text, { confirmLabel: t('Verwerfen'), cancelLabel: t('Weiter bearbeiten'), danger: true }))) return;
       // Before the request: the session may be reported gone (live connection) before its answer.
       discardUnsaved();
@@ -281,10 +281,10 @@ export function Shell({ user }: { user: User }) {
       ? [
           {
             id: 'new-note',
-            label: t('Neue Notiz'),
+            label: t('Neue Seite'),
             hint: activeMount.name,
             icon: <FilePlus />,
-            keywords: ['neu', 'notiz', 'anlegen', 'new', 'note', 'create'],
+            keywords: ['neu', 'seite', 'notiz', 'anlegen', 'new', 'page', 'note', 'create'],
             run: () => openAction({ kind: 'create', mountId: activeMount.id, parent: active && active.mountId === activeMount.id ? active.path.split('/').slice(0, -1).join('/') : '', type: 'file' }),
           },
           {
@@ -299,7 +299,7 @@ export function Shell({ user }: { user: User }) {
       : []),
     ...(active
       ? [
-          { id: 'reveal', label: t('Aktuelle Notiz im Baum anzeigen'), icon: <LocateFixed />, keywords: ['baum', 'tree', 'zeigen', 'show', 'reveal'], run: () => useWorkspace.getState().revealInTree(active.mountId, active.path) },
+          { id: 'reveal', label: t('Aktuelle Seite im Baum anzeigen'), icon: <LocateFixed />, keywords: ['baum', 'tree', 'zeigen', 'show', 'reveal'], run: () => useWorkspace.getState().revealInTree(active.mountId, active.path) },
           {
             id: 'favorite',
             label: usePersonal.getState().isFavorite(active.mountId, active.path) ? t('Aus Favoriten entfernen') : t('Zu Favoriten hinzufügen'),
@@ -310,7 +310,7 @@ export function Shell({ user }: { user: User }) {
           ...(split
             ? [{ id: 'close-split', label: t('Geteilte Ansicht schließen'), icon: <Columns2 />, keywords: ['split', 'geteilt', 'schließen', 'close'], run: () => useWorkspace.getState().closeSplit() }]
             : []),
-          { id: 'history', label: t('Versionen der aktuellen Notiz'), icon: <History />, keywords: ['versionen', 'historie', 'history', 'versions'], run: () => openAction({ kind: 'history', mountId: active.mountId, path: active.path }) },
+          { id: 'history', label: t('Versionen der aktuellen Seite'), icon: <History />, keywords: ['versionen', 'historie', 'history', 'versions'], run: () => openAction({ kind: 'history', mountId: active.mountId, path: active.path }) },
         ]
       : []),
     ...(hoist ? [{ id: 'unhoist', label: t('Fokus aufheben (alle Quellen zeigen)'), icon: <X />, keywords: ['fokus', 'hoist', 'alle', 'focus', 'all'], run: () => useWorkspace.getState().setHoist(null) }] : []),
@@ -341,9 +341,9 @@ export function Shell({ user }: { user: User }) {
     },
     ...(active
       ? [
-          { id: 'print', label: t('Notiz drucken / als PDF'), icon: <Printer />, keywords: ['drucken', 'print', 'pdf'], run: () => printNote(active.mountId, active.path, isSealed(active.mountId, active.path)) },
-          { id: 'export', label: t('Notiz exportieren: HTML-Datei'), icon: <FileDown />, keywords: ['export', 'html', 'herunterladen', 'download'], run: () => downloadExport(active.mountId, active.path) },
-          { id: 'export-md', label: t('Notiz exportieren: Markdown'), icon: <FileDown />, keywords: ['export', 'markdown', 'md', 'zip', 'herunterladen', 'download'], run: () => downloadExport(active.mountId, active.path, 'md') },
+          { id: 'print', label: t('Seite drucken / als PDF'), icon: <Printer />, keywords: ['drucken', 'print', 'pdf'], run: () => printNote(active.mountId, active.path, isSealed(active.mountId, active.path)) },
+          { id: 'export', label: t('Seite exportieren: HTML-Datei'), icon: <FileDown />, keywords: ['export', 'html', 'herunterladen', 'download'], run: () => downloadExport(active.mountId, active.path) },
+          { id: 'export-md', label: t('Seite exportieren: Markdown'), icon: <FileDown />, keywords: ['export', 'markdown', 'md', 'zip', 'herunterladen', 'download'], run: () => downloadExport(active.mountId, active.path, 'md') },
         ]
       : []),
     { id: 'trash', label: t('Papierkorb'), icon: <Trash2 />, keywords: ['papierkorb', 'gelöscht', 'wiederherstellen', 'trash', 'deleted', 'restore'], run: () => openTrash() },
@@ -368,7 +368,7 @@ export function Shell({ user }: { user: User }) {
     { id: 'width', label: prefs.editorWidth === 'full' ? t('Normale Breite') : t('Volle Breite'), icon: <Maximize2 />, keywords: ['breite', 'width', 'voll', 'full'], run: () => prefs.set({ editorWidth: prefs.editorWidth === 'full' ? 'normal' : 'full' }) },
   ];
 
-  // „Neue Notiz“ at the top of the sidebar: in the source of the open note (its folder), else the first writable source.
+  // „Neue Seite“ at the top of the sidebar: in the source of the open note (its folder), else the first writable source.
   const newNote = commands.find((c) => c.id === 'new-note');
   const view = prefs.sidebarView === 'ai' && !user.isAdmin ? 'tree' : prefs.sidebarView;
   const views: [SidebarView, string][] = [
@@ -426,10 +426,10 @@ export function Shell({ user }: { user: User }) {
               <button
                 type="button"
                 className="flex h-[35px] w-full items-center justify-center gap-1.5 rounded-full bg-accent-cta text-sm font-semibold text-on-cta shadow-[0_6px_16px_-8px_var(--accent-cta)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                title={t('Neue Notiz in „{where}“', { where: newNote.hint ?? '' })}
+                title={t('Neue Seite in „{where}“', { where: newNote.hint ?? '' })}
                 onClick={newNote.run}
               >
-                <Plus className="h-4 w-4" /> {t('Neue Notiz')}
+                <Plus className="h-4 w-4" /> {t('Neue Seite')}
               </button>
             )}
             <SearchBox ref={search} mounts={mountList} onSearchPage={(q) => searchPage.open(q)} />
@@ -492,7 +492,7 @@ export function Shell({ user }: { user: User }) {
                     {user.isAdmin
                       ? t('Ein Repository oder ein Ordner mit Markdown-Dateien.')
                       : user.isGuest
-                        ? t('Noch ist nichts mit dir geteilt. Sobald dir jemand eine Notiz freigibt, steht sie links im Baum – du bekommst dazu eine E-Mail.')
+                        ? t('Noch ist nichts mit dir geteilt. Sobald dir jemand eine Seite freigibt, steht sie links im Baum – du bekommst dazu eine E-Mail.')
                         : t('Dir ist noch keine Quelle freigegeben. Ein Administrator gibt dir Quellen oder Ordner frei – danach erscheinen sie links im Baum.')}
                   </p>
                   {user.isAdmin && (
@@ -564,7 +564,7 @@ export function Shell({ user }: { user: User }) {
             const style = split ? (isActive ? { right: '50%' } : isSplit ? { left: '50%' } : undefined) : undefined;
             return (
               <div key={tab.id} className={cx('absolute inset-0', !isActive && !isSplit && 'hidden', isSplit && 'border-l border-line')} style={style}>
-                {mount ? <PartBoundary note={`${mount.id}:${tab.path}`}><Suspense fallback={NOTE_LOADING}><NoteView mount={mount} path={tab.path} isActive={isActive || isSplit} onCloseSplit={isSplit ? () => useWorkspace.getState().closeSplit() : undefined} onCloseTab={() => useWorkspace.getState().closeTab(tab.id)} onSearch={() => setPaletteOpen(true)} /></Suspense></PartBoundary> : mounts.data && <div className="p-10 text-center text-fg-muted">{t('Die Quelle dieser Notiz ist nicht (mehr) eingebunden.')}</div>}
+                {mount ? <PartBoundary note={`${mount.id}:${tab.path}`}><Suspense fallback={NOTE_LOADING}><NoteView mount={mount} path={tab.path} isActive={isActive || isSplit} onCloseSplit={isSplit ? () => useWorkspace.getState().closeSplit() : undefined} onCloseTab={() => useWorkspace.getState().closeTab(tab.id)} onSearch={() => setPaletteOpen(true)} /></Suspense></PartBoundary> : mounts.data && <div className="p-10 text-center text-fg-muted">{t('Die Quelle dieser Seite ist nicht (mehr) eingebunden.')}</div>}
               </div>
             );
           })}
@@ -971,7 +971,7 @@ function EmptyState({ onSearch }: { onSearch: () => void }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 text-fg-muted">
       <Logo />
-      <p className="text-sm">{t('Wähle links eine Notiz oder suche danach.')}</p>
+      <p className="text-sm">{t('Wähle links eine Seite oder suche danach.')}</p>
       <Button size="sm" onClick={onSearch}>
         {t('Suchen')} <kbd className="ml-1 rounded border border-line px-1 text-[0.625rem]">{t('Strg K')}</kbd>
       </Button>

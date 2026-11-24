@@ -57,7 +57,7 @@ export function UsersPanel({ me }: { me: User }) {
       <p className="text-fg-muted">
         {fillNodes(
           t(
-            'Angemeldet wird mit der E-Mail-Adresse; Änderungen erscheinen in Git mit dem Namen als Autor, ohne E-Mail-Adresse. {gaeste} sehen nur, was ihnen ausdrücklich freigegeben ist (z. B. eine per E-Mail geteilte Notiz). Gesperrte Konten können sich nicht anmelden, ihre Tokens werden ungültig. Was jemand sehen und ändern darf, stellst du im Reiter „Rechte“ ein (oder per Rechtsklick → „Berechtigungen …“).',
+            'Angemeldet wird mit der E-Mail-Adresse; Änderungen erscheinen in Git mit dem Namen als Autor, ohne E-Mail-Adresse. {gaeste} sehen nur, was ihnen ausdrücklich freigegeben ist (z. B. eine per E-Mail geteilte Seite). Gesperrte Konten können sich nicht anmelden, ihre Tokens werden ungültig. Was jemand sehen und ändern darf, stellst du im Reiter „Rechte“ ein (oder per Rechtsklick → „Berechtigungen …“).',
           ),
           { gaeste: <strong className="font-medium text-fg">{t('Gäste')}</strong> },
         )}
@@ -154,7 +154,7 @@ export function UsersPanel({ me }: { me: User }) {
                   variant="ghost"
                   aria-label={t('{name} löschen', { name: u.username })}
                   onClick={() =>
-                    void confirmDialog(t('Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Notizen und Git-Historie bleiben.', { name: u.username }), {
+                    void confirmDialog(t('Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Seiten und Git-Historie bleiben.', { name: u.username }), {
                       confirmLabel: t('Löschen'),
                       danger: true,
                     }).then((ok) => ok && void act(() => api.deleteUser(u.id)))

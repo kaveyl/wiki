@@ -856,7 +856,7 @@ export function BackupFilesPanel({ onOpenTab }: { onOpenTab: (p: BackupPage) => 
       await qc.invalidateQueries({ queryKey: ['tree', r.mountId] });
       await qc.invalidateQueries({ queryKey: ['mounts'] });
       const skipped = r.skipped.length
-        ? ` ${tn(r.skipped.length, '{n} unverschlüsselte Notiz im verschlüsselten Ordner ausgelassen.', '{n} unverschlüsselte Notizen im verschlüsselten Ordner ausgelassen.')}`
+        ? ` ${tn(r.skipped.length, '{n} unverschlüsselte Seite im verschlüsselten Ordner ausgelassen.', '{n} unverschlüsselte Seiten im verschlüsselten Ordner ausgelassen.')}`
         : '';
       toast({
         kind: 'ok',
@@ -1264,7 +1264,7 @@ function RestoreActions({ archive, path, isFile, entries, onCompare }: { archive
     await qc.invalidateQueries({ queryKey: ['backup-current'] });
     await qc.invalidateQueries({ queryKey: ['note', r.mountId] });
     const skipped = r.skipped.length
-      ? ` ${tn(r.skipped.length, '{n} unverschlüsselte Notiz im verschlüsselten Ordner ausgelassen.', '{n} unverschlüsselte Notizen im verschlüsselten Ordner ausgelassen.')}`
+      ? ` ${tn(r.skipped.length, '{n} unverschlüsselte Seite im verschlüsselten Ordner ausgelassen.', '{n} unverschlüsselte Seiten im verschlüsselten Ordner ausgelassen.')}`
       : '';
     const n = r.paths.length;
     const other = r.mountId !== mountId ? (mounts.data?.find((m) => m.id === r.mountId)?.name ?? '') : null;
@@ -1344,7 +1344,7 @@ function RestoreActions({ archive, path, isFile, entries, onCompare }: { archive
                   date: day(archive.createdAt),
                 })
               : kind === 'note'
-                ? t('Als neue Notiz – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.', {
+                ? t('Als neue Seite – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.', {
                     date: day(archive.createdAt),
                   })
                 : t('Als neue Datei – Quelle, Ordner und Name wählst du; vorgeschlagen wird „… (Sicherung {date})“ neben dem Original. Nichts wird überschrieben.', {
@@ -1363,8 +1363,8 @@ function RestoreActions({ archive, path, isFile, entries, onCompare }: { archive
             text={
               isNote
                 ? git
-                  ? t('Ersetzt den jetzigen Stand (bleibt in den Versionen). Fehlende Anhänge, auf die die Notiz verweist, kommen mit.')
-                  : t('Ersetzt den jetzigen Stand – dieser Ordner führt keine Versionen, er ist danach nicht mehr da. Fehlende Anhänge, auf die die Notiz verweist, kommen mit.')
+                  ? t('Ersetzt den jetzigen Stand (bleibt in den Versionen). Fehlende Anhänge, auf die die Seite verweist, kommen mit.')
+                  : t('Ersetzt den jetzigen Stand – dieser Ordner führt keine Versionen, er ist danach nicht mehr da. Fehlende Anhänge, auf die die Seite verweist, kommen mit.')
                 : isFile
                   ? git
                     ? t('Ersetzt den jetzigen Stand (bleibt in den Versionen).')
@@ -1413,7 +1413,7 @@ function RestoreActions({ archive, path, isFile, entries, onCompare }: { archive
           kind={kind}
           intro={
             isNote
-              ? t('Die Datei mit dem Stand vom {when} kommt als Kopie zurück, mit den Bildern und Anhängen, auf die die Notiz verweist. Das Original bleibt, wie es ist.', {
+              ? t('Die Datei mit dem Stand vom {when} kommt als Kopie zurück, mit den Bildern und Anhängen, auf die die Seite verweist. Das Original bleibt, wie es ist.', {
                   when: when(archive.createdAt),
                 })
               : isFile
@@ -1499,7 +1499,7 @@ function CompareDialog({ archive, path, onClose }: { archive: BackupArchive; pat
       setTake(new Set());
       onClose();
     } catch (e) {
-      setError(e instanceof ApiError && e.status === 409 ? t('Die Notiz wurde inzwischen geändert – Vergleich schließen und neu öffnen.') : errorText(e));
+      setError(e instanceof ApiError && e.status === 409 ? t('Die Seite wurde inzwischen geändert – Vergleich schließen und neu öffnen.') : errorText(e));
     } finally {
       setBusy(false);
     }

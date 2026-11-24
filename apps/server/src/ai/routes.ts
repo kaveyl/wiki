@@ -46,7 +46,7 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
   server.put<{ Body: { id?: string; kind: ProviderKind; name?: string; baseUrl?: string; model?: string; cloud?: boolean; apiKey?: string | null; effort?: string | null; private?: boolean } }>('/api/ai/providers', async (req) => {
     d.requireAdmin(req);
     const p = d.providers.save(req.body);
-    d.audit(req, 'ai-provider-saved', `KI-Anbieter gespeichert: ${p.name} (${p.kind}, ${p.cloud ? 'Cloud' : 'lokal'}, Modell ${p.model || '–'}${p.effort ? `, Aufwand ${p.effort}` : ''}${p.private ? ', für private Notizen' : ''})`);
+    d.audit(req, 'ai-provider-saved', `KI-Anbieter gespeichert: ${p.name} (${p.kind}, ${p.cloud ? 'Cloud' : 'lokal'}, Modell ${p.model || '–'}${p.effort ? `, Aufwand ${p.effort}` : ''}${p.private ? ', für private Seiten' : ''})`);
     return p;
   });
 

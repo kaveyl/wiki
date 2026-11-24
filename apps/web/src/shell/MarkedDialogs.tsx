@@ -78,8 +78,8 @@ export function MoveManyDialog({ mountId, items: marked, onClose }: { mountId: s
           <FolderPicker groups={groups} value={dest} onChange={setDest} loading={mounts.isLoading || trees.some((q) => q.isLoading)} />
           <span className="block text-xs text-fg-faint">
             {dest.mountId === mountId
-              ? t('Links auf die Notizen werden automatisch angepasst. Gibt es den Namen im Ziel schon, bleibt dieser Eintrag, wo er ist.')
-              : t('In eine andere Quelle: Die Notizen werden dort angelegt und hier gelöscht, verlinkte Bilder werden mitkopiert. Links aus dieser Quelle lassen sich nicht über Repo-Grenzen anpassen.')}
+              ? t('Links auf die Seiten werden automatisch angepasst. Gibt es den Namen im Ziel schon, bleibt dieser Eintrag, wo er ist.')
+              : t('In eine andere Quelle: Die Seiten werden dort angelegt und hier gelöscht, verlinkte Bilder werden mitkopiert. Links aus dieser Quelle lassen sich nicht über Repo-Grenzen anpassen.')}
           </span>
         </div>
         <FormError className="whitespace-pre-line">{error}</FormError>
@@ -130,7 +130,7 @@ export function DeleteManyDialog({ mountId, items: marked, onClose, onTrash }: {
       <p className="text-sm">{tn(items.length, 'Diesen Eintrag wirklich löschen?', 'Diese {n} Einträge wirklich löschen?')}</p>
       <p className="mt-1 text-xs text-fg-muted">{items.map((i) => `„${i.title}“`).join(', ')}</p>
       <p className="mt-2 text-xs text-fg-muted">
-        {items.some((i) => i.isDir) ? `${t('Es werden nur Markdown-Notizen gelöscht; andere Dateien (Code, Bilder) im Ordner bleiben erhalten.')} ` : ''}
+        {items.some((i) => i.isDir) ? `${t('Es werden nur Markdown-Seiten gelöscht; andere Dateien (Code, Bilder) im Ordner bleiben erhalten.')} ` : ''}
         {t('Gelöschtes landet im Papierkorb der Quelle und lässt sich dort wiederherstellen.')}
       </p>
       <FormError className="mt-2 whitespace-pre-line">{error}</FormError>

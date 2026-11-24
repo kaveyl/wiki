@@ -165,8 +165,8 @@ try {
   check('GET /search mit limit', Array.isArray(hits.data) && hits.data.length > 0 && hits.data.length <= 5, `„${word}“ → ${hits.data?.length}`);
   check('GET /search?source=: nur diese Quelle', (await api(rw, 'GET', `/search?q=${encodeURIComponent(word)}&source=${S}`)).data.every((h) => h.sourceId === S));
   check('GET /search ohne q → leere Liste', (await api(rw, 'GET', '/search')).data?.length === 0);
-  const before = await api(rw, 'GET', `/notes/${S}/${enc(anyNote.path)}`);
-  check('GET /notes (vorhandene Notiz)', typeof before.data?.markdown === 'string' && before.data.hash, anyNote.path);
+  const before = await api(rw, 'GET', `/pages/${S}/${enc(anyNote.path)}`);
+  check('GET /pages (vorhandene Seite)', typeof before.data?.markdown === 'string' && before.data.hash, anyNote.path);
 
   // ── folders and notes
   dir = `api-check-${Date.now()}`;
@@ -178,65 +178,65 @@ try {
   check('POST /folders ohne Namen → 400', (await api(rw, 'POST', `/folders/${S}`, { parent: dir, name: '' })).status === 400);
   check('POST /folders ohne Body → 400', (await api(rw, 'POST', `/folders/${S}`)).status === 400);
   check('POST /folders mit Lese-Token → 403', (await api(ro, 'POST', `/folders/${S}`, { parent: dir, name: 'nein' })).status === 403);
-  const a = await api(rw, 'POST', `/notes/${S}`, { parent: `${dir}/Projekte`, title: 'Größe & Maß' });
-  check('POST /notes (Umlaute, fehlender Ordner entsteht)', a.status === 200 && a.data.path === `${dir}/Projekte/Größe & Maß.md`, JSON.stringify(a.data));
-  const a2 = await api(rw, 'POST', `/notes/${S}`, { parent: `${dir}/Projekte`, title: 'Größe & Maß' });
-  check('POST /notes: gleicher Titel → eindeutiger Name, nichts überschrieben', a2.status === 200 && a2.data.path !== a.data.path, JSON.stringify(a2.data));
+  const a = await api(rw, 'POST', `/pages/${S}`, { parent: `${dir}/Projekte`, title: 'Größe & Maß' });
+  check('POST /pages (Umlaute, fehlender Ordner entsteht)', a.status === 200 && a.data.path === `${dir}/Projekte/Größe & Maß.md`, JSON.stringify(a.data));
+  const a2 = await api(rw, 'POST', `/pages/${S}`, { parent: `${dir}/Projekte`, title: 'Größe & Maß' });
+  check('POST /pages: gleicher Titel → eindeutiger Name, nichts überschrieben', a2.status === 200 && a2.data.path !== a.data.path, JSON.stringify(a2.data));
   // Events for agents: the starting point before the writes below.
   const c0 = await api(ro, 'GET', `/changes?source=${S}&path=${encodeURIComponent(dir)}`);
-  const b = await api(rw, 'POST', `/notes/${S}`, { parent: dir, title: 'Quelle', markdown: `# Quelle\n\nSiehe [Größe](Projekte/Gr%C3%B6%C3%9Fe%20%26%20Ma%C3%9F.md).\n` });
-  check('POST /notes mit Markdown und Link', b.status === 200, JSON.stringify(b.data));
-  check('POST /notes ohne Titel → 400', (await api(rw, 'POST', `/notes/${S}`, { parent: dir, title: ' ' })).status === 400);
-  check('POST /notes ohne Body → 400', (await api(rw, 'POST', `/notes/${S}`)).status === 400);
-  check('POST /notes kaputtes JSON → 400', (await api(rw, 'POST', `/notes/${S}`, '{"title": ')).status === 400);
-  check('POST /notes mit Lese-Token → 403', (await api(ro, 'POST', `/notes/${S}`, { parent: dir, title: 'nein' })).status === 403);
-  check('POST /notes unbekannte Quelle → 404', (await api(rw, 'POST', '/notes/gibt-es-nicht', { parent: '', title: 'x' })).status === 404);
+  const b = await api(rw, 'POST', `/pages/${S}`, { parent: dir, title: 'Quelle', markdown: `# Quelle\n\nSiehe [Größe](Projekte/Gr%C3%B6%C3%9Fe%20%26%20Ma%C3%9F.md).\n` });
+  check('POST /pages mit Markdown und Link', b.status === 200, JSON.stringify(b.data));
+  check('POST /pages ohne Titel → 400', (await api(rw, 'POST', `/pages/${S}`, { parent: dir, title: ' ' })).status === 400);
+  check('POST /pages ohne Body → 400', (await api(rw, 'POST', `/pages/${S}`)).status === 400);
+  check('POST /pages kaputtes JSON → 400', (await api(rw, 'POST', `/pages/${S}`, '{"title": ')).status === 400);
+  check('POST /pages mit Lese-Token → 403', (await api(ro, 'POST', `/pages/${S}`, { parent: dir, title: 'nein' })).status === 403);
+  check('POST /pages unbekannte Quelle → 404', (await api(rw, 'POST', '/pages/gibt-es-nicht', { parent: '', title: 'x' })).status === 404);
 
   // ── read and write
-  const rb = await api(rw, 'GET', `/notes/${S}/${enc(b.data.path)}`);
-  check('GET /notes: Inhalt, hash, access, name, title', rb.data?.markdown?.includes('Siehe [Größe]') && rb.data.hash && rb.data.access && rb.data.name === 'Quelle' && rb.data.encrypted === false);
-  const w = await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: rb.data.markdown + '\nZweite Zeile per API.\n', baseHash: rb.data.hash });
-  check('PUT /notes', w.status === 200 && w.data.changed === true && w.data.hash !== rb.data.hash);
-  const same = await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: rb.data.markdown + '\nZweite Zeile per API.\n', baseHash: w.data.hash });
+  const rb = await api(rw, 'GET', `/pages/${S}/${enc(b.data.path)}`);
+  check('GET /pages: Inhalt, hash, access, name, title', rb.data?.markdown?.includes('Siehe [Größe]') && rb.data.hash && rb.data.access && rb.data.name === 'Quelle' && rb.data.encrypted === false);
+  const w = await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: rb.data.markdown + '\nZweite Zeile per API.\n', baseHash: rb.data.hash });
+  check('PUT /pages', w.status === 200 && w.data.changed === true && w.data.hash !== rb.data.hash);
+  const same = await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: rb.data.markdown + '\nZweite Zeile per API.\n', baseHash: w.data.hash });
   check('PUT gleicher Inhalt → changed=false', same.status === 200 && same.data.changed === false);
-  const stale = await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: 'weg', baseHash: rb.data.hash });
+  const stale = await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: 'weg', baseHash: rb.data.hash });
   check('PUT mit altem baseHash → 409 mit currentHash/currentRaw', stale.status === 409 && stale.data.currentHash === w.data.hash && stale.data.currentRaw?.includes('Zweite Zeile'));
-  check('PUT ohne baseHash → 400', (await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: 'x' })).status === 400);
-  check('PUT ohne Body → 400', (await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`)).status === 400);
-  check('PUT markdown kein Text → 400', (await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: 42, baseHash: w.data.hash })).status === 400);
-  check('PUT mit Lese-Token → 403', (await api(ro, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: 'x', baseHash: w.data.hash })).status === 403);
-  check('PUT auf neue Datei → 404 (Anlegen nur mit POST)', (await api(rw, 'PUT', `/notes/${S}/${dir}/neu.md`, { markdown: '# neu\n', baseHash: 'x' })).status === 404);
-  check('GET unbekannte Notiz → 404', (await api(rw, 'GET', `/notes/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
-  check('GET Pfad außerhalb → 400', (await api(rw, 'GET', `/notes/${S}/..%2F..%2Fetc%2Fpasswd`)).status === 400);
-  check('GET .git → 400', (await api(rw, 'GET', `/notes/${S}/.git/config`)).status === 400);
-  const en = await api(rw, 'GET', `/notes/${S}/${dir}/gibt-es-nicht.md`, undefined, { 'accept-language': 'en' });
+  check('PUT ohne baseHash → 400', (await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: 'x' })).status === 400);
+  check('PUT ohne Body → 400', (await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`)).status === 400);
+  check('PUT markdown kein Text → 400', (await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: 42, baseHash: w.data.hash })).status === 400);
+  check('PUT mit Lese-Token → 403', (await api(ro, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: 'x', baseHash: w.data.hash })).status === 403);
+  check('PUT auf neue Datei → 404 (Anlegen nur mit POST)', (await api(rw, 'PUT', `/pages/${S}/${dir}/neu.md`, { markdown: '# neu\n', baseHash: 'x' })).status === 404);
+  check('GET unbekannte Seite → 404', (await api(rw, 'GET', `/pages/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
+  check('GET Pfad außerhalb → 400', (await api(rw, 'GET', `/pages/${S}/..%2F..%2Fetc%2Fpasswd`)).status === 400);
+  check('GET .git → 400', (await api(rw, 'GET', `/pages/${S}/.git/config`)).status === 400);
+  const en = await api(rw, 'GET', `/pages/${S}/${dir}/gibt-es-nicht.md`, undefined, { 'accept-language': 'en' });
   check('Fehler auf Englisch (Accept-Language)', en.status === 404 && /^Not found/.test(en.data.error), en.data.error);
-  const enOk = await api(rw, 'GET', `/notes/${S}/${enc(anyNote.path)}`, undefined, { 'accept-language': 'en' });
+  const enOk = await api(rw, 'GET', `/pages/${S}/${enc(anyNote.path)}`, undefined, { 'accept-language': 'en' });
   check('Inhalt mit Accept-Language: en unverändert', enOk.data?.markdown === before.data.markdown);
-  const none = await api(rw, 'GET', `/notes/${S}/${dir}/gibt-es-nicht.md`, undefined, { 'accept-language': '' });
+  const none = await api(rw, 'GET', `/pages/${S}/${dir}/gibt-es-nicht.md`, undefined, { 'accept-language': '' });
   check('ohne Sprachangabe Englisch (Rückfallsprache)', none.status === 404 && /^Not found/.test(none.data.error), none.data.error);
   const sr = await until(() => api(rw, 'GET', `/search?q=${encodeURIComponent('"Zweite Zeile per API"')}&source=${S}`), (r) => r.data?.length > 0);
   check('GET /search findet frisch Geschriebenes (Phrase)', sr.data?.some?.((h) => h.path === b.data.path && h.snippet.includes('«')));
   check('GET /search path:', (await api(rw, 'GET', `/search?q=${encodeURIComponent(`Zeile path:${dir}/`)}`)).data?.every?.((h) => h.path.startsWith(`${dir}/`)));
   const bl = await until(() => api(rw, 'GET', `/backlinks/${S}/${enc(a.data.path)}`), (r) => r.data?.length > 0);
   check('GET /backlinks', bl.data?.some?.((x) => x.path === b.data.path), JSON.stringify(bl.data));
-  check('GET /backlinks unbekannte Notiz → 404', (await api(rw, 'GET', `/backlinks/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
+  check('GET /backlinks unbekannte Seite → 404', (await api(rw, 'GET', `/backlinks/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
 
   // ── files
   const SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="#5b8def"/></svg>';
-  const up = await api(rw, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'Plan Skizze.svg', contentText: SVG });
+  const up = await api(rw, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'Plan Skizze.svg', contentText: SVG });
   check('POST /attachments (SVG als Text)', up.status === 200 && up.data.path === `${dir}/assets/Plan-Skizze.svg` && up.data.image === true && up.data.markdown === '![Plan-Skizze](assets/Plan-Skizze.svg)', JSON.stringify(up.data));
   const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-  const up2 = await api(rw, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'punkt.png', contentBase64: PNG });
-  const up3 = await api(rw, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'Werte.csv', contentText: 'a;b\n1;2\n' });
+  const up2 = await api(rw, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'punkt.png', contentBase64: PNG });
+  const up3 = await api(rw, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'Werte.csv', contentText: 'a;b\n1;2\n' });
   uploaded.push(...[up, up2, up3].filter((u) => u.status === 200).map((u) => u.data.path));
   check('POST /attachments (PNG Base64, CSV Text)', up2.status === 200 && up2.data.size === 70 && up3.status === 200 && up3.data.image === false && up3.data.markdown === '[Werte.csv](assets/Werte.csv)', `${up3.data?.markdown}`);
-  check('POST /attachments .exe → 400', (await api(rw, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'x.exe', contentBase64: 'TVo=' })).status === 400);
-  check('POST /attachments ohne Inhalt → 400', (await api(rw, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'x.png' })).status === 400);
-  check('POST /attachments unbekannte Notiz → 404', (await api(rw, 'POST', `/attachments/${S}`, { note: `${dir}/gibt-es-nicht.md`, name: 'x.svg', contentText: SVG })).status === 404);
-  check('POST /attachments mit Lese-Token → 403', (await api(ro, 'POST', `/attachments/${S}`, { note: b.data.path, name: 'x.svg', contentText: SVG })).status === 403);
-  const rbf = await api(rw, 'GET', `/notes/${S}/${enc(b.data.path)}`);
-  await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: `${rbf.data.markdown}\n${up.data.markdown}\n\n${up2.data.markdown}\n\n${up3.data.markdown}\n\n![fehlt](assets/fehlt.png)\n`, baseHash: rbf.data.hash });
+  check('POST /attachments .exe → 400', (await api(rw, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'x.exe', contentBase64: 'TVo=' })).status === 400);
+  check('POST /attachments ohne Inhalt → 400', (await api(rw, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'x.png' })).status === 400);
+  check('POST /attachments unbekannte Seite → 404', (await api(rw, 'POST', `/attachments/${S}`, { note: `${dir}/gibt-es-nicht.md`, name: 'x.svg', contentText: SVG })).status === 404);
+  check('POST /attachments mit Lese-Token → 403', (await api(ro, 'POST', `/attachments/${S}`, { page: b.data.path, name: 'x.svg', contentText: SVG })).status === 403);
+  const rbf = await api(rw, 'GET', `/pages/${S}/${enc(b.data.path)}`);
+  await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: `${rbf.data.markdown}\n${up.data.markdown}\n\n${up2.data.markdown}\n\n${up3.data.markdown}\n\n![fehlt](assets/fehlt.png)\n`, baseHash: rbf.data.hash });
   const la = await api(rw, 'GET', `/attachments/${S}/${enc(b.data.path)}`);
   const kinds = (la.data ?? []).map?.((x) => `${x.name}:${x.kind}:${x.size === null ? 'null' : 'ok'}`).sort().join(' ');
   check('GET /attachments: Bilder, Datei, fehlende mit size null', kinds === 'Plan-Skizze.svg:image:ok Werte.csv:file:ok fehlt.png:image:null punkt.png:image:ok', kinds);
@@ -246,7 +246,7 @@ try {
   // ── move and copy
   const mv = await api(rw, 'POST', `/move/${S}`, { from: a.data.path, to: `${dir}/Projekte/Maße.md` });
   check('POST /move (umbenennen)', mv.status === 200 && mv.data.path === `${dir}/Projekte/Maße.md`, JSON.stringify(mv.data));
-  const rb3 = await api(rw, 'GET', `/notes/${S}/${enc(b.data.path)}`);
+  const rb3 = await api(rw, 'GET', `/pages/${S}/${enc(b.data.path)}`);
   check('Link nach dem Verschieben repariert', /\]\(Projekte\/Ma%C3%9Fe\.md\)/.test(rb3.data.markdown), rb3.data.markdown.split('\n').find((l) => l.startsWith('Siehe')));
   check('POST /move auf vorhandenes Ziel → 409', (await api(rw, 'POST', `/move/${S}`, { from: mv.data.path, to: a2.data.path })).status === 409);
   check('POST /move unbekannte Quelle-Datei → 404', (await api(rw, 'POST', `/move/${S}`, { from: `${dir}/gibt-es-nicht.md`, to: `${dir}/x.md` })).status === 404);
@@ -282,7 +282,7 @@ try {
     if (across.status === 200) {
       const back = await api(rw, 'POST', `/copy/${other.id}`, { from: across.data.path, toParent: dir, toSourceId: S });
       check('… und als Kopie zurück', back.status === 200 && back.data.sourceId === S, JSON.stringify(back.data));
-      const leftover = await api(rw, 'DELETE', `/notes/${other.id}/${enc(dir)}`);
+      const leftover = await api(rw, 'DELETE', `/pages/${other.id}/${enc(dir)}`);
       check(`Testordner in „${other.name}“ löschen`, leftover.status === 200, JSON.stringify(leftover.data));
     }
   }
@@ -296,8 +296,8 @@ try {
   check('GET /history', hist.status === 200 && typeof hist.data.git === 'boolean' && Array.isArray(hist.data.versions), `${hist.data.versions?.length} Versionen`);
   if (src.type === 'remote') {
     check('GET /history nach /sync: Version da', hist.data.git && hist.data.versions.length >= 1, hist.data.versions?.map((v) => `${v.commit.slice(0, 7)} ${v.author}`).join(' | '));
-    const cur = await api(rw, 'GET', `/notes/${S}/${enc(b.data.path)}`);
-    await api(rw, 'PUT', `/notes/${S}/${enc(b.data.path)}`, { markdown: cur.data.markdown + '\nDritte Fassung.\n', baseHash: cur.data.hash });
+    const cur = await api(rw, 'GET', `/pages/${S}/${enc(b.data.path)}`);
+    await api(rw, 'PUT', `/pages/${S}/${enc(b.data.path)}`, { markdown: cur.data.markdown + '\nDritte Fassung.\n', baseHash: cur.data.hash });
     await api(rw, 'POST', `/sync/${S}`);
     const hist2 = await api(rw, 'GET', `/history/${S}/${enc(b.data.path)}`);
     const first = hist2.data.versions.at(-1);
@@ -309,12 +309,12 @@ try {
   }
 
   // ── deleting
-  const del = await api(rw, 'DELETE', `/notes/${S}/${enc(cp2.data.path)}`);
-  check('DELETE /notes (Notiz)', del.status === 200 && del.data.ok === true, JSON.stringify(del.data));
-  check('gelöschte Notiz → 404', (await api(rw, 'GET', `/notes/${S}/${enc(cp2.data.path)}`)).status === 404);
-  check('DELETE unbekannter Pfad → 404', (await api(rw, 'DELETE', `/notes/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
-  check('DELETE Wurzel → abgelehnt', (await api(rw, 'DELETE', `/notes/${S}/`)).status >= 400);
-  check('DELETE mit Lese-Token → 403', (await api(ro, 'DELETE', `/notes/${S}/${enc(b.data.path)}`)).status === 403);
+  const del = await api(rw, 'DELETE', `/pages/${S}/${enc(cp2.data.path)}`);
+  check('DELETE /pages (Seite)', del.status === 200 && del.data.ok === true, JSON.stringify(del.data));
+  check('gelöschte Seite → 404', (await api(rw, 'GET', `/pages/${S}/${enc(cp2.data.path)}`)).status === 404);
+  check('DELETE unbekannter Pfad → 404', (await api(rw, 'DELETE', `/pages/${S}/${dir}/gibt-es-nicht.md`)).status === 404);
+  check('DELETE Wurzel → abgelehnt', (await api(rw, 'DELETE', `/pages/${S}/`)).status >= 400);
+  check('DELETE mit Lese-Token → 403', (await api(ro, 'DELETE', `/pages/${S}/${enc(b.data.path)}`)).status === 403);
 } catch (e) {
   check('Ablauf', false, e.stack);
 } finally {
@@ -322,9 +322,9 @@ try {
   try {
     for (const f of uploaded) await fetch(`${BASE}/api/attachments/${S}/${enc(f)}`, { method: 'DELETE', headers: { cookie, 'content-type': 'application/json' } });
     if (S && dir) {
-      const gone = await api(rw, 'DELETE', `/notes/${S}/${enc(dir)}`);
+      const gone = await api(rw, 'DELETE', `/pages/${S}/${enc(dir)}`);
       check('Aufräumen: Testordner in den Papierkorb', gone.status === 200, JSON.stringify(gone.data));
-      if (other) await api(rw, 'DELETE', `/notes/${other.id}/${enc(dir)}`);
+      if (other) await api(rw, 'DELETE', `/pages/${other.id}/${enc(dir)}`);
       const fin = await api(rw, 'POST', `/sync/${S}`);
       check('Aufräumen abgeglichen', fin.status === 200 && fin.data.status.pendingEdits === 0, JSON.stringify(fin.data?.result));
       check('Testordner weg', !(await api(rw, 'GET', `/tree/${S}?depth=1`)).data.some((e) => e.path === dir));

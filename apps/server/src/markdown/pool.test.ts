@@ -31,13 +31,13 @@ afterAll(async () => {
 
 describe('Markdown in the worker with a time limit', () => {
   it('parses ordinary notes like the core functions', async () => {
-    const raw = '---\ntags: [a]\n---\n# Titel\n\n![Bild](assets/b.png) und [Notiz](andere.md).\n';
+    const raw = '---\ntags: [a]\n---\n# Titel\n\n![Bild](assets/b.png) und [Seite](andere.md).\n';
     expect((await pool.links(raw))!.map((l) => l.href)).toEqual(['assets/b.png', 'andere.md']);
     const doc = await pool.doc(raw);
     expect(doc!.content![0]).toMatchObject({ type: 'heading' });
     const para = structuredClone(doc!);
     para.content![1]!.content!.push({ type: 'text', text: ' Mehr.' });
-    expect(await pool.save(raw, para)).toContain('[Notiz](andere.md). Mehr.');
+    expect(await pool.save(raw, para)).toContain('[Seite](andere.md). Mehr.');
     expect((await pool.tree('# A'))!.children[0]).toMatchObject({ type: 'heading' });
   });
 

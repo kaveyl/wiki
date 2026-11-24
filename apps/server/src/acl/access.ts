@@ -50,7 +50,7 @@ export function createAccess({ acl, manager, indexer }: AccessDeps) {
       ...acl.rules(mount.id).filter((r) => r.target !== 'mount' && r.path.startsWith(dir + '/')).map((r) => ({ path: r.path, isDir: r.target === 'folder' })),
     ];
     if (inside.some((e) => !atLeast(acl.level(p, mount.id, e.path, e.isDir), need)))
-      throw new ForbiddenError('Der Ordner enthält Notizen, auf die du keine Schreibrechte hast');
+      throw new ForbiddenError('Der Ordner enthält Seiten, auf die du keine Schreibrechte hast');
     return mount;
   };
   /** A source is listed when its root is readable or a rule for this person opens something below (not someone else's). */

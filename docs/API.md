@@ -46,7 +46,7 @@ Authorization: Bearer kw_…
 
 Ein Token handelt **im Namen seines Inhabers** und hat höchstens dessen Rechte. Tokens gelten **nur**
 für die REST-API (`/api/v1/…`), den MCP-Endpunkt (`/mcp`) und das Abrufen von Dateien
-(`GET /api/files/…`, z. B. Bilder einer Notiz) – Einstellungen, Quellen, Benutzer und Tokens gibt es nur
+(`GET /api/files/…`, z. B. Bilder einer Seite) – Einstellungen, Quellen, Benutzer und Tokens gibt es nur
 mit Anmeldung im Browser (sonst 403). Gesperrte Benutzer und ein vom Administrator neu gesetztes
 Passwort: alle Tokens der Person sofort ungültig.
 
@@ -59,21 +59,21 @@ Token unter Einstellungen → KI & APIs → Alle Tokens an, ohne sich als Agent 
 - **Berechtigungen** (Einstellungen → Benutzer & Rechte → Rechte, Rechtsklick → Berechtigungen) gelten genau
   wie in der App: Unsichtbares gibt es nicht (404, fehlt in Suche und Baum), nur Leserecht heißt 403
   beim Schreiben.
-- **Verschlüsselte Notizen** liefern nur Name und Titel, nie Inhalt (`markdown: null`). Schreiben
-  von Klartext in eine verschlüsselte Notiz lehnt der Server ab.
+- **Verschlüsselte Seiten** liefern nur Name und Titel, nie Inhalt (`markdown: null`). Schreiben
+  von Klartext in eine verschlüsselte Seite lehnt der Server ab.
 - **Konflikte:** Schreiben verlangt den `hash` aus dem Lesen (`baseHash`). Hat sich die Datei
   inzwischen geändert (App, VS Code, Git), kommt **409** mit dem aktuellen Stand – nichts wird
-  überschrieben. Wer die Notiz gerade in der App offen hat, sieht eine geschriebene Änderung sofort;
+  überschrieben. Wer die Seite gerade in der App offen hat, sieht eine geschriebene Änderung sofort;
   tippt die Person gerade selbst, bekommt sie den Konflikt-Hinweis (mit „Zusammenführen“). Ob jemand
   tippt, steht beim Lesen in `editingNow`.
 - **Löschen** (REST und MCP) verschiebt in den Papierkorb der Quelle; zurückholen in der App.
-  Bei einem Ordner werden nur die Notizen gelöscht, andere Dateien (Bilder, Code) bleiben.
+  Bei einem Ordner werden nur die Seiten gelöscht, andere Dateien (Bilder, Code) bleiben.
 - **Versionen kommen gebündelt:** Wie in der App wird nach einer Pause (Standard 2 Minuten, höchstens
   10 Minuten nach der ersten Änderung) committet und abgeglichen. Bis dahin zeigt die Historie die
   Änderung noch nicht; `POST /api/v1/sync/{source}` bzw. `sync_source` erledigt das sofort.
-- **Links zwischen Notizen** sind normale Markdown-Links mit Pfad relativ zur verlinkenden Notiz,
+- **Links zwischen Seiten** sind normale Markdown-Links mit Pfad relativ zur verlinkenden Seite,
   Leerzeichen als `%20`: `[Roadmap](../Projekte/Roadmap.md)`. `[[Wiki-Links]]` erkennt Kaveyl Wiki nicht.
-  Verschieben und Umbenennen reparieren Links auf die Notiz.
+  Verschieben und Umbenennen reparieren Links auf die Seite.
 - **Quellen einbinden/aushängen** und Einstellungen gibt es bewusst nur in der App.
 - **Symbolische Links** innerhalb einer Quelle werden nie befolgt – weder beim Lesen noch beim Schreiben
   (wie im Baum, der sie ausblendet). Ein Pfad durch einen Link ergibt 400.
@@ -89,25 +89,30 @@ Maschinenlesbare Beschreibung (OpenAPI 3.1, ohne Anmeldung abrufbar):
 |---|---|---|
 | `GET /api/v1/sources` | Quellen (id, Name, Typ, eigene Stufe) | read |
 | `GET /api/v1/changes?after=&wait=&source=&path=&own=` | Änderungen seit einem Stand, mit Person und Weg; wartet auf Wunsch ([Ereignisse für Agenten](#ereignisse-für-agenten)) | read |
-| `GET /api/v1/tree/{source}?path=&depth=` | Ordner und Notizen, optional unterhalb eines Ordners / begrenzte Tiefe | read |
+| `GET /api/v1/tree/{source}?path=&depth=` | Ordner und Seiten, optional unterhalb eines Ordners / begrenzte Tiefe | read |
 | `GET /api/v1/search?q=&limit=&source=` | Volltextsuche, mit `source` nur in einer Quelle; Operatoren `"Phrase"`, `-wort`, `tag:x`, `in:"Name"`, `path:ordner/`, `seit:7d`; Treffer in `«…»` | read |
-| `GET /api/v1/notes/{source}/{pfad}` | Notiz als Markdown (ganze Datei inkl. Frontmatter) + `hash`; `editingNow`: wer sie gerade in der App bearbeitet | read |
-| `PUT /api/v1/notes/{source}/{pfad}` | ganze Datei ersetzen: `{"markdown", "baseHash"}` | write |
-| `POST /api/v1/notes/{source}` | anlegen: `{"parent", "title", "markdown"?}` – Dateiname aus dem Titel | write |
-| `DELETE /api/v1/notes/{source}/{pfad}` | Notiz oder Ordner löschen (in den Papierkorb) | write |
-| `POST /api/v1/folders/{source}` | Ordner anlegen: `{"parent", "name"}` – mit Ordner-Notiz (`index.md`), Git kennt keine leeren Ordner | write |
+| `GET /api/v1/pages/{source}/{pfad}` | Seite als Markdown (ganze Datei inkl. Frontmatter) + `hash`; `editingNow`: wer sie gerade in der App bearbeitet | read |
+| `PUT /api/v1/pages/{source}/{pfad}` | ganze Datei ersetzen: `{"markdown", "baseHash"}` | write |
+| `POST /api/v1/pages/{source}` | anlegen: `{"parent", "title", "markdown"?}` – Dateiname aus dem Titel | write |
+| `DELETE /api/v1/pages/{source}/{pfad}` | Seite oder Ordner löschen (in den Papierkorb) | write |
+| `POST /api/v1/folders/{source}` | Ordner anlegen: `{"parent", "name"}` – mit Ordnerseite (`index.md`), Git kennt keine leeren Ordner | write |
 | `POST /api/v1/move/{source}` | umbenennen/verschieben: `{"from", "to", "toSourceId"?}` – Links werden repariert | write |
 | `POST /api/v1/copy/{source}` | kopieren: `{"from", "toParent", "toSourceId"?}` – bei Bedarf „(Kopie)“ | write |
-| `GET /api/v1/backlinks/{source}/{pfad}` | Notizen, die hierher verlinken | read |
+| `GET /api/v1/backlinks/{source}/{pfad}` | Seiten, die hierher verlinken | read |
 | `GET /api/v1/history/{source}/{pfad}` | Versionen aus Git (commit, Datum, Autor, Betreff, Pfad damals) | read |
 | `GET /api/v1/version/{source}/{pfad}?commit=` | Inhalt einer älteren Version | read |
-| `POST /api/v1/attachments/{source}` | Datei hochladen: `{"note", "name", "contentBase64" \| "contentText"}` – nach `assets/` neben der Notiz, höchstens 10 MB, Antwort mit fertigem `markdown`-Link | write |
-| `GET /api/v1/attachments/{source}/{pfad}` | Dateien, auf die die Notiz verlinkt (Größe, `null` = fehlt) | read |
+| `POST /api/v1/attachments/{source}` | Datei hochladen: `{"page", "name", "contentBase64" \| "contentText"}` – nach `assets/` neben der Seite, höchstens 10 MB, Antwort mit fertigem `markdown`-Link | write |
+| `GET /api/v1/attachments/{source}/{pfad}` | Dateien, auf die die Seite verlinkt (Größe, `null` = fehlt) | read |
 | `GET /api/v1/status?source=` | Abgleich-Status: letzter Abgleich und Ergebnis, wartende Änderungen, Stand zum Remote, `canSync` | read |
 | `POST /api/v1/sync/{source}` | jetzt committen und abgleichen (wie „Jetzt abgleichen“) | write |
 
 Pfade mit Leerzeichen oder Umlauten: pro Segment URL-kodieren, die Schrägstriche bleiben
-(`/api/v1/notes/<id>/Projekte/M%C3%A4rz%20Plan.md`).
+(`/api/v1/pages/<id>/Projekte/M%C3%A4rz%20Plan.md`).
+
+**Alte Namen (bis 0.2.15):** Bis Version 0.2.15 hießen die Adressen `/api/v1/notes/…`, das Upload-Feld
+`note` und die MCP-Werkzeuge `read_note`, `write_note`, `create_note`, `move_note`, `copy_note` und
+`delete_note`. Die alten Namen funktionieren bis Version 0.3 weiter, stehen aber nicht mehr in
+`openapi.json` und `tools/list` – bitte auf die neuen umstellen.
 
 ### Beispiele (Bash)
 
@@ -129,9 +134,9 @@ curl -s -H @"$HDR" "$BASE/search?q=docker%20tag:howto"
 
 # Lesen, ändern, zurückschreiben (mit jq)
 SRC=<source-id>
-NOTE=$(curl -s -H @"$HDR" "$BASE/notes/$SRC/plan/roadmap.md")
-jq '{markdown: (.markdown + "- Neuer Punkt aus dem Skript\n"), baseHash: .hash}' <<<"$NOTE" |
-  curl -s -X PUT -H @"$HDR" -H 'content-type: application/json' --data @- "$BASE/notes/$SRC/plan/roadmap.md"
+PAGE=$(curl -s -H @"$HDR" "$BASE/pages/$SRC/plan/roadmap.md")
+jq '{markdown: (.markdown + "- Neuer Punkt aus dem Skript\n"), baseHash: .hash}' <<<"$PAGE" |
+  curl -s -X PUT -H @"$HDR" -H 'content-type: application/json' --data @- "$BASE/pages/$SRC/plan/roadmap.md"
 ```
 
 ### Beispiel (Python)
@@ -144,9 +149,9 @@ s = requests.Session()
 s.headers["Authorization"] = f"Bearer {os.environ['KAVEYL_WIKI_TOKEN']}"
 
 src = s.get(f"{BASE}/sources").json()[0]["id"]
-note = s.get(f"{BASE}/notes/{src}/plan/roadmap.md").json()
-r = s.put(f"{BASE}/notes/{src}/plan/roadmap.md",
-          json={"markdown": note["markdown"] + "\n- Aus Python\n", "baseHash": note["hash"]})
+page = s.get(f"{BASE}/pages/{src}/plan/roadmap.md").json()
+r = s.put(f"{BASE}/pages/{src}/plan/roadmap.md",
+          json={"markdown": page["markdown"] + "\n- Aus Python\n", "baseHash": page["hash"]})
 if r.status_code == 409:
     print("Inzwischen geändert – neu lesen und zusammenführen:", r.json()["currentHash"])
 ```
@@ -179,17 +184,17 @@ Kaveyl Wiki spricht **Streamable HTTP** in der zustandslosen Form: jede Anfrage 
 |---|---|---|
 | `list_sources` | Quellen mit ids – Startpunkt | |
 | `search` | Volltextsuche mit Operatoren, optional nur in einer Quelle (`source_id`), Treffer mit Ausschnitt | |
-| `list_tree` | Ordner und Notizen einer Quelle (optional ab Ordner, Tiefe) | |
-| `read_note` | Notiz als Markdown + `hash`; `editingNow` nennt, wer gerade in der App darin tippt | |
-| `write_note` | ganze Notiz ersetzen (mit `base_hash` aus `read_note`) | ✓ |
-| `create_note` | neue Notiz in einem Ordner (fehlende Ordner entstehen mit) | ✓ |
-| `create_folder` | neuer Ordner, mit Ordner-Notiz | ✓ |
-| `move_note` | umbenennen/verschieben (auch in andere Quelle), Links werden repariert | ✓ |
-| `copy_note` | Notiz oder Ordner (mit Bildern) kopieren, auch in eine andere Quelle – bei Bedarf „(Kopie)“ | ✓ |
-| `delete_note` | Notiz oder Ordner in den Papierkorb | ✓ |
-| `upload_file` | Bild oder Datei (Base64 oder Text, z. B. SVG) nach `assets/` neben der Notiz, liefert den fertigen Markdown-Link | ✓ |
+| `list_tree` | Ordner und Seiten einer Quelle (optional ab Ordner, Tiefe) | |
+| `read_page` | Seite als Markdown + `hash`; `editingNow` nennt, wer gerade in der App darin tippt | |
+| `write_page` | ganze Seite ersetzen (mit `base_hash` aus `read_page`) | ✓ |
+| `create_page` | neue Seite in einem Ordner (fehlende Ordner entstehen mit) | ✓ |
+| `create_folder` | neuer Ordner, mit Ordnerseite | ✓ |
+| `move_page` | umbenennen/verschieben (auch in andere Quelle), Links werden repariert | ✓ |
+| `copy_page` | Seite oder Ordner (mit Bildern) kopieren, auch in eine andere Quelle – bei Bedarf „(Kopie)“ | ✓ |
+| `delete_page` | Seite oder Ordner in den Papierkorb | ✓ |
+| `upload_file` | Bild oder Datei (Base64 oder Text, z. B. SVG) nach `assets/` neben der Seite, liefert den fertigen Markdown-Link | ✓ |
 | `list_changes` | Änderungen seit einem Stand (mit Person), wartet auf Wunsch – für Agenten, die auf Menschen reagieren | |
-| `list_attachments` | Dateien, auf die eine Notiz verlinkt (mit Größe; fehlende mit `null`) | |
+| `list_attachments` | Dateien, auf die eine Seite verlinkt (mit Größe; fehlende mit `null`) | |
 | `get_backlinks` | Rückverweise | |
 | `get_history` | Versionen aus Git | |
 | `read_version` | Inhalt einer älteren Version | |
@@ -197,7 +202,7 @@ Kaveyl Wiki spricht **Streamable HTTP** in der zustandslosen Form: jede Anfrage 
 | `sync_source` | jetzt committen und abgleichen | ✓ |
 
 Lesende Werkzeuge sind als `readOnlyHint` markiert – viele Clients fragen dann bei ihnen nicht
-jedes Mal nach; `delete_note` ist als `destructiveHint` markiert, `sync_source` als `openWorldHint`
+jedes Mal nach; `delete_page` ist als `destructiveHint` markiert, `sync_source` als `openWorldHint`
 (spricht mit dem Git-Server). Fehler (keine Berechtigung, Konflikt, nicht gefunden) kommen als
 normales Werkzeug-Ergebnis mit `isError`, damit das Modell darauf reagieren kann (z. B. neu lesen) –
 in der Sprache der Anfrage (`Accept-Language`), sonst deutsch. Die Werkzeugbeschreibungen und die
@@ -207,14 +212,14 @@ sind englisch, weil sie sich an das Modell richten.
 
 ## Ereignisse für Agenten
 
-Ein Agent, der auf Menschen reagieren soll – etwa auf eine abgehakte Checkbox in einer Notiz, die er selbst angelegt
+Ein Agent, der auf Menschen reagieren soll – etwa auf eine abgehakte Checkbox in einer Seite, die er selbst angelegt
 hat –, muss erfahren, **was** sich geändert hat und **wer** es war. Dafür gibt es zwei Wege; beide liefern nur, was das
 Konto des Agenten lesen darf, und lassen seine eigenen Änderungen weg.
 
 **1. Nachfragen (Long Polling):** `GET /api/v1/changes` bzw. das MCP-Werkzeug `list_changes`. Der erste Aufruf ohne
 `after` liefert nur einen `cursor` (den Startpunkt). Danach mit `after=<cursor>` fragen und den neuen `cursor` aus jeder
 Antwort aufheben; `wait=50` wartet bis zu 50 Sekunden auf die erste Änderung, statt leer zu antworten (mehr als 50 geht
-nicht, größere Werte gelten als 50). `source` und `path` grenzen auf eine Quelle bzw. eine Notiz oder einen Ordner ein,
+nicht, größere Werte gelten als 50). `source` und `path` grenzen auf eine Quelle bzw. eine Seite oder einen Ordner ein,
 `own=true` liefert auch die eigenen Änderungen. Beim MCP-Werkzeug heißen die Angaben `after`, `source_id`, `path`,
 `wait_seconds` und `include_own`.
 
@@ -230,7 +235,7 @@ nicht, größere Werte gelten als 50). `source` und `path` grenzen auf eine Quel
 ```
 
 `kind` ist `created`, `changed`, `deleted` oder `moved` (dann mit `from`). `by` ist die Person, wie der Server sie
-kennt – nicht, was jemand in die Notiz geschrieben hat; `null` heißt „von außen“ (Git-Push, ein Programm im Ordner).
+kennt – nicht, was jemand in die Seite geschrieben hat; `null` heißt „von außen“ (Git-Push, ein Programm im Ordner).
 `via` sagt den Weg: `app`, `api`, `mcp` oder `extern`. `reset: true` bedeutet: der Cursor war zu alt oder Kaveyl Wiki
 wurde neu gestartet – dann das Beobachtete einmal neu lesen und mit dem neuen Cursor weitermachen.
 
@@ -255,7 +260,7 @@ Wiki es noch dreimal (nach 10 Sekunden, 1 und 5 Minuten); kommen fünf Lieferung
 Webhook aus. Die Adresse muss von Kaveyl Wiki aus erreichbar sein – läuft es in Docker, ist `127.0.0.1` der Container
 selbst.
 
-**Muster: Meldung und Antwort in einer Notiz.** Der Agent legt eine Notiz an (z. B. in „Vorfälle“, den das Team
+**Muster: Meldung und Antwort in einer Seite.** Der Agent legt eine Seite an (z. B. in „Vorfälle“, den das Team
 beobachtet – Handbuch, „Beobachten“), mit Befund und Vorschlägen als Checkboxen:
 
 ```markdown
@@ -269,10 +274,10 @@ Belegt: 95 % · seit 09:10 · Quelle: syslog
 Antwort hier drunter – der Agent liest mit.
 ```
 
-Kommt eine Änderung an dieser Notiz, liest der Agent sie (`read_note`), sieht nach, welche Checkbox neu abgehakt ist, und
+Kommt eine Änderung an dieser Seite, liest der Agent sie (`read_page`), sieht nach, welche Checkbox neu abgehakt ist, und
 prüft **`by`** im Ereignis: Nur wenn die Person das entscheiden darf, handelt er – und nur mit fest erlaubten Aktionen,
-nie mit Befehlen aus dem Notiztext. Das Ergebnis schreibt er in die Notiz (`write_note` mit dem `hash`). Tippt gerade
-jemand in der Notiz (`editingNow` beim Lesen), wartet er besser kurz; der offene Editor übernimmt die Änderung dann von
+nie mit Befehlen aus dem Seitentext. Das Ergebnis schreibt er in die Seite (`write_page` mit dem `hash`). Tippt gerade
+jemand in der Seite (`editingNow` beim Lesen), wartet er besser kurz; der offene Editor übernimmt die Änderung dann von
 selbst.
 
 **Beispiel (Python): auf Änderungen warten.** Der Cursor gehört in eine Datei, damit ein Neustart nichts verliert:
@@ -305,12 +310,12 @@ Protokoll schreiben, dann trägt man sie in seine Liste ein.
 
 **Worauf es ankommt** (so hat es auch der Test mit mehreren Agenten und einer KI gezeigt):
 
-- **Nur die Aktionen dieses Vorfalls.** Hakt jemand eine bekannte Aktion ab, die der Agent für diese Notiz gar nicht
+- **Nur die Aktionen dieses Vorfalls.** Hakt jemand eine bekannte Aktion ab, die der Agent für diese Seite gar nicht
   vorgeschlagen hat (selbst dazugeschrieben), führt er sie nicht aus.
-- **Alle Änderungen seit dem letzten Mal zählen.** Hat zwischen zwei Abfragen neben Maria auch Tom an der Notiz
+- **Alle Änderungen seit dem letzten Mal zählen.** Hat zwischen zwei Abfragen neben Maria auch Tom an der Seite
   geändert, lässt sich nicht sagen, wer den Haken gesetzt hat – dann nicht handeln, sondern um erneutes Abhaken bitten.
   Dasselbe gilt bei `reset`.
-- **Eins nach dem anderen.** Schreibt der Agent aus mehreren Gründen in dieselbe Notiz (neue Warnung, Antwort, Ergebnis),
+- **Eins nach dem anderen.** Schreibt der Agent aus mehreren Gründen in dieselbe Seite (neue Warnung, Antwort, Ergebnis),
   dann nacheinander, jeweils mit frisch gelesenem `hash`; bei einem Konflikt neu lesen.
 - **Ein eigenes Konto je Agent,** das nur dort schreiben darf, wo er berichtet. Seine eigenen Änderungen kommen in
   den Ereignissen nicht vor (außer mit `own=true`), er reagiert also nicht auf sich selbst.
@@ -320,7 +325,7 @@ Protokoll schreiben, dann trägt man sie in seine Liste ein.
 Ein vollständiges Beispiel (Node.js, ohne weitere Pakete) bringt Kaveyl Wiki mit –
 [agent.mjs](/hilfe/beispiele/incident-agent/agent.mjs) und [Anleitung](/hilfe/beispiele/incident-agent/README.md), im
 Quellcode unter `examples/incident-agent`: Warnungen
-aus dem Syslog werden zu Vorfall-Notizen, Haken von freigabeberechtigten Personen zu festen Aktionen, Zeilen
+aus dem Syslog werden zu Vorfall-Seiten, Haken von freigabeberechtigten Personen zu festen Aktionen, Zeilen
 „Question:“ bekommen eine Antwort; mit oder ohne Ereignis-Webhook, zuerst im Trockenlauf. Einrichtung des Kontos und
 der Rechte: Handbuch, [Agenten im Team](BENUTZERHANDBUCH.md#agenten-im-team).
 
@@ -404,7 +409,7 @@ nutzen stattdessen die REST-API oder den eingebauten KI-Assistenten (Einstellung
 | 403 „Origin nicht erlaubt“ | Aufruf aus einer fremden Webseite im Browser – nur Clients außerhalb des Browsers oder dieselbe Adresse |
 | Client findet keine Werkzeuge / will OAuth | Client kann keine Kopfzeilen bei HTTP-Servern → über `mcp-remote` anbinden |
 | Konflikt beim Schreiben | Datei wurde inzwischen geändert – neu lesen, zusammenführen, mit neuem `hash` schreiben |
-| Notiz „nicht gefunden“, obwohl sie existiert | fehlendes Leserecht (Kaveyl Wiki verrät nicht, ob es sie gibt) oder Pfad falsch kodiert |
+| Seite „nicht gefunden“, obwohl sie existiert | fehlendes Leserecht (Kaveyl Wiki verrät nicht, ob es sie gibt) oder Pfad falsch kodiert |
 
 Jeder Zugriff mit Änderung steht unter Einstellungen → Werkzeuge → Protokoll (Art „Sicherheit“, `api-…` /
 `mcp-…`); „zuletzt benutzt“ eines Tokens zeigt die Token-Liste.

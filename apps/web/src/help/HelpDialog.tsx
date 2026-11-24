@@ -12,7 +12,7 @@ import { EXAMPLE_FILES, LICENCE_FILES, anchorOf, fetchHelp, findAnchor, helpTarg
 /** Chapters are shown by the editor's read-only view – it loads with the first help page, not with the app. */
 const MarkdownView = lazyPart(
   () => import('../editor/MarkdownView').then((m) => m.MarkdownView),
-  () => <FormError>{t('Dieser Teil der App konnte nicht geladen werden. Bitte die Seite neu laden.')}</FormError>,
+  () => <FormError>{t('Dieser Teil der App konnte nicht geladen werden. Bitte die App neu laden.')}</FormError>,
 );
 
 const DOCS: [HelpDoc, string][] = [

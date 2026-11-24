@@ -279,9 +279,9 @@ describe('lists directly after each other', () => {
   };
 
   it('writes a checklist and a bullet list after it as two lists, not one mixed list (raw Markdown)', () => {
-    const content = [tasks('Ei', 'Brot'), bullets('Notiz')];
+    const content = [tasks('Ei', 'Brot'), bullets('Seite')];
     const out = write(...content);
-    expect(out).toBe('- [ ] Ei\n- [ ] Brot\n\n* Notiz\n');
+    expect(out).toBe('- [ ] Ei\n- [ ] Brot\n\n* Seite\n');
     roundTrip(out, content);
   });
 

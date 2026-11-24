@@ -38,7 +38,7 @@ export function EventHooksPanel({ mounts }: { mounts: Mount[] }) {
   return (
     <div className="max-w-3xl space-y-4 text-sm">
       <p className="text-fg-muted">
-        {t('Schickt Änderungen sofort an ein anderes System – etwa einen Agenten, der auf Antworten in einer Notiz wartet. Jede Lieferung ist mit dem Geheimnis signiert (Kopfzeile X-Kaveyl-Signature: sha256=…); der Empfänger prüft sie. Es geht nur hinaus, was die gewählte Person lesen darf.')}
+        {t('Schickt Änderungen sofort an ein anderes System – etwa einen Agenten, der auf Antworten in einer Seite wartet. Jede Lieferung ist mit dem Geheimnis signiert (Kopfzeile X-Kaveyl-Signature: sha256=…); der Empfänger prüft sie. Es geht nur hinaus, was die gewählte Person lesen darf.')}
       </p>
       {secret && (
         <div className="space-y-1 rounded-lg border border-accent bg-accent-soft p-3" role="status">
@@ -186,7 +186,7 @@ function HookForm({ mounts, users, onCancel, onCreated }: { mounts: Mount[]; use
             </select>
           )}
         </Field>
-        <Field label={t('Nur dieser Ordner oder diese Notiz (optional)')}>
+        <Field label={t('Nur dieser Ordner oder diese Seite (optional)')}>
           <Input value={path} onChange={(e) => setPath(e.target.value)} placeholder={t('z. B. Vorfälle')} />
         </Field>
       </div>

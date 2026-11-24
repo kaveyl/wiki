@@ -16,7 +16,7 @@ export function lazyPart<P extends object>(load: () => Promise<ComponentType<P>>
 
 /** The standard message for a part that could not be loaded. */
 export function PartUnavailable() {
-  return <PartFailed text={t('Dieser Teil der App konnte nicht geladen werden. Bitte die Seite neu laden.')} />;
+  return <PartFailed text={t('Dieser Teil der App konnte nicht geladen werden. Bitte die App neu laden.')} />;
 }
 
 interface BoundaryState {
@@ -41,7 +41,7 @@ export class PartBoundary extends Component<{ note?: string; children: ReactNode
     const { note } = this.props;
     return (
       <PartFailed
-        text={t('Dieser Teil der App konnte nicht angezeigt werden. Bitte die Seite neu laden.')}
+        text={t('Dieser Teil der App konnte nicht angezeigt werden. Bitte die App neu laden.')}
         unsaved={note ? this.state.unsaved.filter((u) => u.note === note) : this.state.unsaved}
       />
     );
@@ -58,12 +58,12 @@ function PartFailed({ text, unsaved = [] }: { text: string; unsaved?: UnsavedNot
         <p>
           {tn(
             count,
-            '{n} Notiz war noch nicht gespeichert. Kopiere sie vor dem Neuladen heraus.',
-            '{n} Notizen waren noch nicht gespeichert. Kopiere sie vor dem Neuladen heraus.',
+            '{n} Seite war noch nicht gespeichert. Kopiere sie vor dem Neuladen heraus.',
+            '{n} Seiten waren noch nicht gespeichert. Kopiere sie vor dem Neuladen heraus.',
           )}
         </p>
       )}
-      {copied !== null && <p>{copied ? tn(count, '{n} Notiz in die Zwischenablage kopiert', '{n} Notizen in die Zwischenablage kopiert') : t('Nicht kopiert')}</p>}
+      {copied !== null && <p>{copied ? tn(count, '{n} Seite in die Zwischenablage kopiert', '{n} Seiten in die Zwischenablage kopiert') : t('Nicht kopiert')}</p>}
       <div className="flex flex-wrap justify-center gap-2">
         {count > 0 && (
           <Button size="sm" variant="primary" onClick={() => void copyText(formatUnsaved(unsaved)).then(setCopied)}>

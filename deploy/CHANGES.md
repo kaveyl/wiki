@@ -3,6 +3,26 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.16 (Beta) – 2026-11-24
+
+Kaveyl Wiki now says **page** instead of **note** everywhere – the app, messages, e-mails, the manual, the API and
+the MCP server. Kaveyl Notes is the notes app; Kaveyl Wiki is the wiki for docs and team knowledge.
+
+### Upgrade notes
+- **API and MCP have new names.** REST: `/api/v1/pages/…` instead of `/api/v1/notes/…`, the upload field is `page`
+  instead of `note`. MCP: `read_page`, `write_page`, `create_page`, `move_page`, `copy_page`, `delete_page` instead of
+  `read_note` … `delete_note`; `upload_file` takes `page`. **The old names keep working until 0.3**, but are no longer
+  listed in `openapi.json`, `tools/list` or the documentation – please switch scripts and agents to the new names.
+  AI clients that remember the tool list (e.g. a running Claude Code session) see the new names after reconnecting.
+- Links into the manual that contain “notiz” changed with their headings (e.g. `#seiten-finden-und-lesen`).
+- No database change.
+
+### Changed
+- “Note” becomes “page” in the interface (German “Notiz” → “Seite”): “New page”, page menu, page header, page
+  links, folder page, page font size, messages, commit texts (“docs: page …”), e-mails and the manual. Callouts
+  (`[!NOTE]`), release notes and the names other programs use in the import (Joplin, HedgeDoc, Trilium notes) stay.
+- The command palette and the slash menu also find “New page” and “Link page” when you type “note”.
+
 ## 0.2.15 (Beta) – 2026-11-24
 
 A new look: the sidebar and the note as two rounded cards, colour themes for light and

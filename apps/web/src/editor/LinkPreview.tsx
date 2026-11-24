@@ -113,7 +113,7 @@ export function LinkPreview({ container, mount, notePath }: { container: HTMLEle
         <span className="truncate">{noteNameIn(mount.id, preview.path)}</span>
       </div>
       <div className="mt-0.5 truncate text-[0.6875rem] text-fg-faint">{preview.path}</div>
-      <p className="mt-2 line-clamp-6 text-xs leading-relaxed text-fg-muted">{preview.missing ? t('Diese Notiz gibt es (noch) nicht.') : preview.text || t('Keine weiteren Inhalte.')}</p>
+      <p className="mt-2 line-clamp-6 text-xs leading-relaxed text-fg-muted">{preview.missing ? t('Diese Seite gibt es (noch) nicht.') : preview.text || t('Keine weiteren Inhalte.')}</p>
     </div>,
     document.body,
   );

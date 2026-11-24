@@ -62,7 +62,7 @@ describe('activity log', () => {
     log.log({ category: 'sync', action: 'synced', mount: m, message: '2 Dateien vom Server geholt', detail: { pushed: 0, incoming: ['M a.md', 'M geheim/b.md'], paths: ['a.md', 'geheim/b.md'] } });
     log.log({ category: 'sync', action: 'conflict-resolved', mount: m, message: 'Konflikt aufgelöst: a.md', detail: { paths: ['a.md'] } });
     log.log({ category: 'sync', action: 'conflict-resolved', mount: m, message: 'Konflikt aufgelöst: alt.md' });
-    log.log({ category: 'sync', action: 'committed', mount: m, message: 'Commit 1234567: docs: 60 Notizen bearbeitet', detail: { paths: many } });
+    log.log({ category: 'sync', action: 'committed', mount: m, message: 'Commit 1234567: docs: 60 Seiten bearbeitet', detail: { paths: many } });
     log.log({ category: 'sync', action: 'recovered', mount: m, message: 'Wieder synchron' });
     const mayRead = (p: string) => !p.startsWith('geheim/');
     const list = log.list();

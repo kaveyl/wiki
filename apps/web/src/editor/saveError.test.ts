@@ -45,6 +45,6 @@ describe('saveFailure', () => {
     const f = saveFailure(new ApiError(403, 'Inzwischen ist hier ein anderes Konto angemeldet – nichts gespeichert', { code: 'other-user' }), true);
     expect(f.kind).toBe('otherUser');
     expect(f.label).toBe('Anderes Konto angemeldet');
-    expect(f.detail).toMatch(/nur unter dem Konto, mit dem die Notiz geöffnet wurde/);
+    expect(f.detail).toMatch(/nur unter dem Konto, mit dem die Seite geöffnet wurde/);
   });
 });

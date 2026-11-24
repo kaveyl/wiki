@@ -53,7 +53,7 @@ export class ConflictError extends Error {
     readonly currentHash: string | null,
     readonly currentRaw: string | null,
   ) {
-    super('Die Notiz wurde inzwischen anderswo geändert');
+    super('Die Seite wurde inzwischen anderswo geändert');
   }
 }
 
@@ -135,9 +135,9 @@ export class NoteService {
     if (current === null) throw new NotFoundError(rel);
     if (sha1(current) !== baseHash) throw new ConflictError(sha1(current), current);
     // The server never sees plaintext of an encrypted note, so it cannot merge a document into it.
-    if (isEncryptedNote(current) || (await inEncryptedFolder(mount, this.dataPath, rel))) throw new ForbiddenError('Verschlüsselte Notiz: wird nur im Browser verschlüsselt gespeichert');
+    if (isEncryptedNote(current) || (await inEncryptedFolder(mount, this.dataPath, rel))) throw new ForbiddenError('Verschlüsselte Seite: wird nur im Browser verschlüsselt gespeichert');
     const next = await markdown.save(current, doc);
-    if (next === null) throw new PathError('Diese Notiz ist zu groß oder zu verschachtelt für den Editor – bitte als Markdown-Quelltext bearbeiten');
+    if (next === null) throw new PathError('Diese Seite ist zu groß oder zu verschachtelt für den Editor – bitte als Markdown-Quelltext bearbeiten');
     return this.writeIfChanged(mount, rel, current, next, author);
   }
 
@@ -171,9 +171,9 @@ export class NoteService {
     if (current === null) throw new NotFoundError(rel);
     if (sha1(current) !== baseHash) throw new ConflictError(sha1(current), current);
     if (isEncryptedNote(raw)) {
-      if (!isAgeBody(raw)) throw new PathError('Verschlüsselte Notiz: Inhalt ist kein age-Block');
+      if (!isAgeBody(raw)) throw new PathError('Verschlüsselte Seite: Inhalt ist kein age-Block');
     } else if (!opts.allowPlain && (isEncryptedNote(current) || (await inEncryptedFolder(mount, this.dataPath, rel)))) {
-      throw new ForbiddenError('Verschlüsselte Notiz: Klartext wird nicht gespeichert');
+      throw new ForbiddenError('Verschlüsselte Seite: Klartext wird nicht gespeichert');
     }
     return this.writeIfChanged(mount, rel, current, raw, author);
   }
@@ -192,7 +192,7 @@ export class NoteService {
     const current = await this.readRaw(mount, rel);
     if (current === null) throw new NotFoundError(rel);
     if (sha1(current) !== baseHash) throw new ConflictError(sha1(current), current);
-    if (await this.plainInEncrypted(mount, rel, current)) throw new ForbiddenError('Verschlüsselte Notiz: Klartext wird nicht gespeichert');
+    if (await this.plainInEncrypted(mount, rel, current)) throw new ForbiddenError('Verschlüsselte Seite: Klartext wird nicht gespeichert');
     const fm = readFrontmatter(splitFrontmatter(current).frontmatter);
     const keys: Record<string, FrontmatterValue> = {};
     if (changes.tags) {
@@ -284,9 +284,9 @@ export class NoteService {
     const heading = encrypted
       ? setFrontmatterKeys('', { encrypted: 'age' })
       : template
-        ? renderTemplate(await readTemplate(mount, this.dataPath, template), { title: title.trim() || 'Neue Notiz', user: author.name })
-        : `# ${title.trim() || 'Neue Notiz'}\n${body?.trim() ? `\n${body.trim()}\n` : ''}`;
-    if (encrypted && body?.trim()) throw new ForbiddenError('In einem verschlüsselten Ordner lässt sich kein Klartext ablegen – Antwort kopieren und in eine Notiz einfügen');
+        ? renderTemplate(await readTemplate(mount, this.dataPath, template), { title: title.trim() || 'Neue Seite', user: author.name })
+        : `# ${title.trim() || 'Neue Seite'}\n${body?.trim() ? `\n${body.trim()}\n` : ''}`;
+    if (encrypted && body?.trim()) throw new ForbiddenError('In einem verschlüsselten Ordner lässt sich kein Klartext ablegen – Antwort kopieren und in eine Seite einfügen');
     // Notes created in the app carry their id from the start (rename-safe, docs/PLAN.md §2.2).
     // A template's own id (if any) is replaced, so every note gets a fresh one.
     const plain = mount.options.writeMetadata ? setFrontmatterKeys(heading, { id: ulid() }) : template && !encrypted ? setFrontmatterKeys(heading, { id: undefined }) : heading;
@@ -301,7 +301,7 @@ export class NoteService {
     } else {
       rel = await uniquePath(mount, this.dataPath, parentRel, base, '.md');
     }
-    if (!fileFilter(mount)(rel)) throw new ForbiddenError('Der Mount-Filter würde diese Notiz ausblenden');
+    if (!fileFilter(mount)(rel)) throw new ForbiddenError('Der Mount-Filter würde diese Seite ausblenden');
     await writeFile(absPath(mount, this.dataPath, rel), content, { flag: 'wx' });
     await this.manager.touched(mount, [rel], author, `docs: ${rel} angelegt (Kaveyl Wiki)`);
     return kind === 'dir' ? posix.dirname(rel) : rel;
@@ -316,12 +316,12 @@ export class NoteService {
     if (raw.includes('\0')) throw new PathError('Keine Textdatei – nur Markdown-Dateien (.md) lassen sich importieren');
     const parentRel = cleanRelPath(parent);
     // Marked as encrypted, but plain text inside: never (audit 28.10. sec-001) – same rule as saving.
-    if (isEncryptedNote(raw) && !isAgeBody(raw)) throw new PathError('Verschlüsselte Notiz: Inhalt ist kein age-Block');
+    if (isEncryptedNote(raw) && !isAgeBody(raw)) throw new PathError('Verschlüsselte Seite: Inhalt ist kein age-Block');
     if (!isEncryptedNote(raw) && (await inEncryptedFolder(mount, this.dataPath, parentRel ? `${parentRel}/new.md` : 'new.md')))
-      throw new ForbiddenError('Ziel ist ein verschlüsselter Ordner – die Notiz zuerst verschlüsseln');
+      throw new ForbiddenError('Ziel ist ein verschlüsselter Ordner – die Seite zuerst verschlüsseln');
     await mkdir(absPath(mount, this.dataPath, parentRel), { recursive: true });
     const rel = await uniquePath(mount, this.dataPath, parentRel, fileNameFor(fileName.replace(/\.(md|markdown)$/i, '')), '.md');
-    if (!fileFilter(mount)(rel)) throw new ForbiddenError('Der Mount-Filter würde diese Notiz ausblenden');
+    if (!fileFilter(mount)(rel)) throw new ForbiddenError('Der Mount-Filter würde diese Seite ausblenden');
     const content = mount.options.writeMetadata ? setFrontmatterKeys(raw, { id: ulid() }) : setFrontmatterKeys(raw, { id: undefined });
     await writeFile(absPath(mount, this.dataPath, rel), content, { flag: 'wx' });
     await this.manager.touched(mount, [rel], author, `docs: ${rel} importiert (Kaveyl Wiki)`);
@@ -396,7 +396,7 @@ export class NoteService {
   private async assertNoPlainIntoEncrypted(src: Mount, fromRel: string, dst: Mount, toRel: string, isDir: boolean) {
     if (!(await inEncryptedFolder(dst, this.dataPath, toRel))) return;
     const encrypted = isDir ? await inEncryptedFolder(src, this.dataPath, `${fromRel}/x.md`) : isEncryptedNote((await this.readRaw(src, fromRel)) ?? '');
-    if (!encrypted) throw new ForbiddenError(isDir ? 'Ziel ist ein verschlüsselter Ordner – den Ordner zuerst verschlüsseln' : 'Ziel ist ein verschlüsselter Ordner – die Notiz zuerst verschlüsseln');
+    if (!encrypted) throw new ForbiddenError(isDir ? 'Ziel ist ein verschlüsselter Ordner – den Ordner zuerst verschlüsseln' : 'Ziel ist ein verschlüsselter Ordner – die Seite zuerst verschlüsseln');
   }
 
   /** Renames or moves a note or folder within the mount. Returns the new path. `readable` limits the files that come along. */
@@ -413,7 +413,7 @@ export class NoteService {
     if (st) await this.assertNoPlainIntoEncrypted(mount, fromRel, mount, toRel, st.isDirectory());
     if (!st) throw new NotFoundError(fromRel);
     if (await lstat(dst).catch(() => null)) throw new ConflictError(null, null);
-    if (st.isFile() && !fileFilter(mount)(toRel)) throw new ForbiddenError('Der Mount-Filter würde die Notiz ausblenden');
+    if (st.isFile() && !fileFilter(mount)(toRel)) throw new ForbiddenError('Der Mount-Filter würde die Seite ausblenden');
     await mkdir(dirname(dst), { recursive: true });
     await rename(src, dst);
     // An encrypted note into another folder: the server cannot rewrite the links inside its age block, so the files it
@@ -708,7 +708,7 @@ export class NoteService {
         if (!(await lstat(absPath(src, this.dataPath, ref)).catch(() => null))?.isFile()) continue;
         const inside = base === '.' ? ref : posix.relative(base, ref);
         if (inside.startsWith('..')) {
-          if (src.id !== dst.id) warnings.push(`„${ref}“ liegt außerhalb des Ordners der Notiz und wurde nicht mitkopiert`);
+          if (src.id !== dst.id) warnings.push(`„${ref}“ liegt außerhalb des Ordners der Seite und wurde nicht mitkopiert`);
           continue;
         }
         const target = cleanRelPath(targetBase === '.' ? inside : `${targetBase}/${inside}`);
@@ -720,8 +720,8 @@ export class NoteService {
         copies.set(ref, target);
       }
     }
-    if (hidden) warnings.push(`${hidden} Notiz(en) ohne Leserecht wurden nicht mitkopiert`);
-    if (skipped) warnings.push(`${skipped} andere Datei(en) wurden nicht mitkopiert – nur Notizen, Bilder und Anhänge`);
+    if (hidden) warnings.push(`${hidden} Seite(n) ohne Leserecht wurden nicht mitkopiert`);
+    if (skipped) warnings.push(`${skipped} andere Datei(en) wurden nicht mitkopiert – nur Seiten, Bilder und Anhänge`);
     const dstVisible = fileFilter(dst);
     for (const [s, t] of copies) {
       if (visible(s) && !dstVisible(t)) throw new ForbiddenError(`Der Filter der Ziel-Quelle würde „${t}“ ausblenden`);
@@ -774,7 +774,7 @@ export class NoteService {
     const abs = absPath(dst, this.dataPath, toRel);
     if (await lstat(abs).catch(() => null)) throw new ConflictError(null, null);
     if (!isEncryptedNote(raw) && (await inEncryptedFolder(dst, this.dataPath, toRel))) {
-      throw new ForbiddenError('Ziel ist ein verschlüsselter Ordner – dort lässt sich keine unverschlüsselte Notiz ablegen');
+      throw new ForbiddenError('Ziel ist ein verschlüsselter Ordner – dort lässt sich keine unverschlüsselte Seite ablegen');
     }
     await mkdir(dirname(abs), { recursive: true });
     await writeFile(abs, dst.options.writeMetadata ? setFrontmatterKeys(raw, { id: ulid() }) : setFrontmatterKeys(raw, { id: undefined }), { flag: 'wx' });
@@ -812,7 +812,7 @@ export class NoteService {
       if ((readable && !readable(ref)) || !isServable(ref)) continue;
       const inside = base === '.' ? ref : posix.relative(base, ref);
       if (inside.startsWith('..')) {
-        if (src?.id !== dst.id) warnings.push(`„${ref}“ liegt außerhalb des Ordners der Notiz und wurde nicht mitkopiert`);
+        if (src?.id !== dst.id) warnings.push(`„${ref}“ liegt außerhalb des Ordners der Seite und wurde nicht mitkopiert`);
         continue;
       }
       const target = cleanRelPath(targetBase === '.' ? inside : `${targetBase}/${inside}`);
@@ -907,7 +907,7 @@ export class NoteService {
     const old = await this.version(mount, commit, versionPath);
     // Same rule as saveRaw: a version from before the encryption would put plaintext back into Git, the index and the AI.
     if (!isEncryptedNote(old) && (isEncryptedNote(current) || (await inEncryptedFolder(mount, this.dataPath, rel)))) {
-      throw new ForbiddenError('Diese Version ist unverschlüsselt – sie lässt sich nicht in die verschlüsselte Notiz zurückholen. „Speichern als“ legt sie außerhalb eines verschlüsselten Ordners ab.');
+      throw new ForbiddenError('Diese Version ist unverschlüsselt – sie lässt sich nicht in die verschlüsselte Seite zurückholen. „Speichern als“ legt sie außerhalb eines verschlüsselten Ordners ab.');
     }
     const result = await this.writeIfChanged(mount, rel, current, old, author, `docs: ${rel} auf Version ${commit.slice(0, 7)} zurückgesetzt (Kaveyl Wiki)`);
     return { hash: result.hash };

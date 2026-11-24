@@ -231,8 +231,8 @@ describe('mounts and notes', () => {
     // A token writes as its person.
     const token = ((await app.server.inject({ method: 'POST', url: '/api/tokens', payload: JSON.stringify({ name: 'Skript', scopes: ['read', 'write'] }), ...as(anna.cookie) })).json() as { token: string }).token;
     const bearer = { authorization: `Bearer ${token}`, 'content-type': 'application/json' };
-    const v1 = (await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/b.md`, headers: bearer })).json() as { hash: string };
-    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/b.md`, headers: bearer, payload: JSON.stringify({ markdown: '# B\n\nPer Token.\n', baseHash: v1.hash }) })).statusCode).toBe(200);
+    const v1 = (await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/b.md`, headers: bearer })).json() as { hash: string };
+    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/b.md`, headers: bearer, payload: JSON.stringify({ markdown: '# B\n\nPer Token.\n', baseHash: v1.hash }) })).statusCode).toBe(200);
     await commitNow();
     await until(() => sh('log', '-1', '--format=%s', '--', 'b.md') !== '' && sh('status', '--porcelain') === '');
     expect(sh('log', '-1', '--format=%an', '--', 'b.md')).toBe('anna');
@@ -380,7 +380,7 @@ describe('mounts and notes', () => {
     expect(saved.json()).toMatchObject({ changed: true });
     const stale = await app.server.inject({ method: 'PUT', url: `/api/notes/${id}/docs/home.md`, ...json({ raw: '# Alt\n', baseHash: note.hash }) });
     expect(stale.statusCode).toBe(409);
-    expect(stale.json()).toMatchObject({ error: 'Die Notiz wurde inzwischen anderswo geändert', currentRaw: '# Home\n\nNeu.\n' });
+    expect(stale.json()).toMatchObject({ error: 'Die Seite wurde inzwischen anderswo geändert', currentRaw: '# Home\n\nNeu.\n' });
 
     const created = await app.server.inject({ method: 'POST', url: `/api/notes/${id}`, ...json({ parent: 'docs', title: 'Trilium Ideen' }) });
     expect(created.json()).toEqual({ path: 'docs/Trilium Ideen.md' });
@@ -641,20 +641,20 @@ describe('users and API tokens', () => {
     expect(token).toMatch(/^kw_[A-Za-z0-9_-]{40}$/);
     expect(info).toMatchObject({ prefix: token.slice(0, 10), scopes: ['read'] });
     const bearer = (t: string) => ({ authorization: `Bearer ${t}` });
-    expect((await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: bearer(token) })).statusCode).toBe(200);
+    expect((await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: bearer(token) })).statusCode).toBe(200);
     // read-only: writes are refused, admin routes too, token management only in the browser.
-    const note = (await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: bearer(token) })).json() as { hash: string };
-    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/home.md`, headers: { ...bearer(token), 'content-type': 'application/json' }, payload: JSON.stringify({ markdown: '# x\n', baseHash: note.hash }) })).statusCode).toBe(403);
+    const note = (await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: bearer(token) })).json() as { hash: string };
+    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/docs/home.md`, headers: { ...bearer(token), 'content-type': 'application/json' }, payload: JSON.stringify({ markdown: '# x\n', baseHash: note.hash }) })).statusCode).toBe(403);
     expect((await app.server.inject({ method: 'GET', url: '/api/admin/users', headers: bearer(token) })).statusCode).toBe(403);
     expect((await app.server.inject({ method: 'GET', url: '/api/tokens', headers: bearer(token) })).statusCode).toBe(403);
     // App routes need the browser login, whatever the token may do (AD-047).
     expect((await app.server.inject({ method: 'GET', url: `/api/notes/${id}/docs/home.md`, headers: bearer(token) })).statusCode).toBe(403);
     // write token: works without the JSON/CSRF rule's cookie, author = token owner.
     const w = ((await app.server.inject({ method: 'POST', url: '/api/tokens', ...json({ name: 'Schreiben', scopes: ['read', 'write'] }) })).json() as { token: string }).token;
-    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/home.md`, headers: { ...bearer(w), 'content-type': 'application/json' }, payload: JSON.stringify({ markdown: '# Per Token\n', baseHash: note.hash }) })).statusCode).toBe(200);
+    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/docs/home.md`, headers: { ...bearer(w), 'content-type': 'application/json' }, payload: JSON.stringify({ markdown: '# Per Token\n', baseHash: note.hash }) })).statusCode).toBe(200);
     expect((await app.server.inject({ method: 'GET', url: '/api/tokens', headers: { cookie } })).json()).toHaveLength(2);
     await app.server.inject({ method: 'DELETE', url: `/api/tokens/${info.id}`, ...json({}) });
-    expect((await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: bearer(token) })).statusCode).toBe(401);
+    expect((await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: bearer(token) })).statusCode).toBe(401);
     expect((await app.server.inject({ method: 'GET', url: '/api/mounts', headers: bearer('kw_falschfalschfalschfalschfalsch') })).statusCode).toBe(401);
     const log = JSON.stringify((await app.server.inject({ method: 'GET', url: '/api/activity?limit=200', headers: { cookie } })).json());
     expect(log).toContain('API-Token erstellt');
@@ -669,7 +669,7 @@ describe('users and API tokens', () => {
     expect(renewed.token).not.toBe(token);
     expect(renewed.info).toMatchObject({ id: info.id, name: 'Skript', scopes: ['read'] });
     expect(Math.round((Date.parse(renewed.info.expiresAt) - Date.now()) / 86_400_000)).toBe(30);
-    const read = (t: string) => app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: { authorization: `Bearer ${t}` } });
+    const read = (t: string) => app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: { authorization: `Bearer ${t}` } });
     expect((await read(token)).statusCode).toBe(401);
     expect((await read(renewed.token)).statusCode).toBe(200);
     // An expired token comes back with its validity counted from now.
@@ -704,7 +704,7 @@ describe('users and API tokens', () => {
     const { token, info } = res.json() as { token: string; info: { id: string; createdBy: { name: string } } };
     expect(info.createdBy).toMatchObject({ name: 'Admin' });
     // It acts as the person: the token works, the database knows it as theirs.
-    expect((await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: { authorization: `Bearer ${token}` } })).statusCode).toBe(200);
+    expect((await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: { authorization: `Bearer ${token}` } })).statusCode).toBe(200);
     expect(app.db.prepare('SELECT user_id FROM api_tokens WHERE id = ?').get(info.id)).toEqual({ user_id: agent.id });
     // At most what the person may: no „admin“ for a normal user, no tokens for guests.
     expect((await make({ userId: agent.id, name: 'x', scopes: ['admin'] })).json().error).toMatch(/Nur Administratoren/);
@@ -724,9 +724,9 @@ describe('users and API tokens', () => {
     // Renewed by the admin: the admin knows it again.
     const again = (await app.server.inject({ method: 'POST', url: `/api/admin/tokens/${info.id}/renew`, ...json({}) })).json() as { token: string; info: { createdBy: unknown } };
     expect(again.info.createdBy).toMatchObject({ name: 'Admin' });
-    expect((await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: { authorization: `Bearer ${mine.token}` } })).statusCode).toBe(401);
+    expect((await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: { authorization: `Bearer ${mine.token}` } })).statusCode).toBe(401);
     expect((await app.server.inject({ method: 'DELETE', url: `/api/admin/tokens/${info.id}`, ...json({}) })).statusCode).toBe(200);
-    expect((await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: { authorization: `Bearer ${again.token}` } })).statusCode).toBe(401);
+    expect((await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: { authorization: `Bearer ${again.token}` } })).statusCode).toBe(401);
     const log = JSON.stringify((await app.server.inject({ method: 'GET', url: '/api/activity?limit=200', headers: { cookie } })).json());
     expect(log).toContain('API-Token erstellt für agent');
     expect(log).toContain('API-Token gelöscht für agent');
@@ -740,7 +740,7 @@ describe('users and API tokens', () => {
     const asOther = (body: unknown) => ({ payload: JSON.stringify(body), headers: { 'content-type': 'application/json', cookie: other.cookie } });
     const make = async () =>
       ((await app.server.inject({ method: 'POST', url: '/api/admin/tokens', ...asOther({ userId: agent.id, name: 'MCP', scopes: ['read', 'mcp'] }) })).json() as { token: string }).token;
-    const read = async (t: string) => (await app.server.inject({ method: 'GET', url: `/api/v1/notes/${id}/docs/home.md`, headers: { authorization: `Bearer ${t}` } })).statusCode;
+    const read = async (t: string) => (await app.server.inject({ method: 'GET', url: `/api/v1/pages/${id}/docs/home.md`, headers: { authorization: `Bearer ${t}` } })).statusCode;
     // Locked – and demoted – the tokens they made for others stop working.
     let t = await make();
     expect(await read(t)).toBe(200);
@@ -1133,7 +1133,7 @@ describe('Speichern als (AD-039)', () => {
     writeFileSync(join(wiki, 'docs', 'bild.png'), 'png');
     writeFileSync(join(wiki, 'docs', 'geheim', 'lohn.png'), 'geheim');
     writeFileSync(join(wiki, 'docs', 'geheim', 'assets', 'vertrag.pdf'), 'geheim');
-    writeFileSync(join(wiki, 'docs', 'geheim', 'notiz.md'), '# Notiz\n');
+    writeFileSync(join(wiki, 'docs', 'geheim', 'notiz.md'), '# Seite\n');
     writeFileSync(join(wiki, 'docs', 'plan.md'), '# Plan\n\n![](bild.png) ![](geheim/lohn.png) [v](geheim/assets/vertrag.pdf)\n');
     const { id } = await createLocalMount();
     mkdirSync(join(root, 'projekte', 'zwei'));
@@ -1309,7 +1309,7 @@ describe('HTML export (Phase 6)', () => {
     expect(home).toContain('href="unter/plan.html"');
     expect(home).toContain('src="assets/bild.png"');
     expect(strFromU8(files['unter/plan.html']!)).toContain('href="../home.html#oben"');
-    expect(strFromU8(files['index.html']!)).toContain('2 Notizen');
+    expect(strFromU8(files['index.html']!)).toContain('2 Seiten');
     expect((await app.server.inject({ method: 'GET', url: `/api/export/${id}/leer`, headers: { cookie } })).statusCode).toBe(404);
 
     // Markdown: the files as they are, plus what they point to; nothing outside the folder, no dotfiles or scripts.
@@ -1407,7 +1407,7 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
     expect(preview.warnings.map((w) => w.text)).toContain('Folien – sie erscheinen als normaler Text');
     expect(preview.remote).toEqual({ count: 4, servers: ['127.0.0.1:8097'] });
     // The dialog offers to fetch them instead of the hint; without fetching, the report names them.
-    expect(preview.warnings.map((w) => w.text)).not.toContain('Notizen mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links');
+    expect(preview.warnings.map((w) => w.text)).not.toContain('Seiten mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links');
     // Another format changes the preview (the dialog's choice).
     expect((await post('/api/import/preview', { token: preview.token, format: 'markdown' })).json()).toMatchObject({ format: 'markdown', detected: 'hedgedoc' });
 
@@ -1419,9 +1419,9 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
     expect(readFileSync(join(folder, 'Hinweisboxen.md'), 'utf8')).toMatch(/^---\nid: \w+\n---\n# Hinweisboxen\n> \[!TIP\]/);
     const report = readFileSync(join(folder, 'Import-Bericht.md'), 'utf8');
     expect(report).toContain('Importiert aus HedgeDoc am ');
-    expect(report).toContain('- Notizen: 60');
-    expect(report).toContain('### Leere Notizen – nicht übernommen (1)');
-    expect(report).toContain('### Notizen mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links (3)');
+    expect(report).toContain('- Seiten: 60');
+    expect(report).toContain('### Leere Seiten – nicht übernommen (1)');
+    expect(report).toContain('### Seiten mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links (3)');
     expect(report).toContain('- [Jahreshauptversammlung (Folien)](Jahreshauptversammlung%20(Folien).md)');
     expect(readFileSync(join(wiki, 'docs', 'Import aus HedgeDoc', 'alt.md'), 'utf8')).toBe('# Alt\n');
     // The note is found like any other, and the import is one commit.
@@ -1447,8 +1447,8 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
     expect(readdirSync(join(base, 'assets')).sort()).toEqual(['Gipfelfoto.jpg', 'Logo.svg', 'PNG.png']);
     expect(readFileSync(join(base, 'Medien.md'), 'utf8')).toContain('![PNG](assets/PNG.png)');
     const report = readFileSync(join(base, 'Import-Bericht.md'), 'utf8');
-    expect(report).toContain('### Notizen mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links (1)\n\n- [Medien](Medien.md)');
-    expect(report).not.toContain('Notizen mit Bildern auf dem alten Server');
+    expect(report).toContain('### Seiten mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links (1)\n\n- [Medien](Medien.md)');
+    expect(report).not.toContain('Seiten mit Bildern auf dem alten Server');
   });
 
   it('an import is the person\'s change even when it writes longer than the watcher waits; a write that breaks off leaves nothing', async () => {
@@ -1460,7 +1460,7 @@ describe('import from other programs (docs/PLAN-IMPORT.md)', () => {
         changes: { path: string; via: string; by: string | null }[];
       };
     const { cursor } = await feed();
-    const many = Object.fromEntries(Array.from({ length: 1200 }, (_, i) => [`Viele/Ordner ${i % 12}/Notiz ${i}.md`, strToU8(`# Notiz ${i}\n`)]));
+    const many = Object.fromEntries(Array.from({ length: 1200 }, (_, i) => [`Viele/Ordner ${i % 12}/Seite ${i}.md`, strToU8(`# Seite ${i}\n`)]));
     const preview = (await upload(id, zipSync(many), 'parent=&name=viele.zip')).json() as { token: string };
     expect((await post('/api/import/run', { token: preview.token })).json()).toMatchObject({ folder: 'Viele', notes: 1200 });
     await new Promise((r) => setTimeout(r, 1500)); // the watcher's events of the import have arrived
@@ -2117,13 +2117,18 @@ describe('REST API v1 and MCP (AD-023)', () => {
     const hits = (await get('/api/v1/search?q=Outline')).json() as { path: string; snippet: string }[];
     expect(hits[0]).toMatchObject({ sourceId: id, path: 'docs/home.md', name: 'home' });
     expect(hits[0]!.snippet).toContain('«Outline»');
-    const note = (await get(`/api/v1/notes/${id}/docs/home.md`)).json() as { hash: string; markdown: string };
+    const note = (await get(`/api/v1/pages/${id}/docs/home.md`)).json() as { hash: string; markdown: string };
     expect(note.markdown).toBe('# Home\n\nTrilium und Outline.\n');
-    const put = (body: object) => app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/home.md`, payload: JSON.stringify(body), ...h });
+    // The old address /api/v1/notes (before AD-081) still answers the same until 0.3, but openapi.json only names /pages.
+    expect((await get(`/api/v1/notes/${id}/docs/home.md`)).json()).toEqual(note);
+    const spec = (await app.server.inject({ method: 'GET', url: '/api/v1/openapi.json' })).json() as { paths: Record<string, unknown> };
+    expect(Object.keys(spec.paths).filter((p) => p.startsWith('/notes'))).toEqual([]);
+    expect(Object.keys(spec.paths)).toContain('/pages/{sourceId}/{path}');
+    const put = (body: object) => app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/docs/home.md`, payload: JSON.stringify(body), ...h });
     expect((await put({ markdown: '# Home\n\nNeu. [Plan](plan.md)\n', baseHash: note.hash })).json()).toMatchObject({ changed: true });
     expect((await put({ markdown: '# Alt\n', baseHash: note.hash })).statusCode).toBe(409);
     expect((await put({ markdown: '# Ohne\n' })).statusCode).toBe(400);
-    const created = (await app.server.inject({ method: 'POST', url: `/api/v1/notes/${id}`, payload: JSON.stringify({ parent: 'docs', title: 'Plan', markdown: '# Plan\n\nInhalt.\n' }), ...h })).json() as { path: string };
+    const created = (await app.server.inject({ method: 'POST', url: `/api/v1/pages/${id}`, payload: JSON.stringify({ parent: 'docs', title: 'Plan', markdown: '# Plan\n\nInhalt.\n' }), ...h })).json() as { path: string };
     expect(created.path).toBe('docs/Plan.md');
     expect(readFileSync(join(root, 'projekte/wiki/docs/Plan.md'), 'utf8')).toContain('Inhalt.');
     expect((await get(`/api/v1/backlinks/${id}/docs/Plan.md`)).json()).toEqual([]); // link says plan.md (other case)
@@ -2133,11 +2138,18 @@ describe('REST API v1 and MCP (AD-023)', () => {
     const copy = (await app.server.inject({ method: 'POST', url: `/api/v1/copy/${id}`, payload: JSON.stringify({ from: 'docs/plan.md', toParent: 'docs' }), ...h })).json() as { path: string };
     expect(copy.path).toBe('docs/plan (Kopie).md');
     expect((await get(`/api/v1/history/${id}/docs/home.md`)).json()).toMatchObject({ git: false });
-    expect((await app.server.inject({ method: 'DELETE', url: `/api/v1/notes/${id}/docs/plan (Kopie).md`, headers: bearer(t) })).json()).toEqual({ ok: true });
+    expect((await app.server.inject({ method: 'DELETE', url: `/api/v1/pages/${id}/docs/plan (Kopie).md`, headers: bearer(t) })).json()).toEqual({ ok: true });
     expect(existsSync(join(root, 'projekte/wiki/docs/plan (Kopie).md'))).toBe(false);
+    // The old address /api/v1/notes (AD-081, until 0.3) also creates, writes and deletes.
+    const made = (await app.server.inject({ method: 'POST', url: `/api/v1/notes/${id}`, payload: JSON.stringify({ parent: 'docs', title: 'Alias' }), ...h })).json() as { path: string; hash: string };
+    expect(made.path).toBe('docs/Alias.md');
+    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/Alias.md`, payload: JSON.stringify({ markdown: '# Alias\n\nalt\n', baseHash: made.hash }), ...h })).statusCode).toBe(200);
+    expect(readFileSync(join(root, 'projekte/wiki/docs/Alias.md'), 'utf8')).toBe('# Alias\n\nalt\n');
+    expect((await app.server.inject({ method: 'DELETE', url: `/api/v1/notes/${id}/docs/Alias.md`, headers: bearer(t) })).json()).toEqual({ ok: true });
+    expect(existsSync(join(root, 'projekte/wiki/docs/Alias.md'))).toBe(false);
     // read-only token: no writes; changes are audited with the API marker.
     const r = await token(['read']);
-    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/home.md`, payload: JSON.stringify({ markdown: 'x', baseHash: 'y' }), headers: bearer(r, { 'content-type': 'application/json' }) })).statusCode).toBe(403);
+    expect((await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/docs/home.md`, payload: JSON.stringify({ markdown: 'x', baseHash: 'y' }), headers: bearer(r, { 'content-type': 'application/json' }) })).statusCode).toBe(403);
     const log = JSON.stringify(app.db.prepare('SELECT message FROM activity').all());
     expect(log).toContain('API: Gespeichert: docs/home.md');
   });
@@ -2148,8 +2160,8 @@ describe('REST API v1 and MCP (AD-023)', () => {
     const call = (method: 'POST' | 'PUT', url: string, payload?: string) =>
       app.server.inject({ method, url, headers: payload === undefined ? bearer(t) : bearer(t, { 'content-type': 'application/json' }), payload });
     for (const [method, url] of [
-      ['POST', `/api/v1/notes/${id}`],
-      ['PUT', `/api/v1/notes/${id}/docs/home.md`],
+      ['POST', `/api/v1/pages/${id}`],
+      ['PUT', `/api/v1/pages/${id}/docs/home.md`],
       ['POST', `/api/v1/move/${id}`],
       ['POST', `/api/v1/copy/${id}`],
       ['POST', `/api/v1/folders/${id}`],
@@ -2163,7 +2175,7 @@ describe('REST API v1 and MCP (AD-023)', () => {
     }
     expect(readFileSync(join(root, 'projekte/wiki/docs/home.md'), 'utf8')).toBe('# Home\n\nTrilium und Outline.\n');
     expect((await app.server.inject({ method: 'GET', url: `/api/v1/backlinks/${id}/docs/gibt-es-nicht.md`, headers: bearer(t) })).statusCode).toBe(404);
-    const up = await call('POST', `/api/v1/attachments/${id}`, JSON.stringify({ note: 'docs/gibt-es-nicht.md', name: 'x.svg', contentText: '<svg/>' }));
+    const up = await call('POST', `/api/v1/attachments/${id}`, JSON.stringify({ page: 'docs/gibt-es-nicht.md', name: 'x.svg', contentText: '<svg/>' }));
     expect(up.statusCode).toBe(404);
     expect(existsSync(join(root, 'projekte/wiki/docs/assets'))).toBe(false);
   });
@@ -2238,25 +2250,25 @@ describe('REST API v1 and MCP (AD-023)', () => {
     await rule({ target: 'folder', path: 'docs', subject: 'user', subjectId: mariaId, level: 'read' });
     const t = await token(['read', 'write'], maria);
     const get = (url: string) => app.server.inject({ method: 'GET', url, headers: bearer(t) });
-    expect((await get(`/api/v1/notes/${id}/geheim/lohn.md`)).statusCode).toBe(404);
+    expect((await get(`/api/v1/pages/${id}/geheim/lohn.md`)).statusCode).toBe(404);
     expect((await get('/api/v1/search?q=Zebrawort')).json()).toEqual([]);
     expect(((await get(`/api/v1/tree/${id}`)).json() as { path: string }[]).map((e) => e.path)).not.toContain('geheim/lohn.md');
-    const note = (await get(`/api/v1/notes/${id}/docs/home.md`)).json() as { hash: string; access: string };
+    const note = (await get(`/api/v1/pages/${id}/docs/home.md`)).json() as { hash: string; access: string };
     expect(note.access).toBe('read');
-    const put = await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${id}/docs/home.md`, payload: JSON.stringify({ markdown: '# x\n', baseHash: note.hash }), headers: bearer(t, { 'content-type': 'application/json' }) });
+    const put = await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${id}/docs/home.md`, payload: JSON.stringify({ markdown: '# x\n', baseHash: note.hash }), headers: bearer(t, { 'content-type': 'application/json' }) });
     expect(put.statusCode).toBe(403);
     // The same over MCP: a token with „write“ never writes more than its person may (owner 21.10.).
     const m = await token(['read', 'write', 'mcp'], maria);
     const call = async (name: string, args: object) =>
       ((await app.server.inject({ method: 'POST', url: '/mcp', payload: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }), headers: bearer(m, { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }) })).json() as { result: { isError?: boolean; content: { text: string }[] } }).result;
     for (const [name, args] of [
-      ['write_note', { source_id: id, path: 'docs/home.md', markdown: '# x\n', base_hash: note.hash }],
-      ['create_note', { source_id: id, parent: 'docs', title: 'Neu' }],
+      ['write_page', { source_id: id, path: 'docs/home.md', markdown: '# x\n', base_hash: note.hash }],
+      ['create_page', { source_id: id, parent: 'docs', title: 'Neu' }],
       ['create_folder', { source_id: id, parent: 'docs', name: 'neu' }],
-      ['move_note', { source_id: id, from: 'docs/home.md', to: 'docs/weg.md' }],
-      ['copy_note', { source_id: id, from: 'docs/home.md', to_parent: 'docs' }],
-      ['delete_note', { source_id: id, path: 'docs/home.md' }],
-      ['upload_file', { source_id: id, note: 'docs/home.md', name: 'x.txt', content_text: 'x' }],
+      ['move_page', { source_id: id, from: 'docs/home.md', to: 'docs/weg.md' }],
+      ['copy_page', { source_id: id, from: 'docs/home.md', to_parent: 'docs' }],
+      ['delete_page', { source_id: id, path: 'docs/home.md' }],
+      ['upload_file', { source_id: id, page: 'docs/home.md', name: 'x.txt', content_text: 'x' }],
     ] as const) {
       const res = await call(name, args);
       expect(res.isError, name).toBe(true);
@@ -2287,13 +2299,13 @@ describe('REST API v1 and MCP (AD-023)', () => {
       'list_sources',
       'search',
       'list_tree',
-      'read_note',
-      'write_note',
-      'create_note',
+      'read_page',
+      'write_page',
+      'create_page',
       'create_folder',
-      'move_note',
-      'copy_note',
-      'delete_note',
+      'move_page',
+      'copy_page',
+      'delete_page',
       'upload_file',
       'list_changes',
       'list_attachments',
@@ -2305,7 +2317,7 @@ describe('REST API v1 and MCP (AD-023)', () => {
     ]);
     expect((await call(ro, 'list_sources', {})).structuredContent).toEqual({ items: [expect.objectContaining({ id, name: 'Wiki' })] });
     expect((await call(ro, 'search', { query: 'Trilium' })).content[0]!.text).toContain('docs/home.md');
-    const note = (await call(ro, 'read_note', { source_id: id, path: 'docs/home.md' })).structuredContent as { hash: string; markdown: string };
+    const note = (await call(ro, 'read_page', { source_id: id, path: 'docs/home.md' })).structuredContent as { hash: string; markdown: string };
     expect(note.markdown).toContain('Trilium');
     expect(note).toMatchObject({ editingNow: [] });
     // Someone else typing in the app shows up for the AI (team test 23.10.); the token's own person does not.
@@ -2314,26 +2326,38 @@ describe('REST API v1 and MCP (AD-023)', () => {
       const beat = await app.server.inject({ method: 'POST', url: '/api/presence', payload: { mountId: id, path: 'docs/home.md', open: true, editing: true }, headers: { cookie: c } });
       expect(beat.statusCode).toBe(200);
     }
-    expect((await call(ro, 'read_note', { source_id: id, path: 'docs/home.md' })).structuredContent).toMatchObject({ editingNow: ['Maria Muster'] });
+    expect((await call(ro, 'read_page', { source_id: id, path: 'docs/home.md' })).structuredContent).toMatchObject({ editingNow: ['Maria Muster'] });
     await app.server.inject({ method: 'POST', url: '/api/presence', payload: { mountId: id, path: 'docs/home.md', open: false }, headers: { cookie: typist.cookie } });
-    expect((await call(ro, 'read_note', { source_id: id, path: 'docs/home.md' })).structuredContent).toMatchObject({ editingNow: [] });
-    const denied = await call(ro, 'write_note', { source_id: id, path: 'docs/home.md', markdown: '# x\n', base_hash: note.hash });
+    expect((await call(ro, 'read_page', { source_id: id, path: 'docs/home.md' })).structuredContent).toMatchObject({ editingNow: [] });
+    const denied = await call(ro, 'write_page', { source_id: id, path: 'docs/home.md', markdown: '# x\n', base_hash: note.hash });
     expect(denied).toMatchObject({ isError: true });
     expect(denied.content[0]!.text).toContain('Schreibrecht');
     const rw = await token(['read', 'write', 'mcp']);
-    expect(await call(rw, 'write_note', { source_id: id, path: 'docs/home.md', markdown: '# Home\n\nVon Claude.\n', base_hash: note.hash })).not.toHaveProperty('isError');
+    expect(await call(rw, 'write_page', { source_id: id, path: 'docs/home.md', markdown: '# Home\n\nVon Claude.\n', base_hash: note.hash })).not.toHaveProperty('isError');
     expect(readFileSync(join(root, 'projekte/wiki/docs/home.md'), 'utf8')).toBe('# Home\n\nVon Claude.\n');
-    const conflict = await call(rw, 'write_note', { source_id: id, path: 'docs/home.md', markdown: '# Alt\n', base_hash: note.hash });
+    const conflict = await call(rw, 'write_page', { source_id: id, path: 'docs/home.md', markdown: '# Alt\n', base_hash: note.hash });
     expect(conflict.isError).toBe(true);
     expect(conflict.content[0]!.text).toContain('Konflikt');
-    expect((await call(rw, 'create_note', { source_id: id, parent: 'docs', title: 'Neu von MCP' })).structuredContent).toMatchObject({ path: 'docs/Neu von MCP.md' });
+    expect((await call(rw, 'create_page', { source_id: id, parent: 'docs', title: 'Neu von MCP' })).structuredContent).toMatchObject({ path: 'docs/Neu von MCP.md' });
     // Copying (team test 23.10.: MCP could move but not copy): a taken name gets „(Kopie)“.
-    expect((await call(rw, 'copy_note', { source_id: id, from: 'docs/Neu von MCP.md', to_parent: 'docs' })).structuredContent).toMatchObject({ path: 'docs/Neu von MCP (Kopie).md' });
+    expect((await call(rw, 'copy_page', { source_id: id, from: 'docs/Neu von MCP.md', to_parent: 'docs' })).structuredContent).toMatchObject({ path: 'docs/Neu von MCP (Kopie).md' });
     expect(readFileSync(join(root, 'projekte/wiki/docs/Neu von MCP (Kopie).md'), 'utf8')).toContain('# Neu von MCP');
-    expect((await call(rw, 'read_note', { source_id: id, path: 'gibts/nicht.md' })).isError).toBe(true);
+    expect((await call(rw, 'read_page', { source_id: id, path: 'gibts/nicht.md' })).isError).toBe(true);
+    // Old tool names (before AD-081) still work until 0.3, but tools/list does not show them.
+    expect(tools.some((t) => t.endsWith('_note'))).toBe(false);
+    const old = (await call(ro, 'read_note', { source_id: id, path: 'docs/home.md' })).structuredContent as { hash: string; markdown: string };
+    expect(old.markdown).toBe('# Home\n\nVon Claude.\n');
+    expect((await call(rw, 'write_note', { source_id: id, path: 'docs/home.md', markdown: '# Home\n\nAlt.\n', base_hash: old.hash })).isError).toBeUndefined();
+    expect(readFileSync(join(root, 'projekte/wiki/docs/home.md'), 'utf8')).toBe('# Home\n\nAlt.\n');
+    for (const name of ['create_note', 'move_note', 'copy_note', 'delete_note']) {
+      expect((await call(ro, name, {})).content[0]!.text, name).not.toContain('Unbekanntes Werkzeug');
+    }
+    // upload_file still takes the old parameter name „note“.
+    const up = await call(rw, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'alt.txt', content_text: 'x' });
+    expect(up.structuredContent).toMatchObject({ path: 'docs/assets/alt.txt' });
     // An internal error (here: a note as parent folder → EEXIST from the file system) names no server path – as REST v1
     // (audit sec2-003).
-    const internal = await call(rw, 'create_note', { source_id: id, parent: 'docs/home.md', title: 'X' });
+    const internal = await call(rw, 'create_page', { source_id: id, parent: 'docs/home.md', title: 'X' });
     expect(internal.isError).toBe(true);
     expect(internal.content[0]!.text).toBe('Interner Fehler');
     const unknown = (await rpc(rw, { jsonrpc: '2.0', id: 9, method: 'resources/list' })).json() as { error: { code: number } };
@@ -2353,7 +2377,7 @@ describe('REST API v1 and MCP (AD-023)', () => {
 
     // Annotations: deleting is marked destructive, syncing talks to the remote.
     const listed = ((await rpc(ro, { jsonrpc: '2.0', id: 2, method: 'tools/list' })).json() as { result: { tools: { name: string; annotations: Record<string, boolean> }[] } }).result.tools;
-    expect(listed.find((x) => x.name === 'delete_note')!.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true });
+    expect(listed.find((x) => x.name === 'delete_page')!.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true });
     expect(listed.find((x) => x.name === 'sync_source')!.annotations).toMatchObject({ readOnlyHint: false, openWorldHint: true });
     expect(listed.find((x) => x.name === 'get_sync_status')!.annotations).toMatchObject({ readOnlyHint: true });
 
@@ -2366,7 +2390,7 @@ describe('REST API v1 and MCP (AD-023)', () => {
     expect(existsSync(join(wiki, 'docs/neu/tief/Ende/index.md'))).toBe(true);
     expect((await call(rw, 'create_folder', { source_id: id, parent: 'docs', name: '  ' })).isError).toBe(true);
     expect((await call(ro, 'create_folder', { source_id: id, parent: 'docs', name: 'Nein' })).isError).toBe(true);
-    const deep = await call(rw, 'create_note', { source_id: id, parent: 'docs/Projekte/Website/2026', title: 'Plan', markdown: '# Plan\n\nSiehe [Home](../../../home.md).\n' });
+    const deep = await call(rw, 'create_page', { source_id: id, parent: 'docs/Projekte/Website/2026', title: 'Plan', markdown: '# Plan\n\nSiehe [Home](../../../home.md).\n' });
     expect(deep.structuredContent).toMatchObject({ path: 'docs/Projekte/Website/2026/Plan.md' });
 
     // search: only one source; in: with the id works too (ids are upper case).
@@ -2377,14 +2401,14 @@ describe('REST API v1 and MCP (AD-023)', () => {
     expect((await hits({ query: `Trilium in:${id}` })).map((h) => h.sourceId)).toEqual([id]);
     expect((await call(ro, 'search', { query: 'Trilium', source_id: 'gibt-es-nicht' })).isError).toBe(true);
 
-    // delete_note: a note and a folder into the folder trash; the root and unknown paths are refused; read-only refused.
-    expect((await call(ro, 'delete_note', { source_id: id, path: 'docs/Projekte/Website/2026/Plan.md' })).isError).toBe(true);
-    expect((await call(rw, 'delete_note', { source_id: id, path: 'docs/Projekte/Website/2026/Plan.md' })).structuredContent).toEqual({ ok: true });
+    // delete_page: a note and a folder into the folder trash; the root and unknown paths are refused; read-only refused.
+    expect((await call(ro, 'delete_page', { source_id: id, path: 'docs/Projekte/Website/2026/Plan.md' })).isError).toBe(true);
+    expect((await call(rw, 'delete_page', { source_id: id, path: 'docs/Projekte/Website/2026/Plan.md' })).structuredContent).toEqual({ ok: true });
     expect(existsSync(join(wiki, 'docs/Projekte/Website/2026/Plan.md'))).toBe(false);
-    expect((await call(rw, 'delete_note', { source_id: id, path: 'docs/Projekte 2' })).structuredContent).toEqual({ ok: true });
+    expect((await call(rw, 'delete_page', { source_id: id, path: 'docs/Projekte 2' })).structuredContent).toEqual({ ok: true });
     expect(existsSync(join(wiki, 'docs/Projekte 2'))).toBe(false);
-    expect((await call(rw, 'delete_note', { source_id: id, path: '' })).isError).toBe(true);
-    expect((await call(rw, 'delete_note', { source_id: id, path: 'docs/gibt-es-nicht.md' })).isError).toBe(true);
+    expect((await call(rw, 'delete_page', { source_id: id, path: '' })).isError).toBe(true);
+    expect((await call(rw, 'delete_page', { source_id: id, path: 'docs/gibt-es-nicht.md' })).isError).toBe(true);
     const trash = ((await app.server.inject({ method: 'GET', url: `/api/trash/${id}`, headers: { cookie } })).json() as { items: { path: string }[] }).items;
     expect(trash.map((x) => x.path).sort()).toEqual(['docs/Projekte 2', 'docs/Projekte/Website/2026/Plan.md']);
     expect(JSON.stringify(app.db.prepare('SELECT message FROM activity').all())).toContain('MCP: Gelöscht: docs/Projekte 2');
@@ -2400,29 +2424,29 @@ describe('REST API v1 and MCP (AD-023)', () => {
     // Plaintext never goes into an encrypted folder, and a refused note is not left behind.
     mkdirSync(join(wiki, 'tresor'), { recursive: true });
     writeFileSync(join(wiki, 'tresor', '.kaveyl-wiki.yml'), 'encrypted: age\n');
-    const plain = await call(rw, 'create_note', { source_id: id, parent: 'tresor', title: 'Geheim', markdown: '# Geheim\n\nKlartext\n' });
+    const plain = await call(rw, 'create_page', { source_id: id, parent: 'tresor', title: 'Geheim', markdown: '# Geheim\n\nKlartext\n' });
     expect(plain.isError).toBe(true);
     expect(plain.content[0]!.text).toContain('Klartext');
     expect(readdirSync(join(wiki, 'tresor'))).toEqual(['.kaveyl-wiki.yml']);
 
     // Errors follow the request language; note content and file names never get translated.
     const en = { 'accept-language': 'en-GB' };
-    expect((await call(rw, 'read_note', { source_id: id, path: 'docs/nichts.md' }, en)).content[0]!.text).toBe('Not found (or no permission).');
-    expect((await call(rw, 'read_note', { source_id: id, path: '../x.md' }, en)).content[0]!.text).toBe('Path outside the source (“..”)');
-    expect((await call(rw, 'read_note', { source_id: id }, en)).content[0]!.text).toBe('Parameter “path” missing');
-    expect((await call(ro, 'write_note', { source_id: id, path: 'docs/home.md', markdown: 'x', base_hash: 'y' }, en)).content[0]!.text).toContain('no write permission');
-    expect((await call(rw, 'read_note', { source_id: id, path: 'docs/nichts.md' })).content[0]!.text).toBe('Nicht gefunden (oder keine Berechtigung).');
+    expect((await call(rw, 'read_page', { source_id: id, path: 'docs/nichts.md' }, en)).content[0]!.text).toBe('Not found (or no permission).');
+    expect((await call(rw, 'read_page', { source_id: id, path: '../x.md' }, en)).content[0]!.text).toBe('Path outside the source (“..”)');
+    expect((await call(rw, 'read_page', { source_id: id }, en)).content[0]!.text).toBe('Parameter “path” missing');
+    expect((await call(ro, 'write_page', { source_id: id, path: 'docs/home.md', markdown: 'x', base_hash: 'y' }, en)).content[0]!.text).toContain('no write permission');
+    expect((await call(rw, 'read_page', { source_id: id, path: 'docs/nichts.md' })).content[0]!.text).toBe('Nicht gefunden (oder keine Berechtigung).');
     // Without any language hint a script gets English (owner 2026-10-22); the unit tests set German as fallback.
     setFallbackLang('en');
     try {
-      expect((await call(rw, 'read_note', { source_id: id, path: 'docs/nichts.md' })).content[0]!.text).toBe('Not found (or no permission).');
-      expect((await call(rw, 'read_note', { source_id: id, path: 'docs/nichts.md' }, { 'accept-language': 'de-AT' })).content[0]!.text).toBe('Nicht gefunden (oder keine Berechtigung).');
+      expect((await call(rw, 'read_page', { source_id: id, path: 'docs/nichts.md' })).content[0]!.text).toBe('Not found (or no permission).');
+      expect((await call(rw, 'read_page', { source_id: id, path: 'docs/nichts.md' }, { 'accept-language': 'de-AT' })).content[0]!.text).toBe('Nicht gefunden (oder keine Berechtigung).');
     } finally {
       setFallbackLang('de');
     }
-    const named = (await call(rw, 'create_note', { source_id: id, parent: 'docs', title: 'Nicht gefunden', markdown: 'Nicht gefunden' }, en)).structuredContent as { path: string };
+    const named = (await call(rw, 'create_page', { source_id: id, parent: 'docs', title: 'Nicht gefunden', markdown: 'Nicht gefunden' }, en)).structuredContent as { path: string };
     expect(named.path).toBe('docs/Nicht gefunden.md');
-    const back = await call(rw, 'read_note', { source_id: id, path: named.path }, en);
+    const back = await call(rw, 'read_page', { source_id: id, path: named.path }, en);
     expect((back.structuredContent as { markdown: string; title: string }).markdown).toContain('Nicht gefunden');
     expect(back.content[0]!.text).toContain('"name": "Nicht gefunden"');
     const unknownTool = (await rpc(rw, { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'rm_rf' } }, en)).json() as { error: { message: string } };
@@ -2434,33 +2458,33 @@ describe('REST API v1 and MCP (AD-023)', () => {
     expect(init.result.instructions).toContain('upload_file');
     expect(init.result.instructions).toContain('\n- Diagrams: a code block with the language mermaid');
     const SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4"/></svg>';
-    const svg = (await call(rw, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'Ofen Brunhilde.svg', content_text: SVG })).structuredContent;
+    const svg = (await call(rw, 'upload_file', { source_id: id, page: 'docs/home.md', name: 'Ofen Brunhilde.svg', content_text: SVG })).structuredContent;
     // Names as in the app: spaces become dashes.
     expect(svg).toEqual({ sourceId: id, path: 'docs/assets/Ofen-Brunhilde.svg', href: 'assets/Ofen-Brunhilde.svg', name: 'Ofen-Brunhilde.svg', size: SVG.length, image: true, markdown: '![Ofen-Brunhilde](assets/Ofen-Brunhilde.svg)' });
     expect(readFileSync(join(wiki, 'docs/assets/Ofen-Brunhilde.svg'), 'utf8')).toBe(SVG);
-    expect((await call(rw, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'Ofen Brunhilde.svg', content_text: SVG })).structuredContent).toMatchObject({ name: 'Ofen-Brunhilde-2.svg' });
+    expect((await call(rw, 'upload_file', { source_id: id, page: 'docs/home.md', name: 'Ofen Brunhilde.svg', content_text: SVG })).structuredContent).toMatchObject({ name: 'Ofen-Brunhilde-2.svg' });
     const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-    const png = (await call(rw, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'punkt.png', content_base64: `data:image/png;base64,${PNG}` })).structuredContent as { path: string; size: number };
+    const png = (await call(rw, 'upload_file', { source_id: id, page: 'docs/home.md', name: 'punkt.png', content_base64: `data:image/png;base64,${PNG}` })).structuredContent as { path: string; size: number };
     expect(readFileSync(join(wiki, png.path))).toEqual(Buffer.from(PNG, 'base64'));
-    const pdf = (await call(rw, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'preise.pdf', content_base64: Buffer.from('%PDF-1.4 test').toString('base64') })).structuredContent;
+    const pdf = (await call(rw, 'upload_file', { source_id: id, page: 'docs/home.md', name: 'preise.pdf', content_base64: Buffer.from('%PDF-1.4 test').toString('base64') })).structuredContent;
     expect(pdf).toMatchObject({ image: false, markdown: '[preise.pdf](assets/preise.pdf)' });
-    const refused = async (args: object, t = rw) => (await call(t, 'upload_file', { source_id: id, note: 'docs/home.md', name: 'x.svg', ...args })).isError;
+    const refused = async (args: object, t = rw) => (await call(t, 'upload_file', { source_id: id, page: 'docs/home.md', name: 'x.svg', ...args })).isError;
     expect(await refused({})).toBe(true);
     expect(await refused({ content_text: 'a', content_base64: 'YQ==' })).toBe(true);
     expect(await refused({ content_base64: 'kein base64!' })).toBe(true);
     expect(await refused({ content_text: '' })).toBe(true);
     expect(await refused({ name: 'tool.exe', content_base64: 'TVo=' })).toBe(true);
     expect(await refused({ name: 'neu.md', content_text: '# x' })).toBe(true);
-    expect(await refused({ note: 'docs/fehlt.md', content_text: SVG })).toBe(true);
+    expect(await refused({ page: 'docs/fehlt.md', content_text: SVG })).toBe(true);
     expect(await refused({ content_text: SVG }, ro)).toBe(true);
     expect(await refused({ content_base64: 'A'.repeat(14_000_100) })).toBe(true);
     writeFileSync(join(wiki, 'tresor', 'geheim.md'), '---\nencrypted: age\n---\n-----BEGIN AGE ENCRYPTED FILE-----\nYWdl\n-----END AGE ENCRYPTED FILE-----\n');
-    expect((await call(rw, 'upload_file', { source_id: id, note: 'tresor/geheim.md', name: 'x.svg', content_text: SVG })).isError).toBe(true);
+    expect((await call(rw, 'upload_file', { source_id: id, page: 'tresor/geheim.md', name: 'x.svg', content_text: SVG })).isError).toBe(true);
     expect(readdirSync(join(wiki, 'tresor'))).not.toContain('assets');
 
     // list_attachments: what the note links to, missing files with size null.
-    const home = (await call(rw, 'read_note', { source_id: id, path: 'docs/home.md' })).structuredContent as { markdown: string; hash: string };
-    await call(rw, 'write_note', { source_id: id, path: 'docs/home.md', markdown: `${home.markdown}\n![Ofen Brunhilde](assets/Ofen-Brunhilde.svg)\n\n[Preise](assets/preise.pdf) [weg](assets/fehlt.png)\n`, base_hash: home.hash });
+    const home = (await call(rw, 'read_page', { source_id: id, path: 'docs/home.md' })).structuredContent as { markdown: string; hash: string };
+    await call(rw, 'write_page', { source_id: id, path: 'docs/home.md', markdown: `${home.markdown}\n![Ofen Brunhilde](assets/Ofen-Brunhilde.svg)\n\n[Preise](assets/preise.pdf) [weg](assets/fehlt.png)\n`, base_hash: home.hash });
     const files = ((await call(ro, 'list_attachments', { source_id: id, path: 'docs/home.md' })).structuredContent as { items: { path: string; size: number | null; kind: string }[] }).items;
     expect(files.map((f) => [f.path, f.kind, f.size === null ? null : f.size > 0])).toEqual([
       ['docs/assets/Ofen-Brunhilde.svg', 'image', true],
@@ -2476,7 +2500,7 @@ describe('REST API v1 and MCP (AD-023)', () => {
     expect((await app.server.inject({ method: 'GET', url: `/api/v1/status?source=${id}`, headers: bearer(v1) })).json()).toEqual([expect.objectContaining({ id, canSync: true })]);
     expect((await post(`/api/v1/sync/${id}`, {})).json()).toMatchObject({ sourceId: id, result: null });
     expect(((await app.server.inject({ method: 'GET', url: `/api/v1/search?q=Trilium&source=${id}`, headers: bearer(v1) })).json() as unknown[]).length).toBe(1);
-    expect((await post(`/api/v1/attachments/${id}`, { note: 'REST-Ordner/index.md', name: 'skizze.svg', contentText: SVG })).json()).toMatchObject({ path: 'REST-Ordner/assets/skizze.svg', markdown: '![skizze](assets/skizze.svg)' });
+    expect((await post(`/api/v1/attachments/${id}`, { page: 'REST-Ordner/index.md', name: 'skizze.svg', contentText: SVG })).json()).toMatchObject({ path: 'REST-Ordner/assets/skizze.svg', markdown: '![skizze](assets/skizze.svg)' });
     expect((await app.server.inject({ method: 'GET', url: `/api/v1/attachments/${id}/docs/home.md`, headers: bearer(v1) })).json()).toHaveLength(3);
   });
 });

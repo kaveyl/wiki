@@ -17,7 +17,7 @@ tags: kaveyl-wiki, manual
 3. [Signing in and the interface](#anmelden-und-oberfläche)
 4. [Menus at a glance](#menüs-im-überblick)
 5. [Adding sources](#quellen-einbinden)
-6. [Finding and reading notes](#notizen-finden-und-lesen)
+6. [Finding and reading pages](#seiten-finden-und-lesen)
 7. [Editing](#bearbeiten) (with [Markdown cheat sheet](#markdown-spickzettel))
 8. [How syncing works](#so-funktioniert-der-abgleich)
 9. [Saving, transferring and syncing](#speichern-übertragen-und-synchronisieren)
@@ -29,7 +29,7 @@ tags: kaveyl-wiki, manual
 15. [Permissions](#berechtigungen)
 16. [Accounts, invitations and sharing by e-mail](#konten-einladungen-und-teilen-per-e-mail)
 17. [Working as a team](#im-team-arbeiten) (with [Following](#beobachten) and [Agents in the team](#agenten-im-team))
-18. [Encrypted notes and folders](#verschlüsselte-notizen-und-ordner)
+18. [Encrypted pages and folders](#verschlüsselte-seiten-und-ordner)
 19. [Settings at a glance](#einstellungen-im-überblick) (with [Backup](#backup))
 20. [Access over the network](#zugriff-über-das-netz) (reverse proxy, Pangolin)
 21. [Data, log and backups](#daten-protokoll-und-sicherungen) (with [deletion rules](#löschregeln))
@@ -54,7 +54,7 @@ Key principles:
 
 - **Your files stay your files.** When saving, Kaveyl Wiki changes only the sections you
   edited; everything else stays exactly as it was, byte for byte (including other people's formatting).
-- **Merely opening a note never changes anything.**
+- **Merely opening a page never changes anything.**
 - **Nothing is overwritten silently.** If changes happen at the same time, a conflict dialog appears.
 
 How Kaveyl Wiki works together with the Git server and with other editors and devices is explained in
@@ -63,7 +63,7 @@ How Kaveyl Wiki works together with the Git server and with other editors and de
 ### At a glance {#auf-einen-blick}
 
 **Files instead of a database.** Kaveyl Wiki is a wiki for perfectly ordinary Markdown files – there is
-no separate database for content. The notes live in Git repositories (Gitea, GitHub, GitLab or
+no separate database for content. The pages live in Git repositories (Gitea, GitHub, GitLab or
 any Git address) or in folders mounted into the container. Each source appears on the left as
 its own tree; the instant search and the command palette (Ctrl+K) find everything.
 
@@ -74,16 +74,16 @@ nothing is overwritten silently, and Kaveyl Wiki shows conflicts. Every source h
 with your Git server, local folders keep their versions with a Git of their own on the server.
 
 **Protection and permissions.** Versions, Trash, backups to a NAS or a folder of your own,
-link repair and a nightly check protect against loss and broken links. Permissions, groups, guests and encrypted notes control who may see
+link repair and a nightly check protect against loss and broken links. Permissions, groups, guests and encrypted pages control who may see
 and change what.
 
 **AI and interfaces.** An AI assistant helps you write and answers questions from
-shared notes – it only makes suggestions, you decide. Via the REST API and MCP, scripts and
+shared pages – it only makes suggestions, you decide. Via the REST API and MCP, scripts and
 AI tools such as Claude work along with the same permissions.
 
 Kaveyl Wiki runs as a **Docker container**. What it stores itself (users, settings, log,
 backups, local copies of the repositories) lives in the mounted folders `/config` and `/data`;
-local folders (notes on this server only) live under `/docs` – see [Data, log and backups](#daten-protokoll-und-sicherungen).
+local folders (pages on this server only) live under `/docs` – see [Data, log and backups](#daten-protokoll-und-sicherungen).
 
 ## Help in Kaveyl Wiki {#hilfe-in-kaveyl-wiki}
 
@@ -165,12 +165,12 @@ If this is a **new server** for a Kaveyl Wiki instance that existed before, do n
 
 ![Interface](handbuch/02-oberflaeche.webp)
 
-The note lies as a rounded sheet on a quiet background; the sidebar stands on the left directly on that background.
+The page lies as a rounded sheet on a quiet background; the sidebar stands on the left directly on that background.
 Between them sits a narrow handle: dragging it (or sliding it with a finger, or ← → on the keyboard) changes the width
 of the sidebar.
 
 - **Left (sidebar)** from top to bottom: “Kaveyl Wiki” with ✦ **Ask AI** (if set up) and **#** Tags; the button
-  **New note** (creates it in the folder of the open note, otherwise in the first source you may write to); the
+  **New page** (creates it in the folder of the open page, otherwise in the first source you may write to); the
   **search**; your **favourites** as small chips (with many, two rows to scroll); the switch **Tree | Recent | AI
   access** (AI access for administrators only) and below it the chosen view – in the tree every added **source**
   (repository or folder) in one shared card. At the very bottom **Add source** (administrators) and the **Trash**,
@@ -181,9 +181,9 @@ of the sidebar.
   the **gear** and the **colour scheme icon** (sun, moon or screen) are here too. Each click on the colour scheme icon
   moves on: Light → Dark → System (follows the device); the choice stays saved in this browser. On the phone, Help and
   Settings are also in the account menu so that the tabs have room.
-- **Top:** tabs of the open notes. The middle mouse button opens in a new tab (under Favorites and
+- **Top:** tabs of the open pages. The middle mouse button opens in a new tab (under Favorites and
   Recent also Ctrl+click; in the tree Ctrl+click [marks](#mehrere-markieren)). Right-click a tab → **“Pin tab”**: pinned tabs move to the left,
-  show a pin instead of ×, are never replaced when you open another note and stay
+  show a pin instead of ×, are never replaced when you open another page and stay
   open with “Close other tabs” and middle-click. Clicking the pin unpins them again.
   With many tabs open they get narrower (the name stays readable); if they still do not fit, the mouse wheel
   scrolls the bar sideways and the button **“All tabs (n)”** (number with an arrow) appears on the right: it lists
@@ -193,25 +193,25 @@ of the sidebar.
 ![Pinned tabs](handbuch/50-angeheftet.webp)
 
 ![All tabs](handbuch/tabs-alle.webp)
-- **Middle:** the editor; the toolbar floats at the bottom over the note (or sits on top, see
-  [Appearance](#darstellung)). **Right:** the table of contents (for longer notes), can be shown and hidden.
-- At the top right of the note: **Editor / Markdown** (switch view), switch width
+- **Middle:** the editor; the toolbar floats at the bottom over the page (or sits on top, see
+  [Appearance](#darstellung)). **Right:** the table of contents (for longer pages), can be shown and hidden.
+- At the top right of the page: **Editor / Markdown** (switch view), switch width
   and the **“…”** menu (Versions, Rename, Delete …).
 
-**Welcome page.** As long as no note is open, the middle shows the welcome page. At the top are the first
+**Welcome page.** As long as no page is open, the middle shows the welcome page. At the top are the first
 steps, matching your role; what is already done is ticked off:
 
 - **Administrators:** Add source, Set up e-mail sending, Set up a reverse proxy with https (done
   as soon as Kaveyl Wiki recognises your request as https – see [Reverse proxy](#reverse-proxy)), Invite people (done
   as soon as there is a second account) and Set up backup (done with an active schedule). Without https,
-  passwords and notes travel across the network unencrypted, and without a configured proxy Kaveyl Wiki cannot see who is really
+  passwords and pages travel across the network unencrypted, and without a configured proxy Kaveyl Wiki cannot see who is really
   making the request – the log then only shows the address of the proxy, and the sign-in throttle hits everyone at once.
-- **Users:** Find notes (done after the first opened note), Keep favourites (after the first star),
+- **Users:** Find pages (done after the first opened page), Keep favourites (after the first star),
   Adjust appearance, Use Kaveyl Wiki like an app (with the way for your device; done if it is already running as an app
   – see [In the browser and as an app](#im-browser-und-als-app-handy-tablet-computer)).
-- **Guests:** open the shared note, Adjust appearance, Use Kaveyl Wiki like an app.
+- **Guests:** open the shared page, Adjust appearance, Use Kaveyl Wiki like an app.
 
-If no source has been shared yet, **“Wait to be given access”** appears instead of “Find notes” – an administrator
+If no source has been shared yet, **“Wait to be given access”** appears instead of “Find pages” – an administrator
 shares sources or folders (see [Permissions](#berechtigungen)); the same then also appears in the sidebar. Below that is what Kaveyl Wiki can do: for everyone,
 Versions and Trash; for users also the AI assistant, API and MCP, encryption and working with
 other editors; for administrators additionally Backup, Notifications and Kaveyl Wiki like an app.
@@ -227,16 +227,16 @@ middle with **“Show welcome page”**. The choice applies to your account on a
 ## Menus at a glance {#menüs-im-überblick}
 
 You reach almost everything by **right-clicking** (on touch devices: **long press**) or via the
-note menu **“…”**. What you are not allowed to do (e.g. without write permission) does not appear at all.
+page menu **“…”**. What you are not allowed to do (e.g. without write permission) does not appear at all.
 
 ### Sidebar header {#kopfzeile-der-seitenleiste}
 
 | Icon | Effect |
 |---|---|
 | ✦ Ask AI | [Ask the knowledge base](#frag-die-wissensbasis) about everything shared |
-| # Tags | **Manage tags:** all tags with count and colour. A click picks a tag; below it **Show notes**, **Colour**, **Rename**, **Merge** and **Delete** (after a question with the count it takes the tag off every note you may edit – the notes stay); a double-click shows the notes at once, right-click offers the same as a menu |
-| New note | new note in the folder of the open note (otherwise in the first source you may write to) |
-| Favourite chips | a click opens, right-click as under [Favourites](#notizen-finden-und-lesen) |
+| # Tags | **Manage tags:** all tags with count and colour. A click picks a tag; below it **Show pages**, **Colour**, **Rename**, **Merge** and **Delete** (after a question with the count it takes the tag off every page you may edit – the pages stay); a double-click shows the pages at once, right-click offers the same as a menu |
+| New page | new page in the folder of the open page (otherwise in the first source you may write to) |
+| Favourite chips | a click opens, right-click as under [Favourites](#seiten-finden-und-lesen) |
 | Tree \| Recent \| AI access | which view stands below; the choice belongs to your account. “Show in tree” switches to “Tree” by itself |
 | Sources: Expand/collapse all | expand or collapse all folders of all sources |
 
@@ -262,9 +262,9 @@ note menu **“…”**. What you are not allowed to do (e.g. without write perm
 
 | Entry | Effect |
 |---|---|
-| New note / New folder | at the top level of the source |
+| New page / New folder | at the top level of the source |
 | Paste “…” | what you copied or cut before (Ctrl+V) |
-| Import ▸ Markdown files … | `.md` files from your computer as notes at the top level ([Import Markdown](#markdown-importieren)) |
+| Import ▸ Markdown files … | `.md` files from your computer as pages at the top level ([Import Markdown](#markdown-importieren)) |
 | Import ▸ From another program … | another program’s export (ZIP) as a new folder ([Import from other programs](#aus-anderen-programmen-importieren)) |
 | Permissions … | [Permissions](#berechtigungen) for the whole source (admins, “manage”) |
 | Share ▸ Give access by e-mail … | [share](#konten-einladungen-und-teilen-per-e-mail) the whole source with someone (admins, “manage”) |
@@ -272,58 +272,58 @@ note menu **“…”**. What you are not allowed to do (e.g. without write perm
 | Arrange → Move source up / down, Sort top level alphabetically | order in the sidebar or of the top level |
 | Sync now | pulls and pushes immediately (repositories) |
 | Export ▸ HTML (ZIP) / Markdown (ZIP) | the whole source as web pages or as Markdown files ([Export](#exportieren-und-drucken)) |
-| Trash | deleted notes of this source ([Trash](#versionen-und-papierkorb)) |
+| Trash | deleted pages of this source ([Trash](#versionen-und-papierkorb)) |
 | Backup ▸ Back up now / Backups and restore … / Schedules … | back up immediately (all active schedules with this source), open its [backups](#sicherungen) or [schedules](#zeitpläne) (admins) |
 | Edit source … | [Edit the source](#eine-quelle-bearbeiten): name, icon, options, contents, remove (admins) |
 | Delete repository … | Gitea/GitHub/GitLab only, admins ([Deleting repositories](#repositories-löschen)) |
 
-### Right-clicking a folder or a note {#rechtsklick-auf-einen-ordner-oder-eine-notiz}
+### Right-clicking a folder or a page {#rechtsklick-auf-einen-ordner-oder-eine-seite}
 
 At the very top a bar with five tiles holds the most used actions, the other entries follow in groups below;
 **Delete** stands apart in red at the end.
 
-- **Tiles on a note:** **New tab** (also the middle mouse button), **Copy**, **Cut**, **Rename** (Rename / move),
+- **Tiles on a page:** **New tab** (also the middle mouse button), **Copy**, **Cut**, **Rename** (Rename / move),
   **Favourite**.
-- **Tiles on a folder:** **Focus** (show only this folder), **Note** and **Folder** (new inside it), **Rename**,
+- **Tiles on a folder:** **Focus** (show only this folder), **Page** and **Folder** (new inside it), **Rename**,
   **Favourite**.
 
 | Entry | Effect |
 |---|---|
-| Open & create ▸ Open to the right / to the left, New note / New folder next to it | on notes: [split view](#notizen-finden-und-lesen) and something new on the same level |
+| Open & create ▸ Open to the right / to the left, New page / New folder next to it | on pages: [split view](#seiten-finden-und-lesen) and something new on the same level |
 | Open (tab / right / left) ▸ In new tab, Open to the right / to the left | on folders with a folder page |
-| Copy / cut / path ▸ Copy, Cut, Paste “…”, Copy path | on folders; on notes, Paste “…” next to it and **Copy path** stand directly in the list. Ctrl+C / Ctrl+X / Ctrl+V always work in the tree. The path goes to the clipboard in full with the source in front (`Source/Folder/Note.md`) |
+| Copy / cut / path ▸ Copy, Cut, Paste “…”, Copy path | on folders; on pages, Paste “…” next to it and **Copy path** stand directly in the list. Ctrl+C / Ctrl+X / Ctrl+V always work in the tree. The path goes to the clipboard in full with the source in front (`Source/Folder/Note.md`) |
 | Rename / move (tile) | name and destination, also into another source; links are repaired |
 | Select | [mark several](#mehrere-markieren) – boxes before the rows, a tap marks (for tablet and phone; with a mouse: Ctrl+click) |
 | Arrange → Move up / Move down, Sort contents alphabetically | order without dragging |
-| Import / export ▸ Markdown files …, From another program … | folders only: `.md` files from your computer as notes into it ([Import Markdown](#markdown-importieren)) or another program’s export (ZIP) as a new subfolder ([Import from other programs](#aus-anderen-programmen-importieren)) |
-| Import / export ▸ HTML (ZIP), Markdown (ZIP), or on notes Export ▸ HTML file, Markdown | [Export](#exportieren-und-drucken) |
+| Import / export ▸ Markdown files …, From another program … | folders only: `.md` files from your computer as pages into it ([Import Markdown](#markdown-importieren)) or another program’s export (ZIP) as a new subfolder ([Import from other programs](#aus-anderen-programmen-importieren)) |
+| Import / export ▸ HTML (ZIP), Markdown (ZIP), or on pages Export ▸ HTML file, Markdown | [Export](#exportieren-und-drucken) |
 | Restore from backup … | the [backups](#sicherungen) of the source, with this place selected when it opens (admins) |
 | Favourite (tile) | Add to Favourites / Remove from Favourites – the chips at the top of the sidebar |
 | Change icon … | icon, emoji or custom icon |
-| Encrypt folder … / Finish encrypting folder … / Remove encryption … | [Encryption](#verschlüsselte-notizen-und-ordner) |
-| Permissions … | [Permissions](#berechtigungen) for this folder or this note |
-| Share ▸ Send by e-mail … | notes only: the note as a file to any address ([Send by e-mail](#per-mail-versenden)); greyed out without e-mail sending and for encrypted notes |
-| Share ▸ Give access by e-mail … | [share](#konten-einladungen-und-teilen-per-e-mail) the folder (with everything in it) or the note with someone (“manage”) |
+| Encrypt folder … / Finish encrypting folder … / Remove encryption … | [Encryption](#verschlüsselte-seiten-und-ordner) |
+| Permissions … | [Permissions](#berechtigungen) for this folder or this page |
+| Share ▸ Send by e-mail … | pages only: the page as a file to any address ([Send by e-mail](#per-mail-versenden)); greyed out without e-mail sending and for encrypted pages |
+| Share ▸ Give access by e-mail … | [share](#konten-einladungen-und-teilen-per-e-mail) the folder (with everything in it) or the page with someone (“manage”) |
 | AI access … | [AI access](#ki-freigaben) exactly here (admins); “Active” after it: a rule of its own applies here already |
 | Delete (on folders: Delete folder) | to the [Trash](#versionen-und-papierkorb), with a confirmation |
 
-### Note menu “…” and note header {#notiz-menü--und-kopfzeile-der-notiz}
+### Page menu “…” and page header {#seiten-menü--und-kopfzeile-der-seite}
 
-In the header: the note's **icon** (a click changes it), **path** (source / folder / note – in narrow windows
+In the header: the page's **icon** (a click changes it), **path** (source / folder / page – in narrow windows
 shortened to “…” at the front; a click or tap shows it in full), **star** (favourite), **Editor / Markdown** (labelled
-only if there is full room for the note name next to it), **Download** (arrow down: the note as `.md`, as a ZIP when it
-uses pictures or files – see [Export](#exportieren-und-drucken); not for encrypted notes), width, table of contents
-on/off and **“…”**. At the top of the menu stand four tiles: **In tree** (expands the tree down to the note),
-**Versions** ([Versions](#versionen-und-papierkorb) from the Git history – restore or save as a new note), **Print**
+only if there is full room for the page name next to it), **Download** (arrow down: the page as `.md`, as a ZIP when it
+uses pictures or files – see [Export](#exportieren-und-drucken); not for encrypted pages), width, table of contents
+on/off and **“…”**. At the top of the menu stand four tiles: **In tree** (expands the tree down to the page),
+**Versions** ([Versions](#versionen-und-papierkorb) from the Git history – restore or save as a new page), **Print**
 (Print / as PDF) and **Share** (opens ▸ Send by e-mail … / Give access by e-mail …). Below them:
 
 | Entry | Effect |
 |---|---|
 | Document: Export ▸ HTML file / Markdown | [Export](#exportieren-und-drucken) |
-| Document: Save as template | turns the note into a [template](#vorlagen) |
+| Document: Save as template | turns the page into a [template](#vorlagen) |
 | Document: Read-only (switch) | sets or removes `readonly: true` in the front matter |
 | AI: Ask AI …, Summarise, Continue writing | only where there is no toolbar (reading mode, Markdown view) – otherwise in the [AI button](#ki-im-editor) |
-| Protection & management: Lock now, Encrypt … / Remove encryption … | [Encryption](#verschlüsselte-notizen-und-ordner) |
+| Protection & management: Lock now, Encrypt … / Remove encryption … | [Encryption](#verschlüsselte-seiten-und-ordner) |
 | Protection & management: Permissions …, Rename / move | as in the right-click menu |
 | Delete | apart in red at the end, as in the right-click menu |
 
@@ -335,14 +335,14 @@ Unpin tab**, **Close tab**, **Close other tabs**. The middle mouse button closes
 
 ### Command palette {#befehlspalette}
 
-**Ctrl+K** opens an input field for notes and commands. Below the field, **All**, **Title** (only hits in the name)
-and **Full text** (only hits in the text) choose which notes appear; **# Tags** opens the tag overview, **✦ Ask AI**
-(if set up) the [knowledge base](#frag-die-wissensbasis). With `>` at the start, commands only: new note,
+**Ctrl+K** opens an input field for pages and commands. Below the field, **All**, **Title** (only hits in the name)
+and **Full text** (only hits in the text) choose which pages appear; **# Tags** opens the tag overview, **✦ Ask AI**
+(if set up) the [knowledge base](#frag-die-wissensbasis). With `>` at the start, commands only: new page,
 new folder, show in tree, favourite, versions, ask AI, tags, search with filters,
 sync, print, export, Trash, Settings, **Help**, Add source,
 light/dark/system, language, sidebar, table of contents, width.
 
-![Right-clicking a note](handbuch/101-menue-notiz.webp)
+![Right-clicking a page](handbuch/101-menue-notiz.webp)
 
 ## Adding sources {#quellen-einbinden}
 
@@ -358,7 +358,7 @@ light/dark/system, language, sidebar, table of contents, width.
    - **Git URL** – any HTTPS repository. Under **Sign-in**: none (public), a
      matching connection (same address – it is suggested) or **New token …** (optionally with a
      username); this becomes a connection when the source is added.
-   - **Local folder** – for notes that live on this server only: a subfolder of `/docs` that the operator mounts in
+   - **Local folder** – for pages that live on this server only: a subfolder of `/docs` that the operator mounts in
      the `docker-compose.yml` (on the server e.g. `./kaveyl-wiki/docs` next to the `docker-compose.yml`).
      **New folder …** creates a subfolder inside the open folder and opens it – for example one per person (“Anna's
      wiki”), without a terminal. With **Keep versions** (the default, see options) the folder gets a Git of its own:
@@ -367,7 +367,7 @@ light/dark/system, language, sidebar, table of contents, width.
      a repository (Gitea, GitHub, GitLab, Git URL).
 2. **Branch** (repositories only). If the repository is still empty (no commit, so no branch either – the provider still names “main”), the step says so: add a file at the provider first (e.g. a README) or create the repository with “New repository”, then **Check again**.
 3. **Contents:** a tree with checkboxes – the whole repository, individual folders or individual files.
-4. **Options:** name and icon in the sidebar (the same choice as for notes: icons,
+4. **Options:** name and icon in the sidebar (the same choice as for pages: icons,
    emoji, custom icons; without a choice the sidebar shows the type: **Git branch** for repositories,
    **folder with a Git mark** for local folders with their own Git, **hard disk** for local folders without
    Git – hovering over the name always shows the type, even with a custom icon) as well as:
@@ -380,14 +380,14 @@ light/dark/system, language, sidebar, table of contents, width.
 
 | Option | Meaning |
 |---|---|
-| Keep versions | Only for local folders without Git, **on by default**. Kaveyl Wiki creates a Git of its own in the folder (hidden folder `.git`) and saves every change as a version – with the person as the author; what another program changes there (for example through a share of the NAS) becomes a version as well, with “Kaveyl Wiki” as the author. No push, no pull. Deleted notes stay in the history (as with repositories). Kaveyl Wiki must be allowed to write into the folder (owner, see `user:` in `docker-compose.yml`), otherwise it says so when adding the source. Off = files only, without versions; later by right-clicking the source → “Edit source …” → **Turn on versions …**. |
+| Keep versions | Only for local folders without Git, **on by default**. Kaveyl Wiki creates a Git of its own in the folder (hidden folder `.git`) and saves every change as a version – with the person as the author; what another program changes there (for example through a share of the NAS) becomes a version as well, with “Kaveyl Wiki” as the author. No push, no pull. Deleted pages stay in the history (as with repositories). Kaveyl Wiki must be allowed to write into the folder (owner, see `user:` in `docker-compose.yml`), otherwise it says so when adding the source. Off = files only, without versions; later by right-clicking the source → “Edit source …” → **Turn on versions …**. |
 | Commit (and push) changes automatically | Default for repositories, always on for folders with **Keep versions**. Off in local folders with a Git of your own (for example a project you work on in VS Code): Kaveyl Wiki only writes the files, you do the committing yourself. **Local folders without Git** do not have this option – there, files are only saved. |
-| When to write your changes to Git? | Pause after the last change before committing/pushing: 10 s, **2 min (default)**, 5 or 15 min. Always immediately when you leave the note and with Ctrl+S. |
-| Write metadata to the front matter | New notes get an `id:` – this lets Kaveyl Wiki recognise them even after they are renamed in VS Code. Off = files never get metadata. |
+| When to write your changes to Git? | Pause after the last change before committing/pushing: 10 s, **2 min (default)**, 5 or 15 min. Always immediately when you leave the page and with Ctrl+S. |
+| Write metadata to the front matter | New pages get an `id:` – this lets Kaveyl Wiki recognise them even after they are renamed in VS Code. Off = files never get metadata. |
 | Read-only | Read only; no editing, creating or deleting in Kaveyl Wiki. |
-| Folder note | File shown as the content of its folder (`index.md`, with Wiki.js often `home.md`). |
+| Folder page | File shown as the content of its folder (`index.md`, with Wiki.js often `home.md`). |
 | AI memory | Send along the AI's instructions and memory entries in `.kaveyl-wiki/ai/` of this source (only effective if the source is shared with the AI). |
-| Keep AI chats | How long unused [AI chats](#chats-und-aufbewahrung) about this source (its notes, folders or the whole source) are kept: **as in Settings → AI** (default 90 days), 7 / 30 / 90 / 180 days, 1 year or never delete – e.g. shorter for a diary. |
+| Keep AI chats | How long unused [AI chats](#chats-und-aufbewahrung) about this source (its pages, folders or the whole source) are kept: **as in Settings → AI** (default 90 days), 7 / 30 / 90 / 180 days, 1 year or never delete – e.g. shorter for a diary. |
 
 ### Editing a source {#eine-quelle-bearbeiten}
 
@@ -456,7 +456,7 @@ optionally with a username). Several connections – including several Gitea ins
     webhook goes, or the webhooks on your own repositories) so that no push arrives twice. If both exist anyway, the
     check reports it.
   - **GitHub / GitLab:** one webhook per added repository (personal accounts have no
-    account-wide one). For this the token needs the permission for webhooks (see the note below the token field).
+    account-wide one). For this the token needs the permission for webhooks (see the page below the token field).
   - The target is the [address for webhooks](#webhooks) (Settings → Sources → Webhooks), without one of your own the
     public address from Settings → Notifications → E-mail. If it is on your own network, Kaveyl Wiki tells you right
     away for GitHub.com/GitLab.com that they cannot reach the address.
@@ -473,10 +473,10 @@ optionally with a username). Several connections – including several Gitea ins
 
 Public repositories and local folders do not need a connection.
 
-## Finding and reading notes {#notizen-finden-und-lesen}
+## Finding and reading pages {#seiten-finden-und-lesen}
 
 - **Instant search** at the top left (Ctrl+P): results appear as you type, grouped into
-  folders, notes (title/path) and content; content includes the **tags** (“recipe” or “#recipe” finds notes with that
+  folders, pages (title/path) and content; content includes the **tags** (“recipe” or “#recipe” finds pages with that
   tag). Right-click (on touch devices: long press) a result → “Open in new
   tab”, “Open to the right/left”, “Show in tree” or “Copy path” (the path
   with the source in front; a message confirms the copy). “All results …” opens the
@@ -484,8 +484,8 @@ Public repositories and local folders do not need a connection.
 
 ![Search](handbuch/06-suche.webp)
 
-- **Command palette** (Ctrl+K): one input field for everything – search for a note and open it
-  (Ctrl+Enter: new tab) or run commands (new note/new folder, show in tree,
+- **Command palette** (Ctrl+K): one input field for everything – search for a page and open it
+  (Ctrl+Enter: new tab) or run commands (new page/new folder, show in tree,
   versions, sync, settings, light/dark, sidebar, table of contents,
   width). With `>` at the start, only commands appear.
 
@@ -497,27 +497,27 @@ Public repositories and local folders do not need a connection.
 
   | Input | Effect |
   |---|---|
-  | `tag:project` | only notes with this tag |
+  | `tag:project` | only pages with this tag |
   | `in:Handbuch` | only this source (name) |
   | `path:docs/` | only this folder |
   | `since:7d` | changed in the last 7 days (`h`, `d`, `w`, `m`, `y` or a date) |
   | `"exact phrase"` | words in exactly this order |
-  | `-word` | exclude notes with this word |
+  | `-word` | exclude pages with this word |
 
 ![Search page](handbuch/34-such-seite.webp)
 
-- **Favourites:** the star at the top right of the note (or right-click in the tree → “Add to Favourites”;
-  this also works for folders without their own folder note – clicking one shows the folder expanded
+- **Favourites:** the star at the top right of the page (or right-click in the tree → “Add to Favourites”;
+  this also works for folders without their own folder page – clicking one shows the folder expanded
   in the tree). Favourites stand as small chips below the search – always one click away, without pushing the tree
   down. Right-click a favourite or an entry in “Recent”: open in new tab, open to the right or left, show in tree,
   **Remove from Favourites** or “Add to Favourites”. **Recent** is a view of the sidebar (switch **Tree | Recent | AI
-  access**): the most recently opened notes – or, with “changed”, the most recently changed ones (also by others, from
+  access**): the most recently opened pages – or, with “changed”, the most recently changed ones (also by others, from
   VS Code or via Git). After each entry, the **source** is shown in grey in brackets – handy, because Git projects
   often have the same folder structure (e.g. several `README` or `docs/`). The lists and the chosen view belong to
   your account and are not stored in the repository.
-  A note only ends up in “Recent” once it could be opened. Entries whose note no longer
+  A page only ends up in “Recent” once it could be opened. Entries whose page no longer
   exists (deleted, renamed outside, source removed) are hidden by the sidebar.
-  If a note cannot be opened, the tab offers “Search” and “Trash” (note not
+  If a page cannot be opened, the tab offers “Search” and “Trash” (page not
   found) or “Try again” (another error) and “Close tab”.
 
 ![Favourites and Recent](handbuch/37-favoriten.webp)
@@ -525,7 +525,7 @@ Public repositories and local folders do not need a connection.
 ![Menu in the favourites](handbuch/51-favoriten-menue.webp)
 
 - **Icons:** click the symbol to the left of the path (or right-click in the tree → “Change icon
-  …”; when creating, right in the “New note”/“New folder” window). Three tabs:
+  …”; when creating, right in the “New page”/“New folder” window). Three tabs:
   - **Symbols** – “Common” shows a selection; the list next to it gives all roughly 1,900
     Lucide symbols by **Category** (files, development, finance, weather …) or “All”.
     The search field searches names, keywords and categories (names and keywords in English,
@@ -533,25 +533,25 @@ Public repositories and local folders do not need a connection.
   - **Emoji** – a selection or any emoji of your own.
   - **Custom** – **Upload …** (PNG, WebP, JPEG, GIF or SVG, at most 256 KB, several
     at once too). Custom icons apply to **all sources** and all users; they may be deleted by
-    whoever uploaded them or by an admin. Notes with a deleted icon show an empty
+    whoever uploaded them or by an admin. Pages with a deleted icon show an empty
     box.
 
   “No icon” removes it. Stored in the frontmatter as `icon: lucide:rocket`,
-  `icon: emoji:📘` or `icon: custom:<id>`; a folder shows the icon of its folder note. Custom
+  `icon: emoji:📘` or `icon: custom:<id>`; a folder shows the icon of its folder page. Custom
   icons are stored in the app’s database (not in the repository) and are included in its backup.
 
 ![Searching symbols](handbuch/53-icon-suche.webp)
 
 ![Custom icons](handbuch/54-eigene-icons.webp)
-- **Read-only:** “…” → “Make read-only” writes `readonly: true` into the note – it
+- **Read-only:** “…” → “Make read-only” writes `readonly: true` into the page – it
   then opens in reading mode for everyone; the header then shows a yellow **“Read only”** (a click unlocks it
-  temporarily). Remove it via the same menu item. If you may only read a note, the header shows a yellow
+  temporarily). Remove it via the same menu item. If you may only read a page, the header shows a yellow
   **“Read-only”**.
-- **Split view:** right-click a note in the tree or a search result → “Open to the
-  right” or “Open to the left” (in the tab menu it is called “Show to the right/left”). The chosen note is placed next to the
+- **Split view:** right-click a page in the tree or a search result → “Open to the
+  right” or “Open to the left” (in the tab menu it is called “Show to the right/left”). The chosen page is placed next to the
   current one. If it is itself the current one (just opened with a click), the previously opened
-  note goes to the other side. Both halves are full editors; clicking the tab of the
-  right-hand note swaps the sides, × in its header closes the split.
+  page goes to the other side. Both halves are full editors; clicking the tab of the
+  right-hand page swaps the sides, × in its header closes the split.
 
 ![Split view](handbuch/38-geteilte-ansicht.webp)
 
@@ -561,7 +561,7 @@ Public repositories and local folders do not need a connection.
   / Collapse all folders**, hovering over any folder – in any source, at any level – shows **Expand everything below
   / Collapse everything below** (one symbol that switches depending on the state; if the folder has no
   subfolders, it only expands or collapses the folder itself) and, where you may write, **+** for a
-  new note or a new folder. **Alt+click** on the
+  new page or a new folder. **Alt+click** on the
   arrow of a folder also expands or collapses it with everything below. On touch devices
   (without a mouse) the symbols are always shown on the source and on the currently selected folder.
 - **Markers at the right edge** of a row always stay in the same place: ✦ (its own
@@ -575,33 +575,33 @@ Public repositories and local folders do not need a connection.
 - **Focus (hoisting):** right-click a folder → “Show only this folder (focus)”. The
   sidebar then shows only this folder; “Focus: …” at the top with × leaves it.
 - **Names:** tree, tabs, header, search, favourites and lists show the **file name**
-  without `.md` everywhere (a folder note `index.md` under the name of its folder). A `title:` in the
-  frontmatter or the first heading does not change the display – but the search still finds notes
+  without `.md` everywhere (a folder page `index.md` under the name of its folder). A `title:` in the
+  frontmatter or the first heading does not change the display – but the search still finds pages
   by their title as well.
 - **Tags:** are shown above the text. “+ Tag” adds one (typing suggests matching existing
-  tags, the arrow in the field or ↓ shows all of them; tap or Enter accepts), × removes it, a click shows all notes with this tag. It is stored
+  tags, the arrow in the field or ↓ shows all of them; tap or Enter accepts), × removes it, a click shows all pages with this tag. It is stored
   in the frontmatter `tags:` in the style of the file – the Wiki.js notation `tags: a, b` stays that way,
   a YAML list stays a list. All tags with their count: **#** at the top of the sidebar.
 
 ![Tags](handbuch/35-tags.webp)
 
-- **Coloured tags:** right-click a tag (above the note or in the **#** window; on a phone, long
+- **Coloured tags:** right-click a tag (above the page or in the **#** window; on a phone, long
   press) → **Colour** → one of twelve colours or **No colour** (grey). The colour applies to the tag in
-  the whole source and appears above the notes, in the **#** window and in the search. It is stored
+  the whole source and appears above the pages, in the **#** window and in the search. It is stored
   in the file `.kaveyl-wiki.yml` at the top of the source (`tagColors:`) – so it travels with the repository,
   and other Kaveyl Wiki installations see the same colours. If a tag occurs in several sources,
   Kaveyl Wiki colours it in all those you may write to; in the others it stays as it is. The **#** window
   then shows the most common colour. Anyone who may write in the source may colour tags.
 - **Renaming or merging a tag:** right-click a tag → **Rename / merge …**,
-  enter the new name. Kaveyl Wiki changes the tag in every note you may edit (in all
+  enter the new name. Kaveyl Wiki changes the tag in every page you may edit (in all
   sources; each file keeps its notation). If the new name already exists, Kaveyl Wiki asks and
-  merges the two – a note with both tags keeps it once. The colour goes along if the target
-  does not have one yet. Notes without write access stay unchanged; the message says how many.
+  merges the two – a page with both tags keeps it once. The colour goes along if the target
+  does not have one yet. Pages without write access stay unchanged; the message says how many.
 
 ![Choosing a tag’s colour](handbuch/117-tag-farbe.webp)
 
-- **Links to notes** carry a small note symbol, links to attachments a paper clip.
-  Hovering briefly over a note link with the mouse shows a **preview** (name, path,
+- **Links to pages** carry a small page symbol, links to attachments a paper clip.
+  Hovering briefly over a page link with the mouse shows a **preview** (name, path,
   beginning of the text).
 
 ![Link preview](handbuch/36-link-vorschau.webp)
@@ -611,16 +611,16 @@ Public repositories and local folders do not need a connection.
 ![Table of contents](handbuch/07-inhaltsverzeichnis.webp)
 
 - **Markdown view:** shows and edits the source text directly. The table of contents is on the right here as well
-  (same switch); a click jumps to the heading's line. The `id:` line at the top is dimmed: it is the note's ID. Kaveyl
-  Wiki recognises the note by it when it is renamed or moved elsewhere (e.g. in VS Code or via Git), and permissions or
-  AI approvals set on this very note depend on it. Do not change or delete it – without it, Kaveyl Wiki only knows the
-  note by its path.
-  Very large notes (over 100,000 characters) appear as plain text in the Markdown view – without highlighting and
+  (same switch); a click jumps to the heading's line. The `id:` line at the top is dimmed: it is the page's ID. Kaveyl
+  Wiki recognises the page by it when it is renamed or moved elsewhere (e.g. in VS Code or via Git), and permissions or
+  AI approvals set on this very page depend on it. Do not change or delete it – without it, Kaveyl Wiki only knows the
+  page by its path.
+  Very large pages (over 100,000 characters) appear as plain text in the Markdown view – without highlighting and
   table of contents, so it stays smooth. The head of the card names the file, line and column; at the bottom (or on top,
   depending on the toolbar setting) floats a bar of its own: **Front matter** jumps to the header data at the very top
   (without one, it creates one with `tags:`), **Line wrap** switches between wrapping long lines and scrolling sideways
   (remembered by this browser), plus Undo and Redo.
-- Next to the tags it says when the note last changed (“Edited today, 20:38”).
+- Next to the tags it says when the page last changed (“Edited today, 20:38”).
 
 ![Markdown view](handbuch/08-markdown-ansicht.webp)
 
@@ -639,7 +639,7 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 ![Editor](handbuch/10-editor.webp)
 
-- **Toolbar:** by default a floating bar at the bottom over the note. Its lower row has **+** (insert block: numbered
+- **Toolbar:** by default a floating bar at the bottom over the page. Its lower row has **+** (insert block: numbered
   list, quote, code block, collapsible block, divider, help), **Aa** (formatting row on/off), checklist, bullet list,
   callout, table, attachment, **✦ AI** and undo/redo; the formatting row above it heading 1–3, bold, italic,
   strikethrough, code, link, copy formatting and emoji. In [Appearance](#darstellung) the bar can go on top (all in one
@@ -675,7 +675,7 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 ![Selection menu](handbuch/12-auswahlmenue.webp)
 
 - **Slash commands:** `/` at the start of a line or after a space opens a menu (heading, list, checklist,
-  code, table, quote, callouts, collapsible block, link note, file or image,
+  code, table, quote, callouts, collapsible block, link page, file or image,
   diagram (Mermaid), divider, link, **Date**, **Time**, **Date and time**). Date and time are the current ones,
   inserted as text – in English `2026-11-16` and `14:05`, in German `16.11.2026` (`/date`, `/time`, `/datum`,
   `/uhrzeit`). Typing further filters – several words work too, German or English
@@ -685,8 +685,8 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 - **Attaching files and images:** paper clip in the toolbar, drag a file into the editor window
   or paste it from the clipboard (e.g. a screenshot). The file goes into the folder
-  `assets/` next to the note and is inserted as an image or link – so it also works in
-  Gitea and VS Code. Below the note the **Attachments** list appears with size, preview (images,
+  `assets/` next to the page and is inserted as an image or link – so it also works in
+  Gitea and VS Code. Below the page the **Attachments** list appears with size, preview (images,
   PDF) and download. Clicking a file link opens the preview or downloads the file.
   Files with the same name are numbered (`Angebot-2.pdf`), never overwritten. Executable
   files (.exe, .bat, .ps1 …) are blocked by default; which endings are blocked and the maximum size (default
@@ -710,11 +710,11 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 ![Image centred, half width](handbuch/55-bild-zentriert.webp)
 
 - **Large images:** an image without its own width takes up at most about **two thirds of the window height**
-  – so a phone photo no longer fills the whole screen, and the note stays readable. The
+  – so a phone photo no longer fills the whole screen, and the page stays readable. The
   **magnifier** at the top right of the image (when hovering, on the selected image and always
   visible on touch devices) or **“View large”** in the small image toolbar shows it as large as the window
   allows; in the reading view a click on the image is enough. Close with a click, **Esc** or ×. Images
-  are only loaded when they scroll into view – so long notes with many images open and
+  are only loaded when they scroll into view – so long pages with many images open and
   scroll smoothly.
 - **Reduced on insert:** photos and screenshots that are larger than **2400 pixels** (longest
   edge) or heavier than 2 MB are reduced by Kaveyl Wiki in the browser already and stored as
@@ -725,8 +725,8 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 ![Viewing an image large](handbuch/94-bild-gross.webp)
 
-- **Linking a note:** type `[[` and a few letters of the title – Kaveyl Wiki suggests
-  matching notes from the same source; Enter inserts a normal relative link
+- **Linking a page:** type `[[` and a few letters of the title – Kaveyl Wiki suggests
+  matching pages from the same source; Enter inserts a normal relative link
   (`[Roadmap](plan/roadmap.md)`) that also works in Gitea and VS Code.
 - **Link to an address:** `/link` or the link button opens a Kaveyl Wiki window with **Link target**
   (web address or relative path) and **Link text**; Enter accepts, Esc cancels. On an existing link
@@ -734,7 +734,7 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 ![Inserting a link](handbuch/107-link-einfuegen.webp)
 
-![Linking a note](handbuch/32-notiz-verlinken.webp)
+![Linking a page](handbuch/32-notiz-verlinken.webp)
 
 - **Formulas:** `$E = mc^2$` within a sentence or `$$ … $$` on a line of its own (LaTeX) are typeset with KaTeX
   – exactly as GitHub displays them. The slash commands “Formula …” insert one (input in the
@@ -762,13 +762,13 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 
 - **Drawings (Excalidraw):** the slash command “Drawing (Excalidraw)” (`/drawing`) opens a
   canvas – shapes, arrows, text, freehand. **Save** stores the drawing as
-  `assets/zeichnung.excalidraw.svg` next to the note and inserts it as an image (each further one gets
+  `assets/zeichnung.excalidraw.svg` next to the page and inserts it as an image (each further one gets
   a number: `zeichnung-2.excalidraw.svg` – each can be edited the same way). Because the file
   is a normal SVG, it can be seen everywhere (Gitea, VS Code, Wiki.js); the drawing itself
   is contained in the file. Editing: **double-click** the image, or click the image →
   “Edit drawing” – it is saved to the same file, the old version stays in the
   Git history. The file can also be opened on excalidraw.com (“Open” → SVG with scene).
-  There are no drawings in encrypted notes (the file would lie next to the note unencrypted).
+  There are no drawings in encrypted pages (the file would lie next to the page unencrypted).
 
 ![Drawing](handbuch/65-zeichnung.webp)
 
@@ -777,23 +777,23 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
 - **Copy formatting** (brush in the toolbar): place the cursor in formatted text (e.g. bold),
   click the brush, then select the target text with the mouse (or with Shift+arrow keys) –
   it gets exactly this formatting. Esc cancels.
-- **Who else is here?** If other users have the same note open, “Maria has the note
+- **Who else is here?** If other users have the same page open, “Maria has the page
   open” is shown at the top – if someone is typing right now, “Maria is editing” (orange). Editing at the same time
   is possible, but whoever saves last gets the notice “changed outside”
   and decides (see Conflicts) – so better agree with each other.
 
 ![Presence](handbuch/45-praesenz.webp)
 
-- **If you start typing while someone else is editing the note,** Kaveyl Wiki asks once:
-  “Maria is editing this note right now …” – with the consequence: whoever saves later gets a notice;
+- **If you start typing while someone else is editing the page,** Kaveyl Wiki asks once:
+  “Maria is editing this page right now …” – with the consequence: whoever saves later gets a notice;
   changes in different places can be merged, for the same place a version has to be chosen. **Edit
   anyway** keeps what you typed and does not ask again while the other person goes on editing (pauses
-  under a minute do not count). **Cancel** drops the text you just typed, and the note shows the saved
+  under a minute do not count). **Cancel** drops the text you just typed, and the page shows the saved
   state again. Nothing is locked – the question is only a notice. Changes through the API, MCP or from
   outside (Git, other programs) do not trigger it.
-- **If someone else saves while you have the note open,** you see the change at once – your cursor and
+- **If someone else saves while you have the page open,** you see the change at once – your cursor and
   the place you are reading stay where they were. If you have unsaved changes yourself, the notice comes
-  instead (see [Resolving conflicts](#konflikte-auflösen)). If someone moves or renames the open note,
+  instead (see [Resolving conflicts](#konflikte-auflösen)). If someone moves or renames the open page,
   your tab follows it, and what you type lands at the new place.
 
 ![Question when editing at the same time](handbuch/45b-weiche-sperre.webp)
@@ -802,7 +802,7 @@ directly, you will find all notations in the [Markdown cheat sheet](#markdown-sp
   “Saved”).
 - What the editor cannot display (e.g. HTML, footnotes) appears as a block with a grey
   border and is kept unchanged.
-- Notes with `readonly: true` in the frontmatter open in reading mode (“Read only” to unlock).
+- Pages with `readonly: true` in the frontmatter open in reading mode (“Read only” to unlock).
 
 ### Markdown cheat sheet {#markdown-spickzettel}
 
@@ -816,7 +816,7 @@ is Markdown, so that the file stays readable everywhere. In the **Markdown view*
 | Bold, italic, strikethrough | `**bold**`, `*italic*`, `~~gone~~` | Ctrl+B, Ctrl+I, toolbar |
 | Code in the text | `` `code` `` | Ctrl+E |
 | Link | `[Text](https://example.com)` | Toolbar “Link” or select text → link in the selection menu |
-| Link to a note | `[Roadmap](plan/roadmap.md)` (relative) or Wiki.js style `/plan/roadmap` | `[[` + name |
+| Link to a page | `[Roadmap](plan/roadmap.md)` (relative) or Wiki.js style `/plan/roadmap` | `[[` + name |
 | Image | `![Description](assets/image.webp)`, with width `<img src="…" width="400">` | paste, drag, paper clip |
 | Bulleted list | `- Item` or `* Item` | Toolbar, `/bullet` |
 | Numbered list | `1. Item` | Toolbar, `/numbered` |
@@ -838,10 +838,10 @@ border. Markdown does not store empty lines – they disappear when saving.
 
 ### Templates {#vorlagen}
 
-When creating a note you can choose a **template**. Templates are normal Markdown
+When creating a page you can choose a **template**. Templates are normal Markdown
 files in the folder `.kaveyl-wiki/templates/` of the respective source (versioned, also editable in VS Code;
-they do not appear in the tree). In the selection they are listed under their **file name**. An existing note becomes a template via “…” → “Save as
-template”. Placeholders that are replaced when creating a note:
+they do not appear in the tree). In the selection they are listed under their **file name**. An existing page becomes a template via “…” → “Save as
+template”. Placeholders that are replaced when creating a page:
 
 | Placeholder | Example |
 |---|---|
@@ -863,19 +863,19 @@ The copies never talk to each other directly.
 ![Who sends what where – and when: browser, agents, Git server, mounted folder, notifications and event webhooks with their times](handbuch/en/abgleich-wege.webp)
 
 **What Kaveyl Wiki sends.** What you write in Kaveyl Wiki is in the file in less than a second. It goes to the server
-in batches: as soon as you leave the note, with Ctrl+S, after a pause in writing (default 2 minutes, adjustable per source
+in batches: as soon as you leave the page, with Ctrl+S, after a pause in writing (default 2 minutes, adjustable per source
 under “When to write your changes to Git?”) and, if you write without a break, at the latest every 10 minutes. This creates a commit with
 you as the author, and Kaveyl Wiki pushes it immediately.
 
 **What Kaveyl Wiki fetches.** Kaveyl Wiki fetches other people’s changes from the server every 5 minutes. With a
 [webhook](#verbindungen) the server reports every change immediately; it is then there within a few seconds. In the
 [sync overview](#speichern-übertragen-und-synchronisieren) you can also do it by hand at any time with “Sync now”.
-If a note is open and unchanged, it loads the new version by itself.
+If a page is open and unchanged, it loads the new version by itself.
 
 **Two kinds of webhook.** The **push webhook** goes from the Git server to Kaveyl Wiki: it reports every push, so Kaveyl
 Wiki does not wait for the next sync (set it up under [Connections](#verbindungen)). The
 **[event webhook](#ereignis-webhooks)** goes from Kaveyl Wiki to another system, such as an agent: it reports every change
-to notes, whether it came from the app, the API, MCP or from outside. Who learns about which changes by dot, e-mail or
+to pages, whether it came from the app, the API, MCP or from outside. Who learns about which changes by dot, e-mail or
 Pushover is described under [Following](#beobachten). The example shows everything together with times:
 
 ![Example with times: Anna writes, Tom sees it live, an agent answers, Lena gets an e-mail, a colleague pushes from VS Code](handbuch/en/abgleich-beispiel.webp)
@@ -888,8 +888,8 @@ this branch or merges their work into it.
 
 **Only Kaveyl Wiki, on several devices.** PC, tablet and phone open the same Kaveyl Wiki instance in the browser. They all work
 on the same copy, so there is nothing to sync between the devices – a change on the phone is
-there on the PC immediately. If two devices edit the same note at the same time, Kaveyl Wiki notices this when saving and shows the
-notice “The note was changed outside the app” with “Merge”, “Load the other version” or “Save my version”.
+there on the PC immediately. If two devices edit the same page at the same time, Kaveyl Wiki notices this when saving and shows the
+notice “The page was changed outside the app” with “Merge”, “Load the other version” or “Save my version”.
 
 **Kaveyl Wiki and a PC with VS Code.** The PC has its own clone of the repository. VS Code does not sync it
 by itself: before editing, fetch the latest state (in VS Code “Sync Changes” or `git pull`) and afterwards send it
@@ -924,11 +924,11 @@ can be seen there.
 ### When two people change things at the same time {#wenn-zwei-gleichzeitig-ändern}
 
 If both Kaveyl Wiki and someone else have changed something since the last sync, Kaveyl Wiki rebases its own changes
-onto the new state of the server. If they affect **different notes or different places in the same note**,
+onto the new state of the server. If they affect **different pages or different places in the same page**,
 they fit together by themselves, and nobody notices anything. The version history stays a straight line, without
 additional merge commits.
 
-If both have changed **the same or directly adjacent lines** – or one has deleted a note that the other
+If both have changed **the same or directly adjacent lines** – or one has deleted a page that the other
 has edited –, a **conflict** arises. Then Kaveyl Wiki overwrites nothing: your version stays saved,
 pushing pauses, and the sync symbol shows a warning. The conflict is resolved in Kaveyl Wiki, with all three versions
 side by side – see [Resolving conflicts](#konflikte-auflösen). Until then, nothing from this source reaches the server.
@@ -953,7 +953,7 @@ of the sync overview shows a warning about it. This also applies if a conflict a
 
 - **Saving** to the file happens immediately (a few hundred milliseconds after you type).
 - **Signed out while something is still unsaved** (sign-out in another tab, session expired,
-  password changed): The tab stays open, with the notice **“You are signed out”** and the number of notes not yet
+  password changed): The tab stays open, with the notice **“You are signed out”** and the number of pages not yet
   saved. **“Sign in in a new tab”** opens Kaveyl Wiki in a new tab; afterwards click **“Save now”** here
   – the new sign-in also applies to this tab. Only once everything is saved (or you confirm **“Discard changes and
   sign out”**) does the sign-in page appear. The content stays only in this tab, not on the device;
@@ -961,13 +961,13 @@ of the sync overview shows a warning about it. This also applies if a conflict a
   something is still unsaved.
   If a **different account** has signed in meanwhile (the sign-in applies to all tabs of this browser),
   the changes are **not** saved under that account: The notice **“Another account signed in”** names
-  both names. **“Copy content”** puts the text of all notes not yet saved on the clipboard;
+  both names. **“Copy content”** puts the text of all pages not yet saved on the clipboard;
   if you sign in again with the original account in the other tab, **“Check again”** or the editor saves
   on its own. **“Discard changes”** (with a confirmation) opens the new account's workspace.
 - **Server briefly not reachable** while something is still unsaved: The workspace stays as it is, and a
-  notice with the number of open notes appears at the top. As soon as the server is back, the editor saves
+  notice with the number of open pages appears at the top. As soon as the server is back, the editor saves
   on its own – leave the tab open until then. If nothing is open, “Server not reachable” appears as before.
-- **Transferring** (commit and, for repositories, push) happens as soon as you **leave** the note
+- **Transferring** (commit and, for repositories, push) happens as soon as you **leave** the page
   (another tab, closing the tab, browser window in the background), with **Ctrl+S**, after the
   configured **pause** (default 2 min) – and if you write without a break, at the latest every 10 minutes.
   One editing session thus usually results in **one** commit; you are the author.
@@ -988,44 +988,44 @@ of the sync overview shows a warning about it. This also applies if a conflict a
 ![Sync overview](handbuch/11-sync-uebersicht.webp)
 
 - Kaveyl Wiki fetches changes from outside every 5 minutes, immediately if a
-  [webhook](#webhooks) is set up, or with “Sync now”. If a note is
+  [webhook](#webhooks) is set up, or with “Sync now”. If a page is
   open and unchanged, it reloads automatically.
 - **Wiki.js** fetches changes from Git at its own interval (5 minutes by default).
 
 ## Creating, renaming, moving, deleting {#anlegen-umbenennen-verschieben-löschen}
 
-Everything by **right-click** in the tree (or in the note menu “…”):
+Everything by **right-click** in the tree (or in the page menu “…”):
 
-- **New note / New folder** – also via the **“+”** that appears when you hover over a source or
-  a folder (choice of “New note” or “New folder”). The file name is formed from the
+- **New page / New folder** – also via the **“+”** that appears when you hover over a source or
+  a folder (choice of “New page” or “New folder”). The file name is formed from the
   title (special characters such as `:` are replaced, a name that exists already gets “ 2” – a message then names
   what it was saved as). The field to the left of the title picks an **icon** right
   away (optional, the same choice as “Change icon”).
 
 ![“+” on a folder](handbuch/59-ordner-neu.webp)
 - **Rename / move:** type the file name, **choose the target from the list** (all
-  sources and folders, searchable). Links to the note are adjusted automatically.
+  sources and folders, searchable). Links to the page are adjusted automatically.
 
 ![Rename and move](handbuch/15-umbenennen-verschieben.webp)
 
 - **Move to another source:** same window, target in another source.
-  The note is created there and deleted here; linked images are copied along
+  The page is created there and deleted here; linked images are copied along
   (the originals stay, files without read permission are not taken along). The Git history stays in the old source, and Kaveyl Wiki cannot adjust links from the old
-  source to this note across repository boundaries.
+  source to this page across repository boundaries.
 
 ![Moving to another source](handbuch/18-quellwechsel.webp)
 
-- **Copy / Cut / Paste:** right-click a note or a folder →
+- **Copy / Cut / Paste:** right-click a page or a folder →
   “Copy” (Ctrl+C) or “Cut” (Ctrl+X), then right-click a folder or the
-  name of a source → “Paste …” (Ctrl+V; on a note = next to it). The shortcuts work when
+  name of a source → “Paste …” (Ctrl+V; on a page = next to it). The shortcuts work when
   the entry is selected in the tree. This also works between sources.
   - **Copy** creates a duplicate; if the name already exists at the target, it is called “name (Kopie)”,
-    “name (Kopie 2)” … A folder is copied with its notes, images, PDFs, attachments (`assets/`) and
+    “name (Kopie 2)” … A folder is copied with its pages, images, PDFs, attachments (`assets/`) and
     folder settings (`.kaveyl-wiki.yml`); other files in it – scripts, configuration, hidden
-    files – stay behind (the message states how many). A note takes its images and attachments from its folder along. Every copy gets a new
-    `id`; links in the copy are adjusted so that they reach the same notes (within
-    a copied folder: the copies). Notes and files without read permission are not copied along. When copied into
-    **another source**, links to notes that exist only in the old source may no longer
+    files – stay behind (the message states how many). A page takes its images and attachments from its folder along. Every copy gets a new
+    `id`; links in the copy are adjusted so that they reach the same pages (within
+    a copied folder: the copies). Pages and files without read permission are not copied along. When copied into
+    **another source**, links to pages that exist only in the old source may no longer
     be correct – the [Check](#prüfung) shows them as broken links.
   - **Cut + Paste** moves – like drag and drop; until then the cut entry
     appears faded.
@@ -1033,15 +1033,15 @@ Everything by **right-click** in the tree (or in the note menu “…”):
 ![Copy and paste](handbuch/57-kopieren-einfuegen.webp)
 
 - **Several at once:** mark them (see [Mark several](#mehrere-markieren)), then move, delete, export or share them.
-- **Delete:** with a confirmation; for folders it states the number of notes in them (the folder page does not count). For folders,
-  only notes are deleted; other files (code, images) stay. Deleted items end up in the
+- **Delete:** with a confirmation; for folders it states the number of pages in them (the folder page does not count). For folders,
+  only pages are deleted; other files (code, images) stay. Deleted items end up in the
   [Trash](#versionen-und-papierkorb) of the source and can be brought back from there – right after
   deleting also via **Restore** in the message ““Name” is in the trash”. The
   keyboard focus then moves to the next line in the tree.
 
 ### Mark several {#mehrere-markieren}
 
-As in a file explorer: **Ctrl+click** (Cmd+click on a Mac) marks a note or folder and one more; the row that is open
+As in a file explorer: **Ctrl+click** (Cmd+click on a Mac) marks a page or folder and one more; the row that is open
 joins in. **Shift+click** marks all visible rows from the last marked one to here. On tablet and phone: long press →
 **“Select”** – boxes appear before the rows, every tap marks or unmarks. Marking always stays within **one** source; a
 click in another source starts over.
@@ -1051,23 +1051,23 @@ actions:
 
 | Action | Effect |
 |---|---|
-| Send by e-mail … | the marked notes as files in one e-mail ([Send by e-mail](#per-mail-versenden)); only when just notes are marked |
+| Send by e-mail … | the marked pages as files in one e-mail ([Send by e-mail](#per-mail-versenden)); only when just pages are marked |
 | Give access by e-mail … | one invitation or notice for all marked ones ([Sharing](#konten-einladungen-und-teilen-per-e-mail)); only when you may “manage” each |
 | Move … | all into one folder, also into another source; links are adjusted. If a name already exists at the target, that item stays where it is and the message names it |
-| Export: Markdown (ZIP) / HTML (ZIP) | one ZIP file with the marked notes and folders – paths from their common folder ([Export](#exportieren-und-drucken)) |
+| Export: Markdown (ZIP) / HTML (ZIP) | one ZIP file with the marked pages and folders – paths from their common folder ([Export](#exportieren-und-drucken)) |
 | Delete … | after one question, all into the [trash](#versionen-und-papierkorb) |
 | Clear selection | like **Done** or Esc in the tree |
 
 A plain click clears the marks and opens as always. The **middle mouse button** or right-click → “Open in new tab” opens
 in a new tab.
 
-![Two notes marked, right-click shows the actions](handbuch/89-mehrere-markiert.webp)
+![Two pages marked, right-click shows the actions](handbuch/89-mehrere-markiert.webp)
 
 ### Import Markdown {#markdown-importieren}
 
 Right-click a folder or the name of a source → **Import ▸ Markdown files …** → choose one or more `.md` files from your
-computer. Each becomes a note in that folder, as it is (frontmatter, tags), under its file name. If the name already
-exists, the new note is called “Name 2” – nothing is ever overwritten. The note gets a new `id`, like a copy. Pictures
+computer. Each becomes a page in that folder, as it is (frontmatter, tags), under its file name. If the name already
+exists, the new page is called “Name 2” – nothing is ever overwritten. The page gets a new `id`, like a copy. Pictures
 the file points to do not come along; single files at most 5 MB. An unencrypted file cannot be imported into an
 encrypted folder. You need “write” there. Whole exports from other programs: [Import from other programs](#aus-anderen-programmen-importieren).
 
@@ -1075,16 +1075,16 @@ encrypted folder. You need “write” there. Whole exports from other programs:
 
 Right-click a folder or the name of a source → **Import ▸ From another program …** → choose the other program’s export
 as a ZIP (500 MB at most). Kaveyl Wiki recognises the format and shows **before anything is written** what will come
-over: the number of notes, files and folders and a list of notes on the import, for instance about links that could not
+over: the number of pages, files and folders and a list of notes on the import, for instance about links that could not
 be matched. You can change the format and the name of the new folder there. **Import** puts everything into a **new
-folder** – never over anything that exists; if the name is taken, a number is added – and writes the note **Import
-report** into it, with all notes and links to the notes concerned. In a source with versions the whole import is one
+folder** – never over anything that exists; if the name is taken, a number is added – and writes the page **Import
+report** into it, with all pages and links to the pages concerned. In a source with versions the whole import is one
 version. To undo it, delete the folder (it goes to the trash).
 
 ![Preview of an import from HedgeDoc](handbuch/90-import-vorschau.webp)
 
-Names are cleaned up as when creating a note (“Hut 1: Tyrol” becomes `Hut 1 - Tyrol.md`); links between the imported
-notes and pictures point to the new names afterwards. Pictures and PDFs stay where they are, other files go into
+Names are cleaned up as when creating a page (“Hut 1: Tyrol” becomes `Hut 1 - Tyrol.md`); links between the imported
+pages and pictures point to the new names afterwards. Pictures and PDFs stay where they are, other files go into
 `assets/` next to them, blocked file extensions ([Attachments](#anhänge)) stay out. You need “write” in the target
 folder; nothing can be imported into encrypted folders, and guests cannot import. Only one import runs at a time. If a
 reverse proxy sits in front of Kaveyl Wiki, it must let uploads this large through – otherwise the dialog says “Too
@@ -1092,27 +1092,27 @@ large for the server”.
 
 | Program | How to get the export | What comes over |
 |---|---|---|
-| **HedgeDoc** (1.x, also CodiMD) | start page → user menu at the top right → **Export user data** | all your own notes, the title becomes the name; `:::info` boxes become callouts, `:::spoiler` a collapsible section, `{%youtube …%}` a link, `[TOC]` is dropped; empty notes stay out |
-| **Joplin** | in the File menu, export everything as “Markdown + Front Matter” and pack the folder as a ZIP (plain “Markdown” works too, then without tags and to-do state) | notebooks become folders, the title becomes the name; pictures and attachments go into `assets/` next to the first note that shows them; links between notes stay; tags stay; to-dos keep open/done and the due date in the frontmatter (`todo`, `done`, `due`); HTML notes from the web clipper and resized pictures (`<img>`) become Markdown |
+| **HedgeDoc** (1.x, also CodiMD) | start page → user menu at the top right → **Export user data** | all your own notes, the title becomes the name; `:::info` boxes become callouts, `:::spoiler` a collapsible section, `{%youtube …%}` a link, `[TOC]` is dropped; empty pages stay out |
+| **Joplin** | in the File menu, export everything as “Markdown + Front Matter” and pack the folder as a ZIP (plain “Markdown” works too, then without tags and to-do state) | notebooks become folders, the title becomes the name; pictures and attachments go into `assets/` next to the first page that shows them; links between pages stay; tags stay; to-dos keep open/done and the due date in the frontmatter (`todo`, `done`, `due`); HTML notes from the web clipper and resized pictures (`<img>`) become Markdown |
 | **Logseq** (0.10.x, graph as a folder) | pack the graph folder (with `pages`, `journals`, `assets`, `logseq` in it) as a ZIP | pages and journals (`Journal/2026-10-28.md`), namespaces `Tours/2026` become folders; page properties become frontmatter (`alias::` → `aliases`), block properties a line `key: value`; the outline stays a list; `[[Page]]` links and links to journals become normal links, also through aliases; `TODO`/`DONE` become task boxes (`LATER`, `NOW` … stay as a word in front); block references `((…))` and embeds become a link to the page with the text of the block; `#+BEGIN_NOTE` and the like become callouts; pictures without the time stamp in their name; queries stay as text, Org pages and whiteboards stay out. Logseq 2.x (database version, beta) is not supported yet |
-| **SilverBullet** | pack the space folder (the pages as `.md` files) as a ZIP | pages and subfolders, pictures and files; `[[Page]]`, `[[Page\|Text]]` and `[[Page#Heading]]` links become normal links, embedded pages a link; `> **note**` boxes become callouts; Lua expressions and queries (`${…}`, `space-lua`) stay as text and are not run; `CONFIG`, the standard library and plugs stay out |
-| **Obsidian** (checked with 1.14) | pack the vault folder as a ZIP – with or without `.obsidian` | folders, notes, pictures and files where they were; `[[Name]]`, `[[Name\|Text]]`, `[[Name#Heading]]`, relative `[[../Folder/Name]]` and Markdown links become normal links – also with `?`, `#` or `%` in the name; for names that exist more than once the nearest note wins; embedded pictures stay pictures (without size), embedded notes and PDFs become a link; callouts of all types become one of the five callouts (the title stays), foldable ones an expandable section; `==highlights==` become bold, `%%comments%%` invisible HTML comments; block ids `^abc` go; `#tags` in the text also go into `tags`; properties stay as they are (links in them as `[[…]]`); canvas and base files come along as files; `.obsidian` and the trash `.trash` stay out |
+| **SilverBullet** | pack the space folder (the pages as `.md` files) as a ZIP | pages and subfolders, pictures and files; `[[Page]]`, `[[Page\|Text]]` and `[[Page#Heading]]` links become normal links, embedded pages a link; `> **page**` boxes become callouts; Lua expressions and queries (`${…}`, `space-lua`) stay as text and are not run; `CONFIG`, the standard library and plugs stay out |
+| **Obsidian** (checked with 1.14) | pack the vault folder as a ZIP – with or without `.obsidian` | folders, pages, pictures and files where they were; `[[Name]]`, `[[Name\|Text]]`, `[[Name#Heading]]`, relative `[[../Folder/Name]]` and Markdown links become normal links – also with `?`, `#` or `%` in the name; for names that exist more than once the nearest page wins; embedded pictures stay pictures (without size), embedded pages and PDFs become a link; callouts of all types become one of the five callouts (the title stays), foldable ones an expandable section; `==highlights==` become bold, `%%comments%%` invisible HTML comments; block ids `^abc` go; `#tags` in the text also go into `tags`; properties stay as they are (links in them as `[[…]]`); canvas and base files come along as files; `.obsidian` and the trash `.trash` stay out |
 | **Outline** (checked with 1.12) | Settings → **Export** → whole workspace, or a collection’s menu → **Export**, each as **Markdown** (the newer **OKF** works too); then download the ZIP | collections as folders, a document with child documents becomes the folder page; title, created/updated and an emoji icon before the title come along; links between documents (a link to a heading opens the document); each file only once (Outline puts it next to every document that uses it); notices (`:::info` …) become callouts, toggle blocks an expandable section; mentions of people become `@Name`; `__underline__` becomes italics. Drafts, archived and deleted documents and templates are not in the export – links to them stay as text and the report names them |
-| **Trilium** (checked with 0.106) | right-click the top note of the subtree → **Export** → **Markdown** | the tree as Trilium shows it – with Trilium’s titles (not the shortened file names of the export); a note with text **and** child notes becomes the page of its folder; pictures, attachments, references, embedded notes, footnotes and download links become Markdown; code and Mermaid notes become a note with a code block; canvases become a picture with the drawing as a file next to it, mind maps and relation maps a file; labels without a value become tags, with a value their own properties in the frontmatter, relations the title of the target note; a clone stays at its first place and is a link to it at the others. Trilium exports **protected notes** only while the protected session is open – otherwise they are missing and the report names the folder. Search, render and map notes stay out; Trilium already drops links to headings in its export |
+| **Trilium** (checked with 0.106) | right-click the top note of the subtree → **Export** → **Markdown** | the tree as Trilium shows it – with Trilium’s titles (not the shortened file names of the export); a page with text **and** child pages becomes the page of its folder; pictures, attachments, references, embedded pages, footnotes and download links become Markdown; code and Mermaid notes become a page with a code block; canvases become a picture with the drawing as a file next to it, mind maps and relation maps a file; labels without a value become tags, with a value their own properties in the frontmatter, relations the title of the target page; a clone stays at its first place and is a link to it at the others. Trilium exports **protected pages** only while the protected session is open – otherwise they are missing and the report names the folder. Search, render and map notes stay out; Trilium already drops links to headings in its export |
 | **Wiki.js** (2.x, checked with 2.5) | Administration → **Storage** → turn on **Local File System** (path in the container) → action **Dump all content to disk**, then pack the folder as a ZIP; with the **Git storage**, pack the folder of the repository | pages with their title as name, folders like the page addresses (named after the page at the same address), a page with child pages becomes the folder page; other languages in a folder of their own (`en/`); uploaded pictures and files stay where they were; description, tags, created/updated go into the frontmatter, unpublished pages with `published: false`; callouts (`{.is-info}` …) become callouts, `{.class}` attributes and picture sizes go; pages of the visual editor and HTML pages become Markdown (without scripts), AsciiDoc pages a code block. Links follow Wiki.js’s rules (`/de/…`, child pages); a relative link that led nowhere in Wiki.js but means a neighbour page of that name is set to it – the report says so; links to tags (`/t/…`) become text. The Git storage gives the same structure as “Dump all content to disk” (the main language without a folder of its own). Scheduled publishing is not in the export |
-| **Markdown folder** | pack a folder of `.md` files (with subfolders and pictures if you like) as a ZIP | folders, notes and files as they are; relative links stay, `[[Name]]` links become normal links; hidden files and folders (`.git`, `.vscode` …) stay out |
+| **Markdown folder** | pack a folder of `.md` files (with subfolders and pictures if you like) as a ZIP | folders, pages and files as they are; relative links stay, `[[Name]]` links become normal links; hidden files and folders (`.git`, `.vscode` …) stay out |
 
-**Names and links:** Kaveyl Wiki writes file and folder names in the usual Unicode form (NFC) – ZIP files from a Mac sometimes store umlauts differently. Markdown links find their target also when it is written differently there or differs only in upper/lower case (`notiz.md` → `Notiz.md`), as `[[links]]` already did.
+**Names and links:** Kaveyl Wiki writes file and folder names in the usual Unicode form (NFC) – ZIP files from a Mac sometimes store umlauts differently. Markdown links find their target also when it is written differently there or differs only in upper/lower case (`notiz.md` → `Seite.md`), as `[[links]]` already did.
 
 **Pictures with HedgeDoc:** the export does not contain the uploaded pictures; they stay on the HedgeDoc server. The
 preview therefore offers **“Fetch pictures from the old server”** (naming the server): Kaveyl Wiki downloads them from
 there once while importing and puts them into `assets/`, named after their picture text. The old server has to be still
 running and reachable from the Kaveyl Wiki server. Only files under `/uploads/` (pictures and PDFs) are fetched, without
 redirects and never over loopback or link-local addresses (`127.0.0.1`, `169.254.…`), for 10 minutes at most. Whatever does not arrive stays a web link, and the
-import report names the notes.
+import report names the pages.
 
 **Limits with HedgeDoc:** the export holds no addresses of the notes. So links to other HedgeDoc notes keep pointing to
-the old server – the import report names every note concerned. Slides (`type: slide`) show as normal text.
+the old server – the import report names every page concerned. Slides (`type: slide`) show as normal text.
 
 **Wikis that already are a Git repository of Markdown** – Gollum, the wikis of Gitea, GitHub and GitLab
 (`….wiki.git`), documentation repositories with MkDocs or Docusaurus – need no import: simply
@@ -1120,9 +1120,9 @@ the old server – the import report names every note concerned. Slides (`type: 
 
 ### Drag and drop in the tree {#ziehen-und-ablegen-im-baum}
 
-- Dragging a note or a folder **onto a folder** moves it there (links are
-  repaired, as when renaming). Dragging onto the name of a source = top level. Notes
-  can also be dragged into **another source** (the note is created there and deleted here).
+- Dragging a page or a folder **onto a folder** moves it there (links are
+  repaired, as when renaming). Dragging onto the name of a source = top level. Pages
+  can also be dragged into **another source** (the page is created there and deleted here).
 - Dragging **between** two entries (line above/below the entry) sets the **order**.
   It is stored in the folder's `.kaveyl-wiki.yml` (`order:`) and is therefore the same for everyone;
   entries not listed follow alphabetically.
@@ -1150,17 +1150,17 @@ the old server – the import report names every note concerned. Slides (`type: 
   open the web page and do not count as broken links. A typed or pasted address becomes a link by itself;
   file names like `Note.md` or `pictures.zip` stay text, even though these endings are also web endings
   (with `https://` in front they become a link).
-- **Click** opens the note (with Ctrl/⌘ or the middle mouse button in a new tab), a file as a
+- **Click** opens the page (with Ctrl/⌘ or the middle mouse button in a new tab), a file as a
   preview or download, a web address in a new browser tab. **Right-clicking** a link
-  shows Kaveyl Wiki's link menu: Open or Open in browser, Open in new tab (notes), Copy link,
+  shows Kaveyl Wiki's link menu: Open or Open in browser, Open in new tab (pages), Copy link,
   Edit link …, Remove link (the text stays). Right-clicking normal text still shows the
   browser's menu (e.g. for spelling suggestions).
 
 ![Link menu](handbuch/108-link-menue.webp)
-- Below every note, **“Linked from”** shows which notes refer to it.
-- **Very large notes:** a note over 256 KB – or one nested so deeply that the server cannot read it within a few
+- Below every page, **“Linked from”** shows which pages refer to it.
+- **Very large pages:** a page over 256 KB – or one nested so deeply that the server cannot read it within a few
   seconds – is not read as Markdown. It stays in the full-text search and can be edited, but only appears in the
-  Markdown view (with a notice at the top); its links to other notes do not count for “Linked from” and the link check,
+  Markdown view (with a notice at the top); its links to other pages do not count for “Linked from” and the link check,
   and when a target is renamed, Kaveyl Wiki does not adjust them in it. Kaveyl Wiki still recognizes its pictures and
   attachments – they never count as unused and go along when it is moved or exported. An HTML export shows its text unformatted.
 
@@ -1170,41 +1170,41 @@ the old server – the import report names every note concerned. Slides (`type: 
   - Renaming/moving **in Kaveyl Wiki** → links are adjusted immediately, each in the style
     of the file (relative stays relative, Wiki.js style stays Wiki.js style).
   - Renaming **outside** (VS Code, Wiki.js, `git mv`) in a repository → Kaveyl Wiki
-    recognises the note again and repairs the links in a separate commit
+    recognises the page again and repairs the links in a separate commit
     `fix(links): …`.
   - In **local folders without automatic commit** nothing is changed on its own; the
     sync overview offers “**Repair links**”.
   - Kaveyl Wiki does not touch links that already led nowhere before – the
     [Check](#prüfung) finds those.
-- **Links leading nowhere** are marked **red and dashed** in the note (“Target missing”) – immediately while
-  you write, not only after saving. A click on one opens the link menu with **Create note**
-  (creates the note where the link points and opens it in a new tab), **Edit link …**
+- **Links leading nowhere** are marked **red and dashed** in the page (“Target missing”) – immediately while
+  you write, not only after saving. A click on one opens the link menu with **Create page**
+  (creates the page where the link points and opens it in a new tab), **Edit link …**
   and **Remove link**. With Ctrl/⌘+click the link is opened anyway. The marking does not change
-  the file; a target you are not allowed to read also counts as missing. Encrypted notes are not
+  the file; a target you are not allowed to read also counts as missing. Encrypted pages are not
   checked (their links do not leave the browser).
 
 ![Link leading nowhere](handbuch/110-link-ins-leere.webp)
 
 ## Versions and trash {#versionen-und-papierkorb}
 
-**Versions** (note menu “…” → “Versions”, only in Git sources): list of all commits of the
-note, also across renames. For each version “Changes in this version” or
+**Versions** (page menu “…” → “Versions”, only in Git sources): list of all commits of the
+page, also across renames. For each version “Changes in this version” or
 “Difference to the current version”. **“Restore this version”** makes the old
 state the current version – as a new change, the history stays complete.
 
 ![Versions](handbuch/16-versionen.webp)
 
-**“Save as …”** stores the selected version as a **new note** instead; the current
+**“Save as …”** stores the selected version as a **new page** instead; the current
 version stays as it is. In the window you choose the **folder** – the original's folder is
 suggested, but you can switch to any folder of any source you are allowed to write to (the list
 is searchable) – and the **file name**; Kaveyl Wiki appends `.md`. The suggestion is
 “Name (Version 2026-10-03)”. If the name already exists in the folder, the window says so right away and offers
 a free one (“Name (2)”); if you accept it, you stay in the name field and can keep typing or save with
-Enter – nothing is ever overwritten. The new note gets its own `id`;
+Enter – nothing is ever overwritten. The new page gets its own `id`;
 images and attachments the old version refers to come along (including ones that have since been deleted
-– they are fetched from the Git history), and links are adjusted so that they reach the same notes
-from the new location. In another source, links to notes of the old source
-no longer work. Afterwards the new note opens.
+– they are fetched from the Git history), and links are adjusted so that they reach the same pages
+from the new location. In another source, links to pages of the old source
+no longer work. Afterwards the new page opens.
 
 The same window appears in the [Trash](#versionen-und-papierkorb) (“Save as” on an entry)
 and in [Backups](#sicherungen) (“Save as …”).
@@ -1216,27 +1216,27 @@ and in [Backups](#sicherungen) (“Save as …”).
 source. Where deleted items are kept depends on the source:
 
 - **Sources without automatic commit** (local folders without versions): Kaveyl Wiki moves deleted
-  notes into the source's hidden folder `.kaveyl-wiki/trash/` instead of deleting them. If the
+  pages into the source's hidden folder `.kaveyl-wiki/trash/` instead of deleting them. If the
   folder is in a Git repository, Git ignores the trash (its own `.gitignore` inside).
 - **Git sources with automatic commit** (repositories, local folders with versions): Deleted items are in the Git
   history; the trash shows them from there. Deleting in Kaveyl Wiki does not wait for the pause before the next
-  commit: the note goes into the history with its latest state at once and is in the trash right away – even one you
-  have only just created. Notes deleted and committed outside also appear here. What was deleted
+  commit: the page goes into the history with its latest state at once and is in the trash right away – even one you
+  have only just created. Pages deleted and committed outside also appear here. What was deleted
   before the versions were turned on stays in the trash folder and is still listed.
 
-A deleted **folder** is one entry (“plan/Unterordner (3 Notizen)”) – **“Restore
-all”** brings everything back, a click on the name shows the individual notes for
-restoring them one by one. In Git sources, notes deleted in the same commit are
+A deleted **folder** is one entry (“plan/Unterordner (3 Seiten)”) – **“Restore
+all”** brings everything back, a click on the name shows the individual pages for
+restoring them one by one. In Git sources, pages deleted in the same commit are
 grouped the same way. If another file now sits at the old place, nothing is
 overwritten.
 
 - **Save as:** the icon with the pen next to “Restore” (for a folder entry also on
-  each individual note). It opens the **Save as** window as for versions: folder in any
+  each individual page). It opens the **Save as** window as for versions: folder in any
   source you are allowed to write to, and name – suggested is “Name (restored)” at the
-  old place. A whole folder entry comes back as a new folder with all notes and subfolders.
+  old place. A whole folder entry comes back as a new folder with all pages and subfolders.
   If something already sits at the old place, Kaveyl Wiki offers this window on its own with the normal
-  “Restore” – so nothing is ever overwritten. If the note has an `id:`, the
-  restored version gets a new one (the old one belongs to the note that now sits there).
+  “Restore” – so nothing is ever overwritten. If the page has an `id:`, the
+  restored version gets a new one (the old one belongs to the page that now sits there).
 
 ![Save as from the trash](handbuch/93-unter-anderem-namen.webp)
 
@@ -1279,16 +1279,16 @@ not come back.
 
 ![Conflict](handbuch/21-konflikt.webp)
 
-If a note that is **currently open** changes outside while you are editing it, a notice appears
+If a page that is **currently open** changes outside while you are editing it, a notice appears
 directly in the editor. **Merge** brings both changes together when they are in different places
-(other paragraphs, lines or list items): the note then holds both, nothing is lost. If both changed the
+(other paragraphs, lines or list items): the page then holds both, nothing is lost. If both changed the
 same place, Kaveyl Wiki says so and changes nothing – then you choose a version.
 **Show differences** shows what is only in the other version (red, “-”) and what
 is only in your version (green, “+”). **Save my version** replaces the other change with your version.
-**Load the other version** discards your unsaved changes – Kaveyl Wiki asks first. If the note was
-**deleted or moved** outside, you keep your version with **Save as a new note …**: you choose the folder and name
-as with “Save as”; existing notes are never overwritten. For encrypted notes there is
-neither merging nor the comparison nor saving as a new note.
+**Load the other version** discards your unsaved changes – Kaveyl Wiki asks first. If the page was
+**deleted or moved** outside, you keep your version with **Save as a new page …**: you choose the folder and name
+as with “Save as”; existing pages are never overwritten. For encrypted pages there is
+neither merging nor the comparison nor saving as a new page.
 
 ![Notice with Merge](handbuch/21b-zusammenfuehren.webp)
 
@@ -1321,20 +1321,20 @@ Added sources of the repository are unmounted beforehand.
 ## Permissions {#berechtigungen}
 
 Who may see and change what is set with **rules** – on a whole source, a
-folder or a single note. Right-click → **“Permissions …”** (for a note also “…” →
+folder or a single page. Right-click → **“Permissions …”** (for a page also “…” →
 “Permissions …”). The menu entry appears for admins and for everyone who has the permission
 “manage” at that place.
 
 | Permission | Meaning |
 |---|---|
-| **no access** | The note or folder is invisible – in the tree, in search, in “Recent”, in backlinks. |
+| **no access** | The page or folder is invisible – in the tree, in search, in “Recent”, in backlinks. |
 | **read** | View, search, view versions. The editor is locked, rename/delete/create are missing. |
 | **read & write** | Additionally change, create, move, delete, attachments, order. |
 | **manage** | Additionally assign rules for this area. Not for [guests](#konten-einladungen-und-teilen-per-e-mail). |
 
 A rule applies to **All**, a **group** or a **person**. This is how it is evaluated:
 
-- The **most specific** rule wins: note before folder before parent folder before source. On the same
+- The **most specific** rule wins: page before folder before parent folder before source. On the same
   level, a person rule comes before a group rule before “All”.
 - **“No access” for a person or group always applies**, even if more is allowed further down.
   “No access” for **All**, on the other hand, is only the default and can be opened again below or per
@@ -1344,15 +1344,15 @@ A rule applies to **All**, a **group** or a **person**. This is how it is evalua
   “Without a grant, users may:”; default “see nothing” – you open up sources with a rule, such as “All: read & write” on the
   source). Administrators always see and may do everything.
 - The dialog shows the rules at this place and, below them, the ones **inherited** from above. Rules on
-  notes are attached to their ID and survive renaming; note and folder rules move along when you move items in the
+  pages are attached to their ID and survive renaming; page and folder rules move along when you move items in the
   app, also into another source (after renaming or deleting outside the app they appear on the source under “Rules without a
   target”). A folder rule is attached to the folder name: It stays there and applies again as soon as there is a folder with
   that name – remove it when it is no longer needed. If files stay behind at the old place when a folder is moved to another source (e.g. PDFs),
   its rules apply at both places. If such a move is interrupted midway, the old place stays protected
-  as before, and whatever has already arrived at the target carries the same rules (shown in the dialog as rules of the respective note).
+  as before, and whatever has already arrived at the target carries the same rules (shown in the dialog as rules of the respective page).
 - **Deleting whole folders or moving them to another source** (and deleting a trash entry
-  for good) is only possible with write permission on **everything** inside – including notes you
-  cannot see, and subfolders that contain only images or PDFs. Otherwise Kaveyl Wiki reports “The folder contains notes you have no write
+  for good) is only possible with write permission on **everything** inside – including pages you
+  cannot see, and subfolders that contain only images or PDFs. Otherwise Kaveyl Wiki reports “The folder contains pages you have no write
   access to”.
 - **Syncing** (“Sync now”, “Sync all”) needs read & write
   on the whole source; “Sync all” only takes those sources.
@@ -1376,7 +1376,7 @@ like “read & write” – as does an older rule “manage” for a guest (show
 **New users only see what you grant**, as long as the default is “see nothing” (the preset);
 their welcome page tells them so.
 
-**Language of the e-mails.** Anyone who already has an account gets e-mails (reset, shared note, notifications) in
+**Language of the e-mails.** Anyone who already has an account gets e-mails (reset, shared page, notifications) in
 the language of their account – if none is chosen (“Automatic”), in the language their interface showed last.
 Invitations to new people go out in the language of the person inviting – the invited person has not set one yet,
 after all.
@@ -1396,21 +1396,21 @@ hands.
 
 ![Accepting an invitation](handbuch/84-einladung.webp)
 
-**Give access by e-mail.** Right-click a note, a folder or a source (for a note also “…” in the
-note) → **Share ▸ “Give access by e-mail …”** – visible to administrators and everyone allowed to *manage* there.
-Several [marked](#mehrere-markieren) notes and folders of one source go in one invitation. On accepting, only what the
+**Give access by e-mail.** Right-click a page, a folder or a source (for a page also “…” in the
+page) → **Share ▸ “Give access by e-mail …”** – visible to administrators and everyone allowed to *manage* there.
+Several [marked](#mehrere-markieren) pages and folders of one source go in one invitation. On accepting, only what the
 inviting person may then still share applies – if that right was taken away meanwhile, that part is left out. Enter the e-mail (and
 optionally a name), choose **read** or **read & write**, **Invite**. A folder or a source is shared
 with everything in it, including whatever is added later.
 - If the address already has an account, the person may read or edit **immediately** and gets a notification e-mail with a
   link (for a folder or a source the link shows it expanded in the tree). Anyone who was already allowed more there keeps
   their permissions – sharing never takes anything away.
-- Otherwise an **invitation** goes out. On accepting it, a **guest account** with exactly this permission is created; the note
+- Otherwise an **invitation** goes out. On accepting it, a **guest account** with exactly this permission is created; the page
   opens straight away or the folder is open in the tree. In the tree the guest only sees what was shared and the folder path
   to it. Guests never get “manage” – they cannot share further.
 - If the person is explicitly blocked there (“no access”, also via a group), Kaveyl Wiki reports that the
   grant would not take effect – first lift the block under “Permissions …”. Sharing never lifts a block.
-  A block on a single note *in* the shared folder remains.
+  A block on a single page *in* the shared folder remains.
 - **If a proxy with sign-in sits in front** (Cloudflare Access, Authentik, Pangolin): The invitation creates the account in
   Kaveyl Wiki, but the person only gets to the link if the proxy lets them through. Allow them there as well (see
   [SSO & proxy](#sso--proxy)) – otherwise the link ends at the proxy's sign-in screen.
@@ -1421,7 +1421,7 @@ permissions or make them a normal user under Users → pen.
 
 ![Sharing a folder by e-mail](handbuch/85b-ordner-teilen.webp)
 
-![Sharing a note by e-mail](handbuch/85-notiz-teilen.webp)
+![Sharing a page by e-mail](handbuch/85-notiz-teilen.webp)
 
 ![A guest's view](handbuch/86-gast.webp)
 
@@ -1431,49 +1431,49 @@ permissions or make them a normal user under Users → pen.
 
 ### Send by e-mail {#per-mail-versenden}
 
-For people **without an account**: right-click a note (or “…” in the note) → **Share ▸ “Send by e-mail …”**, one or more
+For people **without an account**: right-click a page (or “…” in the page) → **Share ▸ “Send by e-mail …”**, one or more
 addresses (separated by commas, 10 at most) → **Send**. Each address gets its own e-mail – the recipients do not see each
-other. It says who sent the note; the note is attached as a Markdown file (`.md`), as a ZIP when it has pictures or
+other. It says who sent the page; the page is attached as a Markdown file (`.md`), as a ZIP when it has pictures or
 files – the same file as the **Download** button. There is **no link**: the e-mail gives no access to Kaveyl Wiki.
-Replies go to your address. Several [marked](#mehrere-markieren) notes go together in one e-mail.
+Replies go to your address. Several [marked](#mehrere-markieren) pages go together in one e-mail.
 
-- Anyone who may **read** the note may send it – they could download it anyway. **Guests** may not.
-- **Encrypted notes** never (the server does not know their content).
+- Anyone who may **read** the page may send it – they could download it anyway. **Guests** may not.
+- **Encrypted pages** never (the server does not know their content).
 - Without [e-mail sending](#e-mail) set up, the entry is greyed out.
-- Against mass mail: at most 30 addresses per hour and person and 200 for the whole instance, at most 50 notes and
+- Against mass mail: at most 30 addresses per hour and person and 200 for the whole instance, at most 50 pages and
   10 MB per e-mail. Long names are shortened in subject and text.
-- The [log](#protokoll) records who sent which notes to which addresses.
+- The [log](#protokoll) records who sent which pages to which addresses.
 
-![Sending two notes by e-mail](handbuch/89b-per-mail-versenden.webp)
+![Sending two pages by e-mail](handbuch/89b-per-mail-versenden.webp)
 
 ## Working as a team {#im-team-arbeiten}
 
-Several people can edit the same sources, folders and notes – in the app, through the API or MCP (an agent, an AI) and
+Several people can edit the same sources, folders and pages – in the app, through the API or MCP (an agent, an AI) and
 from outside (Git, VS Code, a program in the folder). Kaveyl Wiki never silently overwrites anything: every change comes
 with the name of whoever made it, and whoever saves later decides about differences. What does **not** work: typing
 at the same time letter by letter as in an online office suite – Kaveyl Wiki works with saved versions, and if two
 people changed the same place, one of them picks a version.
 
-### Together on one note {#gemeinsam-an-einer-notiz}
+### Together on one page {#gemeinsam-an-einer-seite}
 
-An example: Maria and Tom both have the note “Weekly plan” open.
+An example: Maria and Tom both have the page “Weekly plan” open.
 
 1. **Maria types.** Tom sees “Maria is editing” (orange) at the top. When Maria saves (automatically, shortly after
    typing), Tom sees her change at once – his cursor and the place where he is reading stay where they were.
 2. **Tom starts typing too** while Maria is still at it. Kaveyl Wiki asks him once whether he wants to edit anyway
    (picture under [Editing](#bearbeiten)). He chooses **Edit anyway** and changes a different paragraph than Maria.
-3. **Whoever saves later** gets a notice in the editor that the note has changed in the meantime. **Merge** takes both,
+3. **Whoever saves later** gets a notice in the editor that the page has changed in the meantime. **Merge** takes both,
    because the changes are in different places. Had both changed the same sentence, Kaveyl Wiki says so: with **Show
    differences** Tom sees what differs and picks his or Maria’s version – what is only in the other one is missing
    afterwards (see [Resolving conflicts](#konflikte-auflösen)).
-4. **If Maria renames or moves the note** while Tom is typing, Tom’s tab follows the note, and his text ends up in the
+4. **If Maria renames or moves the page** while Tom is typing, Tom’s tab follows the page, and his text ends up in the
    new place.
 5. **The versions** then show who changed what – see the next section.
 
 The same goes for changes from outside: a colleague working in the Git repository, or a program writing into a mounted
 folder, shows up the same way – for a mounted folder at once, for a Git server with the next sync. An agent using the API
-or MCP reads the current state of the note before writing and gets a conflict instead of overwriting anything; it also
-sees who is editing the note right now and can wait.
+or MCP reads the current state of the page before writing and gets a conflict instead of overwriting anything; it also
+sees who is editing the page right now and can wait.
 
 ### Who changed what {#wer-hat-was-geändert}
 
@@ -1486,15 +1486,15 @@ with the name of the account its token belongs to – that is why every agent ge
 
 ### Following {#beobachten}
 
-If you want to know when others change something – in a note, a folder or a whole source – **follow** it: right-click
+If you want to know when others change something – in a page, a folder or a whole source – **follow** it: right-click
 (on touch devices: long press) → **Follow …** (for a source **Follow source …**). You choose how you learn about it:
 
-- **Dot in the sidebar:** a coloured dot appears next to the note; the folder and source above it show the number.
-  At the top of the sidebar, **New for you** lists everything new with person and time. Opening the note removes its
+- **Dot in the sidebar:** a coloured dot appears next to the page; the folder and source above it show the number.
+  At the top of the sidebar, **New for you** lists everything new with person and time. Opening the page removes its
   dot; **Mark all as read** empties the list.
 - **E-mail:** how often, you choose once for everything under [Settings → Account → Follow](#beobachten-und-pushover):
   **Bundled** (default – the first change starts a wait of 2 minutes, everything in it is in one mail), **At most once
-  an hour** or **Once a day** (a summary at the time you choose, 7:00 by default, server time zone). Each note appears with its newest state and a link
+  an hour** or **Once a day** (a summary at the time you choose, 7:00 by default, server time zone). Each page appears with its newest state and a link
   straight to it. On top of that there are at most 20 messages an hour and the admin's daily limit (100 by default):
   when one is reached, the next message waits and brings everything along – nothing is lost, not even on a restart or
   update. Needs e-mail sending to be set up.
@@ -1511,8 +1511,8 @@ a program in the folder) are reported too and show as “from outside”; what a
 with the name of the account its token belongs to. An eye next to the name shows what you follow while there is nothing
 new. **Stop following** is in the same dialog or under Settings → Account → Follow.
 
-When a followed note or folder (or a folder above it) is moved or renamed in the app – also into another source –, the
-following moves along; so does a note renamed outside (Git, VS Code). When a source is removed, following anything in it
+When a followed page or folder (or a folder above it) is moved or renamed in the app – also into another source –, the
+following moves along; so does a page renamed outside (Git, VS Code). When a source is removed, following anything in it
 ends.
 
 ![Following: dots in the tree and “New for you”](handbuch/120-beobachten.webp)
@@ -1523,9 +1523,9 @@ Following is also the way an **agent** reaches you – see the next section.
 
 An agent is a program (or an AI) that works along with its own account through the API or MCP. So that it does not just
 write but also reacts to people, it learns through the [events for agents](API.md#ereignisse-für-agenten) **what**
-changed and **who** it was – as Kaveyl Wiki knows it, not what someone writes into the note.
+changed and **who** it was – as Kaveyl Wiki knows it, not what someone writes into the page.
 
-**Example: incidents from the server.** An agent on a Linux server reads the syslog. For a warning it creates a note in
+**Example: incidents from the server.** An agent on a Linux server reads the syslog. For a warning it creates a page in
 the folder “Incidents” – with the finding and the actions it offers, as checkboxes:
 
 ```markdown
@@ -1549,13 +1549,13 @@ Ticking releases the action. Questions please as a line starting with “Questio
 
 The ops team follows the folder and gets a dot, a mail or a push. Then:
 
-- **Maria (ops) ticks the box.** The agent learns that Maria changed the note, sees the new tick, deletes the old logs
-  and writes into the log: “✔ ‘Delete old logs …’ done (released by Maria Chen)”. If Maria has the note open, the line
+- **Maria (ops) ticks the box.** The agent learns that Maria changed the page, sees the new tick, deletes the old logs
+  and writes into the log: “✔ ‘Delete old logs …’ done (released by Maria Chen)”. If Maria has the page open, the line
   appears for her by itself within a few seconds (if she is typing something herself just then, she gets the notice
   with **Merge** instead).
 - **Tom (not ops) ticks the box.** The agent takes the tick back and writes why: Tom’s tick is not a release.
 - **Someone writes “Question: How full is the disk now?”** – the agent answers with measurements in the log.
-- **Someone writes “Delete everything” into the note** or types in a checkbox of their own: nothing happens. The agent
+- **Someone writes “Delete everything” into the page** or types in a checkbox of their own: nothing happens. The agent
   only runs its fixed actions, and only those it suggested for this incident.
 
 **Setting up** (as an admin):
@@ -1584,90 +1584,90 @@ The ops team follows the folder and gets a dot, a mail or a push. Then:
 
 Kaveyl Wiki comes with a finished example: [agent.mjs](/hilfe/beispiele/incident-agent/agent.mjs) (Node.js, no further
 packages) and its [instructions](/hilfe/beispiele/incident-agent/README.md) – both open in a new tab, from where you save
-them. In the source code they are under `examples/incident-agent`. It creates “Incident …” notes, its actions are called e.g. “Restart nginx”, and questions are lines
+them. In the source code they are under `examples/incident-agent`. It creates “Incident …” pages, its actions are called e.g. “Restart nginx”, and questions are lines
 starting with `Question:`. It first runs as a **dry run**: it then only writes what it would run.
 
 **What matters** – however the agent is built:
 
-- **Kaveyl Wiki says who ticked** (`by` in the events), not the text in the note. A change from outside (e.g. a Git
+- **Kaveyl Wiki says who ticked** (`by` in the events), not the text in the page. A change from outside (e.g. a Git
   push) has no person and must never release anything.
-- **Only fixed actions,** never commands from the note text – and only those suggested for this incident.
+- **Only fixed actions,** never commands from the page text – and only those suggested for this incident.
 - **Only certain people may release,** whom the agent knows (its list, e.g. the ops team). These rules live in the
   agent, not in Kaveyl Wiki. The agent keeps the list as account ids, not names – copy them under
   Settings → Users & permissions → [Users](#benutzer) (fingerprint per account).
 - **When in doubt, ask again:** if the agent or Kaveyl Wiki was away too long, nobody can tell any more who set a tick.
-  The same holds when several people changed the note between two queries and not all of them may release. Then the
+  The same holds when several people changed the page between two queries and not all of them may release. Then the
   agent takes the tick back and asks for it to be ticked again.
-- **An AI as an agent** (such as Claude via MCP) reads notes and logs as data. Give it only tools for reading on the
+- **An AI as an agent** (such as Claude via MCP) reads pages and logs as data. Give it only tools for reading on the
   server; running things should be left to a fixed agent after a release by people. A tick by the AI then never counts as
-  a release – not even if someone talks it into it in a note.
+  a release – not even if someone talks it into it in a page.
 
-## Encrypted notes and folders {#verschlüsselte-notizen-und-ordner}
+## Encrypted pages and folders {#verschlüsselte-seiten-und-ordner}
 
-**Encrypting a note.** Via “…” at the top right → **“Encrypt …”** you enter a
+**Encrypting a page.** Via “…” at the top right → **“Encrypt …”** you enter a
 passphrase twice (at least 8 characters). The content is encrypted **in your browser** with
 [age](https://age-encryption.org); on the server, in Git and in VS Code there is then only
 a block `-----BEGIN AGE ENCRYPTED FILE-----`. Linked attachments (images and files in `assets/`)
-are encrypted too and are then called e.g. `bild.png.age`. If another note shows the same image,
+are encrypted too and are then called e.g. `bild.png.age`. If another page shows the same image,
 the unencrypted original is kept for it. Via “…” → **“Remove encryption …”**
-the note is saved in plain text again, and its attachments come back as normal files.
+the page is saved in plain text again, and its attachments come back as normal files.
 
-**Encrypting a folder.** Right-click the folder → **“Encrypt folder …”**. All notes
-in it get the same passphrase, **new notes in the folder are encrypted automatically**, and
-plain-text notes cannot be moved into it. A lock next to the folder name shows this.
-Kaveyl Wiki encrypts the notes as they currently are on disk – including ones that are added during
+**Encrypting a folder.** Right-click the folder → **“Encrypt folder …”**. All pages
+in it get the same passphrase, **new pages in the folder are encrypted automatically**, and
+plain-text pages cannot be moved into it. A lock next to the folder name shows this.
+Kaveyl Wiki encrypts the pages as they currently are on disk – including ones that are added during
 the process. If the process is interrupted, or if someone outside (VS Code, Git) puts an
-unencrypted note into the folder, the folder's context menu offers **“Finish encrypting folder”**;
-the note itself shows a notice at the top with **“Encrypt now”**, which also includes changes not yet
-saved. The check under Settings → Tools also reports such notes.
+unencrypted page into the folder, the folder's context menu offers **“Finish encrypting folder”**;
+the page itself shows a notice at the top with **“Encrypt now”**, which also includes changes not yet
+saved. The check under Settings → Tools also reports such pages.
 **“Remove encryption …”** makes the whole folder including attachments readable again.
 
-**Opening and locking.** An encrypted note asks for the passphrase. For a note that is still empty
-in an encrypted folder, Kaveyl Wiki checks the input against another note in the folder – a
+**Opening and locking.** An encrypted page asks for the passphrase. For a page that is still empty
+in an encrypted folder, Kaveyl Wiki checks the input against another page in the folder – a
 typo is therefore rejected and not taken over for the folder; if there is nothing to check against yet,
-Kaveyl Wiki asks for the passphrase twice to be safe. If the note for checking cannot be loaded at the moment
-(for example during a server outage), Kaveyl Wiki says so instead of taking over the input unchecked. Unlocking applies to this note or the whole
+Kaveyl Wiki asks for the passphrase twice to be safe. If the page for checking cannot be loaded at the moment
+(for example during a server outage), Kaveyl Wiki says so instead of taking over the input unchecked. Unlocking applies to this page or the whole
 folder until nothing happens for a while; typing counts as use. You set the time under
 Settings → **Account** (5 / 15 / 30 / 60 minutes or only when the page is closed). “…” →
 **“Lock now”** locks immediately, as does reloading the page; whatever you typed last is still
 saved encrypted beforehand. At the top it says “encrypted”; you edit quite normally, and saving is
-encrypted. The AI assistant is not available in encrypted notes – the server never gets to see their
+encrypted. The AI assistant is not available in encrypted pages – the server never gets to see their
 content.
 
 **Older versions, trash, conflicts.** A version from before the encryption cannot be brought back into
-the encrypted note, and no plain-text note comes out of the trash into an
+the encrypted page, and no plain-text page comes out of the trash into an
 encrypted folder; with “Save as” you store it in another place. If there is
-a conflict in an encrypted note during syncing, you take over one of the two versions in full – an encrypted block
+a conflict in an encrypted page during syncing, you take over one of the two versions in full – an encrypted block
 cannot be merged. When moving or copying, the encrypted
 attachments and the folder marking move along.
 
 **Limits – please read.** Without the passphrase the contents are **lost**; nobody can
 restore them. What stays readable is the frontmatter (tags, icon, the list of attachments, a `title:` set
 yourself and e.g. a description from Wiki.js) as well as file and folder names. The first heading is
-**not** taken over as the title – so choose the file name so that it gives nothing away. Notes encrypted with an
+**not** taken over as the title – so choose the file name so that it gives nothing away. Pages encrypted with an
 older version still carry their heading as `title:` in plain text; when
 decrypting, Kaveyl Wiki removes this taken-over title again (a different title set yourself
 stays). Earlier, unencrypted versions remain in the Git history – also in a local folder with versions. Search finds encrypted
-notes only by their name (or a set title); “Linked from” does not know their links. A passphrase cannot be changed; the way to do so is “Remove encryption” and encrypting
+pages only by their name (or a set title); “Linked from” does not know their links. A passphrase cannot be changed; the way to do so is “Remove encryption” and encrypting
 again – in the process the plain text briefly ends up in the Git history.
 
 **Reinstallation, other repository.** Everything needed for decryption is in the file itself (age block with
 salt and parameters) and in your passphrase – Kaveyl Wiki does not store a key. After a
-reinstallation or in a newly added repository, the notes open with the same passphrase
+reinstallation or in a newly added repository, the pages open with the same passphrase
 as before; the folder marking (`.kaveyl-wiki.yml`) and the `.age` attachments move along. Without Kaveyl Wiki:
 `awk 'f;/^---$/&&++n==2{f=1}' notiz.md | age -d` (strip the frontmatter, then
 [age](https://age-encryption.org)), attachments with `age -d bild.png.age > bild.png`.
 
-![Encrypted note](handbuch/47-verschluesselt.webp)
+![Encrypted page](handbuch/47-verschluesselt.webp)
 
 ## Settings at a glance {#einstellungen-im-überblick}
 
 The cog at the top right (on a phone: account menu → Settings).
 
-**How all dialogs behave** (Settings, Add source, New note, Rename,
+**How all dialogs behave** (Settings, Add source, New page, Rename,
 Permissions, AI access, drawing …):
 
-- If the dialog has an input field (New note, Rename …), the cursor is already in it when it opens
+- If the dialog has an input field (New page, Rename …), the cursor is already in it when it opens
   – you can start typing straight away and confirm with Enter.
 - A **click next to the dialog** does not close it – so your input is not lost.
 - **Esc** or **×** close the dialog. Esc only ever closes the topmost one: dialogs opened from the
@@ -1775,7 +1775,7 @@ whether 0 means “never” and – if you deviate from it – the default. The 
 
 ![Settings → Tools → Clean-up](handbuch/90-einstellungen-aufraeumen.webp)
 
-This is also where the **Trash of notes** is: **Keep deleted notes** (default 30 days, 0 =
+This is also where the **Trash of pages** is: **Keep deleted pages** (default 30 days, 0 =
 never delete automatically) applies to the trashes of all sources. Kaveyl Wiki deletes older entries for good
 at night; in Git sources they are only hidden, the history stays. You open the trash itself
 in the sidebar, see [Versions and trash](#versionen-und-papierkorb).
@@ -1792,19 +1792,19 @@ security entries (365) – each with its own **Save**. These are the same rules 
 #### Check {#prüfung}
 
 Compares the index, files and Git and reports: **broken links**, **duplicate IDs**, missing or
-orphaned index entries, stuck rebases, **orphaned attachments** (no longer linked from any note) and
-notes that are **unencrypted in an encrypted folder**. The encrypted attachments
-(`.age`) of an encrypted note count as linked. The check **changes nothing**. **Check now** starts it; it also runs every night at 3 am.
+orphaned index entries, stuck rebases, **orphaned attachments** (no longer linked from any page) and
+pages that are **unencrypted in an encrypted folder**. The encrypted attachments
+(`.age`) of an encrypted page count as linked. The check **changes nothing**. **Check now** starts it; it also runs every night at 3 am.
 Per source there is a collapsed row with the number per kind (“2 broken links”) – a click shows the
-entries, a click on an entry opens the note. Only the **latest** report is kept; the
+entries, a click on an entry opens the page. Only the **latest** report is kept; the
 log records every check.
 
 **Deleting orphaned attachments:** in a source’s expanded report, the bin at an orphaned attachment deletes that one,
 **Delete all orphaned attachments** all of the source – each after a question. Right before deleting, Kaveyl Wiki checks
-again whether a note links to it by now; then the file stays. In a Git source the file stays in the history; in a folder
+again whether a page links to it by now; then the file stays. In a Git source the file stays in the history; in a folder
 without Git it is gone for good (the question says which case applies). A link from another source showing the same
-folder counts too. If a source has a note over 2 MB, the check reports no orphaned attachments there (such notes have no
-links in the index) and names the note in the report.
+folder counts too. If a source has a page over 2 MB, the check reports no orphaned attachments there (such pages have no
+links in the index) and names the page in the report.
 
 ![Check](handbuch/24-fsck.webp)
 
@@ -1918,10 +1918,10 @@ without password anyway** does it open. In the first-run setup, with a backup pa
 encrypted ZIP file.
 
 **Open** shows the contents of the backup as a tree on the left (hidden files such as `.kaveyl-wiki` if you wish),
-and on the right what can be done with the selection. For a note it also says how it is **now**:
+and on the right what can be done with the selection. For a page it also says how it is **now**:
 unchanged, changed or deleted.
 
-- **Compare** (note changed): both versions side by side, the backup on the left, the
+- **Compare** (page changed): both versions side by side, the backup on the left, the
   current state on the right. Identical lines are collapsed; each changed section has **Take from the
   backup** and **Copy**. This way you bring back exactly the paragraphs you need, or just copy
   text out. **Save** writes the mixed version, **Cancel** leaves everything as it is.
@@ -1933,12 +1933,12 @@ unchanged, changed or deleted.
 - **Overwrite**: replaces the current state (after confirmation). In Git sources the old state stays in
   the [versions](#versionen-und-papierkorb). For a folder, existing files are replaced, newer
   files stay, nothing is deleted.
-- For a single note, **attachments** it refers to that are missing by now come back
+- For a single page, **attachments** it refers to that are missing by now come back
   with it (existing ones are never overwritten). Other files can be **downloaded** one by one.
 
 A source's trash never comes back. Database backups can only be downloaded here; a database comes back in the first-run
 setup of a new server ([On a new server](#auf-einem-neuen-server)).
-It is quicker from the sidebar: right-click a note or folder → **Restore from
+It is quicker from the sidebar: right-click a page or folder → **Restore from
 backup …** opens this tab for the source, and in the opened backup the item is
 already selected. Right-click a source → **Backup** ▸ **Back up now** backs it up with all
 active schedules that contain it – only this source, without the Kaveyl Wiki database.
@@ -1949,7 +1949,7 @@ active schedules that contain it – only this source, without the Kaveyl Wiki d
 
 #### Database {#datenbank}
 
-Backups of the Kaveyl Wiki database in the container (not of your notes): one every night at 3 am,
+Backups of the Kaveyl Wiki database in the container (not of your pages): one every night at 3 am,
 plus a weekly one on Sundays, stored under `/config/backups` – that is, on the same disk.
 For a copy on another device, include the Kaveyl Wiki database in a [schedule](#zeitpläne). At the top,
 the [deletion rules](#löschregeln) for it: how many daily (default 7) and weekly (4) backups
@@ -2018,7 +2018,7 @@ a click locks or unlocks. The last active admin is protected.
   “Wrong e-mail address or password”, so that nobody can try out which accounts exist.
 - **Deleting** removes the account with its sessions, settings, AI chats, tokens, group memberships, its
   permission rules, what it follows together with its Pushover user key, the event webhooks in its name and the invitations it sent that nobody has accepted yet. In the [Log](#protokoll), name, display name and address become “deleted account”, its own
-  entries lose the IP address – what happened stays readable, who did it does not. **Notes stay**, as does the
+  entries lose the IP address – what happened stays readable, who did it does not. **Pages stay**, as does the
   name as author in the Git history (which cannot be changed afterwards). An account is always deleted by an
   administrator – a user asks them for it (this is also what their account page says); that satisfies the right to
   erasure.
@@ -2055,7 +2055,7 @@ is the same rule as right-clicking the source → “Permissions …”.
   locks the person out (“locked through Group …”), this can only be changed on the group – or by taking the person out of
   the group.
 - **Administrators** may do everything in every source (“everything (admin)”); they need no grants.
-- **“+2 exceptions”** below a cell: grants further down, on folders or individual notes (e.g. one
+- **“+2 exceptions”** below a cell: grants further down, on folders or individual pages (e.g. one
   shared by e-mail). A click opens the person.
 - **Many sources:** the grid scrolls within itself, the name column and the source row stay in place. **Find source**
   hides the other columns, **Find person** the other rows. A click on a **source** shows all
@@ -2074,7 +2074,7 @@ nothing is deleted by itself:
 - accounts that have not been active for more than 90 days → *Lock* or *Delete account*
 - accounts that have never signed in (e.g. created but never used) → *Delete account*. *Last active*
   is also shown in the user list, to the hour.
-- grants whose folder or note no longer exists → *Remove access*
+- grants whose folder or page no longer exists → *Remove access*
 - groups without members → *Delete group*
 
 ![Permissions](handbuch/99b-rechte.webp)
@@ -2094,7 +2094,7 @@ If Pangolin or another proxy with its own sign-in sits in front, you then sign i
   Access by e-mail address, with Authentik by the identifier connected once, see
   [Account](#konto)). Everyone else sees the normal sign-in.
 - **What the proxy in front lets through is up to the proxy.** Anyone not allowed there does not reach Kaveyl Wiki at
-  all – not even the sign-in page or an invitation link. So if you share a note with someone
+  all – not even the sign-in page or an invitation link. So if you share a page with someone
   ([sharing by e-mail](#konten-einladungen-und-teilen-per-e-mail)), you must **also allow the person at the
   proxy** (Cloudflare: e-mail in the Access policy, e.g. with a one-time code; Pangolin: user or
   e-mail share of the resource; Authentik: create the user and, if the application there is bound to groups or policies,
@@ -2275,7 +2275,7 @@ exactly your selection applies.
 | Event | When Kaveyl Wiki reports |
 |---|---|
 | Sync problems | a source cannot sync (at most every 6 hours per source), a conflict is waiting to be resolved – and “back in sync” as soon as it works again after a reported error |
-| Nightly run | the check, clean-up or backup at 3 a.m. has failed, the check has found **something new** (e.g. a link to nowhere – with source and note, at most ten listed; what has already been reported and stays does not come back every night, what was fixed and comes back counts as new) or storage space for `/data` or `/config` is running low (below 1 GB or 5 %) – **one** message per night, only if there is something |
+| Nightly run | the check, clean-up or backup at 3 a.m. has failed, the check has found **something new** (e.g. a link to nowhere – with source and page, at most ten listed; what has already been reported and stays does not come back every night, what was fixed and comes back counts as new) or storage space for `/data` or `/config` is running low (below 1 GB or 5 %) – **one** message per night, only if there is something |
 | Backup | a scheduled or manually started [backup](#zeitpläne) has failed completely or partly – with source and reason. If the same schedule keeps failing, at most **one message a day** arrives; if it works again afterwards, once “working again” |
 | Security | 10 failed sign-ins in 15 minutes (at most hourly), a new administrator, a new API token |
 
@@ -2319,7 +2319,7 @@ cannot be reached (for instance because the server is deliberately not allowed o
 
 ### AI & APIs {#ki--apis}
 
-Everything that lets programs get at the notes: the AI assistant and personal tokens for scripts and AI tools.
+Everything that lets programs get at the pages: the AI assistant and personal tokens for scripts and AI tools.
 
 #### AI {#ki}
 
@@ -2327,16 +2327,16 @@ The tab has two sections: **For everyone: providers and retention** (only visibl
 users) and **My AI assistant** (everyone’s own).
 
 - **AI providers** (admins): list of providers with name, type, model, “☁ Cloud provider” and – for providers
-  that may see private notes – **private**; the
+  that may see private pages – **private**; the
   **Default** radio button determines which provider applies when someone does not choose their own. If several
-  providers are allowed for private notes, **Default private** decides which of them gets them. “+ Ollama”, “+ Ollama Cloud”, “+ Anthropic”, “+ OpenRouter”,
+  providers are allowed for private pages, **Default private** decides which of them gets them. “+ Ollama”, “+ Ollama Cloud”, “+ Anthropic”, “+ OpenRouter”,
   “+ OpenAI-compatible” open the form: **Name**, **Address**, **API key** (encrypted, never
   shown again), **Model** – “Test connection” lists the models –, for Anthropic **Effort**, and the tick
-  **Allow for private notes**. Details: [Setting up AI](#ki-einrichten).
+  **Allow for private pages**. Details: [Setting up AI](#ki-einrichten).
 - **Keep unused chats** (admins): default **90 days** since the last message, 0 = never.
   Different per source: [Edit source](#eine-quelle-bearbeiten) → “Keep AI chats”.
 - **My AI assistant** (everyone): **My provider** (otherwise the default), with several allowed providers
-  **My AI for private notes** (otherwise “Default private”), **Personal instructions**
+  **My AI for private pages** (otherwise “Default private”), **Personal instructions**
   (sent with every request, e.g. “answer briefly, in English”) and **Delete my chat histories**.
 - What the AI may see is not set here but by right-click → **AI access …** –
   see [AI access](#ki-freigaben).
@@ -2374,7 +2374,7 @@ when it expires and when it was last used. **Person** filters to one account. Pe
 [API tokens](#api-tokens). This way, for example, the account of an AI agent gets its token without you signing in as
 the agent. The token acts as this person and can do at most what they may: “manage” only for administrators, guests
 and locked accounts get no tokens. Because you know the value, the person's list shows “made by” and your name; if they
-renew the token themselves, only they know the new value and the note goes. The log records who created, renewed or
+renew the token themselves, only they know the new value and the page goes. The log records who created, renewed or
 deleted which token for whom. If you lock or delete an administrator or take the role away, the tokens they made or
 renewed for others are gone at once – they know their values. Expired tokens are marked “expired”; “Renew” makes them
 valid again with a new value.
@@ -2384,16 +2384,16 @@ valid again with a new value.
 #### Event webhooks {#ereignis-webhooks}
 
 Admins only. An event webhook sends changes **right away** to another system – typically an agent waiting for answers
-in a note – instead of the agent asking all the time. **New event webhook**: **Name**, **Receiver address** (http or
+in a page – instead of the agent asking all the time. **New event webhook**: **Name**, **Receiver address** (http or
 https; redirects are not followed), **With the rights of** (usually the agent’s account – only what this person may read
-goes out), optionally a **Source** and a **folder or note**. This person’s own changes are left out (otherwise an agent
+goes out), optionally a **Source** and a **folder or page**. This person’s own changes are left out (otherwise an agent
 would hear its own), unless you tick the box for it.
 
 After creating it, the **secret** is shown once; the receiver uses it to check the `X-Kaveyl-Signature` header
 (HMAC-SHA256 of the body). **Test** sends a “ping” at once; **Switch off/on**, **New secret** (the old one stops
 working) and **Delete** are on every entry. Kaveyl Wiki bundles changes that come within a second, retries a failed
 delivery three more times (after 10 seconds, 1 and 5 minutes) and switches a webhook off when five deliveries in a row
-do not arrive even so (entry in the log; a failed “Test” switches nothing off). A chosen folder or note moves along when
+do not arrive even so (entry in the log; a failed “Test” switches nothing off). A chosen folder or page moves along when
 it is moved or renamed, as with [following](#beobachten); when the chosen source is removed, Kaveyl Wiki switches the
 webhook off (entry in the log). Format of
 a delivery: API reference, “Events for agents”. What goes where and when – push webhook, event webhook, e-mails – is shown in the picture under
@@ -2408,9 +2408,9 @@ Three cards:
 - **Colour theme:** one theme for light (**Lavender indigo** as the standard, **Amethyst**, **Plum**, **Lilac slate**)
   and one for dark (**Classic** – neutral anthracite – as the standard, **Night indigo**, **OLED black**). The colour
   scheme decides which one applies. The colour themes also apply to this browser.
-- **Editor:** the **toolbar** – **Floating at the bottom** (the standard: a bar at the bottom edge of the note, above it
+- **Editor:** the **toolbar** – **Floating at the bottom** (the standard: a bar at the bottom edge of the page, above it
   the formatting row with headings, bold, italic etc., which you show or hide with **Aa**) or **On top** (one bar above
-  the note; if it is too wide, e.g. with a larger font, it wraps into a second row). On the phone it is always on top. Plus **Editor width** (Normal, Wide, Full width or a percentage of your
+  the page; if it is too wide, e.g. with a larger font, it wraps into a second row). On the phone it is always on top. Plus **Editor width** (Normal, Wide, Full width or a percentage of your
   own) and **Table of contents** on/off. Toolbar, width and table of contents belong to your account (the same on all
   devices).
 
@@ -2421,20 +2421,20 @@ Three cards:
 #### Language {#sprache}
 
 Here you set the language of the interface: Deutsch or English. Because the page briefly reloads for this,
-Kaveyl Wiki asks first; afterwards you are back on this page of the settings, and your open notes are still there.
+Kaveyl Wiki asks first; afterwards you are back on this page of the settings, and your open pages are still there.
 You can do the same via the command palette (Ctrl K, “English” or “Deutsch”) and, before signing in, with **DE | EN** at the top
 right.
 
 The language belongs to your account and so applies on all devices. It applies to the whole interface, to messages
-from the server and to e-mails to you (notifications, shared notes); invitations to new people go out in the
-language of the person inviting. This manual, too, is available in German and English. Log entries that were already stored appear translated, as far as Kaveyl Wiki knows them. Notes
+from the server and to e-mails to you (notifications, shared pages); invitations to new people go out in the
+language of the person inviting. This manual, too, is available in German and English. Log entries that were already stored appear translated, as far as Kaveyl Wiki knows them. Pages
 themselves are never translated.
 
 #### Font size {#schriftgröße}
 
 Four sliders from 80 to 150 %: **Interface** (menus, buttons, dialogs, tabs – everything around the
-note, including the sidebar), **Sidebar** (tree, favourites, recent, AI access – on top of the
-interface size), **Note text** (notes, reading view, help) and **Code** (code blocks, `code` in text, the
+page, including the sidebar), **Sidebar** (tree, favourites, recent, AI access – on top of the
+interface size), **Page text** (pages, reading view, help) and **Code** (code blocks, `code` in text, the
 “Markdown” view). Every change applies **at once** throughout Kaveyl Wiki, also behind the window; below each slider
 there is an example. **Reset all to 100 %** restores the default. It is saved for
 your account (the same on all devices).
@@ -2446,7 +2446,7 @@ your account (the same on all devices).
 Shows your **sign-in address**. **Change password**: current password, new password twice (following
 the [password rules](#anmelden-und-oberfläche)) – ends all other sessions; if e-mail sending is set up,
 a notification e-mail arrives. **Lock automatically after**: when unlocked
-[encrypted notes](#verschlüsselte-notizen-und-ordner) are locked again (5 / 15 / 30 / 60
+[encrypted pages](#verschlüsselte-seiten-und-ordner) are locked again (5 / 15 / 30 / 60
 minutes or only when the page is closed). **Delete account**: an administrator does this – please request it there;
 what is removed and what stays is described under [Users](#benutzer).
 
@@ -2492,7 +2492,7 @@ editing, Markdown cheat sheet, menus, keyboard shortcuts, AI, sources, troublesh
 [Help in Kaveyl Wiki](#hilfe-in-kaveyl-wiki).
 
 If you have hidden the welcome page, **“Show welcome page again”** brings it back – it appears as soon as
-no note is open.
+no page is open.
 ## Access over the network {#zugriff-über-das-netz}
 
 In your own network, Kaveyl Wiki can be reached directly via the address of the computer and the port from the
@@ -2607,7 +2607,7 @@ on the server is set in the `docker-compose.yml` (example: `./kaveyl-wiki/…` n
 
 | What | In the container |
 |---|---|
-| Notes | in your repositories or folders – as `.md` files |
+| Pages | in your repositories or folders – as `.md` files |
 | Local working copies of the repositories | `/data/repos` |
 | Local folders (with versions: their own `.git` in the folder) | `/docs` |
 | Kaveyl Wiki database (users, sources, encrypted tokens, settings, log, AI chats, search index) | `/config/kaveyl-wiki.db` |
@@ -2626,9 +2626,9 @@ on the server is set in the `docker-compose.yml` (example: `./kaveyl-wiki/…` n
   IP address), sign-out, password change, sources, connections (created, changed, deleted), deleting and
   restoring, rejected webhooks.
 - *System:* start, nightly check, backups, clean-up.
-- **Never in the log:** passwords, tokens, cookies, note contents. Changes to content
+- **Never in the log:** passwords, tokens, cookies, page contents. Changes to content
   are in the Git history (versions).
-- **Folder permissions apply here too:** anyone who may not read every note named sees entries without the
+- **Folder permissions apply here too:** anyone who may not read every page named sees entries without the
   file lists; entries whose text itself names file names (conflict, conflict resolved, commit,
   restore) are then missing entirely. Likewise, the conflict notice of a source only names files you are allowed to read.
   Users without administrator rights only see errors (sync, index, file watching, backup …) as a general
@@ -2653,19 +2653,19 @@ there is the [Backup](#backup) area.
 
 ### What is in the database? {#was-steht-in-der-datenbank}
 
-The file `/config/kaveyl-wiki.db` (SQLite) holds everything that is **not** in your notes:
+The file `/config/kaveyl-wiki.db` (SQLite) holds everything that is **not** in your pages:
 
 | In the database | Note |
 |---|---|
 | Users, groups, permissions, guests | passwords only as a hash (scrypt) |
 | Sign-ins, links from e-mails, API tokens | tokens only as a hash – nobody can read them out again |
 | Added sources, connections, all settings | credentials (tokens, SMTP keys, Pushover keys, AI API keys) **encrypted** with `secret.key` |
-| Log | without passwords, tokens and note contents; retention according to the [deletion rules](#löschregeln) |
+| Log | without passwords, tokens and page contents; retention according to the [deletion rules](#löschregeln) |
 | AI chats, AI access, AI proposals, memory per source | chats according to the deletion rules |
 | Repository trash, custom icons, personal preferences (open tabs, editor width) | |
-| Search index and links between notes | is rebuilt from the notes if it is missing |
+| Search index and links between pages | is rebuilt from the pages if it is missing |
 
-**Not in the database:** the notes and attachments themselves – they are in your repositories or
+**Not in the database:** the pages and attachments themselves – they are in your repositories or
 folders and are versioned with Git. Kaveyl Wiki fetches the local copies under `/data/repos` again when needed.
 So for a complete restore you need: a database backup **and** `secret.key`
 (without it the stored credentials are unusable and have to be entered again) – and your
@@ -2676,7 +2676,7 @@ repositories or folders.
 So that nothing in the container grows without limit, everything that Kaveyl Wiki stores itself has a deletion rule
 with a default value. All of them are under **Settings → Tools → Clean-up** (with the current state and
 **Clean up now**), most of them also where they belong. They are applied **every night
-at 3 am** (before the database backup) or immediately with “Clean up now”. **None of these rules deletes your notes or
+at 3 am** (before the database backup) or immediately with “Clean up now”. **None of these rules deletes your pages or
 the Git history.**
 
 | What grows | Rule (default) | 0 = never? | Can also be set under |
@@ -2684,7 +2684,7 @@ the Git history.**
 | Log: normal entries | 30 days | – | Tools → Log |
 | Log: warnings and errors | 90 days | – | Tools → Log |
 | Log: security | 365 days | – | Tools → Log |
-| Trash of notes (`.kaveyl-wiki/trash`; Git sources: only hide) | 30 days | yes | – |
+| Trash of pages (`.kaveyl-wiki/trash`; Git sources: only hide) | 30 days | yes | – |
 | AI chats (from the last message) | 90 days, **can differ per source** | yes | AI; edit source → “Keep AI chats” |
 | Repositories in the repository trash | 30 days, then deleted for good | yes | Sources → Added sources |
 | Git backups (bundles) | 30 days | yes | Sources → Added sources |
@@ -2744,15 +2744,15 @@ counts as cloud, because Ollama forwards it to ollama.com.
 slower and more expensive. Only the levels the chosen model supports are offered (after “Test connection”); if it
 has none, the form says so. The list shows the level after the model.
 
-**Allow for private notes:** with this tick Kaveyl Wiki treats a provider like an AI in your own network: it may
-see notes that are allowed for **private AI only** ([AI access](#ki-freigaben)). An AI in your own network has the
+**Allow for private pages:** with this tick Kaveyl Wiki treats a provider like an AI in your own network: it may
+see pages that are allowed for **private AI only** ([AI access](#ki-freigaben)). An AI in your own network has the
 tick by itself (it can be removed). For a cloud provider you set it deliberately – for example for a provider with
 Zero Data Retention (ZDR); the form then names where the content goes, because Kaveyl Wiki cannot check whether
-nothing is really stored there. Notes allowed for private AI only **always** go to a private AI – when summarising,
-continuing and asking –, whichever provider is the default: first your own choice (“My AI for private notes”), then
+nothing is really stored there. Pages allowed for private AI only **always** go to a private AI – when summarising,
+continuing and asking –, whichever provider is the default: first your own choice (“My AI for private pages”), then
 **Default private**, otherwise the first allowed provider. If a provider without the tick is chosen explicitly
-there, Kaveyl Wiki refuses instead of sending the note. Remove the tick and that provider no longer sees the
-private notes, at once.
+there, Kaveyl Wiki refuses instead of sending the page. Remove the tick and that provider no longer sees the
+private pages, at once.
 
 One provider is the **Default**; every
 user can choose a different one under Settings → AI and store **personal instructions**
@@ -2765,7 +2765,7 @@ Keys are stored encrypted and never shown again.
 ### AI access {#ki-freigaben}
 
 **Granting access (admins):** without access the AI sees **nothing** – that is the default. Right-click
-a source, a folder or a note → **AI access …**:
+a source, a folder or a page → **AI access …**:
 
 | Choice | Meaning |
 |---|---|
@@ -2774,13 +2774,13 @@ a source, a folder or a note → **AI access …**:
 | **Not allowed (exception)** | Blocks here, even if something above is allowed – e.g. the whole source allowed, only the folder “Tagebuch” not. A block always wins. |
 
 **Private or not – only if you have both:** “private AI” are the providers with the tick **Allow for private
-notes** ([Setting up AI](#ki-einrichten)) – an AI in your own network by itself, a cloud provider only if you set
+pages** ([Setting up AI](#ki-einrichten)) – an AI in your own network by itself, a cloud provider only if you set
 it. If all providers are cloud without the tick (e.g. only Ollama Cloud), “Allowed” means: goes to Ollama Cloud. If
 all are private, that is where it stays. Only when **both** kinds are set up is there additionally **“Allowed –
 private AI only”**: the private providers see the content, the others never do (e.g. for a diary). The dialogue
 names who is on which side. Whatever you allow while there are only private providers applies to private AI only –
 if another one is added later, nothing goes to it by itself because of it. In addition: `ai: false` in the front matter blocks
-a note, encrypted notes are always off-limits, and the AI never gets more than the asking
+a page, encrypted pages are always off-limits, and the AI never gets more than the asking
 user is allowed to read.
 
 ![AI access](handbuch/61-ki-freigabe.webp)
@@ -2789,16 +2789,16 @@ user is allowed to read.
 
 **Overview of all access rules (admins):** the switch at the top of the sidebar shows all rules with **AI access**
 (a click on a row shows the place in the tree and switches back to “Tree”). Each row is a
-rule: source, folder or note (with the source in brackets), on the right **allowed** or **not allowed**
+rule: source, folder or page (with the source in brackets), on the right **allowed** or **not allowed**
 (red); with private and other AI also **private AI only**. An orange **no effect** means: allowed for private AI
-only, but no provider is allowed for private notes – nobody sees it (set the tick, or Edit access → “Allowed”). At
+only, but no provider is allowed for private pages – nobody sees it (set the tick, or Edit access → “Allowed”). At
 the top you filter by **all**, **active** (allowed), **blocked** and – if there are such rules – **private** (a
-collapsed section expands when you do so). A click shows the place in the tree (a note is opened);
+collapsed section expands when you do so). A click shows the place in the tree (a page is opened);
 right-click (on a phone: long press): **Edit access …**, **Show in tree**, **Remove
-access**. Rules shown in grey with “orphaned” are rules whose note no longer exists – they apply nowhere and
-can go. In the tree itself, every source, folder and note with its own rule carries a small
+access**. Rules shown in grey with “orphaned” are rules whose page no longer exists – they apply nowhere and
+can go. In the tree itself, every source, folder and page with its own rule carries a small
 **✦** (red for a block, orange if the access currently has no effect); hovering over it with the mouse shows what applies. A **click on the ✦** opens a
-small menu: **Ask AI …** (with exactly this source, this folder or this note as the context) and
+small menu: **Ask AI …** (with exactly this source, this folder or this page as the context) and
 **Edit AI access …**; for a block only the latter. The ✦ is always at the right edge of the
 row and does not shift when further buttons appear on hover.
 
@@ -2809,21 +2809,21 @@ row and does not shift when further buttons appear on hover.
 Select text → **AI** in the selection menu: Rephrase, Shorten, Expand,
 Fix spelling and grammar, Translate, Custom instruction and **Ask AI …**. Without a selection
 (AI button in the toolbar): **Summarise**, **Continue writing** and **Ask AI …** (see
-below, with this note as the context). The note menu “…” only shows the AI items where there is no
-toolbar – for notes you may only read, and in the Markdown view.
+below, with this page as the context). The page menu “…” only shows the AI items where there is no
+toolbar – for pages you may only read, and in the Markdown view.
 
 The proposal appears in a window: for selected text **Replace** or **Insert
 below**, for Summarise **Insert at the beginning** or **Insert at the end**, for Continue writing
 **Insert at the end** – plus always **Copy** and **Discard**. Links, inline code and formulas are kept (the AI is
 told not to rewrite them).
 
-If the note is not shared with the AI (AI shares, `ai: false`, encrypted), the **AI** button is grey; hovering it says
+If the page is not shared with the AI (AI shares, `ai: false`, encrypted), the **AI** button is grey; hovering it says
 why. If the AI may only read, the menu offers only **Summarise** and **Ask AI …**.
 
-- **Summarise** delivers a few short bullet points in the language of the note. Code and tables
+- **Summarise** delivers a few short bullet points in the language of the page. Code and tables
   are not copied out but described in one sentence; open, planned and undecided
   items remain marked as such.
-- **Continue writing** starts at the end of the note. If it breaks off in the middle of a sentence (or after a
+- **Continue writing** starts at the end of the page. If it breaks off in the middle of a sentence (or after a
   number such as “3.”), the sentence is continued in the same paragraph, without repetition. What does not follow
   from the text – dates, names, prices, a further piece of news – the AI does not invent, but
   inserts **placeholders in square brackets** such as [Datum]; the window then points this out. Please
@@ -2834,28 +2834,28 @@ why. If the AI may only read, the menu offers only **Summarise** and **Ask AI �
 ### Ask the knowledge base {#frag-die-wissensbasis}
 
 Open it via ✦ at the top of the sidebar, (for admins) ✦ at a place in the tree with access, “Ask AI …” in the editor's AI menu
-(or in the note menu “…” where there is no toolbar) or in the command palette. Choose the context – this note, this folder, this source, everything with access or
+(or in the page menu “…” where there is no toolbar) or in the command palette. Choose the context – this page, this folder, this source, everything with access or
 general (without wiki). Here the AI works as an **agent**: it searches by itself, looks at folders
-and reads notes until it can answer – you see the steps live (“Searches …”, “Reads …”),
+and reads pages until it can answer – you see the steps live (“Searches …”, “Reads …”),
 after which the answer appears word by word. Above the answer, the “n steps” can be expanded;
 below it are **only the sources the answer is based on** ([1], [2] …), together with the provider and
 model.
 
-Answers appear **formatted like a note** – headings, lists, tables, code with
+Answers appear **formatted like a page** – headings, lists, tables, code with
 highlighting, formulas. The answer only shows images from Kaveyl Wiki itself; an image from another
 website appears as a link and only loads when you click it. Below every answer:
 
-- **Copy** – the button shows **“Copied”** for a moment; pasted into a Kaveyl Wiki note (Ctrl+V), the answer arrives formatted exactly the same
+- **Copy** – the button shows **“Copied”** for a moment; pasted into a Kaveyl Wiki page (Ctrl+V), the answer arrives formatted exactly the same
   (including callout boxes, formulas, tables); formatted in Word or an e-mail, as Markdown in a text
   editor.
 - **Markdown** / **Formatted** – switches the view, for example to select only part of it as Markdown
   and copy it.
-- **Insert into note** – only while a note you may edit is open: the answer goes below the paragraph (or list or
-  table) that held the cursor; without a cursor placed (at the very start of the note) at the end; cited sources come along as links that work from that note.
-  The chat closes afterwards; Ctrl+Z takes it back. If the chat drew on notes released for private AI only and other AI
-  may read the note, Kaveyl Wiki asks first.
-- **Save as note …** – choose a title (prefilled with the question) and folder; the answer becomes a
-  new note, its sources are listed as links at the end. It is saved in your name, not as the AI;
+- **Insert into page** – only while a page you may edit is open: the answer goes below the paragraph (or list or
+  table) that held the cursor; without a cursor placed (at the very start of the page) at the end; cited sources come along as links that work from that page.
+  The chat closes afterwards; Ctrl+Z takes it back. If the chat drew on pages released for private AI only and other AI
+  may read the page, Kaveyl Wiki asks first.
+- **Save as page …** – choose a title (prefilled with the question) and folder; the answer becomes a
+  new page, its sources are listed as links at the end. It is saved in your name, not as the AI;
   in encrypted folders this does not work (copy and paste there instead).
 
 ### Chats and retention {#chats-und-aufbewahrung}
@@ -2865,7 +2865,7 @@ new one, the trash can on an entry deletes it after a confirmation (always visib
 history …**, fixed below the list, deletes – as in the browser – the chats of the **last hour**, the **last
 24 hours**, **7** or **30 days** or **all** – after a confirmation. Deleted is deleted: questions,
 answers and proposals disappear from the database, the file is overwritten in those places;
-the log only records *which notes* went to which provider, not the questions. (Only
+the log only records *which pages* went to which provider, not the questions. (Only
 older database backups still contain them until these expire.) **Ctrl+Enter** sends the question. While the AI
 works, **Stop** replaces “Ask”: it cancels, the question stays in the field, nothing is saved, and Kaveyl Wiki stops
 asking the provider. Closing the window cancels too. In
@@ -2876,7 +2876,7 @@ deleting the selected chat and for **Clear history …** (clock icon).
 
 Chats that have not been used for longer than **90 days** (default, Settings → AI →
 “Keep unused chats”, 0 = never) are **deleted automatically** – counted from the last message. For
-chats about a particular source (context: a note, a folder or the source) each source can have its
+chats about a particular source (context: a page, a folder or the source) each source can have its
 **own period**: edit source → **“Keep AI chats”** (e.g. 7 days for a diary
 or “never delete” for a project); “As in Settings → AI” uses the general rule. Chats with
 the context “everything with access” or “general” always follow the general rule.
@@ -2884,55 +2884,55 @@ the context “everything with access” or “general” always follow the gene
 ### Context, sources and accuracy {#bezug-quellen-und-genauigkeit}
 
 **Context “General (without wiki)”:** a free question to the language model, as in a normal
-AI chat. **No note** goes to the provider, so no access rule is needed for it; the
+AI chat. **No page** goes to the provider, so no access rule is needed for it; the
 answer comes from the model's knowledge, has no sources and may be outdated or wrong. The AI
-says when it is unsure, does not invent sources and, for questions about your notes, refers you to
+says when it is unsure, does not invent sources and, for questions about your pages, refers you to
 a different context. Your personal instructions (Settings → AI) apply here too.
 
-When answering questions, the AI sticks strictly to the notes: it only reproduces what is written there, quotes
+When answering questions, the AI sticks strictly to the pages: it only reproduces what is written there, quotes
 ideas, wishes and conditions word for word instead of reinterpreting them, searches multi-part questions part by part
-and says explicitly when something – or an assumption in the question – is not in the notes.
+and says explicitly when something – or an assumption in the question – is not in the pages.
 With language models this is no guarantee: check important things via the linked sources.
 
-- **Click** on a source opens the note and closes the window.
+- **Click** on a source opens the page and closes the window.
 - **Right-click** (touch: long press) → **Open in new tab** – the window stays open, so
   you can open several sources one after another; also “Open and close dialogue”, “Open to the
   right” (closes the window) and “Copy path”. The middle mouse button also opens in the
   background.
 - **Open all n in tabs** (with several sources) opens each one in its own tab (the first one
-  in front) and closes the window. Notes that are already open do not get a second tab.
+  in front) and closes the window. Pages that are already open do not get a second tab.
 
 ![Ask the knowledge base](handbuch/63-ki-fragen.webp)
 
-**Private notes when asking:** if you ask about an area that also holds notes for “private AI only”, your default
-provider answers – without those notes. If some match, a note below the answer says e.g. “Only what is allowed for
-Claude is found – 2 matching private notes are not included.” with the button **“Ask with …”**: it asks the same
-question in the same chat of the private AI, which then includes the notes. From then on the chat stays with the
+**Private pages when asking:** if you ask about an area that also holds pages for “private AI only”, your default
+provider answers – without those pages. If some match, a page below the answer says e.g. “Only what is allowed for
+Claude is found – 2 matching private pages are not included.” with the button **“Ask with …”**: it asks the same
+question in the same chat of the private AI, which then includes the pages. From then on the chat stays with the
 private AI, because its history holds private content; for another provider you start a new chat. If you ask
-directly about a note or folder for “private AI only”, the question goes to the private AI right away.
+directly about a page or folder for “private AI only”, the question goes to the private AI right away.
 
-![Hint about private notes](handbuch/ki-fragen-privat-hinweis.webp)
+![Hint about private pages](handbuch/ki-fragen-privat-hinweis.webp)
 
 ### Tasks and proposals {#aufträge-und-vorschläge}
 
 If you ask the AI for a change, it creates **proposals** instead of
-writing itself: a new note, changing the text of a note, moving a note/folder or remembering
+writing itself: a new page, changing the text of a page, moving a page/folder or remembering
 something. Each proposal appears as a card below the answer – **Preview** shows the new text
 or the changes (red/green), **Apply** carries it out, ✕ discards it. It is applied with
 the author **“Kaveyl Wiki KI (im Auftrag von …)”** – on your behalf, with your name – and a commit message `ai(…): …`; the
 change is a separate commit and can be brought back at any time via “Versions”. There are proposals
 only where the AI has access and you yourself may write – for a folder this applies to everything
-in it, as when moving in the tree; if the note has been changed in the meantime, Kaveyl Wiki overwrites nothing (then ask the AI again). The AI cannot
+in it, as when moving in the tree; if the page has been changed in the meantime, Kaveyl Wiki overwrites nothing (then ask the AI again). The AI cannot
 delete.
 
-If the private AI read private notes in this chat, a proposal may contain their content. If the target is a place that AI
-without “Allow for private notes” may read as well, the card shows a yellow note – likewise when a proposal moves a note or
-folder allowed for **private AI only** to such a place. You can still apply it; the note only tells you that the content
+If the private AI read private pages in this chat, a proposal may contain their content. If the target is a place that AI
+without “Allow for private pages” may read as well, the card shows a yellow page – likewise when a proposal moves a page or
+folder allowed for **private AI only** to such a place. You can still apply it; the page only tells you that the content
 is no longer private afterwards.
 
-So that proposals work as normal notes, Kaveyl Wiki tidies them up: source numbers such as “[1]” from
-the chat do not end up in the note, and links that the AI writes from the root of the source
-(`Besprechungen/…`) are converted to match the note's folder (`../Besprechungen/…`). All
+So that proposals work as normal pages, Kaveyl Wiki tidies them up: source numbers such as “[1]” from
+the chat do not end up in the page, and links that the AI writes from the root of the source
+(`Besprechungen/…`) are converted to match the page's folder (`../Besprechungen/…`). All
 AI answers get normal hyphens and spaces instead of typographic special characters that
 some models scatter in – otherwise a search for “Eis-Angebot” would not find them. A correction of a
 single paragraph remains one paragraph.
@@ -2940,7 +2940,7 @@ single paragraph remains one paragraph.
 ![Proposal from the AI](handbuch/64-ki-agent-vorschlag.webp)
 
 **Models without tools:** small local models often cannot call tools. In that case
-Kaveyl Wiki searches for matching notes itself, as before, and the AI answers from them (without steps and without
+Kaveyl Wiki searches for matching pages itself, as before, and the AI answers from them (without steps and without
 proposals).
 
 ### Memory per source {#gedächtnis-pro-quelle}
@@ -2957,7 +2957,7 @@ Code or Hermes. They are sent along with every AI request about this source – 
 ### AI log {#protokoll-der-ki}
 
 Every request is recorded in the log (who, which provider and which model, which
-notes with path and version, for the agent also the steps), as is every applied proposal –
+pages with path and version, for the agent also the steps), as is every applied proposal –
 but not the content itself.
 
 ## API and MCP (Claude, Hermes, scripts) {#api-und-mcp-claude-hermes-skripte}
@@ -2974,7 +2974,7 @@ committed to Git with you as the author and noted in the log (“API: …” or 
 ready-made command for Claude Code is shown as well, for copying.
 
 **Claude Code / Claude Desktop (MCP):** a token with “MCP” (and “write” if Claude is to change
-notes), then in the terminal:
+pages), then in the terminal:
 
 ```
 claude mcp add --transport http kaveyl-wiki https://wiki.example.org/mcp --header "Authorization: Bearer kw_…"
@@ -2984,13 +2984,13 @@ Claude Desktop connects through the small bridge `mcp-remote` – its settings a
 [API reference](API.md#mcp-clients-einrichten).
 
 Claude can then list sources, search (also within just one source), look at the tree, read,
-write, create, copy, move and delete notes, see who is editing a note right now, ask what has changed since last time
+write, create, copy, move and delete pages, see who is editing a page right now, ask what has changed since last time
 and by whom ([Agents in the team](#agenten-im-team)), create folders, upload images and files
-(they end up in the `assets` folder next to the note, as when pasting in the editor), fetch backlinks and versions,
+(they end up in the `assets` folder next to the page, as when pasting in the editor), fetch backlinks and versions,
 view the sync status and start a sync. Before writing, it reads the
-note; if someone has changed it in the meantime, it gets a conflict instead of overwriting anything.
+page; if someone has changed it in the meantime, it gets a conflict instead of overwriting anything.
 Deleted items go to the [Trash](#versionen-und-papierkorb) and can be brought back from there.
-It sees encrypted notes only by their name and cannot change them. Changes
+It sees encrypted pages only by their name and cannot change them. Changes
 are – as in the app – bundled into one Git version after a short pause; only then do they appear
 in the versions (“Sync now” does it immediately). Adding or removing sources and
 changing settings is deliberately not possible via MCP – that stays in the app.
@@ -3004,7 +3004,7 @@ setup per client in [docs/API.md](API.md#mcp-clients-einrichten).
 **REST API for scripts:** `https://<deine Adresse>/api/v1/…` with the same header. The complete
 description (OpenAPI) is at `/api/v1/openapi.json`, e.g. for importing into Postman or
 Bruno. Examples: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
-`GET /api/v1/notes/<Quelle>/<Pfad>` (returns Markdown and `hash`), `PUT` to the same address with
+`GET /api/v1/pages/<Quelle>/<Pfad>` (returns Markdown and `hash`), `PUT` to the same address with
 `{"markdown": "…", "baseHash": "<hash>"}`.
 
 ## Keyboard shortcuts {#tastenkürzel}
@@ -3012,18 +3012,18 @@ Bruno. Examples: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | Shortcut | Effect |
 |---|---|
 | F1 | Help – in a settings area or dialog, exactly on that |
-| Ctrl+K | Command palette (notes and commands) |
+| Ctrl+K | Command palette (pages and commands) |
 | Ctrl+P | Instant search in the sidebar |
 | Ctrl+S | Save and commit immediately |
 | Ctrl+B / Ctrl+I / Ctrl+E | bold / italic / code |
 | Ctrl+Z / Ctrl+Shift+Z | Undo / Redo |
 | Alt+↑ / Alt+↓ (in the editor) | move the paragraph, heading or block with the cursor one place up / down; a list or checklist item stays in its list, several selected ones move together |
 | `/` at the start of a line or after a space | Slash commands |
-| `[[` | Search for a note and link it |
+| `[[` | Search for a page and link it |
 | `:` + word | Insert emoji |
 | Middle mouse button (under Favorites and Recent also Ctrl+click) | open in a new tab |
 | Ctrl+click / Shift+click (in the tree) | [mark](#mehrere-markieren) one row / a range; Esc clears |
-| Ctrl+C / Ctrl+X / Ctrl+V (in the tree) | copy / cut / paste note/folder |
+| Ctrl+C / Ctrl+X / Ctrl+V (in the tree) | copy / cut / paste page/folder |
 | ↑ / ↓ (in the tree) | previous / next visible row; Home / End jump to the first / last |
 | → / ← (in the tree) | expand a source or folder or go to the first row in it / collapse it or go to the parent folder |
 | Enter (in the tree, under Favourites and Recent) | open – like a click |
@@ -3031,7 +3031,7 @@ Bruno. Examples: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | ← / → (on a tab) | open the previous / next tab; Home / End open the first / last |
 
 With Tab you reach the tree of sources as a single stop – on the last used or
-the open note –, after that the arrow keys move. The headers “Favourites”, “Recent” and
+the open page –, after that the arrow keys move. The headers “Favourites”, “Recent” and
 “AI access” and the entries below them can also be reached with Tab; Enter or Space
 expands and collapses a header.
 
@@ -3043,21 +3043,21 @@ Common causes: server not reachable or token invalid (Settings → Sources → C
 and pushing after 2 minutes (cloning after 5), so that saving and the sync of other sources do not wait indefinitely; the next sync
 tries again. The log shows since when the error has existed.
 
-**At the top right there is a red message instead of “Saved”.** The note could not be saved; the message names the
+**At the top right there is a red message instead of “Saved”.** The page could not be saved; the message names the
 reason, and clicking it shows what to do. **No connection:** your changes stay in the tab, Kaveyl Wiki saves
 by itself as soon as the server can be reached again – leave the tab open until then. **Signed out:** the session has
 expired; sign in via **Sign in in a new tab**, after which Kaveyl Wiki saves in the original tab by itself.
-**Note no longer there:** it was deleted or moved; the notice above the text offers
-[“Save as a new note …”](#konflikte-auflösen). **Server error:** Kaveyl Wiki tries again by itself; if the
+**Page no longer there:** it was deleted or moved; the notice above the text offers
+[“Save as a new page …”](#konflikte-auflösen). **Server error:** Kaveyl Wiki tries again by itself; if the
 error persists, an administrator finds the cause in the server log. **Not saved** with a message (e.g. missing
 write permission): the message names the reason.
 
 **“This part of the app could not be loaded” or “… could not be shown”.** Usually the tab dates from before an
-update, or the network was briefly gone. **Reload** loads the current version. If it affects a note with unsaved
+update, or the network was briefly gone. **Reload** loads the current version. If it affects a page with unsaved
 changes, the message names it – first **Copy content** and paste the text somewhere else; the other tabs stay
 open and save as usual.
 
-**A note does not appear in the tree.** Only `.md` files are shown; hidden folders
+**A page does not appear in the tree.** Only `.md` files are shown; hidden folders
 (`.git`, `.obsidian` …) and `node_modules` are hidden; in addition, the content selection
 of the source applies (right-click → “Edit source …”).
 
@@ -3065,13 +3065,13 @@ of the source applies (right-click → “Edit source …”).
 Repositories: after the next sync (5 min), immediately with a webhook, or “Sync now”.
 
 **Wiki.js does not show my change yet.** Check whether it was committed (sync icon
-green, versions of the note); Wiki.js fetches at its own interval.
+green, versions of the page); Wiki.js fetches at its own interval.
 
 **“The file is not valid UTF-8”.** The file has a different character encoding and is not opened,
 for protection – save it as UTF-8 in VS Code.
 
 **A link points nowhere.** Settings → Tools → Check → “Check now” lists all broken
-links with a jump to the note.
+links with a jump to the page.
 
 **Forgotten password.** On the sign-in page, **“Forgot password?”** – the link arrives by e-mail.
 Without e-mail sending set up, an administrator sets a new initial password under Settings → Users & permissions → **Users** → pencil.
@@ -3085,10 +3085,10 @@ once; with several requests, only the newest link is valid. Simply request a new
 
 **Server storage is running low.** Settings → Tools → **Clean-up** shows what takes up how much space
 (log, trash, AI chats, backups, local copies), with the [deletion rules](#löschregeln);
-**Clean up now** applies them immediately. Notes and Git history grow with the content – large attachments
+**Clean up now** applies them immediately. Pages and Git history grow with the content – large attachments
 make a repository permanently larger (Git forgets nothing).
 
-**A note with many images loads slowly.** Kaveyl Wiki shrinks new images when they are inserted
+**A page with many images loads slowly.** Kaveyl Wiki shrinks new images when they are inserted
 ([Large images](#bearbeiten)). Older, very large images in the repository: download them once, shrink them
 and insert them again – or drag the width on the image smaller (that only changes the display).
 
@@ -3101,35 +3101,35 @@ not with your user name.
 
 ## Export and print {#exportieren-und-drucken}
 
-You export via **Export** – in the note menu “…”, by right-clicking a note, a folder
-or the name of a source in the tree, and in the command palette (“Export note …”). There you choose
+You export via **Export** – in the page menu “…”, by right-clicking a page, a folder
+or the name of a source in the tree, and in the command palette (“Export page …”). There you choose
 the format:
 
-- **HTML** – for reading without Kaveyl Wiki. A note becomes a single **HTML file** with embedded
+- **HTML** – for reading without Kaveyl Wiki. A page becomes a single **HTML file** with embedded
   images, for sending or archiving. A folder or a whole source becomes a **ZIP**: each
-  note becomes an HTML file in the same place, links between them keep working, linked
+  page becomes an HTML file in the same place, links between them keep working, linked
   images and files are included, and an overview (`index.html`, or `inhalt.html` if the folder
-  itself has an `index.md`) lists everything. Encrypted notes are left out.
+  itself has an `index.md`) lists everything. Encrypted pages are left out.
 - **Markdown** – the files themselves, for further use in another tool or as a
-  copy. The notes come byte for byte as they are in the source, plus the images and files
-  they refer to; the folder structure is kept. A folder or a source comes as a **ZIP**. A single note comes as a
-  **`.md` file**; if it refers to pictures or files, as a ZIP with the note and its pictures. Encrypted notes are
+  copy. The pages come byte for byte as they are in the source, plus the images and files
+  they refer to; the folder structure is kept. A folder or a source comes as a **ZIP**. A single page comes as a
+  **`.md` file**; if it refers to pictures or files, as a ZIP with the page and its pictures. Encrypted pages are
   included for a folder – encrypted, as they are in the file.
 
-  The quickest way is the **Download** button (arrow down) in the note's header, next to the width.
+  The quickest way is the **Download** button (arrow down) in the page's header, next to the width.
 
-Several [marked](#mehrere-markieren) notes and folders of one source come together in **one ZIP**; the paths in it start
+Several [marked](#mehrere-markieren) pages and folders of one source come together in **one ZIP**; the paths in it start
 at the folder that holds them all.
 
 For both formats: only what you are allowed to read is exported. Images and files outside the
 exported folder are not included.
 
-- **Print and PDF:** note menu “…” → **Print / as PDF …** opens the browser’s print dialog
-  with a clean page (just the note, without the sidebar and menus). For a PDF,
+- **Print and PDF:** page menu “…” → **Print / as PDF …** opens the browser’s print dialog
+  with a clean page (just the page, without the sidebar and menus). For a PDF,
   choose “Save as PDF” there. The print command in the browser’s menu also prints only the
-  note (without the sidebar); this is how you print encrypted notes that are decrypted only in your
+  page (without the sidebar); this is how you print encrypted pages that are decrypted only in your
   browser. (In Kaveyl Wiki, Ctrl+P is the search.)
-- Raw HTML in a note appears as text in the export and is never executed; formulas
+- Raw HTML in a page appears as text in the export and is never executed; formulas
   appear as LaTeX text, Mermaid diagrams as code. Links that would run code
   (`javascript:` and the like) stay as text without a target in the export – as in Kaveyl Wiki itself.
 
@@ -3155,7 +3155,7 @@ without address and menu bars. This is how it works, depending on the device:
 
 The Welcome page shows you the way for your device right away; if Kaveyl Wiki is already running as an app, the step
 is ticked off there. You can remove the app again like any other (long-press the icon, or in the
-browser’s settings); your notes are not affected, they are on the server.
+browser’s settings); your pages are not affected, they are on the server.
 
 The icon is called **Kaveyl Wiki**, and the status and navigation bars take the colour of the page (light or dark, as set
 under Appearance). An icon added before version 0.2.15 may still be called “Kaveyl” and show a purple bar – then remove
@@ -3165,18 +3165,18 @@ the app and add it again.
 Via `http://…`, most browsers create at most a bookmark icon. https is provided by the reverse proxy
 that the admin sets up (see [Reverse proxy](#reverse-proxy)).
 
-**Without a connection.** Notes are deliberately not stored on the device – because of permissions and data protection.
+**Without a connection.** Pages are deliberately not stored on the device – because of permissions and data protection.
 Without a network, the app starts with the notice “Offline” and the button “Try again”.
 
 **On a phone and in narrow windows** the sidebar is a drawer: the sidebar icon on the left of the
-tab bar (“Show sidebar”) opens it, and tapping a note or the area next to it closes it
+tab bar (“Show sidebar”) opens it, and tapping a page or the area next to it closes it
 again. On touch devices, “+” and expand/collapse are always shown on the source – hovering with the mouse is never
 needed –, and on folders for the selected folder; a long press opens the context menu (e.g. “Arrange”). The
 formatting bar can be swiped sideways.
 
 ![Phone: sidebar as a drawer](handbuch/67-mobil-baum.webp)
 
-![Phone: note](handbuch/68-mobil-notiz.webp)
+![Phone: page](handbuch/68-mobil-notiz.webp)
 
 ## Technology and components {#technik-und-komponenten}
 
@@ -3208,13 +3208,13 @@ that unchanged sections are kept byte for byte. Formulas are shown by **KaTeX**,
 
 **Server, data and search.** The server is **Fastify** with WebSockets for live messages. What Kaveyl Wiki
 stores itself – users, permissions, settings, the log and the search index – is kept in an
-**SQLite** database; the notes themselves remain files. Instant search uses SQLite’s full-text index
+**SQLite** database; the pages themselves remain files. Instant search uses SQLite’s full-text index
 (FTS5) for word beginnings and a trigram index for parts of words. Kaveyl Wiki works with Git repositories
 through the perfectly normal `git` program, and it notices changes to files through file watching.
 
 **Security.** Passwords are stored with scrypt, stored credentials (tokens, SMTP,
 AI keys) are encrypted with AES-256-GCM – both with Node.js’s built-in tools. Encrypted
-notes use the open **age** format and are decrypted and encrypted only in the browser.
+pages use the open **age** format and are decrypted and encrypted only in the browser.
 
 **AI and interfaces.** The AI assistant speaks two widely used protocols: the OpenAI-compatible
 interface (Ollama, Ollama Cloud, OpenRouter, OpenAI and similar) and the Anthropic interface.
@@ -3237,8 +3237,8 @@ package names and the licence.
 | Zustand | interface state (tabs, dialogs, help) | `zustand` | MIT |
 | Radix UI | dialogs, menus, context menus, pop-overs | `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-context-menu`, `@radix-ui/react-popover` | MIT |
 | Tailwind CSS | styling, colours, light/dark | `tailwindcss`, `@tailwindcss/vite` | MIT |
-| Lucide | icons in the interface and for notes | `lucide-react` | ISC |
-| Inter | Typeface of the interface and the notes | `@fontsource-variable/inter` | OFL-1.1 |
+| Lucide | icons in the interface and for pages | `lucide-react` | ISC |
+| Inter | Typeface of the interface and the pages | `@fontsource-variable/inter` | OFL-1.1 |
 | Vite | builds the web app | `vite`, `@vitejs/plugin-react` | MIT |
 
 **Editor and content**
@@ -3253,7 +3253,7 @@ package names and the licence.
 | Mermaid | diagrams from text | `mermaid` | MIT |
 | Excalidraw | drawings | `@excalidraw/excalidraw` | MIT |
 | YAML | front matter and templates | `yaml` | ISC |
-| age | encrypted notes | `age-encryption` | BSD-3-Clause |
+| age | encrypted pages | `age-encryption` | BSD-3-Clause |
 
 **Server**
 

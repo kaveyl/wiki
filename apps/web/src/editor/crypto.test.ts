@@ -9,7 +9,7 @@ const PASS = 'richtig-lange-passphrase';
 const front = (raw: string) => readFrontmatter(splitFrontmatter(raw).frontmatter);
 
 describe('sealNote / unsealNote', () => {
-  const plain = '---\ntags:\n  - geheim\n---\n# Kontodaten\n\nIBAN DE00 1234 und ![Scan](assets/scan.png), [PDF](assets/vertrag.pdf), [Notiz](andere.md)\n';
+  const plain = '---\ntags:\n  - geheim\n---\n# Kontodaten\n\nIBAN DE00 1234 und ![Scan](assets/scan.png), [PDF](assets/vertrag.pdf), [Seite](andere.md)\n';
 
   it('round-trips the text, with and without a title', async () => {
     expect(await unsealNote(PASS, await sealNote(PASS, plain))).toBe(plain);

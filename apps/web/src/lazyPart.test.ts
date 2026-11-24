@@ -101,7 +101,7 @@ describe('a part that fails while rendering', () => {
     const out = failed();
     expect(out).toContain('role="alert"');
     expect(out).toContain('Dieser Teil der App konnte nicht angezeigt werden.');
-    expect(out).toContain('2 Notizen waren noch nicht gespeichert');
+    expect(out).toContain('2 Seiten waren noch nicht gespeichert');
     expect(out).toContain('Inhalte kopieren');
     expect(out).toContain('Neu laden');
   });
@@ -109,7 +109,7 @@ describe('a part that fails while rendering', () => {
   it('in a tab, only its own note counts; without unsaved changes there is nothing to copy', () => {
     setUnsaved('e1', 'm:a.md', async () => undefined, () => '# A');
     setUnsaved('e2', 'm:b.md', async () => undefined, () => '# B');
-    expect(failed('m:a.md')).toContain('1 Notiz war noch nicht gespeichert');
+    expect(failed('m:a.md')).toContain('1 Seite war noch nicht gespeichert');
     const clean = failed('m:c.md');
     expect(clean).not.toContain('Inhalte kopieren');
     expect(clean).toContain('Neu laden');
@@ -120,7 +120,7 @@ describe('a part that fails while rendering', () => {
       throw new Error('destroyed');
     });
     setUnsaved('e2', 'm:b.md', async () => undefined, () => '# B');
-    expect(failed()).toContain('1 Notiz war noch nicht gespeichert');
+    expect(failed()).toContain('1 Seite war noch nicht gespeichert');
   });
 });
 

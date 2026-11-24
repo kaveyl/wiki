@@ -190,7 +190,7 @@ export function registerLibraryRoutes(server: FastifyInstance, ctx: AppContext) 
       if (old && tagKey(from) !== tagKey(to) && atLeast(levelIn(req, m.id, '', true), 'write')) {
         await writeTagColors(manager, config.dataPath, m, { [tagKey(from)]: null, ...(colors[tagKey(to)] ? {} : { [tagKey(to)]: old }) }, author(req), `Tag-Farbe #${tagKey(from)} → #${tagKey(to)} (Kaveyl Wiki)`);
       }
-      audit(req, 'tag-renamed', `Tag #${from} → #${to} in ${changed.length} Notiz(en)`, { mount: mountRef(m) });
+      audit(req, 'tag-renamed', `Tag #${from} → #${to} in ${changed.length} Seite(n)`, { mount: mountRef(m) });
     }
     return { notes: count, skipped, sources };
   });
@@ -219,7 +219,7 @@ export function registerLibraryRoutes(server: FastifyInstance, ctx: AppContext) 
         const colors = await readTagColors(m, config.dataPath);
         if (colors[tagKey(tag)]) await writeTagColors(manager, config.dataPath, m, { [tagKey(tag)]: null }, author(req), `Tag-Farbe #${tagKey(tag)} entfernt (Kaveyl Wiki)`);
       }
-      audit(req, 'tag-removed', `Tag #${tag} aus ${changed.length} Notiz(en) entfernt`, { mount: mountRef(m) });
+      audit(req, 'tag-removed', `Tag #${tag} aus ${changed.length} Seite(n) entfernt`, { mount: mountRef(m) });
     }
     return { notes: count, skipped, sources };
   });

@@ -67,7 +67,7 @@ describe('archive', () => {
     const src = join(dir, 'src');
     mkdirSync(join(src, 'a', 'assets'), { recursive: true });
     mkdirSync(join(src, '.git'), { recursive: true });
-    writeFileSync(join(src, 'a', 'Notiz äö.md'), '# Notiz\n\nText\n');
+    writeFileSync(join(src, 'a', 'Seite äö.md'), '# Seite\n\nText\n');
     writeFileSync(join(src, 'a', 'assets', 'bild.png'), Buffer.from([1, 2, 3, 0, 4]));
     writeFileSync(join(src, '.git', 'HEAD'), 'ref');
     for (const password of [null, 'Backup-Passwort-1']) {
@@ -75,8 +75,8 @@ describe('archive', () => {
       const res = await zipFolder(src, out, { password });
       expect(res.files).toBe(2);
       const a = await Archive.open(out, password);
-      expect(a.entries().map((e) => e.path)).toEqual(['a/assets/bild.png', 'a/Notiz äö.md']);
-      expect((await a.read('a/Notiz äö.md')).toString()).toBe('# Notiz\n\nText\n');
+      expect(a.entries().map((e) => e.path)).toEqual(['a/assets/bild.png', 'a/Seite äö.md']);
+      expect((await a.read('a/Seite äö.md')).toString()).toBe('# Seite\n\nText\n');
       expect([...(await a.read('a/assets/bild.png'))]).toEqual([1, 2, 3, 0, 4]);
       await a.close();
     }

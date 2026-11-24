@@ -53,7 +53,7 @@ export async function convertExport(input: ConvertInput, fetcher?: PictureFetche
     const chosen = (input.format && formatById(input.format)) || formatById(detected)!;
     const draft = await chosen.convert(zip.files);
     // Trilium builds notes from its `!!!meta.json` alone – the ZIP's entry count does not bound them.
-    if (draft.notes.length + draft.files.length > IMPORT_LIMITS.entries) throw new ImportError(`Der Import ergäbe mehr als ${IMPORT_LIMITS.entries} Notizen und Dateien`);
+    if (draft.notes.length + draft.files.length > IMPORT_LIMITS.entries) throw new ImportError(`Der Import ergäbe mehr als ${IMPORT_LIMITS.entries} Seiten und Dateien`);
     if (input.fetch && fetcher && draft.remote?.length) await fetchRemote(draft, fetcher);
     const plan = buildPlan(draft, { folderNote: input.folderNote, blocked: new Set(input.blocked) });
     const own = new Set(zip.files);

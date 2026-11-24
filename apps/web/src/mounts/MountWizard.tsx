@@ -257,7 +257,7 @@ function NewHostRepo({ connection, onCancel, onCreated }: { connection: Connecti
           </select>
         </Field>
         <Field label={t('Repository-Name')}>
-          <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={t('z. B. notizen')} />
+          <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={t('z. B. team-wiki')} />
         </Field>
       </div>
       <Field label={t('Beschreibung (optional)')}>
@@ -375,7 +375,7 @@ function LocalSource({ onPick }: { onPick: (s: Source) => void }) {
         ) : (
           <Rich
             parts={DOCS_CODE}
-            text={t('Kein Ordner für lokale Notizen eingehängt. In der {compose} unter {volumes} z. B. {mount} ergänzen (den Ordner auf dem Server vorher anlegen; er muss dem Benutzer gehören, unter dem der Container läuft – Standard 1000:1000) und den Container neu starten – danach erscheinen hier die Unterordner von {docs}. Für den Abgleich mit einem Git-Server ein Repository einbinden.')}
+            text={t('Kein Ordner für lokale Seiten eingehängt. In der {compose} unter {volumes} z. B. {mount} ergänzen (den Ordner auf dem Server vorher anlegen; er muss dem Benutzer gehören, unter dem der Container läuft – Standard 1000:1000) und den Container neu starten – danach erscheinen hier die Unterordner von {docs}. Für den Abgleich mit einem Git-Server ein Repository einbinden.')}
           />
         )}
       </p>
@@ -528,7 +528,7 @@ export function Selection({ tree, onBack, onNext, nextLabel = t('Weiter') }: { t
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
         <span className="text-fg-muted">
-          <Rich text={t('{n} von {total} Notizen ausgewählt', { total: files.length })} parts={{ n: <strong className="text-fg">{selected.size}</strong> }} />
+          <Rich text={t('{n} von {total} Seiten ausgewählt', { total: files.length })} parts={{ n: <strong className="text-fg">{selected.size}</strong> }} />
         </span>
         <span className="flex gap-1">
           <Button size="sm" variant="ghost" onClick={() => (setSelected(new Set(files)), setExpert(null))}>
@@ -541,7 +541,7 @@ export function Selection({ tree, onBack, onNext, nextLabel = t('Weiter') }: { t
       </div>
       <div className="max-h-[42vh] overflow-y-auto rounded-lg border border-line py-1">
         {files.length === 0 ? (
-          <div className="p-3 text-sm text-fg-muted">{t('Noch keine Notizen – der Ordner wird ganz eingebunden, neue Notizen legst du danach in Kaveyl Wiki an.')}</div>
+          <div className="p-3 text-sm text-fg-muted">{t('Noch keine Seiten – der Ordner wird ganz eingebunden, neue Seiten legst du danach in Kaveyl Wiki an.')}</div>
         ) : (
           <CheckNode node={tree} depth={0} selected={selected} onToggle={toggle} root />
         )}
@@ -649,8 +649,8 @@ function OptionsStep({ src, branch, include, count, onBack, onDone }: { src: Sou
         <Rich
           text={
             src.type === 'remote'
-              ? tn(count, '{n} Notiz aus {source} (Branch {branch})', '{n} Notizen aus {source} (Branch {branch})')
-              : tn(count, '{n} Notiz aus {source}', '{n} Notizen aus {source}')
+              ? tn(count, '{n} Seite aus {source} (Branch {branch})', '{n} Seiten aus {source} (Branch {branch})')
+              : tn(count, '{n} Seite aus {source}', '{n} Seiten aus {source}')
           }
           parts={{ source: <code className="text-xs">{src.source}</code>, branch: <code className="text-xs">{branch}</code> }}
         />
@@ -775,8 +775,8 @@ function MountOptionsForm({
           label={t('Wann deine Änderungen nach Git schreiben?')}
           hint={
             type === 'remote'
-              ? t('Commit und Push: beim Verlassen der Notiz und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Die andere Richtung – Änderungen anderer holen – läuft alle 5 Minuten, mit Webhook sofort.')
-              : t('Commit: beim Verlassen der Notiz und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Kein Push und kein Pull – der Ordner gleicht mit keinem Git-Server ab.')
+              ? t('Commit und Push: beim Verlassen der Seite und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Die andere Richtung – Änderungen anderer holen – läuft alle 5 Minuten, mit Webhook sofort.')
+              : t('Commit: beim Verlassen der Seite und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Kein Push und kein Pull – der Ordner gleicht mit keinem Git-Server ab.')
           }
         >
           <select
@@ -817,7 +817,7 @@ function MountOptionsForm({
         </span>
       </label>
       <AiChatDays value={value.aiChatDays} onChange={(aiChatDays) => onChange({ ...value, aiChatDays })} />
-      <Field label={t('Ordner-Notiz')} hint={t('Datei, die als Inhalt ihres Ordners angezeigt wird (Wiki.js nutzt oft home.md).')}>
+      <Field label={t('Ordnerseite')} hint={t('Datei, die als Inhalt ihres Ordners angezeigt wird (Wiki.js nutzt oft home.md).')}>
         <select
           className="h-8 w-full rounded-md border border-line bg-bg px-2 text-sm"
           value={value.folderNote}
@@ -853,7 +853,7 @@ function AiChatDays({ value, onChange }: { value: number | undefined; onChange: 
     [0, t('Nie löschen')],
   ];
   return (
-    <Field label={t('KI-Chats aufbewahren')} hint={t('Chats über Notizen, Ordner oder diese ganze Quelle werden gelöscht, wenn sie so lange unbenutzt sind.')}>
+    <Field label={t('KI-Chats aufbewahren')} hint={t('Chats über Seiten, Ordner oder diese ganze Quelle werden gelöscht, wenn sie so lange unbenutzt sind.')}>
       <select aria-label={t('KI-Chats aufbewahren')} className="h-8 w-full rounded-md border border-line bg-bg px-2 text-sm" value={v} onChange={(e) => onChange(Number(e.target.value))}>
         {choices.map(([n, label]) => (
           <option key={n} value={n}>

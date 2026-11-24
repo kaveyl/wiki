@@ -198,7 +198,7 @@ export function buildPlan(draft: Draft, opts: BuildOptions): Plan {
   if (remote.length) {
     const concerned = [...new Set(remote.flatMap((r) => r.notes))];
     warnings.push({
-      text: draft.remoteTried ? 'Notizen mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links' : 'Notizen mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links',
+      text: draft.remoteTried ? 'Seiten mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links' : 'Seiten mit Bildern auf dem alten Server – der Export enthält sie nicht, sie bleiben Web-Links',
       notes: concerned.map((f) => noteAt.get(f)).filter((p): p is string => !!p),
       items: [],
       remote: !draft.remoteTried,

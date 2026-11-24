@@ -125,16 +125,16 @@ export async function fsck(mounts: Mount[], indexer: Indexer, dataPath: string):
         } else if (await inEncryptedFolder(mount, dataPath, p)) {
           // Left over by an interrupted „Ordner verschlüsseln“ or copied in from outside: readable by everyone with
           // access to the files, and Kaveyl Wiki refuses to save it until it is encrypted.
-          add({ kind: 'plain-in-encrypted', path: p, detail: 'Notiz liegt unverschlüsselt in einem verschlüsselten Ordner – öffnen und „Verschlüsseln“ wählen' });
+          add({ kind: 'plain-in-encrypted', path: p, detail: 'Seite liegt unverschlüsselt in einem verschlüsselten Ordner – öffnen und „Verschlüsseln“ wählen' });
         }
       }
 
       // Attachments no note links to any more (left behind after deleting a link or a note).
       if (large !== null && attachments.length)
-        add({ kind: 'error', path: large, detail: 'Notiz ist größer als 2 MB und hat keine Links im Index – verwaiste Anhänge werden für diese Quelle nicht gemeldet' });
+        add({ kind: 'error', path: large, detail: 'Seite ist größer als 2 MB und hat keine Links im Index – verwaiste Anhänge werden für diese Quelle nicht gemeldet' });
       for (const a of large === null ? attachments : []) {
         if (a.endsWith('.age') && unlistedEncrypted) continue;
-        if (!referenced.has(join(root, ...a.split('/')))) add({ kind: 'orphaned-attachment', path: a, detail: 'Anhang wird von keiner Notiz mehr verlinkt' });
+        if (!referenced.has(join(root, ...a.split('/')))) add({ kind: 'orphaned-attachment', path: a, detail: 'Anhang wird von keiner Seite mehr verlinkt' });
       }
 
       const exists = async (p: string) => !!(await lstat(join(root, ...p.split('/'))).catch(() => null))?.isFile();

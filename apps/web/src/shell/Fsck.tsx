@@ -65,7 +65,7 @@ export function FsckPanel({ onOpenNote }: { onOpenNote: () => void }) {
       paths.length === 1
         ? t('„{path}“ aus „{name}“ löschen?', { path: paths[0]!, name })
         : t('{n} verwaiste Anhänge aus „{name}“ löschen?', { n: paths.length, name });
-    const after = git ? t('Keine Notiz verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.') : t('Keine Notiz verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.');
+    const after = git ? t('Keine Seite verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.') : t('Keine Seite verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.');
     if (!(await confirmDialog(`${question} ${after}`, { confirmLabel: t('Löschen'), danger: true }))) return;
     setBusy(true);
     let removed = 0;
@@ -129,7 +129,7 @@ export function FsckPanel({ onOpenNote }: { onOpenNote: () => void }) {
                 </button>
                 {isOpen && m.issues.some((i) => i.kind === 'orphaned-attachment') && (
                   <div className="flex items-center gap-2 border-t border-line bg-subtle/40 px-3 py-2 pl-8">
-                    <span className="flex-1 text-xs text-fg-muted">{t('Verwaiste Anhänge verlinkt keine Notiz mehr – sie lassen sich hier löschen.')}</span>
+                    <span className="flex-1 text-xs text-fg-muted">{t('Verwaiste Anhänge verlinkt keine Seite mehr – sie lassen sich hier löschen.')}</span>
                     <Button
                       size="sm"
                       variant="ghost"

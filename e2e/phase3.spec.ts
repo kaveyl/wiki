@@ -1,5 +1,5 @@
 // Phase 3 end-to-end: editor comfort (callouts, collapsible blocks, code highlighting, …).
-// Runs after phase1.spec.ts in the same seeded workspace (admin + local mount "Notizen").
+// Runs after phase1.spec.ts in the same seeded workspace (admin + local mount "Projektwiki").
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -21,7 +21,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });
 
 const tree = () => page.locator('aside nav[aria-label="Quellen"]');
@@ -111,7 +111,7 @@ test('links a note via [[ autocomplete as a relative Markdown link', async () =>
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
   await page.keyboard.type('Siehe [[Roadm');
-  const list = page.getByRole('listbox', { name: 'Notiz verlinken' });
+  const list = page.getByRole('listbox', { name: 'Seite verlinken' });
   await expect(list.getByRole('option', { name: /^roadmap/ })).toBeVisible();
   await shot(page, '32-note-link');
   await page.keyboard.press('Enter');
@@ -253,9 +253,9 @@ test('tags: add and remove in the note, browse all tags, filter by tag', async (
   await page.getByRole('button', { name: 'Tags', exact: true }).click();
   const tagsDialog = page.getByRole('dialog', { name: 'Tags' });
   await expect(tagsDialog.getByRole('button', { name: /ideen/ })).toBeVisible();
-  // A click picks the tag (its actions in the bar below, redesign 24.11.); „Notizen zeigen“ opens the search.
+  // A click picks the tag (its actions in the bar below, redesign 24.11.); „Seiten zeigen“ opens the search.
   await tagsDialog.getByRole('button', { name: /ideen/ }).click();
-  await tagsDialog.getByRole('button', { name: 'Notizen zeigen' }).click();
+  await tagsDialog.getByRole('button', { name: 'Seiten zeigen' }).click();
   const search = page.getByRole('dialog', { name: 'Suche' });
   await expect(search.getByLabel('Suchanfrage')).toHaveValue('tag:ideen');
   await expect(search.getByRole('button', { name: /^trilium/ })).toBeVisible();
@@ -309,13 +309,13 @@ test('colored tags: right-click → Farbe, saved in .kaveyl-wiki.yml; rename mer
 test('a tag can be removed from all notes; the notes stay (QA 24.11.)', async () => {
   writeFileSync(join(NOTES, 'wegtag-a.md'), '---\ntags: [wegdamit, bleibt]\n---\n# A\n');
   writeFileSync(join(NOTES, 'wegtag-b.md'), '---\ntags: wegdamit\n---\n# B\n');
-  await waitIndexed(page, 'Notizen', ['wegtag-a.md', 'wegtag-b.md']);
+  await waitIndexed(page, 'Projektwiki', ['wegtag-a.md', 'wegtag-b.md']);
   await page.getByRole('button', { name: 'Tags', exact: true }).click();
   const tagsDialog = page.getByRole('dialog', { name: 'Tags' });
   await tagsDialog.getByRole('button', { name: /wegdamit/ }).click();
   await tagsDialog.getByRole('button', { name: 'Löschen', exact: true }).click();
   const ask = page.getByRole('alertdialog');
-  await expect(ask).toContainText('#wegdamit aus 2 Notizen entfernen? Die Notizen selbst bleiben, auch ihre anderen Tags.');
+  await expect(ask).toContainText('#wegdamit aus 2 Seiten entfernen? Die Seiten selbst bleiben, auch ihre anderen Tags.');
   await ask.getByRole('button', { name: 'Tag entfernen' }).click();
   await expect.poll(() => read('wegtag-b.md'), { timeout: 10_000 }).toBe('# B\n');
   expect(read('wegtag-a.md')).toBe('---\ntags: [bleibt]\n---\n# A\n');
@@ -351,11 +351,11 @@ test('favorites, recently opened and recently changed in the sidebar', async () 
   await recent.getByRole('button', { name: 'geöffnet' }).click();
   await expect(recent.getByText('kolibri', { exact: true })).toBeVisible();
   // Rows name their source: the same folder structure often recurs across repos.
-  await expect(recent.locator('[title^="Notizen / "]').first()).toContainText('(Notizen)');
+  await expect(recent.locator('[title^="Projektwiki / "]').first()).toContainText('(Projektwiki)');
   // Favorites and the chosen view survive a reload (stored per user on the server).
   await page.reload();
   await expect(favs.getByText('Detailseite', { exact: true })).toBeVisible();
-  await expect(favs.locator('[title^="Notizen / "]').first()).toBeVisible();
+  await expect(favs.locator('[title^="Projektwiki / "]').first()).toBeVisible();
   await expect(aside.getByRole('tab', { name: 'Zuletzt', exact: true })).toHaveAttribute('aria-selected', 'true');
   await recent.getByRole('button', { name: 'geändert' }).click();
   await expect(recent.getByText('frisch', { exact: true }).first()).toBeVisible();
@@ -366,7 +366,7 @@ test('favorites, recently opened and recently changed in the sidebar', async () 
 
 test('icon from the note header and write protection toggle', async () => {
   await openNote('roadmap');
-  await page.getByRole('button', { name: 'Icon der Notiz' }).filter({ visible: true }).click();
+  await page.getByRole('button', { name: 'Icon der Seite' }).filter({ visible: true }).click();
   await page.getByRole('button', { name: 'Symbol rocket' }).click();
   await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toContain('icon: lucide:rocket');
   // The own icon also shows under „Zuletzt · geöffnet“, which only remembers the path (owner 2026-10-16).
@@ -455,9 +455,9 @@ test('templates: save a note as template, create a new note from it with variabl
   writeFileSync(join(NOTES, '.kaveyl-wiki/templates/Tagebuch.md'), '# {{title}} – {{weekday}}, {{date}}\n\n## Erledigt\n\n- [ ] \n');
   await page.keyboard.press('Control+k');
   await expect(page.getByRole('textbox', { name: 'Befehlspalette' })).toBeFocused();
-  await page.keyboard.type('>neue notiz');
+  await page.keyboard.type('>neue seite');
   await page.keyboard.press('Enter');
-  const dialog = page.getByRole('dialog', { name: 'Neue Notiz' });
+  const dialog = page.getByRole('dialog', { name: 'Neue Seite' });
   await dialog.getByLabel('Titel').fill('Tag eins');
   await dialog.getByLabel('Vorlage').selectOption({ label: 'Tagebuch' }); // by file name (AD-022)
   // The icon right away (Owner 30.10.); the title keeps its text.
@@ -468,7 +468,7 @@ test('templates: save a note as template, create a new note from it with variabl
   await expect(dialog.getByLabel('Titel')).toHaveValue('Tag eins');
   await shot(page, '40-vorlage');
   await dialog.getByRole('button', { name: 'Anlegen' }).click();
-  await expect(page.getByRole('button', { name: 'Icon der Notiz' }).filter({ visible: true })).toContainText('📝');
+  await expect(page.getByRole('button', { name: 'Icon der Seite' }).filter({ visible: true })).toContainText('📝');
   const today = new Date();
   const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   await expect(editor().getByRole('heading', { level: 1 })).toContainText(`Tag eins – `);

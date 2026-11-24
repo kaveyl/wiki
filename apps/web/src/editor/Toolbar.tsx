@@ -75,8 +75,8 @@ export async function promptLink(editor: Editor) {
     await promptDialog(current ? t('Link bearbeiten') : t('Link setzen'), {
       label: t('Link-Ziel'),
       value: current ?? '',
-      placeholder: t('https://… oder ../notiz.md'),
-      hint: t('Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Notiz. Leer lassen entfernt den Link.'),
+      placeholder: t('https://… oder ../seite.md'),
+      hint: t('Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Seite. Leer lassen entfernt den Link.'),
       mono: true,
       confirmLabel: t('Übernehmen'),
       help: 'links-und-verlinkt-von',

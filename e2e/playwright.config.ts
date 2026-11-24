@@ -11,7 +11,7 @@ const PORT = 18093;
 if (!process.env.TEST_WORKER_INDEX) {
   rmSync(E2E_DIR, { recursive: true, force: true });
   const notes: Record<string, string> = {
-    'projekte/notizen/index.md': '# Notizen\n\nStartseite des lokalen Ordners.\n',
+    'projekte/notizen/index.md': '# Projektwiki\n\nStartseite des lokalen Ordners.\n',
     'projekte/notizen/trilium.md': '---\ntitle: Trilium Ideen\ntags: pkm, wiki\n---\n\n# Ignoriert\n\n* Stern-Liste bleibt\n* unverändert\n\nErster Absatz über Hierarchien.\n',
     'projekte/notizen/plan/roadmap.md': '# Roadmap\n\nSiehe [Trilium](../trilium.md) und [Wiki.js-Stil](/plan/details).\n',
     'projekte/notizen/plan/details.md': '# Details\n\nDetailseite.\n',

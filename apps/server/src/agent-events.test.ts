@@ -74,8 +74,8 @@ it('an agent hears who changed what it may read – not its own writes, not hidd
   const start = await changes(agent, '');
   expect(start).toMatchObject({ reset: false, changes: [] });
   // The agent writes (left out), the admin ticks the box in the app, something changes in a folder Eva may not read.
-  const note = (await app.server.inject({ method: 'GET', url: `/api/v1/notes/${mountId}/vorfaelle/platte.md`, headers: bearer(agent) })).json() as { hash: string; markdown: string };
-  const own = await app.server.inject({ method: 'PUT', url: `/api/v1/notes/${mountId}/vorfaelle/platte.md`, payload: { markdown: note.markdown + '\nAgent: 95 % belegt.\n', baseHash: note.hash }, headers: bearer(agent, { 'content-type': 'application/json' }) });
+  const note = (await app.server.inject({ method: 'GET', url: `/api/v1/pages/${mountId}/vorfaelle/platte.md`, headers: bearer(agent) })).json() as { hash: string; markdown: string };
+  const own = await app.server.inject({ method: 'PUT', url: `/api/v1/pages/${mountId}/vorfaelle/platte.md`, payload: { markdown: note.markdown + '\nAgent: 95 % belegt.\n', baseHash: note.hash }, headers: bearer(agent, { 'content-type': 'application/json' }) });
   expect(own.statusCode).toBe(200);
   const now = (await inject('GET', `/api/notes/${mountId}/vorfaelle/platte.md`, admin)).json() as { hash: string; raw: string };
   expect((await inject('PUT', `/api/notes/${mountId}/vorfaelle/platte.md`, admin, { raw: now.raw.replace('- [ ]', '- [x]'), baseHash: now.hash })).statusCode).toBe(200);

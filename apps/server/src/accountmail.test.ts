@@ -201,7 +201,7 @@ describe('sharing a note by e-mail (guests)', () => {
     await configureMail();
     expect((await post('/api/share', { mountId, path: 'team/plan.md', email: 'kunde@example.test' })).json()).toEqual({ existing: false });
     const mail = await smtp.waitFor('kunde@example.test');
-    expect(mail.subject).toBe('Anna Admin hat die Notiz „plan“ mit dir geteilt');
+    expect(mail.subject).toBe('Anna Admin hat die Seite „plan“ mit dir geteilt');
     const token = tokenOf(FakeSmtp.link(mail, '#invite='), 'invite');
     expect((await post('/api/invite/info', { token }, null)).json()).toMatchObject({ note: 'plan', inviter: 'Anna Admin' });
     // The name the person chose; a line break in it is taken out (sec-004).
@@ -258,7 +258,7 @@ describe('sharing a note by e-mail (guests)', () => {
     await post(`/api/acl/${mountId}`, { target: 'note', path: 'team/plan.md', subject: 'user', subjectId: carl.id, level: 'none' });
     const locked = await post('/api/share', { mountId, path: 'team/plan.md', email: 'carl@example.test' });
     expect(locked.statusCode).toBe(400);
-    expect(locked.json().error).toMatch(/für die Notiz gesperrt/);
+    expect(locked.json().error).toMatch(/für die Seite gesperrt/);
     expect((await get(`/api/notes/${mountId}/team/plan.md`, carl.cookie)).statusCode).toBe(404);
   });
 });
@@ -364,7 +364,7 @@ describe('several notes at once and notes sent by mail (owner 28.10.)', () => {
     const res = await post('/api/share', { mountId, path: 'team/plan.md', more: [{ target: 'note', path: 'start.md' }], email: 'kunde@example.test' });
     expect(res.json()).toEqual({ existing: false });
     const mail = await smtp.waitFor('kunde@example.test');
-    expect(mail.subject).toBe('Anna Admin hat 2 Notizen mit dir geteilt');
+    expect(mail.subject).toBe('Anna Admin hat 2 Seiten mit dir geteilt');
     expect(mail.text).toContain('„plan“, „start“');
     const token = tokenOf(FakeSmtp.link(mail, '#invite='), 'invite');
     const guest = cookieOf(await post('/api/invite/accept', { token, password: 'Karls-Passwort-2026!' }, null));
@@ -373,7 +373,7 @@ describe('several notes at once and notes sent by mail (owner 28.10.)', () => {
     const maria = await addUser('maria');
     await post(`/api/acl/${mountId}`, { target: 'mount', subject: 'all', level: 'none' });
     await post('/api/share', { mountId, path: 'team/lohn.md', more: [{ target: 'folder', path: 'team' }], email: 'maria@example.test' });
-    expect((await smtp.waitFor('maria@example.test', (m) => m.subject.includes('geteilt'))).subject).toBe('Anna Admin hat 2 Notizen und Ordner mit dir geteilt');
+    expect((await smtp.waitFor('maria@example.test', (m) => m.subject.includes('geteilt'))).subject).toBe('Anna Admin hat 2 Seiten und Ordner mit dir geteilt');
     expect(await tree(maria.cookie)).toEqual(['team', 'team/lohn.md', 'team/plan.md']);
   });
 
@@ -392,7 +392,7 @@ describe('several notes at once and notes sent by mail (owner 28.10.)', () => {
     const res = await post('/api/mail-notes', { mountId, paths: ['team/plan.md', 'start.md'], to: ['partner@extern.test', 'zweite@extern.test'] }, maria.cookie);
     expect(res.json()).toEqual({ sent: 2, notes: 2 });
     const mail = await smtp.waitFor('partner@extern.test');
-    expect(mail.subject).toBe('maria hat dir 2 Notizen aus Kaveyl Wiki geschickt');
+    expect(mail.subject).toBe('maria hat dir 2 Seiten aus Kaveyl Wiki geschickt');
     expect(mail.text).toContain('„plan“, „start“');
     expect(mail.text).toContain('Antworten auf diese Mail gehen an maria.');
     expect(mail.text).not.toMatch(/https?:\/\//);

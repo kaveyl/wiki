@@ -100,7 +100,7 @@ export class AccountMail {
 
   private noteName(mountId: string, noteId: string): string {
     const path = this.notePath(mountId, noteId);
-    return path ? path.split('/').pop()!.replace(/\.md$/i, '') : 'eine Notiz';
+    return path ? path.split('/').pop()!.replace(/\.md$/i, '') : 'eine Seite';
   }
 
   private mountName(mountId: string): string {
@@ -243,7 +243,7 @@ export class AccountMail {
     if (p.mountId && p.noteId) {
       const path = this.notePath(p.mountId, p.noteId);
       // With further ones, a first one that is gone is left out like them (audit 28.10. code-008).
-      if (!path && !p.more?.length) throw new AuthError('Die Notiz gibt es nicht mehr');
+      if (!path && !p.more?.length) throw new AuthError('Die Seite gibt es nicht mehr');
       if (path && !mayShare(path, false)) {
         if (!p.more?.length) throw new AuthError('Wer eingeladen hat, darf das inzwischen nicht mehr freigeben');
       } else if (path) {
@@ -301,7 +301,7 @@ export class AccountMail {
     const payload: InvitePayload = { mountId: input.mountId, level: input.level, inviter: by.displayName };
     if (input.target === 'note') {
       payload.noteId = (this.db.prepare('SELECT id FROM note_ids WHERE mount_id = ? AND path = ?').get(input.mountId, input.path) as { id: string } | undefined)?.id;
-      if (!payload.noteId) throw new AuthError('Notiz nicht gefunden');
+      if (!payload.noteId) throw new AuthError('Seite nicht gefunden');
     } else if (input.target === 'folder') {
       if (!input.path || !this.folderExists(input.mountId, input.path)) throw new AuthError('Ordner nicht gefunden');
       payload.folder = input.path;
@@ -309,7 +309,7 @@ export class AccountMail {
     const more = (input.more ?? []).map((m): { target: 'note' | 'folder'; path: string; name: string; noteId?: string; folder?: string } => {
       if (m.target === 'note') {
         const noteId = (this.db.prepare('SELECT id FROM note_ids WHERE mount_id = ? AND path = ?').get(input.mountId, m.path) as { id: string } | undefined)?.id;
-        if (!noteId) throw new AuthError('Notiz nicht gefunden');
+        if (!noteId) throw new AuthError('Seite nicht gefunden');
         return { noteId, name: this.noteName(input.mountId, noteId), ...m };
       }
       if (!m.path || !this.folderExists(input.mountId, m.path)) throw new AuthError('Ordner nicht gefunden');
@@ -321,18 +321,18 @@ export class AccountMail {
     // Whole sentences per kind, so that every paragraph translates (mailer: line by line).
     const subjects: { several?: string; text?: string } = {};
     const subject = {
-      note: `${by.displayName} hat die Notiz „${thing.name}“ mit dir geteilt`,
+      note: `${by.displayName} hat die Seite „${thing.name}“ mit dir geteilt`,
       folder: `${by.displayName} hat den Ordner „${thing.name}“ mit dir geteilt`,
       source: `${by.displayName} hat die Quelle „${thing.name}“ mit dir geteilt`,
     }[thing.what];
     const n = thing.name;
     const shared = {
-      note: `${by.displayName} hat die Notiz „${n}“ in Kaveyl Wiki mit dir geteilt.`,
+      note: `${by.displayName} hat die Seite „${n}“ in Kaveyl Wiki mit dir geteilt.`,
       folder: `${by.displayName} hat den Ordner „${n}“ in Kaveyl Wiki mit dir geteilt, mit allem, was darin liegt.`,
       source: `${by.displayName} hat die Quelle „${n}“ in Kaveyl Wiki mit dir geteilt, mit allem, was darin liegt.`,
     }[thing.what];
     const show = {
-      note: `${by.displayName} möchte dir die Notiz „${n}“ in Kaveyl Wiki zeigen.`,
+      note: `${by.displayName} möchte dir die Seite „${n}“ in Kaveyl Wiki zeigen.`,
       folder: `${by.displayName} möchte dir den Ordner „${n}“ in Kaveyl Wiki zeigen, mit allem, was darin liegt.`,
       source: `${by.displayName} möchte dir die Quelle „${n}“ in Kaveyl Wiki zeigen, mit allem, was darin liegt.`,
     }[thing.what];
@@ -342,10 +342,10 @@ export class AccountMail {
       const count = more.length + 1;
       const notesOnly = input.target === 'note' && more.every((m) => m.target === 'note');
       const list = [thing.name, ...more.map((m) => m.name)].map((x) => `„${x}“`).join(', ');
-      subjects.several = notesOnly ? `${by.displayName} hat ${count} Notizen mit dir geteilt` : `${by.displayName} hat ${count} Notizen und Ordner mit dir geteilt`;
+      subjects.several = notesOnly ? `${by.displayName} hat ${count} Seiten mit dir geteilt` : `${by.displayName} hat ${count} Seiten und Ordner mit dir geteilt`;
       subjects.text = notesOnly
-        ? `${by.displayName} hat ${count} Notizen in Kaveyl Wiki mit dir geteilt: ${list}.`
-        : `${by.displayName} hat ${count} Notizen und Ordner in Kaveyl Wiki mit dir geteilt: ${list}.`;
+        ? `${by.displayName} hat ${count} Seiten in Kaveyl Wiki mit dir geteilt: ${list}.`
+        : `${by.displayName} hat ${count} Seiten und Ordner in Kaveyl Wiki mit dir geteilt: ${list}.`;
     }
     const topic = subjects.several ?? subject;
     const existing = this.auth.userByEmail(email);
@@ -359,7 +359,7 @@ export class AccountMail {
         to: email,
         subject: topic,
         text: `Hallo ${existing.displayName},\n\n${subjects.text ?? shared}\n\n${may}`,
-        action: { label: one ? 'Notiz öffnen' : 'In Kaveyl Wiki zeigen', url: this.mailer.link(where) },
+        action: { label: one ? 'Seite öffnen' : 'In Kaveyl Wiki zeigen', url: this.mailer.link(where) },
       });
       return { existing: true };
     }
@@ -369,7 +369,7 @@ export class AccountMail {
       lang: userLang(this.db, by.id) ?? uiLang,
       subject: topic,
       text: `Hallo,\n\n${subjects.text ?? show}\n\n${may}\n\nLeg dafür über den Link ein Passwort fest – danach meldest du dich mit dieser E-Mail-Adresse an.\n\nDer Link gilt ${INVITE_DAYS} Tage.`,
-      action: { label: input.target === 'note' && !more.length ? 'Notiz ansehen' : 'Ansehen', url: this.mailer.link(`#invite=${token}`) },
+      action: { label: input.target === 'note' && !more.length ? 'Seite ansehen' : 'Ansehen', url: this.mailer.link(`#invite=${token}`) },
     });
     return { existing: false };
   }
@@ -383,7 +383,7 @@ export class AccountMail {
     const own = this.acl.rulesAt(at.mountId, at.target, path).find((r) => r.subject === 'user' && r.subjectId === user.id);
     // Their own „Kein Zugriff“ right here: the share would replace it – a lock is never lifted that way.
     if (own?.level === 'none') {
-      const place = { note: 'die Notiz', folder: 'den Ordner', mount: 'die Quelle' }[at.target];
+      const place = { note: 'die Seite', folder: 'den Ordner', mount: 'die Quelle' }[at.target];
       throw new AuthError(`Diese Person ist für ${place} gesperrt – die Sperre lässt sich nur unter „Berechtigungen“ aufheben`);
     }
     const rule = this.acl.addRule({ mountId: at.mountId, target: at.target, path, subject: 'user', subjectId: user.id, level: at.level });

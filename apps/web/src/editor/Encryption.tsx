@@ -125,7 +125,7 @@ export function EncryptedGate({
           <Lock className="h-5 w-5 text-accent" /> {noteNameIn(note.mountId, note.path)}
         </div>
         <p className="text-fg-muted">
-          {scope !== note.path ? t('Diese Notiz ist verschlüsselt (Ordner „{folder}“).', { folder: scope }) : t('Diese Notiz ist verschlüsselt.')}{' '}
+          {scope !== note.path ? t('Diese Seite ist verschlüsselt (Ordner „{folder}“).', { folder: scope }) : t('Diese Seite ist verschlüsselt.')}{' '}
           {autoLockMin() > 0
             ? tn(autoLockMin(), 'Entsperren gilt für diese Sitzung, bis {n} Minute lang nichts passiert (Einstellungen → Konto).', 'Entsperren gilt für diese Sitzung, bis {n} Minuten lang nichts passiert (Einstellungen → Konto).')
             : t('Entsperren gilt für diese Sitzung, bis die Seite geschlossen wird (Einstellungen → Konto).')}
@@ -258,7 +258,7 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
  * `content`: the editor's newer text (not yet saved) instead of the file's.
  */
 export async function encryptNote(mountId: string, path: string, given?: string, content?: string): Promise<boolean> {
-  const passphrase = given ?? (await askPassphrase(t('Notiz verschlüsseln'), LOSS_WARNING, true));
+  const passphrase = given ?? (await askPassphrase(t('Seite verschlüsseln'), LOSS_WARNING, true));
   if (!passphrase) return false;
   let replaced: string[] = [];
   await withRetry(async () => {
@@ -288,7 +288,7 @@ async function unsealAndSave(mountId: string, path: string, passphrase: string) 
 
 /** Removes the encryption of a note (needs the passphrase), including its attachments. */
 export async function decryptNote(mountId: string, path: string): Promise<boolean> {
-  const passphrase = passphraseFor(mountId, path) ?? (await askPassphrase(t('Verschlüsselung entfernen'), t('Die Notiz wird danach wieder im Klartext gespeichert.'), false));
+  const passphrase = passphraseFor(mountId, path) ?? (await askPassphrase(t('Verschlüsselung entfernen'), t('Die Seite wird danach wieder im Klartext gespeichert.'), false));
   if (!passphrase) return false;
   await unsealAndSave(mountId, path, passphrase);
   return true;
@@ -304,10 +304,10 @@ export async function encryptFolder(mountId: string, folder: string, onProgress:
   let passphrase = known;
   if (!passphrase) {
     passphrase = already
-      ? await askPassphrase(t('Ordner „{folder}“ fertig verschlüsseln', { folder }), t('Die Passphrase des Ordners – die übrigen Notizen bekommen dieselbe.'), false)
-      : await askPassphrase(t('Ordner „{folder}“ verschlüsseln', { folder }), <>{LOSS_WARNING} {t('Alle Notizen darin bekommen dieselbe Passphrase, neue werden automatisch verschlüsselt.')}</>, true);
+      ? await askPassphrase(t('Ordner „{folder}“ fertig verschlüsseln', { folder }), t('Die Passphrase des Ordners – die übrigen Seiten bekommen dieselbe.'), false)
+      : await askPassphrase(t('Ordner „{folder}“ verschlüsseln', { folder }), <>{LOSS_WARNING} {t('Alle Seiten darin bekommen dieselbe Passphrase, neue werden automatisch verschlüsselt.')}</>, true);
     if (!passphrase) return false;
-    if ((await checkFolderPassphrase(mountId, folder, passphrase)) === false) throw new Error(t('Passphrase falsch – sie passt nicht zu den schon verschlüsselten Notizen des Ordners.'));
+    if ((await checkFolderPassphrase(mountId, folder, passphrase)) === false) throw new Error(t('Passphrase falsch – sie passt nicht zu den schon verschlüsselten Seiten des Ordners.'));
   }
   // Mark first: from now on the server refuses plaintext in this folder (also for new notes).
   if (!already) await api.setFolderEncrypted(mountId, folder, true);
@@ -334,7 +334,7 @@ export async function encryptFolder(mountId: string, folder: string, onProgress:
 export async function encryptIntoFolder(mountId: string, folder: string, path: string, content?: string): Promise<boolean> {
   let passphrase = passphraseFor(mountId, folder);
   if (!passphrase) {
-    passphrase = await askPassphrase(t('Notiz im Ordner „{folder}“ verschlüsseln', { folder }), t('Die Passphrase des Ordners.'), false);
+    passphrase = await askPassphrase(t('Seite im Ordner „{folder}“ verschlüsseln', { folder }), t('Die Passphrase des Ordners.'), false);
     if (!passphrase) return false;
     const ok = await checkFolderPassphrase(mountId, folder, passphrase);
     if (ok === false) throw new Error(t('Passphrase falsch.'));
@@ -349,7 +349,7 @@ export async function encryptIntoFolder(mountId: string, folder: string, path: s
 
 /** Removes the encryption of a whole folder: checks the passphrase, lifts the mark, then decrypts every note. */
 export async function decryptFolder(mountId: string, folder: string, onProgress: (done: number, total: number) => void): Promise<boolean> {
-  const passphrase = passphraseFor(mountId, folder) ?? (await askPassphrase(t('Verschlüsselung von „{folder}“ aufheben', { folder }), t('Alle Notizen darin werden wieder im Klartext gespeichert.'), false));
+  const passphrase = passphraseFor(mountId, folder) ?? (await askPassphrase(t('Verschlüsselung von „{folder}“ aufheben', { folder }), t('Alle Seiten darin werden wieder im Klartext gespeichert.'), false));
   if (!passphrase) return false;
   if ((await checkFolderPassphrase(mountId, folder, passphrase)) === false) throw new Error(t('Passphrase falsch.'));
   // Unmark first: plain notes (and their plain attachments) are only accepted outside an encrypted folder.
@@ -360,7 +360,7 @@ export async function decryptFolder(mountId: string, folder: string, onProgress:
     try {
       await unsealAndSave(mountId, n.path, passphrase);
     } catch (e) {
-      throw new Error(t('{path}: {error} – die übrigen Notizen bleiben verschlüsselt und lassen sich einzeln entschlüsseln.', { path: n.path, error: errorText(e) }));
+      throw new Error(t('{path}: {error} – die übrigen Seiten bleiben verschlüsselt und lassen sich einzeln entschlüsseln.', { path: n.path, error: errorText(e) }));
     }
     onProgress(++done, notes.length);
   }

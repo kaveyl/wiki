@@ -65,7 +65,7 @@ export function App() {
     return (
       <Centered title={offline ? t('Offline') : t('Server nicht erreichbar')}>
         <p className="mb-4 text-sm text-fg-muted">
-          {offline ? t('Kaveyl braucht eine Verbindung zum Server – Notizen werden nicht auf dem Gerät gespeichert.') : errorText(session.error)}
+          {offline ? t('Kaveyl braucht eine Verbindung zum Server – Seiten werden nicht auf dem Gerät gespeichert.') : errorText(session.error)}
         </p>
         <Button size="sm" onClick={() => void session.refetch()}>
           {t('Erneut versuchen')}
@@ -104,11 +104,11 @@ export function App() {
 function OtherAccountUnsaved({ count, before, now }: { count: number; before: User; now: User }) {
   const qc = useQueryClient();
   const copy = async () => {
-    if (await copyText(unsavedText())) toast({ kind: 'ok', title: tn(count, '{n} Notiz in die Zwischenablage kopiert', '{n} Notizen in die Zwischenablage kopiert') });
+    if (await copyText(unsavedText())) toast({ kind: 'ok', title: tn(count, '{n} Seite in die Zwischenablage kopiert', '{n} Seiten in die Zwischenablage kopiert') });
     else toast({ kind: 'error', title: t('Nicht kopiert') });
   };
   const discard = async () => {
-    const ok = await confirmDialog(tn(count, 'Die Änderungen an {n} Notiz gehen verloren. Trotzdem verwerfen?', 'Die Änderungen an {n} Notizen gehen verloren. Trotzdem verwerfen?'), {
+    const ok = await confirmDialog(tn(count, 'Die Änderungen an {n} Seite gehen verloren. Trotzdem verwerfen?', 'Die Änderungen an {n} Seiten gehen verloren. Trotzdem verwerfen?'), {
       confirmLabel: t('Verwerfen'),
       danger: true,
     });
@@ -144,8 +144,8 @@ function ServerGoneUnsaved({ count, onRetry }: { count: number; onRetry: () => v
       <span>
         {tn(
           count,
-          'Server nicht erreichbar. {n} Notiz ist noch nicht gespeichert – sie wird gespeichert, sobald der Server wieder da ist. Lass diesen Tab offen.',
-          'Server nicht erreichbar. {n} Notizen sind noch nicht gespeichert – sie werden gespeichert, sobald der Server wieder da ist. Lass diesen Tab offen.',
+          'Server nicht erreichbar. {n} Seite ist noch nicht gespeichert – sie wird gespeichert, sobald der Server wieder da ist. Lass diesen Tab offen.',
+          'Server nicht erreichbar. {n} Seiten sind noch nicht gespeichert – sie werden gespeichert, sobald der Server wieder da ist. Lass diesen Tab offen.',
         )}
       </span>
       <Button size="sm" onClick={onRetry}>
@@ -172,7 +172,7 @@ function SignedOutUnsaved({ count }: { count: number }) {
     setTried(true);
   };
   const discard = async () => {
-    const ok = await confirmDialog(tn(count, 'Die Änderungen an {n} Notiz gehen verloren. Trotzdem abmelden?', 'Die Änderungen an {n} Notizen gehen verloren. Trotzdem abmelden?'), {
+    const ok = await confirmDialog(tn(count, 'Die Änderungen an {n} Seite gehen verloren. Trotzdem abmelden?', 'Die Änderungen an {n} Seiten gehen verloren. Trotzdem abmelden?'), {
       confirmLabel: t('Verwerfen'),
       cancelLabel: t('Weiter bearbeiten'),
       danger: true,
@@ -184,8 +184,8 @@ function SignedOutUnsaved({ count }: { count: number }) {
       <p role="alert" className="text-sm">
         {tn(
           count,
-          'Du bist abgemeldet. {n} Notiz ist noch nicht gespeichert. Melde dich in einem neuen Tab an und klicke dann hier auf „Jetzt speichern“.',
-          'Du bist abgemeldet. {n} Notizen sind noch nicht gespeichert. Melde dich in einem neuen Tab an und klicke dann hier auf „Jetzt speichern“.',
+          'Du bist abgemeldet. {n} Seite ist noch nicht gespeichert. Melde dich in einem neuen Tab an und klicke dann hier auf „Jetzt speichern“.',
+          'Du bist abgemeldet. {n} Seiten sind noch nicht gespeichert. Melde dich in einem neuen Tab an und klicke dann hier auf „Jetzt speichern“.',
         )}
       </p>
       {tried && <p className="mt-2 text-sm text-fg-muted">{t('Noch nicht wieder angemeldet – bitte zuerst im neuen Tab anmelden.')}</p>}

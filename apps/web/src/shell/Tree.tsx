@@ -273,7 +273,7 @@ function RowActions({
             <DropdownContent align="start" minWidth={170} className="z-50">
               {(
                 [
-                  ['file', t('Neue Notiz'), <FilePlus key="f" />],
+                  ['file', t('Neue Seite'), <FilePlus key="f" />],
                   ['dir', t('Neuer Ordner'), <FolderPlus key="d" />],
                 ] as const
               ).map(([type, label, icon]) => (
@@ -509,7 +509,7 @@ export function MountTree({ mount, onEditMount, mountIds, canReorder }: { mount:
           {rootWritable && (
             <>
               <ContextItem icon={<Plus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: '', type: 'file' })}>
-                {t('Neue Notiz')}
+                {t('Neue Seite')}
               </ContextItem>
               <ContextItem icon={<FolderPlus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: '', type: 'dir' })}>
                 {t('Neuer Ordner')}
@@ -608,7 +608,7 @@ export function MountTree({ mount, onEditMount, mountIds, canReorder }: { mount:
       {expanded && (
         <div>
           {tree.isPending && <div className="px-7 py-1 text-xs text-fg-faint">{t('Lädt …')}</div>}
-          {tree.data && tree.data.length === 0 && <div className="px-7 py-1 text-xs text-fg-faint">{t('Keine Notizen')}</div>}
+          {tree.data && tree.data.length === 0 && <div className="px-7 py-1 text-xs text-fg-faint">{t('Keine Seiten')}</div>}
           {hoist !== null && (
             <div className="mx-1 mb-1 flex items-center gap-1.5 rounded-md bg-accent-soft px-2 py-1 text-xs text-fg">
               <Focus className="h-3.5 w-3.5 shrink-0" />
@@ -846,7 +846,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             {isDir ? (
               !ro && (
                 <>
-                  <ContextTile icon={<Plus />} label={t('Neue Notiz hier')} short={t('Notiz')} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })} />
+                  <ContextTile icon={<Plus />} label={t('Neue Seite hier')} short={t('Seite')} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })} />
                   <ContextTile icon={<FolderPlus />} label={t('Neuer Ordner hier')} short={t('Ordner')} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'dir' })} />
                 </>
               )
@@ -914,7 +914,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
                     <ContextSeparator />
                     <ContextLabel>{t('Daneben anlegen')}</ContextLabel>
                     <ContextItem icon={<Plus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })}>
-                      {t('Neue Notiz daneben')}
+                      {t('Neue Seite daneben')}
                     </ContextItem>
                     <ContextItem icon={<FolderPlus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'dir' })}>
                       {t('Neuer Ordner daneben')}
@@ -1038,7 +1038,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
                 <ContextItem
                   icon={<Mail />}
                   disabled={!session?.mail || inEncrypted}
-                  title={!session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : inEncrypted ? t('Verschlüsselte Notizen lassen sich nicht per Mail versenden') : undefined}
+                  title={!session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : inEncrypted ? t('Verschlüsselte Seiten lassen sich nicht per Mail versenden') : undefined}
                   onSelect={() => openAction({ kind: 'mail-notes', mountId: mount.id, notes: [{ path: entry.path, title }] })}
                 >
                   {t('Per Mail versenden …')}

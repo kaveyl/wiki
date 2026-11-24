@@ -74,9 +74,9 @@ export const obsidian: ImportFormat = {
     if (callouts.length) draft.warnings.push({ text: 'Callouts – auf die fünf Arten von Kaveyl Wiki abgebildet, einklappbare als aufklappbarer Abschnitt', notes: callouts });
     if (tasks.length) draft.warnings.push({ text: 'Aufgaben mit eigenem Zustand ([/], [>], [?] …) – als offen übernommen, [-] (abgebrochen) als erledigt', notes: tasks });
     if (marks.length) draft.warnings.push({ text: 'Hervorhebungen (==Text==) – als fett übernommen', notes: marks });
-    if (blockIds.length) draft.warnings.push({ text: 'Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Notiz', notes: blockIds });
+    if (blockIds.length) draft.warnings.push({ text: 'Block-IDs (^abc) am Zeilenende – entfernt, Links auf einzelne Blöcke zeigen auf die Seite', notes: blockIds });
     if (comments.length) draft.warnings.push({ text: 'Kommentare (%%…%%) – als unsichtbare HTML-Kommentare übernommen', notes: comments });
-    if (drawings.length) draft.warnings.push({ text: 'Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Notiz', items: drawings });
+    if (drawings.length) draft.warnings.push({ text: 'Canvas, Bases und Zeichnungen – als Datei übernommen, nicht als Seite', items: drawings });
     return draft;
   },
 };

@@ -27,7 +27,7 @@ it('only users who may read (view) and write (resolve) every conflicted file of 
   mkdirSync(join(ext, 'team'), { recursive: true });
   writeFileSync(join(ext, 'home.md'), '# Home\n');
   writeFileSync(join(ext, 'geheim', 'plan.md'), '# Plan\n\nGEHEIM-BASIS\n');
-  writeFileSync(join(ext, 'team', 'notiz.md'), '# Notiz\n\nBasis\n');
+  writeFileSync(join(ext, 'team', 'notiz.md'), '# Seite\n\nBasis\n');
   await git(ext, ['add', '-A']);
   await git(ext, ['commit', '-q', '-m', 'init'], { env: EXT });
   await git(ext, ['push', '-q', 'origin', 'main']);
@@ -65,12 +65,12 @@ it('only users who may read (view) and write (resolve) every conflicted file of 
   const onServer = (path: string) => git(root, ['--git-dir', remote, 'show', `main:${path}`]);
 
   // A conflict only in a folder Eva may write: she sees and resolves it, also through the subfolder source.
-  await conflictOn('team/notiz.md', '# Notiz\n\nLokal\n', '# Notiz\n\nServer\n');
+  await conflictOn('team/notiz.md', '# Seite\n\nLokal\n', '# Seite\n\nServer\n');
   const own = await view(sub.id, eva);
   expect(own.statusCode).toBe(200);
   expect((own.json() as { files: { path: string }[] }).files.map((f) => f.path)).toEqual(['team/notiz.md']);
-  expect((await resolve(sub.id, eva, 'team/notiz.md', '# Notiz\n\nVon Eva\n')).statusCode).toBe(200);
-  expect(await onServer('team/notiz.md')).toBe('# Notiz\n\nVon Eva\n');
+  expect((await resolve(sub.id, eva, 'team/notiz.md', '# Seite\n\nVon Eva\n')).statusCode).toBe(200);
+  expect(await onServer('team/notiz.md')).toBe('# Seite\n\nVon Eva\n');
 
   // A conflict in her closed folder: no content and no resolution – neither through the whole source nor the subfolder one.
   await conflictOn('geheim/plan.md', '# Plan\n\nGEHEIM-LOKAL\n', '# Plan\n\nGEHEIM-SERVER\n');

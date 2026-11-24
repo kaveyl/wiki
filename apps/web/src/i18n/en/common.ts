@@ -15,7 +15,7 @@ export default {
   'Sprache der Oberfläche': 'Interface language',
   'Sprache auf {name} umstellen? Die Seite lädt dafür kurz neu.': 'Switch the language to {name}? The page reloads briefly.',
   Umstellen: 'Switch',
-  'Notizen werden nie übersetzt.': 'Notes are never translated.',
+  'Seiten werden nie übersetzt.': 'Pages are never translated.',
   'Gilt für dein Konto auf allen Geräten, auch für E-Mails an dich. Die Seite lädt dafür kurz neu.':
     'Applies to your account on all devices, including e-mails to you. The page reloads briefly.',
   'Das Handbuch gibt es bisher nur auf Deutsch.': 'The manual is currently available in German only.',

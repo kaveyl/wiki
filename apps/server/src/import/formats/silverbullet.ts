@@ -28,7 +28,7 @@ export const silverbullet: ImportFormat = {
       n.content = outsideCode(n.content, admonitions, false);
     }
     if (system.length) draft.warnings.push({ text: 'Einstellungen und Erweiterungen von SilverBullet (CONFIG, Bibliothek, Plugs) – nicht übernommen', items: system.map((f) => f.path) });
-    if (dynamic.length) draft.warnings.push({ text: 'Lua-Ausdrücke und Abfragen von SilverBullet – sie stehen als Text in der Notiz und werden nicht ausgeführt', notes: dynamic });
+    if (dynamic.length) draft.warnings.push({ text: 'Lua-Ausdrücke und Abfragen von SilverBullet – sie stehen als Text in der Seite und werden nicht ausgeführt', notes: dynamic });
     return draft;
   },
 };

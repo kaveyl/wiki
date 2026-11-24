@@ -64,7 +64,7 @@ test('mounts a local folder through the wizard', async () => {
   await shot(page, '03b-lokaler-ordner');
   await page.getByRole('button', { name: /notizen/ }).click();
   await page.getByRole('button', { name: 'Diesen Ordner wählen' }).click();
-  await expect(page.getByText('6 von 6 Notizen ausgewählt')).toBeVisible();
+  await expect(page.getByText('6 von 6 Seiten ausgewählt')).toBeVisible();
   await shot(page, '03-wizard-selection');
   await page.getByRole('button', { name: 'Weiter' }).click();
   // A folder without Git: versions are offered and on by default (AD-071), no commit options of its own.
@@ -73,12 +73,12 @@ test('mounts a local folder through the wizard', async () => {
   await expect(page.getByText('Änderungen automatisch committen')).toHaveCount(0);
   // This one stays a plain folder: later tests use its folder trash.
   await versions.uncheck();
-  await page.getByLabel('Name in der Seitenleiste').fill('Notizen');
+  await page.getByLabel('Name in der Seitenleiste').fill('Projektwiki');
   await page.getByRole('button', { name: 'Icon der Quelle' }).click();
   await page.getByRole('tab', { name: 'Emoji' }).click();
   await page.getByRole('button', { name: 'Emoji 📒' }).click();
   await page.getByRole('button', { name: 'Einbinden' }).click();
-  await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('Notizen', { exact: true })).toBeVisible();
+  await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('Projektwiki', { exact: true })).toBeVisible();
   // The first step is ticked off; the welcome page can be hidden and brought back.
   const welcome = page.getByTestId('welcome');
   await expect(welcome.getByText('Quelle einbinden (erledigt)')).toBeAttached();
@@ -86,12 +86,12 @@ test('mounts a local folder through the wizard', async () => {
   await expect(page.getByRole('dialog', { name: 'Hilfe' })).toBeVisible();
   await page.keyboard.press('Escape');
   await welcome.getByRole('button', { name: 'Nicht mehr anzeigen' }).click();
-  await expect(page.getByText('Wähle links eine Notiz oder suche danach.')).toBeVisible();
+  await expect(page.getByText('Wähle links eine Seite oder suche danach.')).toBeVisible();
   // Hiding says where it comes back; the help tab brings it back as well as the button in the empty middle.
   await expect(page.getByText('Zurückholen: Einstellungen → Hilfe → „Willkommensseite wieder anzeigen“.')).toBeVisible();
   await openSettingsPage(page, 'Hilfe');
   await page.getByRole('button', { name: 'Willkommensseite wieder anzeigen' }).click();
-  await expect(page.getByText('Wird angezeigt, solange keine Notiz offen ist', { exact: false })).toBeVisible();
+  await expect(page.getByText('Wird angezeigt, solange keine Seite offen ist', { exact: false })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(welcome).toBeVisible();
   await welcome.getByRole('button', { name: 'Nicht mehr anzeigen' }).click();
@@ -100,7 +100,7 @@ test('mounts a local folder through the wizard', async () => {
 });
 
 test('shows the tree with file names, folder notes and no code files', async () => {
-  await page.locator('aside nav[aria-label="Quellen"]').getByText('Notizen', { exact: true }).click();
+  await page.locator('aside nav[aria-label="Quellen"]').getByText('Projektwiki', { exact: true }).click();
   const aside = page.locator('aside nav[aria-label="Quellen"]');
   // File names without .md, not the frontmatter title ("Trilium Ideen").
   await expect(aside.getByText('trilium', { exact: true })).toBeVisible();
@@ -200,7 +200,7 @@ test('follows relative and Wiki.js-style links', async () => {
 });
 
 test('instant search with grouping, new tab and reveal in tree', async () => {
-  const search = page.getByLabel('Notizen durchsuchen');
+  const search = page.getByLabel('Seiten durchsuchen');
   await search.fill('hierar');
   await expect(page.getByText('Inhalt', { exact: true })).toBeVisible();
   await search.fill('roadm');
@@ -223,7 +223,7 @@ test('reloads a clean editor when the file changes on disk', async () => {
 
 test('creates a note from the tree context menu', async () => {
   await page.locator('aside nav[aria-label="Quellen"]').getByText('plan', { exact: true }).click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Neue Notiz hier' }).click();
+  await page.getByRole('menuitem', { name: 'Neue Seite hier' }).click();
   await page.getByLabel('Titel').fill('Meeting: Kickoff');
   await page.getByRole('button', { name: 'Anlegen' }).click();
   await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('Meeting - Kickoff', { exact: true })).toBeVisible();
@@ -236,7 +236,7 @@ test('renames and moves a note: name field plus folder dropdown, no free-text pa
   await page.locator('aside nav[aria-label="Quellen"]').getByText('Meeting - Kickoff', { exact: true }).click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Umbenennen / verschieben' }).click();
   await expect(page.getByLabel('Dateiname')).toHaveValue('Meeting - Kickoff');
-  await expect(page.getByRole('button', { name: 'Ordner wählen' })).toHaveText('Notizen › plan');
+  await expect(page.getByRole('button', { name: 'Ordner wählen' })).toHaveText('Projektwiki › plan');
   await page.getByLabel('Dateiname').fill('Kickoff');
   await page.getByRole('button', { name: 'Ordner wählen' }).click();
   await expect(page.getByRole('option')).toHaveText(['Oberste Ebene', 'plan']);
@@ -298,7 +298,7 @@ test('Markdown view: table of contents from the source, a hint on the id line (O
     join(NOTES, 'quelle-toc.md'),
     `---\nid: 01J0QUELLETOC0000000000000\n---\n# Quelle\n\n${fill('Quellwort')}\n\n\`\`\`sh\n# kein Titel\n\`\`\`\n\n## Mitte\n\n${fill('Mittelwort')}\n\n## Ende\n\nSchluss.\n`,
   );
-  await waitIndexed(page, 'Notizen', ['quelle-toc.md']);
+  await waitIndexed(page, 'Projektwiki', ['quelle-toc.md']);
   await page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-toc', { exact: true }).click();
   await page.getByTitle('Markdown-Quelltext').filter({ visible: true }).click();
   const toc = page.getByRole('navigation', { name: 'Inhaltsverzeichnis' });
@@ -312,7 +312,7 @@ test('Markdown view: table of contents from the source, a hint on the id line (O
   await expect(page.locator('.cm-line', { hasText: 'id: 01J0QUELLETOC' })).toBeInViewport();
   // Scrolling by hand moves the mark in the list as well.
   await expect(toc.getByRole('button', { name: 'Quelle' })).toHaveClass(/border-accent/, { timeout: 3000 });
-  await expect(page.locator('.cm-note-id .cm-note-id-hint')).toHaveText('← Kennung der Notiz – nicht ändern oder löschen');
+  await expect(page.locator('.cm-note-id .cm-note-id-hint')).toHaveText('← Kennung der Seite – nicht ändern oder löschen');
   await shot(page, '13b-markdown-toc');
   // Hidden with the same switch as in the editor.
   await page.getByRole('button', { name: 'Inhaltsverzeichnis ein-/ausblenden' }).filter({ visible: true }).click();
@@ -328,10 +328,10 @@ test('Markdown view: table of contents from the source, a hint on the id line (O
 
 test('Markdown view: a very large note is plain text, without table of contents (security review 0.2.12)', async () => {
   writeFileSync(join(NOTES, 'quelle-gross.md'), `# Gross\n\n## Teil\n\n${'Langwort. '.repeat(12_000)}\n`);
-  await waitIndexed(page, 'Notizen', ['quelle-gross.md']);
+  await waitIndexed(page, 'Projektwiki', ['quelle-gross.md']);
   await page.locator('aside nav[aria-label="Quellen"]').getByText('quelle-gross', { exact: true }).click();
   await page.getByTitle('Markdown-Quelltext').filter({ visible: true }).click();
-  await expect(page.getByText('Große Notiz: ohne Hervorhebung und Inhaltsverzeichnis', { exact: false })).toBeVisible();
+  await expect(page.getByText('Große Seite: ohne Hervorhebung und Inhaltsverzeichnis', { exact: false })).toBeVisible();
   await expect(page.locator('.cm-line', { hasText: '## Teil' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Inhaltsverzeichnis' })).toHaveCount(0);
   await page.getByTitle('Visueller Editor').filter({ visible: true }).click();
@@ -365,7 +365,7 @@ test('sync overview lists every source with its state', async () => {
   await expect(page.getByText('Alle Quellen synchron')).toBeVisible();
   // A plain local folder has nothing to sync: one line below the list, its name opens the history.
   await expect(page.getByText('Lokale Ordner ohne Git – nichts zu synchronisieren')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Verlauf von Notizen' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Verlauf von Projektwiki' })).toBeVisible();
   await shot(page, '15-sync');
   await page.keyboard.press('Escape');
 });
@@ -422,7 +422,7 @@ test('mounts the Gitea test branch, edits and pushes (never main)', async () => 
   await page.getByRole('radio', { name: TEST_BRANCH, exact: true }).check();
   await shot(page, '09-branch');
   await page.getByRole('button', { name: 'Weiter' }).click();
-  await expect(page.getByText(/Notizen ausgewählt/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Seiten ausgewählt/)).toBeVisible({ timeout: 30_000 });
   await page.getByRole('button', { name: 'Keine' }).click();
   await page.getByRole('checkbox').nth(1).click(); // first top-level folder (docs)
   await shot(page, '10-remote-selection');
@@ -440,7 +440,7 @@ test('mounts the Gitea test branch, edits and pushes (never main)', async () => 
   await shot(page, '11-remote-tree');
   // Edit a note of its own (created and deleted again) — never the shared Home page.
   await aside.getByText('docs', { exact: true }).click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Neue Notiz hier' }).click();
+  await page.getByRole('menuitem', { name: 'Neue Seite hier' }).click();
   await page.getByLabel('Titel').fill('E2E Stempel');
   await page.getByRole('button', { name: 'Anlegen' }).click();
   const heading = page.locator('.prose-note h1', { hasText: 'E2E Stempel' }).filter({ visible: true });
@@ -515,7 +515,7 @@ test('moves a note with its image into another source', async () => {
   await expect(page.getByRole('option')).toHaveText(['Oberste Ebene', 'alt']);
   await page.getByRole('option', { name: 'alt' }).click();
   await expect(page.getByRole('button', { name: 'Ordner wählen' })).toHaveText('Archiv › alt');
-  await expect(page.getByText('Die Git-Historie bleibt in Notizen')).toBeVisible();
+  await expect(page.getByText('Die Git-Historie bleibt in Projektwiki')).toBeVisible();
   await shot(page, '19-move-across');
   await page.getByRole('button', { name: 'Verschieben' }).click();
   await expect(page.getByRole('dialog')).toBeHidden();
@@ -608,17 +608,17 @@ test('runs the consistency check from the settings and lists problems per source
   await openSettingsPage(page, 'Prüfung');
   await page.getByRole('button', { name: 'Jetzt prüfen' }).click();
   // One folded row per source with a count by kind; the details on demand.
-  const notizen = page.getByRole('region', { name: 'Prüfbericht Notizen' });
+  const notizen = page.getByRole('region', { name: 'Prüfbericht Projektwiki' });
   await expect(notizen).toContainText('1 Gebrochener Link');
   await expect(notizen).not.toContainText('„gibts/nicht.md“ führt ins Leere');
-  await notizen.getByRole('button', { name: /Notizen/ }).click();
+  await notizen.getByRole('button', { name: /Projektwiki/ }).click();
   await expect(notizen).toContainText('„gibts/nicht.md“ führt ins Leere');
   await shot(page, '24-fsck');
   // Orphaned attachments: deleted from the report after a question that says what happens.
   await expect(notizen).toContainText('assets/verwaist-qa.png');
   await notizen.getByRole('button', { name: '„assets/verwaist-qa.png“ löschen' }).click();
   const ask = page.getByRole('alertdialog');
-  await expect(ask).toContainText('„assets/verwaist-qa.png“ aus „Notizen“ löschen?');
+  await expect(ask).toContainText('„assets/verwaist-qa.png“ aus „Projektwiki“ löschen?');
   await ask.getByRole('button', { name: 'Löschen', exact: true }).click();
   await expect.poll(() => existsSync(join(NOTES, 'assets', 'verwaist-qa.png')), { timeout: 10_000 }).toBe(false);
   await expect(notizen).not.toContainText('assets/verwaist-qa.png');
@@ -631,7 +631,7 @@ test('shows the event log, keeps retention settings and makes a backup on demand
   await openSettingsPage(page, 'Protokoll');
   const log = page.getByRole('list', { name: 'Protokoll' });
   await expect(log).toContainText('Ersteinrichtung: Administrator');
-  await expect(log).toContainText('Quelle eingebunden: Notizen');
+  await expect(log).toContainText('Quelle eingebunden: Projektwiki');
   await page.getByLabel('Kategorie').selectOption('sync');
   await expect(log).not.toContainText('Ersteinrichtung');
   await page.getByLabel('Kategorie').selectOption('');
@@ -649,8 +649,8 @@ test('shows the event log, keeps retention settings and makes a backup on demand
   await page.keyboard.press('Escape');
 
   await page.getByRole('button', { name: /^Sync-Status/ }).click();
-  await page.getByRole('button', { name: 'Verlauf von Notizen' }).click();
-  await expect(page.getByRole('dialog', { name: 'Verlauf: Notizen' })).toContainText('Quelle eingebunden: Notizen');
+  await page.getByRole('button', { name: 'Verlauf von Projektwiki' }).click();
+  await expect(page.getByRole('dialog', { name: 'Verlauf: Projektwiki' })).toContainText('Quelle eingebunden: Projektwiki');
   await page.keyboard.press('Escape');
 });
 
@@ -700,7 +700,7 @@ test('shows versions with diffs, restores one, and brings back a deleted note', 
   writeFileSync(join(ARCHIV, 'versionen.md'), '# Versionen\n\nZweite Fassung.\n');
   execFileSync('rm', [join(ARCHIV, 'alt/geloescht.md')]);
   g('add', '-A');
-  g('commit', '-q', '-m', 'Zweite Fassung, Notiz gelöscht');
+  g('commit', '-q', '-m', 'Zweite Fassung, Seite gelöscht');
 
   const aside = page.locator('aside nav[aria-label="Quellen"]');
   await aside.getByText('versionen', { exact: true }).click();
@@ -723,8 +723,8 @@ test('shows versions with diffs, restores one, and brings back a deleted note', 
   await expect(saveAs.getByRole('button', { name: 'Speichern', exact: true })).toBeDisabled();
   await saveAs.getByRole('button', { name: '„versionen (2)“ verwenden' }).click();
   await saveAs.getByRole('button', { name: 'Ordner wählen' }).click();
-  await page.locator('[role="option"][data-mount="Notizen"]', { hasText: 'Oberste Ebene' }).click();
-  await expect(saveAs.getByRole('button', { name: 'Ordner wählen' })).toContainText('Notizen › Oberste Ebene');
+  await page.locator('[role="option"][data-mount="Projektwiki"]', { hasText: 'Oberste Ebene' }).click();
+  await expect(saveAs.getByRole('button', { name: 'Ordner wählen' })).toContainText('Projektwiki › Oberste Ebene');
   await shot(page, '116-version-speichern-als');
   await saveAs.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect.poll(() => (existsSync(join(NOTES, 'versionen (2).md')) ? readFileSync(join(NOTES, 'versionen (2).md'), 'utf8') : '')).toContain('Erste Fassung.');

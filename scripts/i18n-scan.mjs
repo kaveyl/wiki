@@ -7,7 +7,7 @@ import { join, relative, resolve } from 'node:path';
 const ROOT = resolve(import.meta.dirname, '..');
 const SKIP = [/\/i18n\//, /\.test\.tsx?$/, /editor\/Emoji\.tsx$/, /editor\/lucide-all\.ts$/];
 const GERMAN =
-  /[äöüÄÖÜß„“]|\b(der|die|das|den|dem|und|oder|nicht|ist|sind|wird|werden|mit|für|von|zum|zur|ein|eine|einen|kein|keine|noch|schon|bitte|Notiz|Notizen|Quelle|Quellen|Ordner|Datei|Dateien|Einstellungen|Speichern|Abbrechen|Schließen|Öffnen|Neu|Neue|Neuer|Hinzufügen|Entfernen|Bearbeiten|Umbenennen|Verschieben|Kopieren|Einfügen|Suchen|Fehler|Wiederherstellen|Anmelden|Abmelden|Benutzer|Gruppe|Rechte|Verbindung|Sicherung|Prüfen|Jetzt|Alle|Keine|Weiter|Zurück|Fertig|Hilfe|Seite|Ansicht|Vorlage|Papierkorb|Version|Versionen)\b/;
+  /[äöüÄÖÜß„“]|\b(der|die|das|den|dem|und|oder|nicht|ist|sind|wird|werden|mit|für|von|zum|zur|ein|eine|einen|kein|keine|noch|schon|bitte|Seiten|Notiz|Notizen|Quelle|Quellen|Ordner|Datei|Dateien|Einstellungen|Speichern|Abbrechen|Schließen|Öffnen|Neu|Neue|Neuer|Hinzufügen|Entfernen|Bearbeiten|Umbenennen|Verschieben|Kopieren|Einfügen|Suchen|Fehler|Wiederherstellen|Anmelden|Abmelden|Benutzer|Gruppe|Rechte|Verbindung|Sicherung|Prüfen|Jetzt|Alle|Keine|Weiter|Zurück|Fertig|Hilfe|Seite|Ansicht|Vorlage|Papierkorb|Version|Versionen)\b/;
 const STR = /'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`/g;
 
 function files(p) {

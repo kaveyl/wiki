@@ -103,7 +103,7 @@ export function LanguageSetting() {
         ))}
       </div>
       <p className="text-xs text-fg-faint">{t('Gilt für dein Konto auf allen Geräten, auch für E-Mails an dich. Die Seite lädt dafür kurz neu.')}</p>
-      <p className="text-xs text-fg-faint">{t('Notizen werden nie übersetzt.')}</p>
+      <p className="text-xs text-fg-faint">{t('Seiten werden nie übersetzt.')}</p>
     </div>
   );
 }

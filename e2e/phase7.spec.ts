@@ -1,5 +1,5 @@
 // Phase 7: installable web app (manifest, service worker) and the phone layout.
-// Runs after phase1–6 in the same seeded workspace (admin + local mount "Notizen").
+// Runs after phase1–6 in the same seeded workspace (admin + local mount "Projektwiki").
 import { expect, test, type Browser } from '@playwright/test';
 
 
@@ -57,7 +57,7 @@ test('phone: the sidebar is a drawer that closes when a note opens; tree actions
   const box = (await drawer.boundingBox())!;
   expect(box.width).toBeLessThanOrEqual(345);
   // Touch screens have no hover: the source row shows its actions right away.
-  const source = drawer.locator('[data-mount]', { hasText: 'Notizen' }).first();
+  const source = drawer.locator('[data-mount]', { hasText: 'Projektwiki' }).first();
   await expect(source.getByRole('button', { name: 'Neu …' })).toBeVisible();
   const tree = drawer.locator('nav[aria-label="Quellen"]');
   if (!(await tree.getByText('roadmap', { exact: true }).first().isVisible())) await tree.getByText('plan', { exact: true }).first().tap();
@@ -98,11 +98,11 @@ test('signed out elsewhere while the live connection is silent: the first failed
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(page.getByLabel('Notizen durchsuchen')).toBeVisible();
+  await expect(page.getByLabel('Seiten durchsuchen')).toBeVisible();
   // Opening a note changes this account's tabs, recent list and tree – the later specs share the account: put it back.
   const KEYS = ['workspace', 'personal', 'prefs'];
   const before = await Promise.all(KEYS.map(async (k) => (await page.request.get(`/api/state/${k}`)).json()));
-  await page.getByLabel('Notizen durchsuchen').fill('roadm');
+  await page.getByLabel('Seiten durchsuchen').fill('roadm');
   await page.locator('div.mx-1').filter({ hasText: 'roadmap' }).first().click();
   await page.keyboard.press('Escape');
   const editor = page.locator('.prose-note').filter({ visible: true }).first();
@@ -137,7 +137,7 @@ test('locked by an admin while signed in: the login page comes at once – also 
     const a = await make('sperr-a');
     const pa = await a.ctx.newPage();
     await pa.goto('/');
-    await expect(pa.getByLabel('Notizen durchsuchen')).toBeVisible();
+    await expect(pa.getByLabel('Seiten durchsuchen')).toBeVisible();
     await lock(a.user.id);
     await expect(pa.getByRole('button', { name: 'Anmelden' })).toBeVisible({ timeout: 10_000 });
     // The right password: told that the account is locked (a wrong one still hears the usual answer).
@@ -150,7 +150,7 @@ test('locked by an admin while signed in: the login page comes at once – also 
     const pb = await b.ctx.newPage();
     await pb.routeWebSocket('**/api/events', (ws) => ws.close({ code: 1011 }));
     await pb.goto('/');
-    await expect(pb.getByLabel('Notizen durchsuchen')).toBeVisible();
+    await expect(pb.getByLabel('Seiten durchsuchen')).toBeVisible();
     await lock(b.user.id);
     await expect(pb.getByRole('button', { name: 'Anmelden' })).toBeVisible({ timeout: 20_000 });
     await a.ctx.close();

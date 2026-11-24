@@ -46,7 +46,7 @@ Authorization: Bearer kw_…
 
 A token acts **on behalf of its owner** and has at most their permissions. Tokens apply **only**
 to the REST API (`/api/v1/…`), the MCP endpoint (`/mcp`) and fetching files
-(`GET /api/files/…`, e.g. images of a note) – settings, sources, users and tokens are only available
+(`GET /api/files/…`, e.g. images of a page) – settings, sources, users and tokens are only available
 when signed in in the browser (otherwise 403). Disabled users and a password newly set by the administrator:
 all of the person’s tokens become invalid immediately.
 
@@ -59,21 +59,21 @@ makes the token under Settings → AI & APIs → All tokens, without signing in 
 - **Permissions** (Settings → Users & permissions → Permissions, right-click → Permissions …) apply exactly
   as in the app: what is invisible does not exist (404, missing from search and tree), read access only means 403
   when writing.
-- **Encrypted notes** only return name and title, never content (`markdown: null`). The server refuses
-  writing plain text into an encrypted note.
+- **Encrypted pages** only return name and title, never content (`markdown: null`). The server refuses
+  writing plain text into an encrypted page.
 - **Conflicts:** writing requires the `hash` from reading (`baseHash`). If the file has changed
   in the meantime (app, VS Code, Git), you get **409** with the current state – nothing is
-  overwritten. Whoever has the note open in the app sees a written change at once; if that person
+  overwritten. Whoever has the page open in the app sees a written change at once; if that person
   is typing themselves, they get the conflict notice (with “Merge”). Whether someone is typing is in
   `editingNow` when reading.
 - **Deleting** (REST and MCP) moves to the source’s trash; restore in the app.
-  For a folder, only the notes are deleted; other files (images, code) stay.
+  For a folder, only the pages are deleted; other files (images, code) stay.
 - **Versions come bundled:** as in the app, changes are committed and synced after a pause (default 2 minutes, at most
   10 minutes after the first change). Until then, the history does not show the
   change yet; `POST /api/v1/sync/{source}` or `sync_source` does it straight away.
-- **Links between notes** are normal Markdown links with a path relative to the linking note,
+- **Links between pages** are normal Markdown links with a path relative to the linking page,
   spaces as `%20`: `[Roadmap](../Projekte/Roadmap.md)`. Kaveyl Wiki does not recognise `[[Wiki-Links]]`.
-  Moving and renaming repair links to the note.
+  Moving and renaming repair links to the page.
 - **Adding/detaching sources** and settings are deliberately only available in the app.
 - **Symbolic links** within a source are never followed – neither when reading nor when writing
   (as in the tree, which hides them). A path through a link results in 400.
@@ -89,25 +89,30 @@ Machine-readable description (OpenAPI 3.1, available without authentication):
 |---|---|---|
 | `GET /api/v1/sources` | sources (id, name, type, own level) | read |
 | `GET /api/v1/changes?after=&wait=&source=&path=&own=` | changes since a point, with person and way; waits on request ([Events for agents](#ereignisse-für-agenten)) | read |
-| `GET /api/v1/tree/{source}?path=&depth=` | folders and notes, optionally below a folder / limited depth | read |
+| `GET /api/v1/tree/{source}?path=&depth=` | folders and pages, optionally below a folder / limited depth | read |
 | `GET /api/v1/search?q=&limit=&source=` | full-text search, with `source` only in one source; operators `"phrase"`, `-word`, `tag:x`, `in:"Name"`, `path:folder/`, `since:7d`; matches in `«…»` | read |
-| `GET /api/v1/notes/{source}/{path}` | note as Markdown (whole file incl. frontmatter) + `hash`; `editingNow`: who is editing it in the app right now | read |
-| `PUT /api/v1/notes/{source}/{path}` | replace the whole file: `{"markdown", "baseHash"}` | write |
-| `POST /api/v1/notes/{source}` | create: `{"parent", "title", "markdown"?}` – file name from the title | write |
-| `DELETE /api/v1/notes/{source}/{path}` | delete note or folder (into the trash) | write |
-| `POST /api/v1/folders/{source}` | create folder: `{"parent", "name"}` – with folder note (`index.md`), Git knows no empty folders | write |
+| `GET /api/v1/pages/{source}/{path}` | page as Markdown (whole file incl. frontmatter) + `hash`; `editingNow`: who is editing it in the app right now | read |
+| `PUT /api/v1/pages/{source}/{path}` | replace the whole file: `{"markdown", "baseHash"}` | write |
+| `POST /api/v1/pages/{source}` | create: `{"parent", "title", "markdown"?}` – file name from the title | write |
+| `DELETE /api/v1/pages/{source}/{path}` | delete page or folder (into the trash) | write |
+| `POST /api/v1/folders/{source}` | create folder: `{"parent", "name"}` – with folder page (`index.md`), Git knows no empty folders | write |
 | `POST /api/v1/move/{source}` | rename/move: `{"from", "to", "toSourceId"?}` – links are repaired | write |
 | `POST /api/v1/copy/{source}` | copy: `{"from", "toParent", "toSourceId"?}` – “(Kopie)” if needed | write |
-| `GET /api/v1/backlinks/{source}/{path}` | notes that link here | read |
+| `GET /api/v1/backlinks/{source}/{path}` | pages that link here | read |
 | `GET /api/v1/history/{source}/{path}` | versions from Git (commit, date, author, subject, path at the time) | read |
 | `GET /api/v1/version/{source}/{path}?commit=` | content of an older version | read |
-| `POST /api/v1/attachments/{source}` | upload a file: `{"note", "name", "contentBase64" \| "contentText"}` – into `assets/` next to the note, at most 10 MB, response with a ready-made `markdown` link | write |
-| `GET /api/v1/attachments/{source}/{path}` | files the note links to (size, `null` = missing) | read |
+| `POST /api/v1/attachments/{source}` | upload a file: `{"page", "name", "contentBase64" \| "contentText"}` – into `assets/` next to the page, at most 10 MB, response with a ready-made `markdown` link | write |
+| `GET /api/v1/attachments/{source}/{path}` | files the page links to (size, `null` = missing) | read |
 | `GET /api/v1/status?source=` | sync status: last sync and result, pending changes, state relative to the remote, `canSync` | read |
 | `POST /api/v1/sync/{source}` | commit and sync now (like “Sync now”) | write |
 
 Paths with spaces or umlauts: URL-encode each segment, the slashes stay
-(`/api/v1/notes/<id>/Projekte/M%C3%A4rz%20Plan.md`).
+(`/api/v1/pages/<id>/Projekte/M%C3%A4rz%20Plan.md`).
+
+**Old names (up to 0.2.15):** Up to version 0.2.15 the addresses were `/api/v1/notes/…`, the upload field
+`note` and the MCP tools `read_note`, `write_note`, `create_note`, `move_note`, `copy_note` and
+`delete_note`. The old names keep working until version 0.3, but are no longer listed in
+`openapi.json` and `tools/list` – please switch to the new ones.
 
 ### Examples (Bash) {#beispiele-bash}
 
@@ -129,9 +134,9 @@ curl -s -H @"$HDR" "$BASE/search?q=docker%20tag:howto"
 
 # Read, change, write back (with jq)
 SRC=<source-id>
-NOTE=$(curl -s -H @"$HDR" "$BASE/notes/$SRC/plan/roadmap.md")
-jq '{markdown: (.markdown + "- New item from the script\n"), baseHash: .hash}' <<<"$NOTE" |
-  curl -s -X PUT -H @"$HDR" -H 'content-type: application/json' --data @- "$BASE/notes/$SRC/plan/roadmap.md"
+PAGE=$(curl -s -H @"$HDR" "$BASE/pages/$SRC/plan/roadmap.md")
+jq '{markdown: (.markdown + "- New item from the script\n"), baseHash: .hash}' <<<"$PAGE" |
+  curl -s -X PUT -H @"$HDR" -H 'content-type: application/json' --data @- "$BASE/pages/$SRC/plan/roadmap.md"
 ```
 
 ### Example (Python) {#beispiel-python}
@@ -144,9 +149,9 @@ s = requests.Session()
 s.headers["Authorization"] = f"Bearer {os.environ['KAVEYL_WIKI_TOKEN']}"
 
 src = s.get(f"{BASE}/sources").json()[0]["id"]
-note = s.get(f"{BASE}/notes/{src}/plan/roadmap.md").json()
-r = s.put(f"{BASE}/notes/{src}/plan/roadmap.md",
-          json={"markdown": note["markdown"] + "\n- From Python\n", "baseHash": note["hash"]})
+page = s.get(f"{BASE}/pages/{src}/plan/roadmap.md").json()
+r = s.put(f"{BASE}/pages/{src}/plan/roadmap.md",
+          json={"markdown": page["markdown"] + "\n- From Python\n", "baseHash": page["hash"]})
 if r.status_code == 409:
     print("Changed in the meantime – read again and merge:", r.json()["currentHash"])
 ```
@@ -179,17 +184,17 @@ Kaveyl Wiki speaks **Streamable HTTP** in the stateless form: each request is a 
 |---|---|---|
 | `list_sources` | sources with ids – starting point | |
 | `search` | full-text search with operators, optionally only in one source (`source_id`), matches with excerpt | |
-| `list_tree` | folders and notes of a source (optionally from a folder, depth) | |
-| `read_note` | note as Markdown + `hash`; `editingNow` names who is typing in it in the app right now | |
-| `write_note` | replace the whole note (with `base_hash` from `read_note`) | ✓ |
-| `create_note` | new note in a folder (missing folders are created along with it) | ✓ |
-| `create_folder` | new folder, with folder note | ✓ |
-| `move_note` | rename/move (also into another source), links are repaired | ✓ |
-| `copy_note` | copy a note or folder (with its images), also into another source – “(Kopie)” when needed | ✓ |
-| `delete_note` | note or folder into the trash | ✓ |
-| `upload_file` | image or file (Base64 or text, e.g. SVG) into `assets/` next to the note, returns the ready-made Markdown link | ✓ |
+| `list_tree` | folders and pages of a source (optionally from a folder, depth) | |
+| `read_page` | page as Markdown + `hash`; `editingNow` names who is typing in it in the app right now | |
+| `write_page` | replace the whole page (with `base_hash` from `read_page`) | ✓ |
+| `create_page` | new page in a folder (missing folders are created along with it) | ✓ |
+| `create_folder` | new folder, with folder page | ✓ |
+| `move_page` | rename/move (also into another source), links are repaired | ✓ |
+| `copy_page` | copy a page or folder (with its images), also into another source – “(Kopie)” when needed | ✓ |
+| `delete_page` | page or folder into the trash | ✓ |
+| `upload_file` | image or file (Base64 or text, e.g. SVG) into `assets/` next to the page, returns the ready-made Markdown link | ✓ |
 | `list_changes` | changes since a point (with the person), waits on request – for agents that react to people | |
-| `list_attachments` | files a note links to (with size; missing ones with `null`) | |
+| `list_attachments` | files a page links to (with size; missing ones with `null`) | |
 | `get_backlinks` | backlinks | |
 | `get_history` | versions from Git | |
 | `read_version` | content of an older version | |
@@ -197,7 +202,7 @@ Kaveyl Wiki speaks **Streamable HTTP** in the stateless form: each request is a 
 | `sync_source` | commit and sync now | ✓ |
 
 Reading tools are marked as `readOnlyHint` – many clients then do not ask
-every time for them; `delete_note` is marked as `destructiveHint`, `sync_source` as `openWorldHint`
+every time for them; `delete_page` is marked as `destructiveHint`, `sync_source` as `openWorldHint`
 (talks to the Git server). Errors (no permission, conflict, not found) come as a
 normal tool result with `isError`, so that the model can react to them (e.g. read again) –
 in the language of the request (`Accept-Language`), otherwise German. The tool descriptions and the
@@ -207,14 +212,14 @@ are in English because they are addressed to the model.
 
 ## Events for agents {#ereignisse-für-agenten}
 
-An agent that should react to people – for example to a ticked checkbox in a note it created itself – has to learn
+An agent that should react to people – for example to a ticked checkbox in a page it created itself – has to learn
 **what** changed and **who** did it. There are two ways; both deliver only what the agent’s account may read and leave
 out its own changes.
 
 **1. Asking (long polling):** `GET /api/v1/changes` or the MCP tool `list_changes`. The first call without `after`
 returns only a `cursor` (the starting point). Then ask with `after=<cursor>` and keep the new `cursor` from each answer;
 `wait=50` waits up to 50 seconds for the first change instead of answering empty (50 is the most; larger values count
-as 50). `source` and `path` narrow it to a source or a note or folder, `own=true` also returns your own changes. In the
+as 50). `source` and `path` narrow it to a source or a page or folder, `own=true` also returns your own changes. In the
 MCP tool the parameters are called `after`, `source_id`, `path`, `wait_seconds` and `include_own`.
 
 ```json
@@ -229,7 +234,7 @@ MCP tool the parameters are called `after`, `source_id`, `path`, `wait_seconds` 
 ```
 
 `kind` is `created`, `changed`, `deleted` or `moved` (then with `from`). `by` is the person as the server knows them –
-not what someone wrote into the note; `null` means “from outside” (a Git push, a program in the folder). `via` tells the
+not what someone wrote into the page; `null` means “from outside” (a Git push, a program in the folder). `via` tells the
 way: `app`, `api`, `mcp` or `extern`. `reset: true` means: the cursor was too old or Kaveyl Wiki restarted – read what
 you watch once more and go on with the new cursor.
 
@@ -254,7 +259,7 @@ three more times (after 10 seconds, 1 and 5 minutes); when five deliveries in a 
 is switched off. The address must be reachable from Kaveyl Wiki – if it runs in Docker, `127.0.0.1` is the container
 itself.
 
-**Pattern: report and answer in one note.** The agent creates a note (e.g. in “Incidents”, which the team follows –
+**Pattern: report and answer in one page.** The agent creates a page (e.g. in “Incidents”, which the team follows –
 manual, “Following”), with the finding and suggestions as checkboxes:
 
 ```markdown
@@ -268,9 +273,9 @@ Used: 95 % · since 09:10 · source: syslog
 Answer below – the agent is reading along.
 ```
 
-When this note changes, the agent reads it (`read_note`), looks which checkbox was newly ticked and checks **`by`** in
+When this page changes, the agent reads it (`read_page`), looks which checkbox was newly ticked and checks **`by`** in
 the event: only if that person may decide it does it act – and only with actions allowed in advance, never with commands
-from the note text. It writes the result into the note (`write_note` with the `hash`). If someone is typing in the note
+from the page text. It writes the result into the page (`write_page` with the `hash`). If someone is typing in the page
 right now (`editingNow` when reading), it had better wait a moment; the open editor then takes the change over by itself.
 
 **Example (Python): waiting for changes.** The cursor belongs in a file, so that a restart loses nothing:
@@ -303,11 +308,11 @@ add it to its list.
 
 **What matters** (as the test with several agents and an AI showed):
 
-- **Only this incident’s actions.** If someone ticks a known action the agent did not suggest for this note at all
+- **Only this incident’s actions.** If someone ticks a known action the agent did not suggest for this page at all
   (written in by themselves), it does not run it.
-- **All changes since last time count.** If Tom changed the note as well as Maria between two queries, nobody can tell
+- **All changes since last time count.** If Tom changed the page as well as Maria between two queries, nobody can tell
   who set the tick – then do not act but ask for it to be ticked again. The same applies on `reset`.
-- **One thing after the other.** If the agent writes into the same note for several reasons (new warning, answer,
+- **One thing after the other.** If the agent writes into the same page for several reasons (new warning, answer,
   result), then one after the other, each time with a freshly read `hash`; on a conflict, read again.
 - **One account per agent,** allowed to write only where it reports. Its own changes do not appear in the events
   (unless `own=true`), so it does not react to itself.
@@ -317,7 +322,7 @@ add it to its list.
 A complete example (Node.js, no further packages) comes with Kaveyl Wiki –
 [agent.mjs](/hilfe/beispiele/incident-agent/agent.mjs) and [instructions](/hilfe/beispiele/incident-agent/README.md), in
 the source code under `examples/incident-agent`: warnings from
-the syslog become incident notes, ticks by people allowed to release become fixed actions, lines “Question:” get an
+the syslog become incident pages, ticks by people allowed to release become fixed actions, lines “Question:” get an
 answer; with or without an event webhook, first as a dry run. Setting up the account and the permissions: manual,
 [Agents in the team](BENUTZERHANDBUCH.md#agenten-im-team).
 
@@ -401,7 +406,7 @@ use the REST API or the built-in AI assistant instead (Settings → AI).
 | 403 “Origin not allowed” | call from a third-party web page in the browser – only clients outside the browser or the same address |
 | Client finds no tools / wants OAuth | client cannot send headers to HTTP servers → connect via `mcp-remote` |
 | Conflict when writing | the file has been changed in the meantime – read again, merge, write with the new `hash` |
-| Note “not found” although it exists | missing read access (Kaveyl Wiki does not reveal whether it exists) or path encoded incorrectly |
+| Page “not found” although it exists | missing read access (Kaveyl Wiki does not reveal whether it exists) or path encoded incorrectly |
 
 Every access that changes something is listed under Settings → Tools → Log (type “Security”, `api-…` /
 `mcp-…`); the token list shows a token’s “last used”.

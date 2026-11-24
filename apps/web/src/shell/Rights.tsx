@@ -562,7 +562,7 @@ function GroupActions({ c, who }: { c: Ctx; who: Who }) {
 }
 
 async function deleteAccount(c: Ctx, u: Person) {
-  const ok = await confirmDialog(t('Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Notizen und Git-Historie bleiben.', { name: u.name }), {
+  const ok = await confirmDialog(t('Konto {name} endgültig löschen? Seine Rechte-Regeln gehen mit, im Protokoll wird der Name entfernt. Seiten und Git-Historie bleiben.', { name: u.name }), {
     confirmLabel: t('Löschen'),
     danger: true,
   });
@@ -677,7 +677,7 @@ function ExceptionsLink({ c, who, mountId }: { c: Ctx; who: Who; mountId: string
 
 /** A rule on a folder or a note further down. */
 function ExceptionRow({ c, r, guest }: { c: Ctx; r: Rule; guest: boolean }) {
-  const kind = r.target === 'note' ? t('Notiz') : t('Ordner');
+  const kind = r.target === 'note' ? t('Seite') : t('Ordner');
   const where = r.path || t('(unbekannt)');
   const remove = async () => {
     const ok = await confirmDialog(t('Freigabe entfernen? {who} verliert „{level}“ auf {where}.', { who: whoName(c.o, r.subject === 'all' ? 'all' : `${r.subject === 'group' ? 'g' : 'u'}:${r.subjectId}`), level: LEVEL_LABELS[r.level], where }), {

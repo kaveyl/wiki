@@ -17,7 +17,7 @@ describe('i18n', () => {
   });
 
   it('fills only known placeholders', () => {
-    expect(fill('{n} Notizen in {name}', { n: 3, name: 'Wiki' })).toBe('3 Notizen in Wiki');
+    expect(fill('{n} Seiten in {name}', { n: 3, name: 'Wiki' })).toBe('3 Seiten in Wiki');
     expect(fill('Vorlage {{date}} und {x}', {})).toBe('Vorlage {{date}} und {x}');
     expect(placeholders('{b} und {a}')).toEqual(['a', 'b']);
   });

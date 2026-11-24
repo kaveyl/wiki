@@ -39,7 +39,7 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail', { exact: true }).fill('e2e@example.test');
   await page.getByLabel('Passwort', { exact: true }).fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
 });
 
 async function closeAll() {
@@ -102,14 +102,14 @@ test('Backup → Zeitpläne: table of rhythms with how many to keep; „Jetzt si
   await expect(list).toContainText('Nächste Sicherung');
   // A note of its own for the comparison below (earlier specs rename and move the seeded ones).
   writeFileSync(join(NOTES, 'vergleich.md'), '# Vergleich\n\nErster Absatz.\n\nZweiter Absatz.\n');
-  await waitIndexed(page, 'Notizen', ['vergleich.md']);
+  await waitIndexed(page, 'Projektwiki', ['vergleich.md']);
   await expect(tree().getByText('vergleich', { exact: true })).toBeVisible({ timeout: 15_000 });
   await list.getByRole('button', { name: 'Jetzt sichern' }).first().click();
   await openSettingsPage(page, 'Sicherungen');
   const files = settings().getByRole('region', { name: 'Sicherungen', exact: true });
-  await expect(files.getByRole('region', { name: 'Sicherungen Notizen' })).toBeVisible({ timeout: 20_000 });
+  await expect(files.getByRole('region', { name: 'Sicherungen Projektwiki' })).toBeVisible({ timeout: 20_000 });
   await expect(files.getByRole('region', { name: 'Sicherungen Kaveyl-Wiki-Datenbank' })).toBeVisible();
-  expect(readdirSync(join(BACKUP, 'kaveyl-wiki', 'Notizen')).some((f) => /^Notizen_\d{4}-\d\d-\d\d_\d{6}\.zip$/.test(f))).toBe(true);
+  expect(readdirSync(join(BACKUP, 'kaveyl-wiki', 'Projektwiki')).some((f) => /^Projektwiki_\d{4}-\d\d-\d\d_\d{6}\.zip$/.test(f))).toBe(true);
   await files.getByRole('button', { name: 'Verlauf' }).click();
   await expect(files.getByRole('list', { name: 'Läufe' })).toContainText('erfolgreich');
   await shot(page, '114-backup-sicherungen');
@@ -141,8 +141,8 @@ test('restore by comparing: one changed section taken over from the backup, the 
   const before = readFileSync(file, 'utf8');
   writeFileSync(file, before.replace('Erster Absatz.', 'Erster Absatz – aus Versehen überschrieben.') + '\nNeuer Absatz von heute.\n');
   const files = settings().getByRole('region', { name: 'Sicherungen', exact: true });
-  await files.getByRole('region', { name: 'Sicherungen Notizen' }).getByRole('button', { name: 'Öffnen' }).first().click();
-  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Notizen$/ });
+  await files.getByRole('region', { name: 'Sicherungen Projektwiki' }).getByRole('button', { name: 'Öffnen' }).first().click();
+  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Projektwiki$/ });
   await browser.getByRole('tree', { name: 'Inhalt der Sicherung' }).getByRole('button', { name: 'vergleich', exact: true }).click();
   await expect(browser.getByLabel('Wiederherstellen')).toContainText('jetzt: geändert');
   await browser.getByRole('button', { name: 'Vergleichen …' }).click();
@@ -170,13 +170,13 @@ test('„Aus Backup wiederherstellen …“ on a note: the archive opens there, 
   const files = settings().getByRole('region', { name: 'Sicherungen', exact: true });
   await expect(files.getByLabel('Quelle')).toHaveValue(/.+/);
   await expect(files).toContainText('Gesucht: „roadmap“');
-  await files.getByRole('region', { name: 'Sicherungen Notizen' }).getByRole('button', { name: 'Öffnen' }).first().click();
-  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Notizen$/ });
+  await files.getByRole('region', { name: 'Sicherungen Projektwiki' }).getByRole('button', { name: 'Öffnen' }).first().click();
+  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Projektwiki$/ });
   await expect(browser.getByLabel('Wiederherstellen')).toContainText('plan/roadmap.md');
   await browser.getByRole('button', { name: 'Speichern als …', exact: true }).click();
   const saveAs = page.getByRole('dialog', { name: 'Speichern als' });
   await expect(saveAs.getByLabel('Dateiname')).toHaveValue(/^roadmap \(Sicherung \d\d\.\d\d\.\d{4}\)$/);
-  await expect(saveAs.getByRole('button', { name: 'Ordner wählen' })).toContainText('Notizen › plan');
+  await expect(saveAs.getByRole('button', { name: 'Ordner wählen' })).toContainText('Projektwiki › plan');
   await saveAs.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(browser.getByLabel('Wiederherstellen')).toContainText(/Als „plan\/roadmap \(Sicherung \d\d\.\d\d\.\d{4}\)\.md“ gespeichert/);
   expect(readdirSync(join(NOTES, 'plan')).some((f) => /^roadmap \(Sicherung \d\d\.\d\d\.\d{4}\)\.md$/.test(f))).toBe(true);
@@ -184,13 +184,13 @@ test('„Aus Backup wiederherstellen …“ on a note: the archive opens there, 
 });
 
 test('source menu → Backup: „Jetzt sichern“ and the way to the plans', async () => {
-  await tree().getByText('Notizen', { exact: true }).first().click({ button: 'right' });
+  await tree().getByText('Projektwiki', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Backup' }).hover();
   await page.waitForTimeout(150);
   await page.getByRole('menuitem', { name: 'Backup' }).hover();
   await page.getByRole('menuitem', { name: 'Jetzt sichern' }).click();
-  await expect(page.getByText(/„Notizen“ wird gesichert/)).toBeVisible();
-  await tree().getByText('Notizen', { exact: true }).first().click({ button: 'right' });
+  await expect(page.getByText(/„Projektwiki“ wird gesichert/)).toBeVisible();
+  await tree().getByText('Projektwiki', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Backup' }).hover();
   await page.waitForTimeout(150);
   await page.getByRole('menuitem', { name: 'Backup' }).hover();
@@ -206,20 +206,20 @@ test('SMB: an encrypted backup to the share, opened and browsed again', async ()
   await panel.getByRole('button', { name: 'Zeitplan hinzufügen' }).click();
   const form = panel.getByRole('form', { name: 'Neuer Zeitplan' });
   await form.getByLabel('Ziel').selectOption({ label: 'NAS (verschlüsselt)' });
-  await form.getByLabel('Name (optional)').fill('Notizen aufs NAS');
+  await form.getByLabel('Name (optional)').fill('Projektwiki aufs NAS');
   await form.getByLabel('Ausgewählte Quellen').check();
-  await form.getByLabel('Notizen', { exact: true }).check();
+  await form.getByLabel('Projektwiki', { exact: true }).check();
   await form.getByLabel('Auch die Kaveyl-Wiki-Datenbank (Benutzer, Rechte, Einstellungen, Quellen)').uncheck();
   await form.getByRole('button', { name: 'Zeitplan anlegen' }).click();
-  const row = panel.getByRole('list', { name: 'Zeitpläne' }).getByRole('listitem').filter({ hasText: 'Notizen aufs NAS' });
+  const row = panel.getByRole('list', { name: 'Zeitpläne' }).getByRole('listitem').filter({ hasText: 'Projektwiki aufs NAS' });
   await row.getByRole('button', { name: 'Jetzt sichern' }).click();
   await openSettingsPage(page, 'Sicherungen');
   const files = settings().getByRole('region', { name: 'Sicherungen', exact: true });
-  const nas = files.getByRole('region', { name: 'Sicherungen Notizen' }).getByRole('listitem').filter({ hasText: 'NAS' });
+  const nas = files.getByRole('region', { name: 'Sicherungen Projektwiki' }).getByRole('listitem').filter({ hasText: 'NAS' });
   await expect(nas.first()).toBeVisible({ timeout: 20_000 });
   await expect(nas.first().getByLabel('verschlüsselt')).toBeVisible();
   await nas.first().getByRole('button', { name: 'Öffnen' }).click();
-  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Notizen$/ });
+  const browser = page.getByRole('dialog', { name: /^Sicherung vom .* – Projektwiki$/ });
   await expect(browser.getByRole('tree', { name: 'Inhalt der Sicherung' })).toContainText('trilium');
   await closeAll();
   expect(existsSync(join(BACKUP, 'kaveyl-wiki'))).toBe(true);
@@ -247,11 +247,11 @@ test('target with its plan deleted in one step, found again when added again, th
 
   await openSettingsPage(page, 'Sicherungen');
   const files = settings().getByRole('region', { name: 'Sicherungen', exact: true });
-  const row = files.getByRole('region', { name: 'Sicherungen Notizen' }).getByRole('listitem').filter({ hasText: 'Backup-Ordner' }).first();
+  const row = files.getByRole('region', { name: 'Sicherungen Projektwiki' }).getByRole('listitem').filter({ hasText: 'Backup-Ordner' }).first();
   await row.getByRole('button', { name: 'Zurückspielen' }).click();
   const confirm = page.getByRole('alertdialog');
-  await expect(confirm).toContainText('Die ganze Quelle „Notizen“');
+  await expect(confirm).toContainText('Die ganze Quelle „Projektwiki“');
   await confirm.getByRole('button', { name: 'Zurückspielen' }).click();
-  await expect(page.getByText(/„Notizen“ zurückgespielt \(\d+ Dateien\)/)).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(/„Projektwiki“ zurückgespielt \(\d+ Dateien\)/)).toBeVisible({ timeout: 20_000 });
   await closeAll();
 });

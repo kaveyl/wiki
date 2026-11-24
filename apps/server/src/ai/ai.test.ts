@@ -214,7 +214,7 @@ describe('AI assistant (AD-011, AD-024)', () => {
     await inject('PUT', '/api/ai/settings', { defaultId: claude.id });
     expect((await inject('GET', '/api/ai/providers')).json()).toMatchObject({ defaultId: claude.id, privateDefaultId: ollama.id });
     // Only a ticked provider can be the default for private notes.
-    expect((await inject('PUT', '/api/ai/settings', { privateDefaultId: claude.id })).json().error).toContain('nicht für private Notizen');
+    expect((await inject('PUT', '/api/ai/settings', { privateDefaultId: claude.id })).json().error).toContain('nicht für private Seiten');
 
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'suggest', cloud: true });
     await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'folder', path: 'privat', level: 'suggest', cloud: false });
@@ -518,7 +518,7 @@ describe('AI agent (AD-026)', () => {
       'Liest Wiki / offen/plan.md',
       'Liest Wiki / privat/tagebuch.md',
       'Schlägt eine Änderung an offen/plan.md vor',
-      'Schlägt eine neue Notiz „Heimlich“ vor',
+      'Schlägt eine neue Seite „Heimlich“ vor',
     ]);
     // What went back to the model: no blocked note, no closed folder, the read note as [1].
     const toolResults = received.at(-1)!.body.messages.filter((m) => m.role === 'tool').map((m) => m.content);
@@ -574,7 +574,7 @@ describe('AI agent (AD-026)', () => {
     expect((await inject('POST', `/api/acl/${mountId}`, { target: 'folder', path: 'offen/assets', subject: 'user', subjectId: eva.id, level: 'none' })).statusCode).toBe(200);
     const evaCookie = `kw_session=${(await app.server.inject({ method: 'POST', url: '/api/login', payload: { email: 'eva@example.test', password: 'Eva-Passwort-0001-lang' } })).cookies.find((c) => c.name === 'kw_session')!.value}`;
     script = [call('propose_move_note', { sourceId: mountId, from: 'offen/geheim.md', to: 'offen/neu/geheim.md' }), { content: 'Vorgeschlagen.' }];
-    const events = await agent({ question: 'Verschieb die Notiz nach neu', scope: { kind: 'all' } }, evaCookie);
+    const events = await agent({ question: 'Verschieb die Seite nach neu', scope: { kind: 'all' } }, evaCookie);
     const id = (events.find((e) => e.type === 'proposal')!.proposal as { id: string }).id;
     expect((await inject('POST', `/api/ai/proposals/${id}/apply`, {}, evaCookie)).json()).toMatchObject({ status: 'applied', result: 'offen/neu/geheim.md' });
     expect(existsSync(join(wiki, 'offen/neu/geheim.md'))).toBe(true);
@@ -698,7 +698,7 @@ describe('AI agent (AD-026)', () => {
 
     // Nothing private read: no warning, wherever it goes.
     script = [call('propose_create_note', { sourceId: mountId, parent: 'offen', title: 'Ohne Privates', markdown: '# x' }), { content: 'Vorgeschlagen.' }];
-    expect(proposalsOf(await agent({ question: 'Leg eine Notiz an', scope: { kind: 'all' } }))[0]!.privateWarning).toBeUndefined();
+    expect(proposalsOf(await agent({ question: 'Leg eine Seite an', scope: { kind: 'all' } }))[0]!.privateWarning).toBeUndefined();
 
     script = [
       call('read_note', { sourceId: mountId, path: 'privat/tagebuch.md' }),
@@ -810,7 +810,7 @@ describe('agent proposals: clean note content (live test 2026-10-08)', () => {
   it('lists only the sources an answer cites (all of them when it cites none)', () => {
     const src = [1, 2, 3].map((n) => ({ n, mountId: 'm', path: `${n}.md`, title: String(n) }));
     expect(citedSources('Um 02:30 Uhr [1], laut [3].', src).map((s) => s.n)).toEqual([1, 3]);
-    expect(citedSources('Steht nicht in den Notizen.', src)).toHaveLength(3);
+    expect(citedSources('Steht nicht in den Seiten.', src)).toHaveLength(3);
     expect(citedSources('Siehe [7].', src)).toHaveLength(3);
   });
 
@@ -821,10 +821,10 @@ describe('agent proposals: clean note content (live test 2026-10-08)', () => {
   });
 
   it('turns links written from the source root into links from the note folder', () => {
-    const files = new Set(['Besprechungen/2026-10-01 Lieferanten.md', 'Notizen/Ideen.md']);
+    const files = new Set(['Besprechungen/2026-10-01 Lieferanten.md', 'Seiten/Ideen.md']);
     const exists = (p: string) => files.has(p);
     const md = '[L](Besprechungen/2026-10-01%20Lieferanten.md#a) [I](Ideen.md) [W](https://x.org/a.md) [U](../Besprechungen/2026-10-01%20Lieferanten.md) [F](fehlt.md)';
-    expect(relinkFromRoot(md, 'Notizen', exists)).toBe(
+    expect(relinkFromRoot(md, 'Seiten', exists)).toBe(
       '[L](../Besprechungen/2026-10-01%20Lieferanten.md#a) [I](Ideen.md) [W](https://x.org/a.md) [U](../Besprechungen/2026-10-01%20Lieferanten.md) [F](fehlt.md)',
     );
     expect(relinkFromRoot(md, '', exists)).toBe(md);

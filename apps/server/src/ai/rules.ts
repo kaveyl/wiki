@@ -91,7 +91,7 @@ export class AiRules {
     let noteId: string | null = null;
     if (target === 'note') {
       noteId = (this.db.prepare('SELECT id FROM note_ids WHERE mount_id = ? AND path = ?').get(mountId, path) as { id: string } | undefined)?.id ?? null;
-      if (!noteId) throw new AiRuleError('Notiz hat keine id (Metadaten aus?) – Freigabe über den Ordner');
+      if (!noteId) throw new AiRuleError('Seite hat keine id (Metadaten aus?) – Freigabe über den Ordner');
     }
     const existing = this.ruleAt(mountId, target, path);
     const id = existing?.id ?? ulid();

@@ -31,8 +31,8 @@ export default {
   'KI-Vorschlag': 'AI suggestion',
   'Angaben in [eckigen Klammern] sind Platzhalter der KI – bitte ausfüllen.':
     'Text in [square brackets] is a placeholder from the AI – please fill it in.',
-  'Die Notiz wurde inzwischen geändert – Ersetzen ist nicht mehr möglich, Einfügen am Ende schon.':
-    'The note has changed in the meantime – replacing is no longer possible, but inserting at the end is.',
+  'Die Seite wurde inzwischen geändert – Ersetzen ist nicht mehr möglich, Einfügen am Ende schon.':
+    'The page has changed in the meantime – replacing is no longer possible, but inserting at the end is.',
   Kopieren: 'Copy',
   Verwerfen: 'Discard',
   'Darunter einfügen': 'Insert below',
@@ -42,7 +42,7 @@ export default {
   KI: 'AI',
   'KI-Assistent': 'AI assistant',
   'KI fragen …': 'Ask AI …',
-  'Diese Notiz': 'This note',
+  'Diese Seite': 'This page',
   'Dieser Ordner': 'This folder',
   'Diese Quelle': 'This source',
   'Alles Freigegebene': 'Everything with access',
@@ -57,16 +57,16 @@ export default {
   Bezug: 'Context',
   'Anderer Bezug: neuer Chat': 'Other context: new chat',
   Chat: 'Chat',
-  'Allgemeine Frage an das Sprachmodell – ohne Wiki: Es geht keine Notiz an den Anbieter, die Antwort kommt aus dem Wissen des Modells und hat keine Quellen. Sie kann veraltet oder falsch sein; für Fragen zu deinen Notizen einen anderen Bezug wählen.':
-    'General question to the language model – without the wiki: no note is sent to the provider, the answer comes from the model’s own knowledge and has no sources. It may be outdated or wrong; for questions about your notes, choose a different context.',
-  'Die KI sucht und liest selbst – nur in Notizen, die für sie freigegeben sind und die du lesen darfst. Auf Wunsch schlägt sie Änderungen vor (neue Notiz, Text ändern, verschieben, sich etwas merken); ausgeführt wird erst, wenn du „Übernehmen“ klickst. Quellen stehen unter der Antwort.':
-    'The AI searches and reads by itself – only in notes it has access to and that you may read. On request it suggests changes (new note, change text, move, remember something); nothing happens until you click “Apply”. Sources are listed below the answer.',
+  'Allgemeine Frage an das Sprachmodell – ohne Wiki: Es geht keine Seite an den Anbieter, die Antwort kommt aus dem Wissen des Modells und hat keine Quellen. Sie kann veraltet oder falsch sein; für Fragen zu deinen Seiten einen anderen Bezug wählen.':
+    'General question to the language model – without the wiki: no page is sent to the provider, the answer comes from the model’s own knowledge and has no sources. It may be outdated or wrong; for questions about your pages, choose a different context.',
+  'Die KI sucht und liest selbst – nur in Seiten, die für sie freigegeben sind und die du lesen darfst. Auf Wunsch schlägt sie Änderungen vor (neue Seite, Text ändern, verschieben, sich etwas merken); ausgeführt wird erst, wenn du „Übernehmen“ klickst. Quellen stehen unter der Antwort.':
+    'The AI searches and reads by itself – only in pages it has access to and that you may read. On request it suggests changes (new page, change text, move, remember something); nothing happens until you click “Apply”. Sources are listed below the answer.',
   'KI-Antwort': 'AI answer',
   'KI arbeitet': 'AI is working',
   'Arbeitet weiter …': 'Still working …',
   Stopp: 'Stop',
-  'Für diese Notiz ist die KI nicht freigegeben': 'AI is not allowed for this note',
-  'Für diese Notiz darf die KI nur lesen, nichts vorschlagen.': 'For this note the AI may only read, not suggest.',
+  'Für diese Seite ist die KI nicht freigegeben': 'AI is not allowed for this page',
+  'Für diese Seite darf die KI nur lesen, nichts vorschlagen.': 'For this page the AI may only read, not suggest.',
   'Die KI denkt nach …': 'The AI is thinking …',
   'Frage oder Auftrag … (Strg+Enter sendet)': 'Question or task … (Ctrl+Enter sends)',
   Frage: 'Question',
@@ -84,7 +84,7 @@ export default {
   '{n} Chat gelöscht': '{n} chat deleted',
   '{n} Chats gelöscht': '{n} chats deleted',
   'Antwort kopiert': 'Answer copied',
-  'In eine Notiz einfügen: formatiert; in einen Texteditor: als Markdown.': 'Pasted into a note: formatted; into a text editor: as Markdown.',
+  'In eine Seite einfügen: formatiert; in einen Texteditor: als Markdown.': 'Pasted into a page: formatted; into a text editor: as Markdown.',
   'Nicht kopiert': 'Not copied',
   'Der Browser hat den Zugriff auf die Zwischenablage verweigert.': 'The browser denied access to the clipboard.',
   '{n} Schritt': '{n} step',
@@ -93,24 +93,24 @@ export default {
   'Antwort verwenden': 'Use answer',
   'Formatiert kopieren (in Texteditoren kommt Markdown an)': 'Copy formatted (text editors receive Markdown)',
   Formatiert: 'Formatted',
-  'Als Notiz speichern …': 'Save as note …',
-  'In Notiz einfügen': 'Insert into note',
+  'Als Seite speichern …': 'Save as page …',
+  'In Seite einfügen': 'Insert into page',
   'Unter dem Absatz mit der Schreibmarke in „{name}“ einfügen': 'Insert below the paragraph with the cursor in “{name}”',
-  'In die Notiz eingefügt': 'Inserted into the note',
-  'Diese Antwort kann Inhalt aus privaten Notizen enthalten. In „{name}“ können ihn danach auch KIs lesen, die nicht für private Notizen zugelassen sind.': 'This answer may contain content from private notes. In “{name}”, AI not allowed for private notes could read it afterwards.',
+  'In die Seite eingefügt': 'Inserted into the page',
+  'Diese Antwort kann Inhalt aus privaten Seiten enthalten. In „{name}“ können ihn danach auch KIs lesen, die nicht für private Seiten zugelassen sind.': 'This answer may contain content from private pages. In “{name}”, AI not allowed for private pages could read it afterwards.',
   'Trotzdem einfügen': 'Insert anyway',
   'Jede Quelle in einem eigenen Tab öffnen': 'Open each source in its own tab',
   'Alle {n} in Tabs öffnen': 'Open all {n} in tabs',
   'oberste Ebene': 'top level',
-  'Neue Notiz „{title}“ in {where}': 'New note “{title}” in {where}',
+  'Neue Seite „{title}“ in {where}': 'New page “{title}” in {where}',
   'Ändern: {where}': 'Change: {where}',
   'Verschieben: {from} → {to}': 'Move: {from} → {to}',
   'Merken für „{source}“: {content}': 'Remember for “{source}”: {content}',
   'Vorschlag übernommen': 'Suggestion applied',
-  'Achtung: Das ist nur für private KI freigegeben. Am Ziel können es nach dem Verschieben auch KIs lesen, die nicht für private Notizen zugelassen sind.':
-    'Note: this is released for private AI only. At the destination, AI not allowed for private notes can read it after the move, too.',
-  'Achtung: Dieser Vorschlag kann Inhalt aus privaten Notizen enthalten. Am Ziel können ihn nach dem Übernehmen auch KIs lesen, die nicht für private Notizen zugelassen sind.':
-    'Note: this suggestion may contain content from private notes. At the destination, AI not allowed for private notes can read it once applied, too.',
+  'Achtung: Das ist nur für private KI freigegeben. Am Ziel können es nach dem Verschieben auch KIs lesen, die nicht für private Seiten zugelassen sind.':
+    'Note: this is released for private AI only. At the destination, AI not allowed for private pages can read it after the move, too.',
+  'Achtung: Dieser Vorschlag kann Inhalt aus privaten Seiten enthalten. Am Ziel können ihn nach dem Übernehmen auch KIs lesen, die nicht für private Seiten zugelassen sind.':
+    'Note: this suggestion may contain content from private pages. At the destination, AI not allowed for private pages can read it once applied, too.',
   'Nicht übernommen': 'Not applied',
   Ausblenden: 'Hide',
   Vorschau: 'Preview',
@@ -144,15 +144,15 @@ export default {
   'KI-Freigabe bearbeiten …': 'Edit AI access …',
   'von der Quelle': 'from the source',
   'von Ordner „{path}“': 'from folder “{path}”',
-  'von der Notiz': 'from the note',
+  'von der Seite': 'from the page',
   'nicht freigegeben (Standard)': 'not allowed (default)',
   '{state} ({from})': '{state} ({from})',
   'KI-Freigabe: {title}': 'AI access: {title}',
   'Darf der KI-Assistent diese Quelle (und alles darin) verwenden?': 'May the AI assistant use this source (and everything in it)?',
   'Darf der KI-Assistent diesen Ordner (und alles darin) verwenden?': 'May the AI assistant use this folder (and everything in it)?',
-  'Darf der KI-Assistent diese Notiz verwenden?': 'May the AI assistant use this note?',
+  'Darf der KI-Assistent diese Seite verwenden?': 'May the AI assistant use this page?',
   'Ohne Freigabe sieht er nichts.': 'Without access it sees nothing.',
-  'Verschlüsselte Notizen und {code} im Frontmatter bleiben immer tabu.': 'Encrypted notes and {code} in the front matter are always off limits.',
+  'Verschlüsselte Seiten und {code} im Frontmatter bleiben immer tabu.': 'Encrypted pages and {code} in the front matter are always off limits.',
   'KI-Freigabe': 'AI access',
   'Keine Regel': 'No rule',
   'Wie darüber': 'Same as above',
@@ -165,8 +165,8 @@ export default {
   'Die Inhalte gehen dafür an: {all}.': 'For this, the content goes to: {all}.',
   'Freigegeben – nur private KI': 'Allowed – private AI only',
   'Nur {local} sieht die Inhalte, nie {cloud}.': 'Only {local} sees the content, never {cloud}.',
-  'Keine KI ist für private Notizen zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.':
-    'No AI is allowed for private notes (Settings → AI) – {cloud} does not see this content, so this rule currently has no effect.',
+  'Keine KI ist für private Seiten zugelassen (Einstellungen → KI) – {cloud} sieht diese Inhalte nicht, die Freigabe wirkt derzeit nicht.':
+    'No AI is allowed for private pages (Settings → AI) – {cloud} does not see this content, so this rule currently has no effect.',
   'Nicht freigegeben': 'Not allowed',
   'Nicht freigegeben (Ausnahme)': 'Not allowed (exception)',
   'Sperrt die ganze Quelle, auch wenn darin etwas freigegeben ist.': 'Blocks the whole source, even if something inside it is allowed.',
@@ -186,8 +186,8 @@ export default {
     'Stored as Markdown in {code} of the source (versioned with it, also readable by Claude Code and Hermes) and sent with every AI request about this source, as long as the source itself is allowed.',
   'Anweisungen (anweisungen.md)': 'Instructions (anweisungen.md)',
   'Anweisungen für die KI': 'Instructions for the AI',
-  'z. B. „Fachbegriffe auf Englisch lassen. Neue Notizen immer mit Datum im Titel.“':
-    'e.g. “Keep technical terms in English. Always put the date in the title of new notes.”',
+  'z. B. „Fachbegriffe auf Englisch lassen. Neue Seiten immer mit Datum im Titel.“':
+    'e.g. “Keep technical terms in English. Always put the date in the title of new pages.”',
   'Gedächtnis (gedaechtnis.md) – neue Einträge schlägt die KI vor, du bestätigst sie':
     'Memory (gedaechtnis.md) – the AI suggests new entries, you confirm them',
   'Gedächtnis der KI': 'AI memory',
@@ -196,12 +196,12 @@ export default {
   // ── Settings → AI (ai/AiSettings.tsx)
   'Ollama (lokal)': 'Ollama (local)',
   'OpenAI-kompatibel (Azure, LM Studio, vLLM …)': 'OpenAI-compatible (Azure, LM Studio, vLLM …)',
-  'Notizen gehen an {host}': 'notes go to {host}',
-  'Notizen gehen an den Anbieter': 'notes go to the provider',
+  'Seiten gehen an {host}': 'pages go to {host}',
+  'Seiten gehen an den Anbieter': 'pages go to the provider',
   'die Adresse {host} liegt im Internet': 'the address {host} is on the internet',
   '{model} ist ein Cloud-Modell – Ollama leitet es an ollama.com weiter': '{model} is a cloud model – Ollama forwards it to ollama.com',
-  'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Notizen gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Notizen).':
-    'At first the AI sees {nothing}: you give it access to sources, folders or notes with right-click → {menu} (read, or read + suggest; for every provider or private AI only). Every request is logged (provider, model, notes sent).',
+  'Die KI sieht zunächst {nothing}: Quellen, Ordner oder Seiten gibst du per Rechtsklick → {menu} frei (lesen oder lesen + vorschlagen, für alle Anbieter oder nur private KI). Jede Anfrage steht im Protokoll (Anbieter, Modell, übertragene Seiten).':
+    'At first the AI sees {nothing}: you give it access to sources, folders or pages with right-click → {menu} (read, or read + suggest; for every provider or private AI only). Every request is logged (provider, model, pages sent).',
   nichts: 'nothing',
   'KI-Freigabe …': 'AI access …',
   'KI-Anbieter': 'AI provider',
@@ -230,20 +230,20 @@ export default {
   Modell: 'Model',
   'Verbindung testen': 'Test connection',
   'Verbunden – {n} Modelle zur Auswahl.': 'Connected – models available: {n}.',
-  'Darf Notizen sehen, die nur für private KI freigegeben sind.': 'May see notes allowed only for private AI.',
+  'Darf Seiten sehen, die nur für private KI freigegeben sind.': 'May see pages allowed only for private AI.',
   privat: 'private',
-  'Wird für private Notizen genommen, wenn der Benutzer nichts anderes gewählt hat.': 'Used for private notes unless the user chose another one.',
+  'Wird für private Seiten genommen, wenn der Benutzer nichts anderes gewählt hat.': 'Used for private pages unless the user chose another one.',
   'Standard privat': 'Default private',
-  'Für private Notizen zulassen': 'Allow for private notes',
-  'Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.':
-    'This AI then also sees notes allowed only for private AI – they go to {host} for that. Kaveyl Wiki cannot check whether nothing is stored there (e.g. zero data retention).',
-  'Diese KI sieht dann auch Notizen, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.': 'This AI then also sees notes allowed only for private AI. It runs in your own network.',
-  'Für private Notizen': 'For private notes',
-  'Notizen, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.':
-    'Notes allowed only for private AI always go to this AI – whichever provider is chosen above.',
-  'Meine KI für private Notizen': 'My AI for private notes',
-  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notiz ist nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private note is not included.',
-  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Notizen sind nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private notes are not included.',
+  'Für private Seiten zulassen': 'Allow for private pages',
+  'Diese KI sieht dann auch Seiten, die nur für private KI freigegeben sind – sie gehen dafür an {host}. Ob dort nichts gespeichert wird (z. B. Zero Data Retention), kann Kaveyl Wiki nicht prüfen.':
+    'This AI then also sees pages allowed only for private AI – they go to {host} for that. Kaveyl Wiki cannot check whether nothing is stored there (e.g. zero data retention).',
+  'Diese KI sieht dann auch Seiten, die nur für private KI freigegeben sind. Sie läuft im eigenen Netz.': 'This AI then also sees pages allowed only for private AI. It runs in your own network.',
+  'Für private Seiten': 'For private pages',
+  'Seiten, die nur für private KI freigegeben sind, gehen immer an diese KI – egal, welcher Anbieter oben gewählt ist.':
+    'Pages allowed only for private AI always go to this AI – whichever provider is chosen above.',
+  'Meine KI für private Seiten': 'My AI for private pages',
+  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Seite ist nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private page is not included.',
+  'Gefunden wird nur, was für {provider} freigegeben ist – {n} passende private Seiten sind nicht dabei.': 'Only what is allowed for {provider} is found – {n} matching private pages are not included.',
   'Mit {name} fragen': 'Ask with {name}',
   Aufwand: 'Effort',
   'Aufwand: {level}': 'effort: {level}',
@@ -295,7 +295,7 @@ export default {
   Gruppe: 'group',
   Organisation: 'organisation',
   'Repository-Name': 'Repository name',
-  'z. B. notizen': 'e.g. notes',
+  'z. B. team-wiki': 'e.g. team-wiki',
   'Beschreibung (optional)': 'Description (optional)',
   'Privat (nur für dich bzw. die Organisation sichtbar)': 'Private (visible only to you or the organisation)',
   'Das Repository wird mit einer README angelegt und danach direkt eingebunden ({name}).':
@@ -313,8 +313,8 @@ export default {
   Weiter: 'Next',
   '{hint} – im Image ist {roots} vorgesehen; dazu in der {compose} unter {volumes} z. B. {mount} ergänzen (den Ordner auf dem Server vorher anlegen; er muss dem Benutzer gehören, unter dem der Container läuft – Standard 1000:1000) und den Container neu starten – danach erscheinen hier die Unterordner von {docs}. Für den Abgleich mit einem Git-Server ein Repository einbinden.':
     '{hint} – the image expects {roots}; for this, add e.g. {mount} under {volumes} in the {compose} (create the folder on the server first; it must belong to the user the container runs as – 1000:1000 by default) and restart the container – then the subfolders of {docs} appear here. To sync with a Git server, add a repository.',
-  'Kein Ordner für lokale Notizen eingehängt. In der {compose} unter {volumes} z. B. {mount} ergänzen (den Ordner auf dem Server vorher anlegen; er muss dem Benutzer gehören, unter dem der Container läuft – Standard 1000:1000) und den Container neu starten – danach erscheinen hier die Unterordner von {docs}. Für den Abgleich mit einem Git-Server ein Repository einbinden.':
-    'No folder for local notes is mounted. Add e.g. {mount} under {volumes} in the {compose} (create the folder on the server first; it must belong to the user the container runs as – 1000:1000 by default) and restart the container – then the subfolders of {docs} appear here. To sync with a Git server, add a repository.',
+  'Kein Ordner für lokale Seiten eingehängt. In der {compose} unter {volumes} z. B. {mount} ergänzen (den Ordner auf dem Server vorher anlegen; er muss dem Benutzer gehören, unter dem der Container läuft – Standard 1000:1000) und den Container neu starten – danach erscheinen hier die Unterordner von {docs}. Für den Abgleich mit einem Git-Server ein Repository einbinden.':
+    'No folder for local pages is mounted. Add e.g. {mount} under {volumes} in the {compose} (create the folder on the server first; it must belong to the user the container runs as – 1000:1000 by default) and restart the container – then the subfolders of {docs} appear here. To sync with a Git server, add a repository.',
   'Freigegebene Wurzeln': 'Shared roots',
   'Kaveyl Wiki darf hier nicht schreiben – der Ordner muss auf dem Server dem Benutzer gehören, unter dem der Container läuft (Standard 1000:1000, sonst die Zeile user: in der docker-compose.yml)':
     'Kaveyl Wiki cannot write here – on the server, the folder must belong to the user the container runs as (1000:1000 by default, otherwise the user: line in docker-compose.yml)',
@@ -329,31 +329,31 @@ export default {
   Zurück: 'Back',
   'Repository wird geklont …': 'Cloning repository …',
   'Ordner wird gelesen …': 'Reading folder …',
-  '{n} von {total} Notizen ausgewählt': '{n} of {total} notes selected',
+  '{n} von {total} Seiten ausgewählt': '{n} of {total} pages selected',
   Alle: 'All',
   Keine: 'None',
-  'Noch keine Notizen – der Ordner wird ganz eingebunden, neue Notizen legst du danach in Kaveyl Wiki an.':
-    'No notes yet – the whole folder is added, you create new notes in Kaveyl Wiki afterwards.',
+  'Noch keine Seiten – der Ordner wird ganz eingebunden, neue Seiten legst du danach in Kaveyl Wiki an.':
+    'No pages yet – the whole folder is added, you create new pages in Kaveyl Wiki afterwards.',
   'Experten: Glob-Muster': 'Advanced: glob patterns',
   'Ein Muster pro Zeile, relativ zur Wurzel, z. B. {example}. Manuelle Änderungen haben Vorrang vor der Auswahl oben.':
     'One pattern per line, relative to the root, e.g. {example}. Manual changes take precedence over the selection above.',
   Zuklappen: 'Collapse',
   Aufklappen: 'Expand',
   'Gesamter Inhalt': 'All content',
-  '{n} Notiz aus {source} (Branch {branch})': '{n} note from {source} (branch {branch})',
-  '{n} Notizen aus {source} (Branch {branch})': '{n} notes from {source} (branch {branch})',
-  '{n} Notiz aus {source}': '{n} note from {source}',
-  '{n} Notizen aus {source}': '{n} notes from {source}',
+  '{n} Seite aus {source} (Branch {branch})': '{n} page from {source} (branch {branch})',
+  '{n} Seiten aus {source} (Branch {branch})': '{n} pages from {source} (branch {branch})',
+  '{n} Seite aus {source}': '{n} page from {source}',
+  '{n} Seiten aus {source}': '{n} pages from {source}',
   'Name in der Seitenleiste': 'Name in the sidebar',
   Einbinden: 'Add',
   'Lokaler Ordner ohne Git: Änderungen werden direkt in die Dateien gespeichert – ohne Versionen.':
     'Local folder without Git: changes are saved directly to the files – without versions.',
   'Versionen führen (empfohlen)': 'Keep versions (recommended)',
   'Kaveyl Wiki legt im Ordner ein eigenes Git an: jede Änderung wird eine Version, mit dir als Autor, Gelöschtes kommt aus dem Verlauf zurück – ohne Abgleich mit einem Git-Server. Aus = nur Dateien, ohne Versionen.':
-    'Kaveyl Wiki creates a Git of its own in the folder: every change becomes a version, with you as the author, and deleted notes come back from the history – without syncing to a Git server. Off = files only, without versions.',
+    'Kaveyl Wiki creates a Git of its own in the folder: every change becomes a version, with you as the author, and deleted pages come back from the history – without syncing to a Git server. Off = files only, without versions.',
   'Versionen einschalten …': 'Turn on versions …',
   'Versionen für „{name}“ einschalten? Kaveyl Wiki legt im Ordner ein eigenes Git an (versteckter Ordner .git) und speichert ab jetzt jede Änderung als Version. Gelöschtes bleibt danach im Verlauf.':
-    'Turn on versions for “{name}”? Kaveyl Wiki creates a Git of its own in the folder (hidden folder .git) and from now on saves every change as a version. Deleted notes then stay in the history.',
+    'Turn on versions for “{name}”? Kaveyl Wiki creates a Git of its own in the folder (hidden folder .git) and from now on saves every change as a version. Deleted pages then stay in the history.',
   'Versionen einschalten': 'Turn on versions',
   'Der Verlauf aus der Sicherung im Ordner ist übernommen.': 'The history from the backup in the folder has been taken over.',
   'Änderungen automatisch committen und pushen': 'Commit and push changes automatically',
@@ -363,10 +363,10 @@ export default {
   'Standardmäßig aus: Kaveyl Wiki schreibt nur Dateien, Commits machst du (oder deine KI-Session) selbst.':
     'Off by default: Kaveyl Wiki only writes files, you (or your AI session) make the commits.',
   'Wann deine Änderungen nach Git schreiben?': 'When to write your changes to Git?',
-  'Commit und Push: beim Verlassen der Notiz und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Die andere Richtung – Änderungen anderer holen – läuft alle 5 Minuten, mit Webhook sofort.':
-    'Commit and push: immediately when you leave the note or press Ctrl+S; when you write continuously, at least every 10 minutes. The other direction – fetching changes by others – runs every 5 minutes, immediately with a webhook.',
-  'Commit: beim Verlassen der Notiz und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Kein Push und kein Pull – der Ordner gleicht mit keinem Git-Server ab.':
-    'Commit: immediately when you leave the note and with Ctrl+S; while you keep writing, at least every 10 minutes. No push and no pull – the folder does not sync with a Git server.',
+  'Commit und Push: beim Verlassen der Seite und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Die andere Richtung – Änderungen anderer holen – läuft alle 5 Minuten, mit Webhook sofort.':
+    'Commit and push: immediately when you leave the page or press Ctrl+S; when you write continuously, at least every 10 minutes. The other direction – fetching changes by others – runs every 5 minutes, immediately with a webhook.',
+  'Commit: beim Verlassen der Seite und mit Strg+S sofort, wer am Stück schreibt, spätestens alle 10 Minuten. Kein Push und kein Pull – der Ordner gleicht mit keinem Git-Server ab.':
+    'Commit: immediately when you leave the page and with Ctrl+S; while you keep writing, at least every 10 minutes. No push and no pull – the folder does not sync with a Git server.',
   'Nach 10 Sekunden Pause (fast sofort)': 'After a 10-second pause (almost immediately)',
   'Nach 2 Minuten Pause (Standard)': 'After a 2-minute pause (default)',
   'Nach 5 Minuten Pause': 'After a 5-minute pause',
@@ -380,7 +380,7 @@ export default {
   'KI-Gedächtnis': 'AI memory',
   'Anweisungen und bestätigte Merk-Einträge für die KI in {path} dieser Quelle (nur wirksam, wenn die Quelle für die KI freigegeben ist).':
     'Instructions and confirmed memory entries for the AI in {path} of this source (only effective if the AI has access to the source).',
-  'Ordner-Notiz': 'Folder note',
+  'Ordnerseite': 'Folder page',
   'Datei, die als Inhalt ihres Ordners angezeigt wird (Wiki.js nutzt oft home.md).':
     'File shown as the content of its folder (Wiki.js often uses home.md).',
   'Wie in Einstellungen → KI': 'As in Settings → AI',
@@ -392,8 +392,8 @@ export default {
   '1 Jahr': '1 year',
   'Nie löschen': 'Never delete',
   'KI-Chats aufbewahren': 'Keep AI chats',
-  'Chats über Notizen, Ordner oder diese ganze Quelle werden gelöscht, wenn sie so lange unbenutzt sind.':
-    'Chats about notes, folders or this whole source are deleted when unused for this long.',
+  'Chats über Seiten, Ordner oder diese ganze Quelle werden gelöscht, wenn sie so lange unbenutzt sind.':
+    'Chats about pages, folders or this whole source are deleted when unused for this long.',
   'Auswahl übernehmen': 'Apply selection',
   'Repository:': 'Repository:',
   'Ordner:': 'Folder:',
@@ -534,7 +534,7 @@ export default {
   'für {email}. Danach bist du angemeldet; alle anderen Anmeldungen werden beendet.':
     'for {email}. You will then be signed in; all other sessions are ended.',
   'Passwort speichern': 'Save password',
-  '{inviter} hat die Notiz {note} mit dir geteilt.': '{inviter} has shared the note {note} with you.',
+  '{inviter} hat die Seite {note} mit dir geteilt.': '{inviter} has shared the page {note} with you.',
   '{inviter} hat den Ordner {note} mit dir geteilt, mit allem, was darin liegt.': '{inviter} has shared the folder {note} with you, with everything in it.',
   '{inviter} hat die Quelle {note} mit dir geteilt, mit allem, was darin liegt.': '{inviter} has shared the source {note} with you, with everything in it.',
   Jemand: 'Someone',

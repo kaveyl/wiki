@@ -64,7 +64,7 @@ export function registerTrashRoutes(server: FastifyInstance, ctx: AppContext) {
     let mount = mountOr404(req.params.mountId);
     // All files of the entry, also those the user cannot see: purging takes them all.
     const all = (await notes.trash(mount, trashHideBefore(mount.id))).find((t) => t.id === item.id)?.files ?? item.files;
-    if (all.some((p) => !atLeast(levelIn(req, mount.id, p, false), 'write'))) throw new ForbiddenError('Der Eintrag enthält Notizen, auf die du keine Schreibrechte hast');
+    if (all.some((p) => !atLeast(levelIn(req, mount.id, p, false), 'write'))) throw new ForbiddenError('Der Eintrag enthält Seiten, auf die du keine Schreibrechte hast');
     for (const p of item.files) mount = access(req, mount.id, p, 'write', false);
     await notes.purgeFromTrash(mount, item.id);
     audit(req, 'trash-purged', `Endgültig gelöscht: ${item.path || item.files.join(', ')}`, { mount: mountRef(mount) });

@@ -73,7 +73,7 @@ function useKatex(latex: string, display: boolean): { html: string | null; error
           setOut({ html: null, error: errorText(e) });
         }
       },
-      () => alive && setOut({ html: null, error: t('Dieser Teil der App konnte nicht geladen werden. Bitte die Seite neu laden.') }),
+      () => alive && setOut({ html: null, error: t('Dieser Teil der App konnte nicht geladen werden. Bitte die App neu laden.') }),
     );
     return () => {
       alive = false;

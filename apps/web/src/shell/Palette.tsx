@@ -129,7 +129,7 @@ export function CommandPalette({
                   run(items[active], e.ctrlKey || e.metaKey);
                 }
               }}
-              placeholder={t('Notiz suchen oder Befehl … („>“ nur Befehle)')}
+              placeholder={t('Seite suchen oder Befehl … („>“ nur Befehle)')}
               aria-label={t('Befehlspalette')}
               className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-fg-faint"
             />
@@ -177,7 +177,7 @@ export function CommandPalette({
             {items.map((item, i) => (
               <Fragment key={item.kind === 'note' ? `n:${item.hit.mountId}:${item.hit.path}` : item.kind === 'all' ? 'all' : `c:${item.command.id}`}>
               {/* Headings over the groups (draft: „Seiten in …“, „Befehle“), not choosable themselves. */}
-              {item.kind === 'note' && i === 0 && <div className="px-3 pb-1 pt-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-fg-faint" role="presentation">{t('Notizen')}</div>}
+              {item.kind === 'note' && i === 0 && <div className="px-3 pb-1 pt-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-fg-faint" role="presentation">{t('Seiten')}</div>}
               {item.kind === 'command' && items[i - 1]?.kind !== 'command' && query && !commandMode && (
                 <div className="px-3 pb-1 pt-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-fg-faint" role="presentation">{t('Befehle')}</div>
               )}
@@ -275,7 +275,7 @@ export function SearchPage({ open, initial, onClose, mounts }: { open: boolean; 
   const hits = query ? (result.data?.hits ?? []) : [];
 
   return (
-    <Modal help="notizen-finden-und-lesen" open={open} onOpenChange={(o) => !o && onClose()} title={t('Suche')} wide>
+    <Modal help="seiten-finden-und-lesen" open={open} onOpenChange={(o) => !o && onClose()} title={t('Suche')} wide>
       <div className="flex flex-col gap-3">
         <div className="flex h-10 items-center gap-2 rounded-md border border-line px-2 focus-within:border-accent">
           <SearchIcon className="h-4 w-4 text-fg-faint" />
@@ -307,7 +307,7 @@ export function SearchPage({ open, initial, onClose, mounts }: { open: boolean; 
               <p>{t('Suche in Titeln, Pfaden, Tags und Inhalten aller Quellen. Operatoren:')}</p>
               <ul className="list-disc pl-5 text-xs">
                 <li>
-                  <code>{t('tag:projekt')}</code> {t('– nur Notizen mit diesem Tag')} · <code>in:wikijs</code> {t('– nur diese Quelle')} · <code>path:docs/</code>{' '}
+                  <code>{t('tag:projekt')}</code> {t('– nur Seiten mit diesem Tag')} · <code>in:wikijs</code> {t('– nur diese Quelle')} · <code>path:docs/</code>{' '}
                   {t('– nur dieser Ordner')}
                 </li>
                 <li>

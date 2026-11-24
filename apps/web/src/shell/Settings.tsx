@@ -483,7 +483,7 @@ function AttachmentSettings() {
       <p className="text-fg-muted">
         {fillNodes(
           t(
-            'Dateien und Bilder, die in eine Notiz gezogen, eingefügt oder über die Büroklammer angehängt werden, landen im Ordner {ordner} neben der Notiz und werden mit committet. Große Dateien machen Repositories dauerhaft größer (Git vergisst nichts) – deshalb gibt es ein Limit.',
+            'Dateien und Bilder, die in eine Seite gezogen, eingefügt oder über die Büroklammer angehängt werden, landen im Ordner {ordner} neben der Seite und werden mit committet. Große Dateien machen Repositories dauerhaft größer (Git vergisst nichts) – deshalb gibt es ein Limit.',
           ),
           { ordner: <code>assets/</code> },
         )}
@@ -519,7 +519,7 @@ function AttachmentSettings() {
       <Field
         label={t('Große Bilder beim Einfügen verkleinern')}
         hint={t(
-          'Fotos und Bildschirmfotos werden vor dem Hochladen im Browser auf diese Kantenlänge verkleinert und als WebP gespeichert – Notizen laden und scrollen schneller, das Repository bleibt klein. GPS- und Kameradaten fallen dabei weg. GIF und SVG bleiben unverändert.',
+          'Fotos und Bildschirmfotos werden vor dem Hochladen im Browser auf diese Kantenlänge verkleinert und als WebP gespeichert – Seiten laden und scrollen schneller, das Repository bleibt klein. GPS- und Kameradaten fallen dabei weg. GIF und SVG bleiben unverändert.',
         )}
       >
         <select
@@ -555,7 +555,7 @@ function AttachmentSettings() {
       </Field>
       <p className="text-xs text-fg-muted">
         {t(
-          'In Notizen nimmt ein Bild ohne eigene Breite höchstens etwa zwei Drittel der Fensterhöhe ein; die Lupe (oder ein Klick in der Leseansicht) zeigt es groß. Die Breite lässt sich mit dem Anfasser unten rechts am ausgewählten Bild ändern.',
+          'Auf Seiten nimmt ein Bild ohne eigene Breite höchstens etwa zwei Drittel der Fensterhöhe ein; die Lupe (oder ein Klick in der Leseansicht) zeigt es groß. Die Breite lässt sich mit dem Anfasser unten rechts am ausgewählten Bild ändern.',
         )}
       </p>
       {current.data && <BlockedTypes blocked={current.data.blocked} blockedDefault={current.data.blockedDefault} />}
@@ -876,7 +876,7 @@ function Appearance() {
           {(
             [
               ['dock', t('Schwebend unten'), t('Leiste am unteren Rand, Formatzeile mit „Aa“ ein- und ausblenden')],
-              ['top', t('Oben'), t('Eine Leiste über der Notiz')],
+              ['top', t('Oben'), t('Eine Leiste über der Seite')],
             ] as const
           ).map(([k, label, hint]) => (
             <button
@@ -949,9 +949,9 @@ function EditorWidthSetting() {
           <span className="w-12 text-right tabular-nums">{pct} %</span>
         </label>
       )}
-      <p className="text-xs text-fg-faint">{t('Prozentwerte skalieren mit dem Fenster. Schnell umschalten: Symbol ⤢ oben rechts in jeder Notiz.')}</p>
+      <p className="text-xs text-fg-faint">{t('Prozentwerte skalieren mit dem Fenster. Schnell umschalten: Symbol ⤢ oben rechts auf jeder Seite.')}</p>
       <label className="flex items-center gap-3 border-t border-line-soft pt-3 text-sm">
-        <span className="flex-1">{t('Inhaltsverzeichnis rechts neben der Notiz anzeigen (ab 2 Überschriften, wenn genug Platz ist)')}</span>
+        <span className="flex-1">{t('Inhaltsverzeichnis rechts neben der Seite anzeigen (ab 2 Überschriften, wenn genug Platz ist)')}</span>
         <input type="checkbox" role="switch" className="switch" checked={showToc} onChange={(e) => set({ showToc: e.target.checked })} />
       </label>
     </div>
@@ -1011,7 +1011,7 @@ function Account({ email }: { email: string }) {
       </div>
       <h3 className="pt-3 text-sm font-medium">{t('Konto löschen')}</h3>
       <p className="text-sm text-fg-muted">
-        {t('Löschen kann ein Administrator: bitte dort beantragen. Gelöscht werden Konto, Einstellungen, KI-Chats, Tokens und dein Name im Protokoll; deine Notizen bleiben, in der Git-Historie bleibt dein Name als Autor.')}
+        {t('Löschen kann ein Administrator: bitte dort beantragen. Gelöscht werden Konto, Einstellungen, KI-Chats, Tokens und dein Name im Protokoll; deine Seiten bleiben, in der Git-Historie bleibt dein Name als Autor.')}
       </p>
     </form>
   );
@@ -1031,7 +1031,7 @@ function AutoLockSetting() {
     <div className="space-y-2 border-t border-line pt-4 text-sm">
       <h3 className="font-medium">{t('Automatisch sperren')}</h3>
       <label className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-fg-muted">{t('Verschlüsselte Notizen wieder sperren nach')}</span>
+        <span className="text-xs font-medium text-fg-muted">{t('Verschlüsselte Seiten wieder sperren nach')}</span>
         <select
           aria-label={t('Automatisch sperren nach')}
           value={autoLockMin}
@@ -1095,7 +1095,7 @@ function HelpTab({ isAdmin }: { isAdmin: boolean }) {
           <p>
             <b className="text-fg">{t('Dateien statt Datenbank.')}</b>{' '}
             {t(
-              'Kaveyl Wiki ist ein Wiki für ganz normale Markdown-Dateien – eine eigene Datenbank für Inhalte gibt es nicht. Die Notizen liegen in Git-Repositories (Gitea, GitHub, GitLab oder jede Git-Adresse) oder in Ordnern, die in den Container eingehängt sind. Jede Quelle erscheint links als eigener Baum; die Sofort-Suche und die Befehlspalette (Strg+K) finden alles.',
+              'Kaveyl Wiki ist ein Wiki für ganz normale Markdown-Dateien – eine eigene Datenbank für Inhalte gibt es nicht. Die Seiten liegen in Git-Repositories (Gitea, GitHub, GitLab oder jede Git-Adresse) oder in Ordnern, die in den Container eingehängt sind. Jede Quelle erscheint links als eigener Baum; die Sofort-Suche und die Befehlspalette (Strg+K) finden alles.',
             )}
           </p>
           <p>
@@ -1107,13 +1107,13 @@ function HelpTab({ isAdmin }: { isAdmin: boolean }) {
           <p>
             <b className="text-fg">{t('Schutz und Rechte.')}</b>{' '}
             {t(
-              'Versionen, Papierkorb, Backups auf ein NAS oder einen eigenen Ordner, Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Notizen regeln, wer was sehen und ändern darf.',
+              'Versionen, Papierkorb, Backups auf ein NAS oder einen eigenen Ordner, Link-Reparatur und eine nächtliche Prüfung schützen vor Verlust und gebrochenen Links. Rechte, Gruppen, Gäste und verschlüsselte Seiten regeln, wer was sehen und ändern darf.',
             )}
           </p>
           <p>
             <b className="text-fg">{t('KI und Schnittstellen.')}</b>{' '}
             {t(
-              'Ein KI-Assistent hilft beim Schreiben und beantwortet Fragen aus freigegebenen Notizen – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und KI-Werkzeuge wie Claude mit denselben Rechten mit.',
+              'Ein KI-Assistent hilft beim Schreiben und beantwortet Fragen aus freigegebenen Seiten – er schlägt nur vor, du entscheidest. Über REST-API und MCP arbeiten Skripte und KI-Werkzeuge wie Claude mit denselben Rechten mit.',
             )}
           </p>
         </div>
@@ -1189,8 +1189,8 @@ function HelpTab({ isAdmin }: { isAdmin: boolean }) {
         <h3 className="font-medium">{t('Willkommensseite')}</h3>
         <p className="text-fg-muted">
           {welcomeHidden
-            ? t('Ausgeblendet. Sie zeigt erste Schritte und was Kaveyl Wiki kann, solange keine Notiz offen ist.')
-            : t('Wird angezeigt, solange keine Notiz offen ist – mit ersten Schritten und dem, was Kaveyl Wiki kann.')}
+            ? t('Ausgeblendet. Sie zeigt erste Schritte und was Kaveyl Wiki kann, solange keine Seite offen ist.')
+            : t('Wird angezeigt, solange keine Seite offen ist – mit ersten Schritten und dem, was Kaveyl Wiki kann.')}
         </p>
         {welcomeHidden && (
           <Button size="sm" onClick={() => usePrefs.getState().set({ hideWelcome: false })}>

@@ -44,7 +44,7 @@ export function TagBar({ mountId, tags, readonly, edited, onChange }: { mountId:
       {tags.map((tag) => (
         <TagMenu key={tag} tag={tag} color={colorOf(mountId, tag)}>
         <span className={cx('group relative flex items-center rounded-full px-2.5 text-xs font-medium [@media(hover:none)]:pr-1', tagChipClass(colorOf(mountId, tag)))} data-tag-color={colorOf(mountId, tag) ?? ''}>
-          <button className="flex items-center gap-0.5 py-1 hover:brightness-90" onClick={() => openSearch(`tag:${/\s/.test(tag) ? `"${tag}"` : tag}`)} title={t('Alle Notizen mit #{tag}', { tag })}>
+          <button className="flex items-center gap-0.5 py-1 hover:brightness-90" onClick={() => openSearch(`tag:${/\s/.test(tag) ? `"${tag}"` : tag}`)} title={t('Alle Seiten mit #{tag}', { tag })}>
             <Hash className="h-3 w-3" />
             {tag}
           </button>
@@ -111,7 +111,7 @@ export function TagBrowser({ onPick }: { onPick: (tag: string) => void }) {
         <Search className="h-4 w-4 shrink-0 text-icon-faint" aria-hidden />
         <input autoFocus data-autofocus value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={t('Tags filtern …')} aria-label={t('Tags filtern')} className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none" />
       </label>
-      {all.data && !list.length && <p className="text-sm text-fg-muted">{t('Keine Tags. Tags stehen im Frontmatter (`tags:`) oder werden über „+ Tag“ oben in einer Notiz vergeben.')}</p>}
+      {all.data && !list.length && <p className="text-sm text-fg-muted">{t('Keine Tags. Tags stehen im Frontmatter (`tags:`) oder werden über „+ Tag“ oben auf einer Seite vergeben.')}</p>}
       {/* A grid of tags (redesign 23.11.): the colour as a dot, the number of notes on the right. */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         {list.map((x) => (
@@ -125,7 +125,7 @@ export function TagBrowser({ onPick }: { onPick: (tag: string) => void }) {
               aria-pressed={x.tag === picked}
               onClick={() => setPicked(x.tag)}
               onDoubleClick={() => onPick(x.tag)}
-              title={x.mixed ? t('In den Quellen unterschiedlich gefärbt – gezeigt wird die häufigste Farbe') : t('Doppelklick zeigt die Notizen mit #{tag}', { tag: x.tag })}
+              title={x.mixed ? t('In den Quellen unterschiedlich gefärbt – gezeigt wird die häufigste Farbe') : t('Doppelklick zeigt die Seiten mit #{tag}', { tag: x.tag })}
             >
               <span className={cx('h-2.5 w-2.5 shrink-0 rounded-full', x.color ? TAG_DOT[x.color] : 'bg-icon-faint')} aria-hidden />
               <span className="min-w-0 flex-1 truncate font-medium">{x.tag}</span>
@@ -137,7 +137,7 @@ export function TagBrowser({ onPick }: { onPick: (tag: string) => void }) {
       {current ? (
         <TagActions key={current.tag} tag={current.tag} color={current.color} count={current.count} onShow={() => onPick(current.tag)} />
       ) : (
-        !!list.length && <p className="text-xs text-fg-faint">{t('Ein Tag anklicken: Notizen zeigen, Farbe wählen, umbenennen, zusammenführen oder löschen (auch per Rechtsklick).')}</p>
+        !!list.length && <p className="text-xs text-fg-faint">{t('Ein Tag anklicken: Seiten zeigen, Farbe wählen, umbenennen, zusammenführen oder löschen (auch per Rechtsklick).')}</p>
       )}
     </div>
   );
@@ -151,13 +151,13 @@ function TagActions({ tag, color, count, onShow }: { tag: string; color: TagColo
       <span className={cx('h-3 w-3 shrink-0 rounded-full', color ? TAG_DOT[color] : 'bg-icon-faint')} aria-hidden />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm">
-          <span className="font-semibold"># {tag}</span> <span className="text-fg-muted">· {tn(count, '{n} Notiz', '{n} Notizen')}</span>
+          <span className="font-semibold"># {tag}</span> <span className="text-fg-muted">· {tn(count, '{n} Seite', '{n} Seiten')}</span>
         </div>
-        <div className="text-xs text-fg-muted">{t('Farbe, Name oder Zusammenführung für alle zugeordneten Notizen ändern – oder den Tag aus allen entfernen')}</div>
+        <div className="text-xs text-fg-muted">{t('Farbe, Name oder Zusammenführung für alle zugeordneten Seiten ändern – oder den Tag aus allen entfernen')}</div>
       </div>
       <div className="flex flex-wrap gap-1.5">
         <Button size="sm" variant="primary" onClick={onShow}>
-          <Hash className="h-3.5 w-3.5" /> {t('Notizen zeigen')}
+          <Hash className="h-3.5 w-3.5" /> {t('Seiten zeigen')}
         </Button>
         <DM.Root>
           <DM.Trigger asChild>

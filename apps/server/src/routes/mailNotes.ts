@@ -37,7 +37,7 @@ export function registerMailNoteRoutes(server: FastifyInstance, ctx: AppContext)
 
   server.post<{ Body: { mountId?: string; paths?: unknown; to?: unknown } }>('/api/mail-notes', async (req) => {
     const user = req.user!;
-    if (user.isGuest) throw new ForbiddenError('Gäste können keine Notizen per Mail versenden');
+    if (user.isGuest) throw new ForbiddenError('Gäste können keine Seiten per Mail versenden');
     if (!mailer.configured()) throw new AuthError(user.isAdmin ? 'E-Mail-Versand ist nicht eingerichtet (Einstellungen → Benachrichtigungen → E-Mail)' : 'E-Mail-Versand ist nicht eingerichtet – bitte den Administrator fragen');
     const to = [...new Set((Array.isArray(req.body?.to) ? req.body.to : []).map((a) => normEmail(String(a))))];
     if (!to.length) throw new AuthError('Bitte mindestens eine E-Mail-Adresse angeben');
@@ -45,8 +45,8 @@ export function registerMailNoteRoutes(server: FastifyInstance, ctx: AppContext)
     const bad = to.find((a) => !validEmail(a));
     if (bad) throw new AuthError(`Keine gültige E-Mail-Adresse: ${bad}`);
     const paths = [...new Set((Array.isArray(req.body?.paths) ? req.body.paths : []).map((p) => cleanRelPath(String(p))).filter(Boolean))];
-    if (!paths.length) throw new PathError('Keine Notiz gewählt');
-    if (paths.length > MAX_NOTES) throw new PathError(`Höchstens ${MAX_NOTES} Notizen auf einmal`);
+    if (!paths.length) throw new PathError('Keine Seite gewählt');
+    if (paths.length > MAX_NOTES) throw new PathError(`Höchstens ${MAX_NOTES} Seiten auf einmal`);
 
     const mountId = String(req.body?.mountId ?? '');
     const files: { filename: string; content: Buffer; contentType: string }[] = [];
@@ -54,11 +54,11 @@ export function registerMailNoteRoutes(server: FastifyInstance, ctx: AppContext)
     const taken = new Set<string>();
     let bytes = 0;
     for (const path of paths) {
-      if (!/\.md$/i.test(path)) throw new PathError('Nur Notizen lassen sich per Mail versenden, keine Ordner');
+      if (!/\.md$/i.test(path)) throw new PathError('Nur Seiten lassen sich per Mail versenden, keine Ordner');
       const mount = access(req, mountId, path, 'read', false);
       const raw = await readFile(absPath(mount, config.dataPath, path), 'utf8').catch(() => null);
-      if (raw === null) throw new PathError(`Notiz nicht gefunden: ${path}`);
-      if (isEncryptedNote(raw)) throw new ForbiddenError('Verschlüsselte Notizen lassen sich nicht per Mail versenden');
+      if (raw === null) throw new PathError(`Seite nicht gefunden: ${path}`);
+      if (isEncryptedNote(raw)) throw new ForbiddenError('Verschlüsselte Seiten lassen sich nicht per Mail versenden');
       // The same file as „Herunterladen“: the .md, with pictures or files a ZIP.
       const out = await exportMarkdown(mount, path, [], {
         dataPath: config.dataPath,
@@ -71,7 +71,7 @@ export function registerMailNoteRoutes(server: FastifyInstance, ctx: AppContext)
       taken.add(filename.toLowerCase());
       const content = Buffer.from(out.only ?? out.zip);
       bytes += content.length;
-      if (bytes > MAX_BYTES) throw new PathError('Zu groß für eine Mail (höchstens 10 MB) – bitte weniger Notizen wählen');
+      if (bytes > MAX_BYTES) throw new PathError('Zu groß für eine Mail (höchstens 10 MB) – bitte weniger Seiten wählen');
       files.push({ filename, content, contentType: out.only ? 'text/markdown; charset=utf-8' : 'application/zip' });
       titles.push(out.name);
     }
@@ -83,11 +83,11 @@ export function registerMailNoteRoutes(server: FastifyInstance, ctx: AppContext)
     const sender = short(user.displayName || user.username, 60);
     const one = titles.length === 1;
     const list = titles.map((n) => `„${short(n, 80)}“`).join(', ');
-    const subject = one ? `${sender} hat dir „${short(titles[0]!, 80)}“ aus Kaveyl Wiki geschickt` : `${sender} hat dir ${titles.length} Notizen aus Kaveyl Wiki geschickt`;
+    const subject = one ? `${sender} hat dir „${short(titles[0]!, 80)}“ aus Kaveyl Wiki geschickt` : `${sender} hat dir ${titles.length} Seiten aus Kaveyl Wiki geschickt`;
     // Whole sentences per paragraph, so that each one translates (mailer: line by line).
     const text = [
       'Hallo,',
-      one ? `${sender} hat dir die Notiz „${short(titles[0]!, 80)}“ aus Kaveyl Wiki geschickt.` : `${sender} hat dir ${titles.length} Notizen aus Kaveyl Wiki geschickt: ${list}.`,
+      one ? `${sender} hat dir die Seite „${short(titles[0]!, 80)}“ aus Kaveyl Wiki geschickt.` : `${sender} hat dir ${titles.length} Seiten aus Kaveyl Wiki geschickt: ${list}.`,
       one
         ? 'Sie hängt als Markdown-Datei (.md) an, mit Bildern oder Dateien als ZIP. Markdown lässt sich mit jedem Texteditor öffnen.'
         : 'Sie hängen als Markdown-Dateien (.md) an, mit Bildern oder Dateien als ZIP. Markdown lässt sich mit jedem Texteditor öffnen.',

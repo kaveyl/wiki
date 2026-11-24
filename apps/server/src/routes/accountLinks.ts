@@ -55,7 +55,7 @@ export function registerAccountLinkRoutes(server: FastifyInstance, ctx: AppConte
       return { target: t as 'note' | 'folder', path: p };
     });
     const result = await accountMail.share({ email: String(req.body?.email ?? ''), mountId: mount.id, target, path, level, displayName: req.body?.displayName, more }, req.user!, requestLang(req));
-    const what = more.length ? `${more.length + 1} Einträge` : { note: 'Notiz', folder: 'Ordner', mount: 'Quelle' }[target];
+    const what = more.length ? `${more.length + 1} Einträge` : { note: 'Seite', folder: 'Ordner', mount: 'Quelle' }[target];
     const where = [path, ...more.map((m) => m.path)].filter(Boolean).join(', ');
     audit(
       req,

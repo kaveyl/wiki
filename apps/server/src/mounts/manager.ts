@@ -85,14 +85,14 @@ function porcelainPaths(out: string): string[] {
 const outsideMessage = (files: string[]) =>
   files.length === 1 ? `docs: ${files[0]} außerhalb von Kaveyl Wiki geändert` : `docs: ${files.length} Dateien außerhalb von Kaveyl Wiki geändert`;
 
-/** „2 Notizen“, „1 Notiz und 1 Datei“: only Markdown files count as notes, pictures and other files are named apart. */
+/** „2 Seiten“, „1 Seite und 1 Datei“: only Markdown files count as notes, pictures and other files are named apart. */
 export const countText = (files: string[]) => {
   const notes = files.filter((f) => f.toLowerCase().endsWith('.md')).length;
   const other = files.length - notes;
   const part = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-  if (!other) return part(notes, 'Notiz', 'Notizen');
+  if (!other) return part(notes, 'Seite', 'Seiten');
   if (!notes) return part(other, 'Datei', 'Dateien');
-  return `${part(notes, 'Notiz', 'Notizen')} und ${part(other, 'Datei', 'Dateien')}`;
+  return `${part(notes, 'Seite', 'Seiten')} und ${part(other, 'Datei', 'Dateien')}`;
 };
 
 export class MountManager {

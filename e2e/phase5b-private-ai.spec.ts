@@ -1,4 +1,4 @@
-// Private AI (AD-079) through the UI, after phase 5 in the same workspace (admin, source „Notizen“, local provider
+// Private AI (AD-079) through the UI, after phase 5 in the same workspace (admin, source „Projektwiki“, local provider
 // „Ollama“ from phase 5 – ticked private by default). Two fake cloud providers record every byte they get:
 // „Claude E2E“ (Anthropic Messages API, not private) and „Ollama ZDR“ (OpenAI-compatible as Ollama Cloud, ticked).
 // Owner 16.11.: switching „Bearbeiten“ between providers kept the first one's fields – and the security rule must hold
@@ -98,8 +98,8 @@ test.beforeAll(async ({ browser }) => {
   await page.getByLabel('E-Mail').fill('e2e@example.test');
   await page.getByLabel('Passwort').fill('E2E-Passwort-12345');
   await page.getByRole('button', { name: 'Anmelden' }).click();
-  await expect(tree().getByText('Notizen', { exact: true }).first()).toBeVisible();
-  await waitIndexed(page, 'Notizen', ['e2e-privat/Tresor.md', 'e2e-offen/Info.md']);
+  await expect(tree().getByText('Projektwiki', { exact: true }).first()).toBeVisible();
+  await waitIndexed(page, 'Projektwiki', ['e2e-privat/Tresor.md', 'e2e-offen/Info.md']);
 });
 
 test.afterAll(async () => {
@@ -110,7 +110,7 @@ test.afterAll(async () => {
   await page.request.put('/api/ai/settings', { data: { defaultId: ollama?.id ?? null, privateDefaultId: null } });
   await page.request.put('/api/state/ai', { data: {} });
   const mounts = (await (await page.request.get('/api/mounts')).json()) as { id: string; name: string }[];
-  const id = mounts.find((m) => m.name === 'Notizen')!.id;
+  const id = mounts.find((m) => m.name === 'Projektwiki')!.id;
   const rules = (await (await page.request.get(`/api/ai/rules?mountId=${id}`)).json()) as { id: string; path: string }[];
   for (const r of (Array.isArray(rules) ? rules : []).filter((r) => r.path.startsWith('e2e-'))) await page.request.delete(`/api/ai/rules/${r.id}`, { data: {} });
   rmSync(join(NOTES, 'e2e-privat'), { recursive: true, force: true });
@@ -135,7 +135,7 @@ test('admin adds a cloud AI and a private cloud AI; effort only where the model 
   await form().getByLabel('Adresse').fill(`${fakeUrl}/claude`);
   await form().getByLabel('API-Key').fill('key-claude-e2e');
   await model().fill('claude-e2e');
-  await expect(form().getByRole('checkbox', { name: 'Für private Notizen zulassen' })).not.toBeChecked();
+  await expect(form().getByRole('checkbox', { name: 'Für private Seiten zulassen' })).not.toBeChecked();
   await form().getByRole('button', { name: 'Verbindung testen' }).click();
   await expect(form().getByText('Verbunden – 1 Modelle zur Auswahl.')).toBeVisible();
   const effort = effortSelect();
@@ -150,7 +150,7 @@ test('admin adds a cloud AI and a private cloud AI; effort only where the model 
   await form().getByLabel('API-Key').fill('key-zdr-e2e');
   await model().fill('gpt-zdr');
   await expect(effortSelect()).toHaveCount(0);
-  const tick = form().getByRole('checkbox', { name: 'Für private Notizen zulassen' });
+  const tick = form().getByRole('checkbox', { name: 'Für private Seiten zulassen' });
   await expect(tick).not.toBeChecked();
   await tick.check();
   await expect(form()).toContainText('Zero Data Retention');
@@ -171,7 +171,7 @@ test('„Bearbeiten“ on another provider shows that provider – and „Speich
   const expectForm = async (name: string, url: string, priv: boolean, effort: string | null) => {
     await expect(form().getByLabel('Name')).toHaveValue(name);
     await expect(form().getByLabel('Adresse')).toHaveValue(url);
-    const tick = form().getByRole('checkbox', { name: 'Für private Notizen zulassen' });
+    const tick = form().getByRole('checkbox', { name: 'Für private Seiten zulassen' });
     if (priv) await expect(tick).toBeChecked();
     else await expect(tick).not.toBeChecked();
     if (effort) await expect(effortSelect().locator('option:checked')).toHaveText(effort);
@@ -219,7 +219,7 @@ test('defaults: Claude for everything, Ollama ZDR for private notes; „Meine KI
     const l = await providers();
     return [l.providers.find((p) => p.id === l.defaultId)?.name, l.providers.find((p) => p.id === l.privateDefaultId)?.name];
   }).toEqual(['Claude E2E', 'Ollama ZDR']);
-  const mine = page.getByLabel('Meine KI für private Notizen');
+  const mine = page.getByLabel('Meine KI für private Seiten');
   await expect(mine.locator('option')).toHaveText(['Standard (Ollama ZDR)', 'Ollama (lokal)', 'Ollama ZDR (Cloud)']);
   await expect(page.getByLabel('Mein Anbieter').locator('option').first()).toHaveText('Standard (Claude E2E)');
   await shot(page, 'ki-anbieter-privat');
@@ -280,7 +280,7 @@ test('asking everything: Claude answers without the private note, „Mit Ollama 
   await dialog.getByRole('button', { name: 'Fragen' }).click();
   await expect(chat.getByText('Claude E2E · claude-e2e · Agent')).toBeVisible();
   await expect(chat.getByText(`Gesehen: ${PUB}`)).toBeVisible();
-  await expect(chat.getByRole('note').filter({ hasText: 'Gefunden wird nur, was für Claude E2E freigegeben ist' })).toContainText('1 passende private Notiz');
+  await expect(chat.getByRole('note').filter({ hasText: 'Gefunden wird nur, was für Claude E2E freigegeben ist' })).toContainText('1 passende private Seite');
   expect(sentTo('claude')).toContain(PUB);
   expect(sentTo('claude')).not.toContain(PRIV);
   // The nosy model guessed the private path itself: it got a refusal, and no search hit named it.
@@ -307,14 +307,14 @@ test('nothing private ever reached the cloud AI; untick → nobody sees the priv
   // Untick on the provider's form: the private note is refused for everyone, nothing is sent.
   await openSettingsPage(page, 'KI');
   await row('Ollama ZDR').getByRole('button', { name: 'Bearbeiten' }).click();
-  await form().getByRole('checkbox', { name: 'Für private Notizen zulassen' }).uncheck();
+  await form().getByRole('checkbox', { name: 'Für private Seiten zulassen' }).uncheck();
   await form().getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(row('Ollama ZDR').getByText('privat', { exact: true })).toHaveCount(0);
   const l = await providers();
   expect(l.providers.find((p) => p.name === 'Ollama ZDR')!.private).toBe(false);
   // The local Ollama is still ticked – the private note may go there only; Claude and ZDR named directly are refused.
   const mounts = (await (await page.request.get('/api/mounts')).json()) as { id: string; name: string }[];
-  const mountId = mounts.find((m) => m.name === 'Notizen')!.id;
+  const mountId = mounts.find((m) => m.name === 'Projektwiki')!.id;
   const count = got.length;
   for (const name of ['Claude E2E', 'Ollama ZDR']) {
     const id = l.providers.find((p) => p.name === name)!.id;

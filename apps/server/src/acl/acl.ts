@@ -166,7 +166,7 @@ export class Acl {
     let noteId: string | null = null;
     if (target === 'note') {
       noteId = (this.db.prepare('SELECT id FROM note_ids WHERE mount_id = ? AND path = ?').get(mountId, path) as { id: string } | undefined)?.id ?? null;
-      if (!noteId) throw new AclError('Notiz nicht gefunden');
+      if (!noteId) throw new AclError('Seite nicht gefunden');
     }
     if (target === 'folder' && !path) throw new AclError('Ordner fehlt');
     let subjectId = subject === 'all' ? null : input.subjectId;

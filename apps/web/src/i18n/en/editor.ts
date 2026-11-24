@@ -2,10 +2,10 @@
 import type { Dictionary } from '@kaveyl-wiki/core';
 
 export default {
-  // Attachments, links below the note
+  // Attachments, links below the page
   'Bild verkleinert': 'Image reduced',
   '{name}: {from} → {to} Pixel, {before} → {after}': '{name}: {from} → {to} pixels, {before} → {after}',
-  'Die Notiz wurde gesperrt – entsperren und die Datei erneut hinzufügen.': 'The note has been locked – unlock it and add the file again.',
+  'Die Seite wurde gesperrt – entsperren und die Datei erneut hinzufügen.': 'The page has been locked – unlock it and add the file again.',
   '„{name}“ nicht angehängt': '“{name}” not attached',
   fehlt: 'missing',
   Anhänge: 'Attachments',
@@ -17,7 +17,7 @@ export default {
   'Herunterladen {name}': 'Download {name}',
   'Verlinkt von': 'Linked from',
   'Verlinkt von ({n})': 'Linked from ({n})',
-  'Ziel fehlt – Klick: Notiz anlegen oder Link bearbeiten': 'Target missing – click: create note or edit link',
+  'Ziel fehlt – Klick: Seite anlegen oder Link bearbeiten': 'Target missing – click: create page or edit link',
   'Icon nicht mehr vorhanden': 'Icon no longer exists',
   'Bild: {alt}': 'Image: {alt}',
   Bild: 'Image',
@@ -36,7 +36,7 @@ export default {
   'Zeichnung wird geladen …': 'Loading drawing …',
   'Gespeichert als SVG in assets/ – überall als Bild sichtbar, hier wieder bearbeitbar.':
     'Saved as SVG in assets/ – visible as an image everywhere, editable again here.',
-  'Zeichnungen gibt es in verschlüsselten Notizen nicht': 'Drawings are not available in encrypted notes',
+  'Zeichnungen gibt es in verschlüsselten Seiten nicht': 'Drawings are not available in encrypted pages',
   'Die Zeichnung läge unverschlüsselt in assets/.': 'The drawing would be stored unencrypted in assets/.',
   'Zeichnung bearbeiten': 'Edit drawing',
   'Neue Zeichnung': 'New drawing',
@@ -57,8 +57,8 @@ export default {
   '– niemand kann sie wiederherstellen. Ältere, unverschlüsselte Versionen bleiben in der Git-Historie lesbar. Titel, Tags und Dateinamen bleiben sichtbar.':
     '– nobody can recover it. Older, unencrypted versions remain readable in the Git history. Titles, tags and file names stay visible.',
   'Noch nichts zum Prüfen da – bitte die Passphrase zur Sicherheit wiederholen.': 'Nothing to check it against yet – please repeat the passphrase to be safe.',
-  'Diese Notiz ist verschlüsselt (Ordner „{folder}“).': 'This note is encrypted (folder “{folder}”).',
-  'Diese Notiz ist verschlüsselt.': 'This note is encrypted.',
+  'Diese Seite ist verschlüsselt (Ordner „{folder}“).': 'This page is encrypted (folder “{folder}”).',
+  'Diese Seite ist verschlüsselt.': 'This page is encrypted.',
   'Entsperren gilt für diese Sitzung, bis {n} Minute lang nichts passiert (Einstellungen → Konto).':
     'Unlocking lasts for this session until nothing happens for {n} minute (Settings → Account).',
   'Entsperren gilt für diese Sitzung, bis {n} Minuten lang nichts passiert (Einstellungen → Konto).':
@@ -66,29 +66,29 @@ export default {
   'Entsperren gilt für diese Sitzung, bis die Seite geschlossen wird (Einstellungen → Konto).':
     'Unlocking lasts for this session until the page is closed (Settings → Account).',
   Entsperren: 'Unlock',
-  'Notiz verschlüsseln': 'Encrypt note',
+  'Seite verschlüsseln': 'Encrypt page',
   'Verschlüsselung entfernen': 'Remove encryption',
-  'Die Notiz wird danach wieder im Klartext gespeichert.': 'The note will then be saved in plain text again.',
+  'Die Seite wird danach wieder im Klartext gespeichert.': 'The page will then be saved in plain text again.',
   'Ordner „{folder}“ fertig verschlüsseln': 'Finish encrypting folder “{folder}”',
-  'Die Passphrase des Ordners – die übrigen Notizen bekommen dieselbe.': 'The folder’s passphrase – the remaining notes get the same one.',
+  'Die Passphrase des Ordners – die übrigen Seiten bekommen dieselbe.': 'The folder’s passphrase – the remaining pages get the same one.',
   'Ordner „{folder}“ verschlüsseln': 'Encrypt folder “{folder}”',
-  'Alle Notizen darin bekommen dieselbe Passphrase, neue werden automatisch verschlüsselt.':
-    'All notes in it get the same passphrase; new ones are encrypted automatically.',
+  'Alle Seiten darin bekommen dieselbe Passphrase, neue werden automatisch verschlüsselt.':
+    'All pages in it get the same passphrase; new ones are encrypted automatically.',
   'Die Passphrase ließ sich nicht prüfen – {error}. Bitte später noch einmal versuchen.':
     'The passphrase could not be checked – {error}. Please try again later.',
-  'Passphrase falsch – sie passt nicht zu den schon verschlüsselten Notizen des Ordners.':
-    'Wrong passphrase – it does not match the notes already encrypted in the folder.',
+  'Passphrase falsch – sie passt nicht zu den schon verschlüsselten Seiten des Ordners.':
+    'Wrong passphrase – it does not match the pages already encrypted in the folder.',
   '{path}: {error} – „Ordner fertig verschlüsseln“ im Menü des Ordners setzt fort.':
     '{path}: {error} – “Finish encrypting folder” in the folder’s menu continues.',
   'Noch unverschlüsselt: {paths} – „Ordner fertig verschlüsseln“ im Menü des Ordners setzt fort.':
     'Still unencrypted: {paths} – “Finish encrypting folder” in the folder’s menu continues.',
-  'Notiz im Ordner „{folder}“ verschlüsseln': 'Encrypt note in folder “{folder}”',
+  'Seite im Ordner „{folder}“ verschlüsseln': 'Encrypt page in folder “{folder}”',
   'Die Passphrase des Ordners.': 'The folder’s passphrase.',
   'Im Ordner gibt es noch nichts, woran sie sich prüfen ließe.': 'There is nothing in the folder yet to check it against.',
   'Verschlüsselung von „{folder}“ aufheben': 'Remove encryption of “{folder}”',
-  'Alle Notizen darin werden wieder im Klartext gespeichert.': 'All notes in it will be saved in plain text again.',
-  '{path}: {error} – die übrigen Notizen bleiben verschlüsselt und lassen sich einzeln entschlüsseln.':
-    '{path}: {error} – the remaining notes stay encrypted and can be decrypted one by one.',
+  'Alle Seiten darin werden wieder im Klartext gespeichert.': 'All pages in it will be saved in plain text again.',
+  '{path}: {error} – die übrigen Seiten bleiben verschlüsselt und lassen sich einzeln entschlüsseln.':
+    '{path}: {error} – the remaining pages stay encrypted and can be decrypted one by one.',
   'Verschlüsselt (age)': 'Encrypted (age)',
   verschlüsselt: 'encrypted',
 
@@ -115,7 +115,7 @@ export default {
   'Icon {name} löschen': 'Delete icon {name}',
   'Lädt …': 'Loading …',
   'Noch keine eigenen Icons.': 'No custom icons yet.',
-  'Icon „{name}“ löschen? Notizen damit zeigen dann ein leeres Feld.': 'Delete icon “{name}”? Notes using it will then show an empty box.',
+  'Icon „{name}“ löschen? Seiten damit zeigen dann ein leeres Feld.': 'Delete icon “{name}”? Pages using it will then show an empty box.',
   Löschen: 'Delete',
   'Icon-Datei': 'Icon file',
   'Hochladen …': 'Upload …',
@@ -124,7 +124,7 @@ export default {
   // Links
   Link: 'Link',
   'Ziel fehlt – dieser Link führt ins Leere.': 'Target missing – this link leads nowhere.',
-  'Notiz anlegen': 'Create note',
+  'Seite anlegen': 'Create page',
   'Im Browser öffnen': 'Open in browser',
   Öffnen: 'Open',
   'In neuem Tab öffnen': 'Open in new tab',
@@ -132,12 +132,12 @@ export default {
   'Link bearbeiten …': 'Edit link …',
   'Link entfernen': 'Remove link',
   'Vorschau: {name}': 'Preview: {name}',
-  'Diese Notiz gibt es (noch) nicht.': 'This note does not exist (yet).',
+  'Diese Seite gibt es (noch) nicht.': 'This page does not exist (yet).',
   'Keine weiteren Inhalte.': 'No further content.',
 
-  'Keine Notiz gefunden': 'No note found',
-  'Titel der Notiz tippen …': 'Type the note’s title …',
-  'Notiz verlinken': 'Link note',
+  'Keine Seite gefunden': 'No page found',
+  'Titel der Seite tippen …': 'Type the page’s title …',
+  'Seite verlinken': 'Link page',
 
   // Math and diagrams
   'Formel bearbeiten': 'Edit formula',
@@ -155,41 +155,41 @@ export default {
   'Keine Schreibrechte in: {sources}': 'No write access in: {sources}',
   '#{tag} umbenennen': 'Rename #{tag}',
   'Neuer Name': 'New name',
-  'Ändert {n} Notiz mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.':
-    'Changes {n} note with #{tag} that you may edit. If the new name already exists, both tags are merged.',
-  'Ändert {n} Notizen mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.':
-    'Changes {n} notes with #{tag} that you may edit. If the new name already exists, both tags are merged.',
+  'Ändert {n} Seite mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.':
+    'Changes {n} page with #{tag} that you may edit. If the new name already exists, both tags are merged.',
+  'Ändert {n} Seiten mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.':
+    'Changes {n} pages with #{tag} that you may edit. If the new name already exists, both tags are merged.',
   Umbenennen: 'Rename',
-  '#{other} gibt es schon ({n} Notiz). #{tag} damit zusammenführen? Notizen mit beiden Tags behalten es einmal.':
-    '#{other} already exists ({n} note). Merge #{tag} into it? Notes with both tags keep it once.',
-  '#{other} gibt es schon ({n} Notizen). #{tag} damit zusammenführen? Notizen mit beiden Tags behalten es einmal.':
-    '#{other} already exists ({n} notes). Merge #{tag} into it? Notes with both tags keep it once.',
+  '#{other} gibt es schon ({n} Seite). #{tag} damit zusammenführen? Seiten mit beiden Tags behalten es einmal.':
+    '#{other} already exists ({n} page). Merge #{tag} into it? Pages with both tags keep it once.',
+  '#{other} gibt es schon ({n} Seiten). #{tag} damit zusammenführen? Seiten mit beiden Tags behalten es einmal.':
+    '#{other} already exists ({n} pages). Merge #{tag} into it? Pages with both tags keep it once.',
   Zusammenführen: 'Merge',
   '#{tag} mit #{other} zusammengeführt': '#{tag} merged into #{other}',
   '#{tag} heißt jetzt #{to}': '#{tag} is now called #{to}',
-  '{n} Notiz geändert, {skipped} ohne Schreibrecht unverändert.': '{n} note changed, {skipped} unchanged without write access.',
-  '{n} Notizen geändert, {skipped} ohne Schreibrecht unverändert.': '{n} notes changed, {skipped} unchanged without write access.',
-  '{n} Notiz geändert.': '{n} note changed.',
-  '{n} Notizen geändert.': '{n} notes changed.',
+  '{n} Seite geändert, {skipped} ohne Schreibrecht unverändert.': '{n} page changed, {skipped} unchanged without write access.',
+  '{n} Seiten geändert, {skipped} ohne Schreibrecht unverändert.': '{n} pages changed, {skipped} unchanged without write access.',
+  '{n} Seite geändert.': '{n} page changed.',
+  '{n} Seiten geändert.': '{n} pages changed.',
   'Umbenennen fehlgeschlagen': 'Renaming failed',
-  'Notizen mit #{tag} zeigen': 'Show notes with #{tag}',
+  'Seiten mit #{tag} zeigen': 'Show pages with #{tag}',
   Farbe: 'Colour',
   'Keine Farbe': 'No colour',
   'Umbenennen / zusammenführen …': 'Rename / merge …',
   Tags: 'Tags',
-  'Alle Notizen mit #{tag}': 'All notes with #{tag}',
+  'Alle Seiten mit #{tag}': 'All pages with #{tag}',
   'Tag {tag} entfernen': 'Remove tag {tag}',
   'Farben anpassen, umbenennen oder doppelte Tags zusammenführen.': 'Change colours, rename or merge duplicate tags.',
-  'Doppelklick zeigt die Notizen mit #{tag}': 'Double-click shows the notes with #{tag}',
-  'Ein Tag anklicken: Notizen zeigen, Farbe wählen, umbenennen, zusammenführen oder löschen (auch per Rechtsklick).': 'Click a tag: show its notes, pick a colour, rename, merge or delete (also by right-click).',
+  'Doppelklick zeigt die Seiten mit #{tag}': 'Double-click shows the pages with #{tag}',
+  'Ein Tag anklicken: Seiten zeigen, Farbe wählen, umbenennen, zusammenführen oder löschen (auch per Rechtsklick).': 'Click a tag: show its pages, pick a colour, rename, merge or delete (also by right-click).',
   'Tag #{tag}': 'Tag #{tag}',
-  'Farbe, Name oder Zusammenführung für alle zugeordneten Notizen ändern – oder den Tag aus allen entfernen': 'Change colour, name or merge for all notes with it – or take the tag off all of them',
-  '#{tag} aus {n} Notiz entfernen? Die Notiz selbst bleibt, auch ihre anderen Tags.': 'Remove #{tag} from {n} note? The note itself stays, and so do its other tags.',
-  '#{tag} aus {n} Notizen entfernen? Die Notizen selbst bleiben, auch ihre anderen Tags.': 'Remove #{tag} from {n} notes? The notes themselves stay, and so do their other tags.',
+  'Farbe, Name oder Zusammenführung für alle zugeordneten Seiten ändern – oder den Tag aus allen entfernen': 'Change colour, name or merge for all pages with it – or take the tag off all of them',
+  '#{tag} aus {n} Seite entfernen? Die Seite selbst bleibt, auch ihre anderen Tags.': 'Remove #{tag} from {n} page? The page itself stays, and so do its other tags.',
+  '#{tag} aus {n} Seiten entfernen? Die Seiten selbst bleiben, auch ihre anderen Tags.': 'Remove #{tag} from {n} pages? The pages themselves stay, and so do their other tags.',
   'Tag entfernen': 'Remove tag',
   '#{tag} entfernt': '#{tag} removed',
   'Tag nicht entfernt': 'Tag not removed',
-  'Aus allen Notizen entfernen …': 'Remove from all notes …',
+  'Aus allen Seiten entfernen …': 'Remove from all pages …',
   '#{tag} zusammenführen': 'Merge #{tag}',
   'Mit Tag': 'Into tag',
   'Tags verwalten': 'Manage tags',
@@ -205,8 +205,8 @@ export default {
   'Neuer Tag': 'New tag',
   'Tags filtern …': 'Filter tags …',
   'Tags filtern': 'Filter tags',
-  'Keine Tags. Tags stehen im Frontmatter (`tags:`) oder werden über „+ Tag“ oben in einer Notiz vergeben.':
-    'No tags. Tags are in the frontmatter (`tags:`) or are added with “+ Tag” at the top of a note.',
+  'Keine Tags. Tags stehen im Frontmatter (`tags:`) oder werden über „+ Tag“ oben auf einer Seite vergeben.':
+    'No tags. Tags are in the frontmatter (`tags:`) or are added with “+ Tag” at the top of a page.',
   'In den Quellen unterschiedlich gefärbt – gezeigt wird die häufigste Farbe': 'Coloured differently in the sources – the most common colour is shown',
   Inhaltsverzeichnis: 'Table of contents',
   Inhalt: 'Contents',
@@ -253,9 +253,9 @@ export default {
   'Überschrift mit einklappbarem Inhalt': 'Heading with collapsible content',
   Trennlinie: 'Divider',
   'Horizontale Linie': 'Horizontal line',
-  'Notiz suchen und verlinken (auch mit [[)': 'Search for a note and link it (also with [[)',
+  'Seite suchen und verlinken (auch mit [[)': 'Search for a page and link it (also with [[)',
   'Datei oder Bild': 'File or image',
-  'Hochladen nach assets/ neben der Notiz': 'Upload to assets/ next to the note',
+  'Hochladen nach assets/ neben der Seite': 'Upload to assets/ next to the page',
   'Zeichnung (Excalidraw)': 'Drawing (Excalidraw)',
   'Skizze, Whiteboard – als SVG in assets/, später wieder bearbeitbar': 'Sketch, whiteboard – as SVG in assets/, editable again later',
   'Diagramm (Mermaid)': 'Diagram (Mermaid)',
@@ -264,7 +264,7 @@ export default {
   'LaTeX, z. B. \\frac{a}{b} – als $$ … $$': 'LaTeX, e.g. \\frac{a}{b} – as $$ … $$',
   'Formel im Text': 'Inline formula',
   'LaTeX im Satz – als $ … $': 'LaTeX within a sentence – as $ … $',
-  'URL oder Pfad zu einer Notiz': 'URL or path to a note',
+  'URL oder Pfad zu einer Seite': 'URL or path to a page',
   'Link einfügen': 'Insert link',
   Datum: 'Date',
   'Heute: {date}': 'Today: {date}',
@@ -273,9 +273,9 @@ export default {
   'Datum und Uhrzeit': 'Date and time',
   Einfügen: 'Insert',
   'Link-Ziel': 'Link target',
-  'https://… oder ../notiz.md': 'https://… or ../note.md',
-  'Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Notiz. Notizen per Suche: [[ tippen.':
-    'Web address (www.… is enough), e-mail or relative path to a note. To search for notes: type [[.',
+  'https://… oder ../seite.md': 'https://… or ../page.md',
+  'Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Seite. Seiten per Suche: [[ tippen.':
+    'Web address (www.… is enough), e-mail or relative path to a page. To search for pages: type [[.',
   Linktext: 'Link text',
   'leer = das Link-Ziel': 'empty = the link target',
   'Kein Befehl gefunden': 'No command found',
@@ -283,8 +283,8 @@ export default {
   // Toolbar
   'Link bearbeiten': 'Edit link',
   'Link setzen': 'Set link',
-  'Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Notiz. Leer lassen entfernt den Link.':
-    'Web address (www.… is enough), e-mail or relative path to a note. Leaving it empty removes the link.',
+  'Web-Adresse (www.… reicht), E-Mail oder relativer Pfad zu einer Seite. Leer lassen entfernt den Link.':
+    'Web address (www.… is enough), e-mail or relative path to a page. Leaving it empty removes the link.',
   Formatierung: 'Formatting',
   'Rückgängig (Strg+Z)': 'Undo (Ctrl+Z)',
   'Wiederholen (Strg+Umschalt+Z)': 'Redo (Ctrl+Shift+Z)',
@@ -331,57 +331,57 @@ export default {
   Spaltenbreite: 'Column width',
   'So breit wie die Textspalte': 'As wide as the text column',
 
-  // Note view
-  'Diese Notiz existiert nicht (mehr).': 'This note does not exist (any more).',
-  'Notiz konnte nicht geladen werden.': 'The note could not be loaded.',
+  // Page view
+  'Diese Seite existiert nicht (mehr).': 'This page does not exist (any more).',
+  'Seite konnte nicht geladen werden.': 'The page could not be loaded.',
   'Vielleicht wurde sie verschoben oder gelöscht.': 'Perhaps it was moved or deleted.',
-  'Notiz verschlüsselt': 'Note encrypted',
+  'Seite verschlüsselt': 'Page encrypted',
   'Verschlüsselung entfernt': 'Encryption removed',
   'Nicht verschlüsselt': 'Not encrypted',
   'Nicht entschlüsselt': 'Not decrypted',
   'Tags nicht gespeichert': 'Tags not saved',
-  'Diese Notiz wurde außerhalb gelöscht oder verschoben.': 'This note was deleted or moved outside the app.',
-  'Die Notiz wurde außerhalb geändert, während du sie bearbeitet hast.': 'The note was changed outside the app while you were editing it.',
+  'Diese Seite wurde außerhalb gelöscht oder verschoben.': 'This page was deleted or moved outside the app.',
+  'Die Seite wurde außerhalb geändert, während du sie bearbeitet hast.': 'The page was changed outside the app while you were editing it.',
   'Fremde Version laden': 'Load the other version',
   'Meine Version speichern': 'Save my version',
   'Zusammengeführt': 'Merged',
   'Nicht zusammengeführt': 'Not merged',
   'Ihr habt dieselbe Stelle geändert. Sieh dir die Unterschiede an und wähle eine Fassung.': 'You both changed the same place. Look at the differences and choose a version.',
-  'Deine Änderungen und die der anderen Seite sind beide in der Notiz.': 'Your changes and those of the other side are both in the note.',
-  'Diese Notiz wurde außerhalb gelöscht oder verschoben. Deine Fassung kannst du als neue Notiz sichern.':
-    'This note was deleted or moved outside the app. You can keep your version as a new note.',
-  'Als neue Notiz speichern …': 'Save as a new note …',
+  'Deine Änderungen und die der anderen stehen jetzt beide auf der Seite.': 'Your changes and the others’ are now both on the page.',
+  'Diese Seite wurde außerhalb gelöscht oder verschoben. Deine Fassung kannst du als neue Seite sichern.':
+    'This page was deleted or moved outside the app. You can keep your version as a new page.',
+  'Als neue Seite speichern …': 'Save as a new page …',
   'Unterschiede ansehen': 'Show differences',
   'Unterschiede nicht geladen': 'Differences not loaded',
-  'Deine ungespeicherten Änderungen an dieser Notiz gehen dabei verloren. Fremde Version trotzdem laden?':
-    'Your unsaved changes to this note will be lost. Load the other version anyway?',
+  'Deine ungespeicherten Änderungen an dieser Seite gehen dabei verloren. Fremde Version trotzdem laden?':
+    'Your unsaved changes to this page will be lost. Load the other version anyway?',
   'Verwerfen und laden': 'Discard and load',
   'Unterschiede zur fremden Version': 'Differences from the other version',
   'Rot mit „-“: steht nur in der fremden Version. Grün mit „+“: steht nur in deiner Fassung.':
     'Red with “-”: only in the other version. Green with “+”: only in your version.',
   'Beide Fassungen sind gleich.': 'Both versions are the same.',
-  'Deine Fassung wird eine neue Notiz. Bilder und Anhänge, auf die sie verweist, kommen mit.':
-    'Your version becomes a new note. Images and attachments it points to come along.',
-  'Diese Notiz liegt unverschlüsselt im verschlüsselten Ordner „{folder}“ und lässt sich so nicht speichern.':
-    'This note lies unencrypted in the encrypted folder “{folder}” and cannot be saved like this.',
+  'Deine Fassung wird eine neue Seite. Bilder und Anhänge, auf die sie verweist, kommen mit.':
+    'Your version becomes a new page. Images and attachments it points to come along.',
+  'Diese Seite liegt unverschlüsselt im verschlüsselten Ordner „{folder}“ und lässt sich so nicht speichern.':
+    'This page lies unencrypted in the encrypted folder “{folder}” and cannot be saved like this.',
   'Jetzt verschlüsseln': 'Encrypt now',
   'Schreibe etwas oder tippe „/“ für Befehle …': 'Write something or type “/” for commands …',
-  'Notiz nicht angelegt': 'Note not created',
+  'Seite nicht angelegt': 'Page not created',
   'Bild groß anzeigen': 'View image large',
-  'Icon der Notiz': 'Note icon',
-  'Pfad der Notiz': 'Note path',
+  'Icon der Seite': 'Page icon',
+  'Pfad der Seite': 'Page path',
   'Icon ändern': 'Change icon',
   'Aus Favoriten entfernen': 'Remove from Favourites',
   'Zu Favoriten': 'Add to Favourites',
   Schreibgeschützt: 'Read-only',
   'Wieder sperren': 'Lock again',
-  'Notiz ist als schreibgeschützt markiert – zum Bearbeiten entsperren': 'The note is marked read-only – unlock to edit',
+  'Seite ist als schreibgeschützt markiert – zum Bearbeiten entsperren': 'The page is marked read-only – unlock to edit',
   Entsperrt: 'Unlocked',
   'Nur lesen': 'Read only',
   'Visueller Editor': 'Visual editor',
   'Zu groß oder zu verschachtelt für den Editor – nur als Markdown-Quelltext': 'Too large or too nested for the editor – Markdown source only',
-  'Diese Notiz ist zu groß (über 256 KB) oder zu verschachtelt für den Editor und erscheint als Markdown-Quelltext. Ihre Links auf andere Notizen zählen nicht für Rückverweise und die Link-Prüfung.':
-    'This note is too large (over 256 KB) or too nested for the editor and appears as Markdown source. Its links to other notes do not count for backlinks and the link check.',
+  'Diese Seite ist zu groß (über 256 KB) oder zu verschachtelt für den Editor und erscheint als Markdown-Quelltext. Ihre Links auf andere Seiten zählen nicht für Rückverweise und die Link-Prüfung.':
+    'This page is too large (over 256 KB) or too nested for the editor and appears as Markdown source. Its links to other pages do not count for backlinks and the link check.',
   Editor: 'Editor',
   'Markdown-Quelltext': 'Markdown source',
   Markdown: 'Markdown',
@@ -408,22 +408,22 @@ export default {
   'Umbenennen / verschieben': 'Rename / move',
   'Geteilte Ansicht schließen': 'Close split view',
   'Inhaltsverzeichnis ein-/ausblenden': 'Show/hide table of contents',
-  'Große Notiz: ohne Hervorhebung und Inhaltsverzeichnis, damit die Ansicht flüssig bleibt.': 'Large note: no highlighting and no table of contents, so the view stays smooth.',
-  '← Kennung der Notiz – nicht ändern oder löschen': '← ID of the note – do not change or delete',
-  'Daran erkennt Kaveyl Wiki die Notiz wieder, auch wenn sie außerhalb umbenannt oder verschoben wird. Rechte und KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.':
-    'Kaveyl Wiki recognises the note by it, even when it is renamed or moved elsewhere. Permissions and AI approvals set on this very note depend on it.',
+  'Große Seite: ohne Hervorhebung und Inhaltsverzeichnis, damit die Ansicht flüssig bleibt.': 'Large page: no highlighting and no table of contents, so the view stays smooth.',
+  '← Kennung der Seite – nicht ändern oder löschen': '← ID of the page – do not change or delete',
+  'Daran erkennt Kaveyl Wiki die Seite wieder, auch wenn sie außerhalb umbenannt oder verschoben wird. Rechte und KI-Freigaben, die direkt auf dieser Seite liegen, hängen daran.':
+    'Kaveyl Wiki recognises the page by it, even when it is renamed or moved elsewhere. Permissions and AI approvals set on this very page depend on it.',
   'Normale Breite': 'Normal width',
   'Volle Breite': 'Full width',
   'Normale Breite (Breite in Einstellungen → Darstellung)': 'Normal width (width in Settings → Appearance)',
   '{names} bearbeitet gerade': '{names} is editing',
   '{names} bearbeiten gerade': '{names} are editing',
-  '{names} bearbeitet diese Notiz gerade. Wenn ihr beide ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der beiden Fassungen gewählt werden – was nur in der anderen steht, fehlt dann in der Notiz.':
-    '{names} is editing this note right now. If you both make changes, whoever saves later gets a notice: changes in different places can be merged. If you changed the same place, one of the two versions has to be chosen – whatever is only in the other one will then be missing from the note.',
-  '{names} bearbeiten diese Notiz gerade. Wenn ihr gleichzeitig ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der Fassungen gewählt werden – was nur in den anderen steht, fehlt dann in der Notiz.':
-    '{names} are editing this note right now. If you make changes at the same time, whoever saves later gets a notice: changes in different places can be merged. If you changed the same place, one of the versions has to be chosen – whatever is only in the others will then be missing from the note.',
+  '{names} bearbeitet diese Seite gerade. Wenn ihr beide ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der beiden Fassungen gewählt werden – was nur in der anderen steht, fehlt dann auf der Seite.':
+    '{names} is editing this page right now. If you both make changes, whoever saves later gets a notice: changes in different places can be merged. If you changed the same place, one of the two versions has to be chosen – whatever is only in the other one will then be missing from the page.',
+  '{names} bearbeiten diese Seite gerade. Wenn ihr gleichzeitig ändert, bekommt, wer später speichert, einen Hinweis: Änderungen an verschiedenen Stellen lassen sich zusammenführen. Habt ihr dieselbe Stelle geändert, muss eine der Fassungen gewählt werden – was nur in den anderen steht, fehlt dann auf der Seite.':
+    '{names} are editing this page right now. If you make changes at the same time, whoever saves later gets a notice: changes in different places can be merged. If you changed the same place, one of the versions has to be chosen – whatever is only in the others will then be missing from the page.',
   'Trotzdem bearbeiten': 'Edit anyway',
-  '{names} hat die Notiz offen': '{names} has the note open',
-  '{names} haben die Notiz offen': '{names} have the note open',
+  '{names} hat die Seite offen': '{names} has the page open',
+  '{names} haben die Seite offen': '{names} have the page open',
   'Speichert …': 'Saving …',
   Ungespeichert: 'Unsaved',
   'Nicht gespeichert': 'Not saved',
@@ -434,11 +434,11 @@ export default {
   'Deine Sitzung ist abgelaufen. Melde dich in einem neuen Tab an – danach speichert Kaveyl Wiki hier automatisch.':
     'Your session has expired. Sign in in a new tab – Kaveyl Wiki then saves here automatically.',
   'Anderes Konto angemeldet': 'Another account signed in',
-  'In diesem Browser ist inzwischen ein anderes Konto angemeldet. Gespeichert wird nur unter dem Konto, mit dem die Notiz geöffnet wurde.':
-    'Another account has signed in in this browser meanwhile. Saving happens only under the account the note was opened with.',
-  'Notiz nicht mehr vorhanden': 'Note no longer there',
-  'Die Notiz wurde gelöscht oder verschoben – wie du deine Fassung sicherst, steht im Hinweis über dem Text.':
-    'The note was deleted or moved – the notice above the text shows how to keep your version.',
+  'In diesem Browser ist inzwischen ein anderes Konto angemeldet. Gespeichert wird nur unter dem Konto, mit dem die Seite geöffnet wurde.':
+    'Another account has signed in in this browser meanwhile. Saving happens only under the account the page was opened with.',
+  'Seite nicht mehr vorhanden': 'Page no longer there',
+  'Die Seite wurde gelöscht oder verschoben – wie du deine Fassung sicherst, steht im Hinweis über dem Text.':
+    'The page was deleted or moved – the notice above the text shows how to keep your version.',
   Serverfehler: 'Server error',
   '{message} – Kaveyl Wiki versucht es automatisch erneut. Hält der Fehler an, findet ein Administrator die Ursache im Server-Protokoll.':
     '{message} – Kaveyl Wiki tries again automatically. If the error persists, an administrator finds the cause in the server log.',

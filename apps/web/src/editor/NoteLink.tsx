@@ -50,11 +50,11 @@ const NoteList = forwardRef<MenuHandle, SuggestionProps<SearchHit>>(function Not
   if (!items.length)
     return (
       <div className="rounded-lg border border-line bg-bg px-3 py-2 text-sm text-fg-muted shadow-pop">
-        {query ? t('Keine Notiz gefunden') : t('Titel der Notiz tippen …')}
+        {query ? t('Keine Seite gefunden') : t('Titel der Seite tippen …')}
       </div>
     );
   return (
-    <div ref={listRef} className="max-h-80 w-80 overflow-y-auto rounded-lg border border-line bg-bg p-1 shadow-pop" role="listbox" aria-label={t('Notiz verlinken')}>
+    <div ref={listRef} className="max-h-80 w-80 overflow-y-auto rounded-lg border border-line bg-bg p-1 shadow-pop" role="listbox" aria-label={t('Seite verlinken')}>
       {items.map((item, i) => (
         <button
           key={item.path}

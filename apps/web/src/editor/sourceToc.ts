@@ -81,8 +81,8 @@ class IdHint extends WidgetType {
   toDOM() {
     const span = document.createElement('span');
     span.className = 'cm-note-id-hint';
-    span.textContent = t('← Kennung der Notiz – nicht ändern oder löschen');
-    span.title = t('Daran erkennt Kaveyl Wiki die Notiz wieder, auch wenn sie außerhalb umbenannt oder verschoben wird. Rechte und KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.');
+    span.textContent = t('← Kennung der Seite – nicht ändern oder löschen');
+    span.title = t('Daran erkennt Kaveyl Wiki die Seite wieder, auch wenn sie außerhalb umbenannt oder verschoben wird. Rechte und KI-Freigaben, die direkt auf dieser Seite liegen, hängen daran.');
     return span;
   }
   ignoreEvent() {

@@ -32,7 +32,7 @@ export function reportText(r: ReportInput): string {
     '',
     t(`Importiert aus ${t(r.format)} am ${date} von ${r.by} (Datei „${r.fileName}“).`),
     '',
-    `- ${t('Notizen')}: ${r.notes}`,
+    `- ${t('Seiten')}: ${r.notes}`,
     `- ${t('Dateien')}: ${r.files}`,
     `- ${t('Ordner')}: ${r.folders}`,
     '',

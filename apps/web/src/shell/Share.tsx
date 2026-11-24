@@ -10,7 +10,7 @@ import { toast } from '../toast';
 import { Button, Field, Input, Modal, Spinner, fillNodes, FormError } from '../ui';
 
 const ACCESS: Record<AclTarget, Record<'read' | 'write', string>> = {
-  note: { read: t('Leserecht auf diese eine Notiz'), write: t('Lese- und Schreibrecht auf diese eine Notiz') },
+  note: { read: t('Leserecht auf diese eine Seite'), write: t('Lese- und Schreibrecht auf diese eine Seite') },
   folder: { read: t('Leserecht auf diesen Ordner mit allem darin'), write: t('Lese- und Schreibrecht auf diesen Ordner mit allem darin') },
   mount: { read: t('Leserecht auf diese ganze Quelle'), write: t('Lese- und Schreibrecht auf diese ganze Quelle') },
 };
@@ -48,7 +48,7 @@ export function ShareDialog({ mountId, target, path, title, more = [], onClose }
             ? t('{email} hat ein Konto und kann „{title}“ jetzt lesen und bearbeiten – eine Hinweis-Mail ist unterwegs.', who)
             : t('{email} hat ein Konto und kann „{title}“ jetzt lesen – eine Hinweis-Mail ist unterwegs.', who)
           : target === 'note'
-            ? t('Einladung an {email} verschickt. Nach dem Annehmen sieht die Person als Gast nur diese Notiz.', who)
+            ? t('Einladung an {email} verschickt. Nach dem Annehmen sieht die Person als Gast nur diese Seite.', who)
             : t('Einladung an {email} verschickt. Nach dem Annehmen sieht die Person als Gast nur „{title}“ mit allem darin.', who),
       ]);
       setEmail('');
@@ -159,13 +159,13 @@ export function MailNotesDialog({ mountId, notes, onClose }: { mountId: string; 
       help="per-mail-versenden"
       open
       onOpenChange={(o) => !o && onClose()}
-      title={one ? t('„{title}“ per Mail versenden', { title: notes[0]!.title }) : t('{n} Notizen per Mail versenden', { n: String(notes.length) })}
+      title={one ? t('„{title}“ per Mail versenden', { title: notes[0]!.title }) : t('{n} Seiten per Mail versenden', { n: String(notes.length) })}
     >
       <div className="space-y-3 text-sm">
         <p className="text-fg-muted">
           {one
-            ? t('Die Notiz geht als Markdown-Datei (.md) im Anhang an jede Adresse – mit Bildern oder Dateien als ZIP. Ohne Link: Die Empfänger brauchen kein Konto. Antworten gehen an dich.')
-            : t('Die Notizen gehen als Markdown-Dateien (.md) im Anhang an jede Adresse – mit Bildern oder Dateien als ZIP. Ohne Link: Die Empfänger brauchen kein Konto. Antworten gehen an dich.')}
+            ? t('Die Seite geht als Markdown-Datei (.md) im Anhang an jede Adresse – mit Bildern oder Dateien als ZIP. Ohne Link: Die Empfänger brauchen kein Konto. Antworten gehen an dich.')
+            : t('Die Seiten gehen als Markdown-Dateien (.md) im Anhang an jede Adresse – mit Bildern oder Dateien als ZIP. Ohne Link: Die Empfänger brauchen kein Konto. Antworten gehen an dich.')}
         </p>
         {!one && <p className="text-xs text-fg-muted">{notes.map((n) => `„${n.title}“`).join(', ')}</p>}
         {!mail ? (

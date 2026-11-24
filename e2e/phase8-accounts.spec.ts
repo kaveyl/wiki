@@ -148,10 +148,10 @@ test('admin invites a new user by mail; the person sets name and password', asyn
   await nora.getByRole('button', { name: 'Konto einrichten' }).click();
   await expect(nora.locator('aside nav[aria-label="Quellen"]')).toBeVisible();
   // A normal user: the default level applies, the source is there.
-  await expect(nora.locator('aside nav[aria-label="Quellen"] [data-mount]', { hasText: 'Notizen' })).toBeVisible();
+  await expect(nora.locator('aside nav[aria-label="Quellen"] [data-mount]', { hasText: 'Projektwiki' })).toBeVisible();
   // Her own start page: steps for a user, nothing an admin sets up.
   const welcome = nora.getByTestId('welcome');
-  await expect(welcome.getByText('Notizen finden', { exact: true })).toBeVisible();
+  await expect(welcome.getByText('Seiten finden', { exact: true })).toBeVisible();
   await expect(welcome.getByText('Favoriten merken', { exact: true })).toBeVisible();
   // No app to download (AD-061): the way for this browser only – Chromium on a computer.
   await expect(welcome.getByText('Kaveyl Wiki wie eine App benutzen', { exact: true })).toBeVisible();
@@ -177,10 +177,10 @@ test('a note shared by e-mail: the guest sees only that note', async ({ browser 
   await admin.keyboard.press('Escape');
 
   const mail = await smtp.waitFor('kunde@example.test');
-  expect(mail.subject).toBe('E2E Admin hat die Notiz „roadmap“ mit dir geteilt');
+  expect(mail.subject).toBe('E2E Admin hat die Seite „roadmap“ mit dir geteilt');
   const guest = await stranger(browser);
   await guest.goto(pathOf(FakeSmtp.link(mail, '#invite=')));
-  await expect(guest.getByText('hat die Notiz „roadmap“ mit dir geteilt')).toBeVisible();
+  await expect(guest.getByText('hat die Seite „roadmap“ mit dir geteilt')).toBeVisible();
   await guest.getByLabel('Passwort', { exact: true }).fill('Karls-Passwort-2026');
   await guest.getByLabel('Passwort wiederholen').fill('Karls-Passwort-2026');
   await guest.getByRole('button', { name: 'Konto einrichten' }).click();
@@ -262,7 +262,7 @@ test('„Rechte“: who may what as a grid – the level right in the cell, one 
   const olaf = grid.getByRole('row').filter({ hasText: 'Olaf Ordner' });
   // The shared folder is an exception further down; the cell itself: no access, nothing of his own.
   await expect(olaf.getByRole('button', { name: '+1 Ausnahme' })).toBeVisible();
-  const cell = grid.getByLabel('Olaf Ordner in Notizen');
+  const cell = grid.getByLabel('Olaf Ordner in Projektwiki');
   await expect(cell).toHaveValue('none');
   // A guest is never offered „verwalten“.
   await expect(cell.locator('option')).toHaveText(['kein Zugriff', 'lesen', 'lesen & schreiben']);
@@ -274,7 +274,7 @@ test('„Rechte“: who may what as a grid – the level right in the cell, one 
   const size = admin.viewportSize()!;
   await admin.setViewportSize({ width: 390, height: 844 });
   const card = settings.getByRole('region', { name: 'Olaf Ordner' });
-  await expect(card.getByLabel('Olaf Ordner in Notizen')).toHaveValue('read');
+  await expect(card.getByLabel('Olaf Ordner in Projektwiki')).toHaveValue('read');
   await expect(card.getByRole('button', { name: /^Alle \d+ Quellen/ })).toBeVisible();
   await shot(admin, '99c-rechte-handy');
   await admin.setViewportSize(size);
@@ -289,8 +289,8 @@ test('„Rechte“: who may what as a grid – the level right in the cell, one 
   await expect(cell).toHaveValue('none');
   await expect.poll(ownRules).toBe(0);
   // One source: everyone below each other.
-  await grid.getByRole('columnheader').getByRole('button', { name: 'Notizen', exact: true }).click();
-  await expect(settings.getByRole('list', { name: 'Rechte in Notizen' })).toContainText('Olaf Ordner');
+  await grid.getByRole('columnheader').getByRole('button', { name: 'Projektwiki', exact: true }).click();
+  await expect(settings.getByRole('list', { name: 'Rechte in Projektwiki' })).toContainText('Olaf Ordner');
   await settings.getByRole('button', { name: 'Alle Quellen' }).click();
   // One person: the exception under its source – removing it is the ordinary removal of the rule, after a question.
   await olaf.getByRole('button', { name: '+1 Ausnahme' }).click();
@@ -382,13 +382,13 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
   await expect(admin.getByRole('menu')).toContainText('2 markiert');
   await shot(admin, '89-mehrere-markiert');
   await admin.getByRole('menuitem', { name: 'Per Mail versenden …' }).click();
-  const dialog = admin.getByRole('dialog', { name: '2 Notizen per Mail versenden' });
+  const dialog = admin.getByRole('dialog', { name: '2 Seiten per Mail versenden' });
   await dialog.getByLabel('An').fill('partner@extern.test, zweite@extern.test');
   await shot(admin, '89b-per-mail-versenden');
   await dialog.getByRole('button', { name: 'Senden' }).click();
   await expect(admin.getByText('An 2 Adressen verschickt')).toBeVisible();
   const mail = await smtp.waitFor('partner@extern.test');
-  expect(mail.subject).toBe('E2E Admin hat dir 2 Notizen aus Kaveyl Wiki geschickt');
+  expect(mail.subject).toBe('E2E Admin hat dir 2 Seiten aus Kaveyl Wiki geschickt');
   expect(mail.text).toContain('Antworten auf diese Mail gehen an E2E Admin.');
   expect(mail.raw).toMatch(/filename="?tagged\.(md|zip)"?/);
   expect(mail.raw).toMatch(/filename="?roadmap\.(md|zip)"?/);
@@ -412,7 +412,7 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
     { name: 'Import Eins.md', mimeType: 'text/markdown', buffer: Buffer.from('---\ntags: [import]\n---\n# Import Eins\n\nAus einer Datei.\n') },
     { name: 'Import Zwei.md', mimeType: 'text/markdown', buffer: Buffer.from('# Import Zwei\n') },
   ]);
-  await expect(admin.getByText('2 Notizen importiert')).toBeVisible();
+  await expect(admin.getByText('2 Seiten importiert')).toBeVisible();
   const one = tree.locator('[data-node$=":plan/Import Eins.md"]');
   const two = tree.locator('[data-node$=":plan/Import Zwei.md"]');
   await expect(one).toBeVisible();
@@ -447,7 +447,7 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
   await imp.getByRole('button', { name: 'ZIP-Datei wählen …' }).click();
   // HedgeDoc names its download „archive.zip“ – the folder is then called after the program.
   await (await zipChooser).setFiles({ name: 'archive.zip', mimeType: 'application/zip', buffer: readFileSync(resolve(import.meta.dirname, '../apps/server/src/import/fixtures/hedgedoc-1.12.0.zip')) });
-  await expect(imp.getByTestId('import-counts')).toContainText('60 Notizen · 0 Dateien · 0 Ordner');
+  await expect(imp.getByTestId('import-counts')).toContainText('60 Seiten · 0 Dateien · 0 Ordner');
   await expect(imp.getByLabel('Format')).toHaveValue('hedgedoc');
   await expect(imp.getByLabel('Neuer Ordner')).toHaveValue('Import aus HedgeDoc');
   // Pictures stay on the HedgeDoc server in its export: fetching them is offered (ticked).
@@ -458,9 +458,9 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
   await imp.getByRole('button', { name: 'Importieren', exact: true }).click();
   await expect(admin.getByText('Import fertig')).toBeVisible();
   await expect(tree.locator('[data-node$=":plan/Import aus HedgeDoc/Hinweisboxen.md"]')).toBeVisible();
-  await expect(admin.locator('.prose-note').filter({ visible: true })).toContainText('Leere Notizen – nicht übernommen (1)');
+  await expect(admin.locator('.prose-note').filter({ visible: true })).toContainText('Leere Seiten – nicht übernommen (1)');
   // The fixture's server is on this machine – never fetched from there, so the report names them.
-  await expect(admin.locator('.prose-note').filter({ visible: true })).toContainText('Notizen mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links (3)');
+  await expect(admin.locator('.prose-note').filter({ visible: true })).toContainText('Seiten mit Bildern, die sich vom alten Server nicht holen ließen – sie bleiben Web-Links (3)');
   // Out again: later specs count notes and the trash.
   expect((await admin.request.delete(`/api/notes/${mountId}/plan/Import aus HedgeDoc`, { data: {} })).ok()).toBe(true);
   const trash2 = (await (await admin.request.get(`/api/trash/${mountId}`)).json()) as { items: { id: string }[] };

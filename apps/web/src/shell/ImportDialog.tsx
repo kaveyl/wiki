@@ -92,7 +92,7 @@ export function ImportDialog({ mountId, parent, where, onClose }: { mountId: str
       const ws = useWorkspace.getState();
       ws.revealInTree(mountId, r.report);
       ws.openNote(mountId, r.report, t('Import-Bericht'));
-      toast({ kind: 'ok', title: t('Import fertig'), text: `${tn(r.notes, '{n} Notiz', '{n} Notizen')}, ${tn(r.files, '{n} Datei', '{n} Dateien')} → ${r.folder}` });
+      toast({ kind: 'ok', title: t('Import fertig'), text: `${tn(r.notes, '{n} Seite', '{n} Seiten')}, ${tn(r.files, '{n} Datei', '{n} Dateien')} → ${r.folder}` });
       onClose();
     } catch (e) {
       setError(errorText(e));
@@ -156,7 +156,7 @@ export function ImportDialog({ mountId, parent, where, onClose }: { mountId: str
             </Field>
             <p className="flex items-center gap-2" data-testid="import-counts">
               <FileArchive className="h-4 w-4 text-fg-muted" />
-              {[tn(preview.notes, '{n} Notiz', '{n} Notizen'), tn(preview.files, '{n} Datei', '{n} Dateien'), tn(preview.folders, 'Ein Ordner', '{n} Ordner')].join(' · ')}
+              {[tn(preview.notes, '{n} Seite', '{n} Seiten'), tn(preview.files, '{n} Datei', '{n} Dateien'), tn(preview.folders, 'Ein Ordner', '{n} Ordner')].join(' · ')}
             </p>
             {preview.remote.count > 0 && (
               <div className="space-y-0.5">

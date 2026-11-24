@@ -1,7 +1,7 @@
 {
   "name": "Kaveyl Wiki",
   "short_name": "Kaveyl Wiki",
-  "description": "Wiki und Notizen aus Markdown-Dateien in Git",
+  "description": "Wiki für Doku und Teamwissen aus Markdown-Dateien in Git",
   "lang": "de",
   "start_url": "/",
   "scope": "/",

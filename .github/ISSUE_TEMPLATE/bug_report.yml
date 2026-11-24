@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time! Please do not post passwords, tokens or private note contents.
+        Thanks for taking the time! Please do not post passwords, tokens or private page contents.
         Security issues: use **Security → Report a vulnerability** instead.
   - type: textarea
     id: what

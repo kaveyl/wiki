@@ -243,7 +243,7 @@ export class Providers {
   }
 
   setPrivateDefault(id: string | null) {
-    if (id && !this.get(id)?.private) throw new AiProviderError('Dieser Anbieter ist nicht für private Notizen zugelassen');
+    if (id && !this.get(id)?.private) throw new AiProviderError('Dieser Anbieter ist nicht für private Seiten zugelassen');
     this.settings.set('ai_private_provider', id ?? '');
   }
 

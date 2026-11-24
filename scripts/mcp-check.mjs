@@ -108,8 +108,8 @@ try {
   const names = tools.map((t) => t.name);
   check('tools/list: 18 Werkzeuge', names.length === 18, names.join(', '));
   const writing = tools.filter((t) => !t.annotations.readOnlyHint).map((t) => t.name).sort().join();
-  check('Schreibwerkzeuge markiert', writing === 'copy_note,create_folder,create_note,delete_note,move_note,sync_source,upload_file,write_note', writing);
-  check('delete_note destruktiv, sync_source openWorld', tools.find((t) => t.name === 'delete_note')?.annotations.destructiveHint && tools.find((t) => t.name === 'sync_source')?.annotations.openWorldHint);
+  check('Schreibwerkzeuge markiert', writing === 'copy_page,create_folder,create_page,delete_page,move_page,sync_source,upload_file,write_page', writing);
+  check('delete_page destruktiv, sync_source openWorld', tools.find((t) => t.name === 'delete_page')?.annotations.destructiveHint && tools.find((t) => t.name === 'sync_source')?.annotations.openWorldHint);
   check('unbekannte Methode → -32601', (await req(full, 'resources/list', {})).json.error?.code === -32601);
   const batch = (await rpc(full, [{ jsonrpc: '2.0', id: 'a', method: 'ping' }, { jsonrpc: '2.0', method: 'notifications/initialized' }, { jsonrpc: '2.0', id: 'b', method: 'tools/list' }])).json;
   check('Batch: zwei Antworten', Array.isArray(batch) && batch.length === 2);
@@ -134,8 +134,8 @@ try {
   check('search mit source_id: nur diese Quelle', Array.isArray(srOne.data) && srOne.data.length > 0 && srOne.data.every((h) => h.sourceId === S));
   const srIn = await call(full, 'search', { query: `${word} in:${S}` });
   check('search mit in:<id>', Array.isArray(srIn.data) && srIn.data.length > 0 && srIn.data.every((h) => h.sourceId === S));
-  const rd0 = await call(full, 'read_note', { source_id: S, path: anyNote.path });
-  check('read_note', typeof rd0.data?.markdown === 'string' && rd0.data.hash, anyNote.path);
+  const rd0 = await call(full, 'read_page', { source_id: S, path: anyNote.path });
+  check('read_page', typeof rd0.data?.markdown === 'string' && rd0.data.hash, anyNote.path);
   const before = rd0.data;
 
   // ── folders and notes
@@ -146,18 +146,18 @@ try {
   const f3 = await call(full, 'create_folder', { source_id: S, parent: dir, name: 'Projekte' });
   check('create_folder: Name wird eindeutig', f2.data?.path === `${dir}/Projekte` && f3.data?.path === `${dir}/Projekte 2`, f3.data?.path);
   check('create_folder ohne Namen → Fehler', (await call(full, 'create_folder', { source_id: S, parent: dir, name: ' ' })).isError);
-  const a = await call(full, 'create_note', { source_id: S, parent: `${dir}/Projekte/Website`, title: 'Ziel' });
-  check('create_note (fehlende Ordner entstehen mit)', a.data?.path === `${dir}/Projekte/Website/Ziel.md`, a.isError ? a.text : a.data.path);
-  const b = await call(full, 'create_note', { source_id: S, parent: dir, title: 'Quelle', markdown: `# Quelle\n\nSiehe [Ziel](Projekte/Website/Ziel.md).\n\n- [ ] offen\n- [x] erledigt\n\n| A | B |\n|---|---|\n| 1 | 2 |\n` });
-  check('create_note mit Markdown, Link, Aufgaben, Tabelle', !b.isError, b.isError ? b.text : b.data.path);
-  const rb = await call(full, 'read_note', { source_id: S, path: b.data.path });
-  check('read_note: id ergänzt, Inhalt unverändert', /^---\n[\s\S]*id:/.test(rb.data.markdown) && rb.data.markdown.includes('| 1 | 2 |') && rb.data.markdown.includes('- [x] erledigt'));
-  const w = await call(full, 'write_note', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nZweite Zeile per MCP.\n', base_hash: rb.data.hash });
-  check('write_note', !w.isError && w.data.changed === true, w.isError ? w.text : '');
-  const same = await call(full, 'write_note', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nZweite Zeile per MCP.\n', base_hash: w.data.hash });
-  check('write_note gleicher Inhalt → changed=false', !same.isError && same.data.changed === false);
-  const stale = await call(full, 'write_note', { source_id: S, path: b.data.path, markdown: 'weg', base_hash: rb.data.hash });
-  check('write_note mit altem hash → Konflikt', stale.isError && /Konflikt/.test(stale.text));
+  const a = await call(full, 'create_page', { source_id: S, parent: `${dir}/Projekte/Website`, title: 'Ziel' });
+  check('create_page (fehlende Ordner entstehen mit)', a.data?.path === `${dir}/Projekte/Website/Ziel.md`, a.isError ? a.text : a.data.path);
+  const b = await call(full, 'create_page', { source_id: S, parent: dir, title: 'Quelle', markdown: `# Quelle\n\nSiehe [Ziel](Projekte/Website/Ziel.md).\n\n- [ ] offen\n- [x] erledigt\n\n| A | B |\n|---|---|\n| 1 | 2 |\n` });
+  check('create_page mit Markdown, Link, Aufgaben, Tabelle', !b.isError, b.isError ? b.text : b.data.path);
+  const rb = await call(full, 'read_page', { source_id: S, path: b.data.path });
+  check('read_page: id ergänzt, Inhalt unverändert', /^---\n[\s\S]*id:/.test(rb.data.markdown) && rb.data.markdown.includes('| 1 | 2 |') && rb.data.markdown.includes('- [x] erledigt'));
+  const w = await call(full, 'write_page', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nZweite Zeile per MCP.\n', base_hash: rb.data.hash });
+  check('write_page', !w.isError && w.data.changed === true, w.isError ? w.text : '');
+  const same = await call(full, 'write_page', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nZweite Zeile per MCP.\n', base_hash: w.data.hash });
+  check('write_page gleicher Inhalt → changed=false', !same.isError && same.data.changed === false);
+  const stale = await call(full, 'write_page', { source_id: S, path: b.data.path, markdown: 'weg', base_hash: rb.data.hash });
+  check('write_page mit altem hash → Konflikt', stale.isError && /Konflikt/.test(stale.text));
   const bl = await until(() => call(full, 'get_backlinks', { source_id: S, path: a.data.path }), (r) => Array.isArray(r.data) && r.data.length > 0);
   check('get_backlinks', bl.data?.some?.((x) => x.path === b.data.path));
   const sr2 = await until(() => call(full, 'search', { query: '"Zweite Zeile per MCP"', source_id: S }), (r) => Array.isArray(r.data) && r.data.length > 0);
@@ -177,7 +177,7 @@ try {
     check('nach dem Abgleich: nichts vor/hinter dem Remote', sync.data.status.git?.ahead === 0 && sync.data.status.git?.behind === 0 && sync.data.status.syncStatus === 'ok', JSON.stringify(sync.data.status.git));
     const hist = await call(full, 'get_history', { source_id: S, path: b.data.path });
     check('get_history direkt nach sync_source', hist.data?.git && hist.data.versions.length >= 1, hist.data?.versions?.map((v) => `${v.commit.slice(0, 7)} ${v.author}`).join(' | '));
-    const w2 = await call(full, 'write_note', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nDritte Fassung.\n', base_hash: w.data.hash });
+    const w2 = await call(full, 'write_page', { source_id: S, path: b.data.path, markdown: rb.data.markdown + '\nDritte Fassung.\n', base_hash: w.data.hash });
     await call(full, 'sync_source', { source_id: S });
     const hist2 = await call(full, 'get_history', { source_id: S, path: b.data.path });
     const first = hist2.data.versions.at(-1);
@@ -187,19 +187,19 @@ try {
 
   // ── files
   const SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" rx="8" fill="#f5c542"/><text x="60" y="36" font-size="16" text-anchor="middle">mcp-check</text></svg>';
-  const up = await call(full, 'upload_file', { source_id: S, note: b.data.path, name: 'Prüf Bild.svg', content_text: SVG });
+  const up = await call(full, 'upload_file', { source_id: S, page: b.data.path, name: 'Prüf Bild.svg', content_text: SVG });
   check('upload_file (SVG als Text)', !up.isError && up.data.path === `${dir}/assets/Prüf-Bild.svg` && up.data.markdown === '![Prüf-Bild](assets/Pr%C3%BCf-Bild.svg)', up.isError ? up.text : up.data.markdown);
   const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-  const up2 = await call(full, 'upload_file', { source_id: S, note: b.data.path, name: 'punkt.png', content_base64: PNG });
+  const up2 = await call(full, 'upload_file', { source_id: S, page: b.data.path, name: 'punkt.png', content_base64: PNG });
   check('upload_file (PNG als Base64)', !up2.isError && up2.data.image === true && up2.data.size === 70, up2.isError ? up2.text : `${up2.data.size} Bytes`);
-  const up3 = await call(full, 'upload_file', { source_id: S, note: b.data.path, name: 'punkt.png', content_base64: PNG });
+  const up3 = await call(full, 'upload_file', { source_id: S, page: b.data.path, name: 'punkt.png', content_base64: PNG });
   uploaded.push(...[up, up2, up3].filter((u) => !u.isError).map((u) => u.data.path));
   check('upload_file: gleicher Name → Nummer', up3.data?.name === 'punkt-2.png');
-  check('upload_file: .exe abgelehnt', (await call(full, 'upload_file', { source_id: S, note: b.data.path, name: 'x.exe', content_base64: 'TVo=' })).isError);
-  check('upload_file: kaputtes Base64 abgelehnt', (await call(full, 'upload_file', { source_id: S, note: b.data.path, name: 'x.png', content_base64: '%%%' })).isError);
-  check('upload_file: Lese-Token abgelehnt', (await call(readOnly, 'upload_file', { source_id: S, note: b.data.path, name: 'x.svg', content_text: SVG })).isError);
-  const rbf = await call(full, 'read_note', { source_id: S, path: b.data.path });
-  const wf = await call(full, 'write_note', { source_id: S, path: b.data.path, markdown: `${rbf.data.markdown}\n${up.data.markdown}\n\n${up2.data.markdown}\n`, base_hash: rbf.data.hash });
+  check('upload_file: .exe abgelehnt', (await call(full, 'upload_file', { source_id: S, page: b.data.path, name: 'x.exe', content_base64: 'TVo=' })).isError);
+  check('upload_file: kaputtes Base64 abgelehnt', (await call(full, 'upload_file', { source_id: S, page: b.data.path, name: 'x.png', content_base64: '%%%' })).isError);
+  check('upload_file: Lese-Token abgelehnt', (await call(readOnly, 'upload_file', { source_id: S, page: b.data.path, name: 'x.svg', content_text: SVG })).isError);
+  const rbf = await call(full, 'read_page', { source_id: S, path: b.data.path });
+  const wf = await call(full, 'write_page', { source_id: S, path: b.data.path, markdown: `${rbf.data.markdown}\n${up.data.markdown}\n\n${up2.data.markdown}\n`, base_hash: rbf.data.hash });
   const la = await call(full, 'list_attachments', { source_id: S, path: b.data.path });
   check('list_attachments: beide Bilder mit Größe', !wf.isError && Array.isArray(la.data) && la.data.length === 2 && la.data.every((f) => f.size > 0 && f.kind === 'image'), JSON.stringify(la.data?.map?.((f) => [f.name, f.size])));
   const served = await fetch(`${BASE}/api/files/${S}/${encodeURI(up.data.path)}`, { headers: { cookie } });
@@ -208,12 +208,12 @@ try {
   const lc0 = await call(readOnly, 'list_changes', { source_id: S, path: dir });
   check('list_changes: Start liefert nur den Cursor', !lc0.isError && typeof lc0.data.cursor === 'string' && lc0.data.changes.length === 0, lc0.isError ? lc0.text : '');
   // ── moving
-  const mv = await call(full, 'move_note', { source_id: S, from: a.data.path, to: `${dir}/Projekte/Ziel neu.md` });
-  check('move_note (umbenennen + verschieben)', !mv.isError && mv.data.path === `${dir}/Projekte/Ziel neu.md`, mv.isError ? mv.text : mv.data.path);
-  const rb3 = await call(full, 'read_note', { source_id: S, path: b.data.path });
+  const mv = await call(full, 'move_page', { source_id: S, from: a.data.path, to: `${dir}/Projekte/Ziel neu.md` });
+  check('move_page (umbenennen + verschieben)', !mv.isError && mv.data.path === `${dir}/Projekte/Ziel neu.md`, mv.isError ? mv.text : mv.data.path);
+  const rb3 = await call(full, 'read_page', { source_id: S, path: b.data.path });
   check('Link nach dem Verschieben repariert', /\]\(Projekte\/Ziel%20neu\.md\)/.test(rb3.data.markdown), rb3.data.markdown.split('\n').find((l) => l.startsWith('Siehe')));
-  const cp = await call(full, 'copy_note', { source_id: S, from: b.data.path, to_parent: dir });
-  check('copy_note: Kopie daneben mit „(Kopie)“', !cp.isError && / \(Kopie\)\.md$/.test(cp.data.path), cp.isError ? cp.text : cp.data.path);
+  const cp = await call(full, 'copy_page', { source_id: S, from: b.data.path, to_parent: dir });
+  check('copy_page: Kopie daneben mit „(Kopie)“', !cp.isError && / \(Kopie\)\.md$/.test(cp.data.path), cp.isError ? cp.text : cp.data.path);
   const lcOff = await call(readOnly, 'list_changes', { source_id: S, path: dir, after: lc0.data.cursor });
   const lcOn = await call(readOnly, 'list_changes', { source_id: S, path: dir, after: lc0.data.cursor, include_own: true });
   const lcCopy = lcOn.data?.changes?.find((c) => c.path === cp.data?.path);
@@ -221,64 +221,64 @@ try {
   const lt0 = Date.now();
   const lcWait = await call(readOnly, 'list_changes', { source_id: S, path: dir, after: lcOn.data?.cursor, wait_seconds: 2 });
   check('list_changes: wait_seconds wartet und antwortet leer', !lcWait.isError && lcWait.data.changes.length === 0 && Date.now() - lt0 >= 1800, `${Date.now() - lt0} ms`);
-  const mvf = await call(full, 'move_note', { source_id: S, from: `${dir}/Projekte 2`, to: `${dir}/Archiv` });
-  check('move_note: Ordner umbenennen', !mvf.isError && mvf.data.path === `${dir}/Archiv`, mvf.isError ? mvf.text : '');
+  const mvf = await call(full, 'move_page', { source_id: S, from: `${dir}/Projekte 2`, to: `${dir}/Archiv` });
+  check('move_page: Ordner umbenennen', !mvf.isError && mvf.data.path === `${dir}/Archiv`, mvf.isError ? mvf.text : '');
   if (other) {
-    const across = await call(full, 'move_note', { source_id: S, from: `${dir}/Projekte/Ziel neu.md`, to: `${dir}/Ziel neu.md`, to_source_id: other.id });
-    check(`move_note in „${other.name}“`, !across.isError, across.isError ? across.text : across.data.path);
+    const across = await call(full, 'move_page', { source_id: S, from: `${dir}/Projekte/Ziel neu.md`, to: `${dir}/Ziel neu.md`, to_source_id: other.id });
+    check(`move_page in „${other.name}“`, !across.isError, across.isError ? across.text : across.data.path);
     if (!across.isError) {
-      const back = await call(full, 'move_note', { source_id: other.id, from: across.data.path, to: `${dir}/Projekte/Ziel neu.md`, to_source_id: S });
+      const back = await call(full, 'move_page', { source_id: other.id, from: across.data.path, to: `${dir}/Projekte/Ziel neu.md`, to_source_id: S });
       check('… und zurück', !back.isError, back.isError ? back.text : back.data.path);
-      const leftover = await call(full, 'delete_note', { source_id: other.id, path: dir });
+      const leftover = await call(full, 'delete_page', { source_id: other.id, path: dir });
       check(`leeren Ordner in „${other.name}“ löschen`, !leftover.isError, leftover.text);
     }
   }
 
   // ── deleting
-  const del = await call(full, 'delete_note', { source_id: S, path: `${dir}/Projekte/Ziel neu.md` });
-  check('delete_note (Notiz)', !del.isError && del.data.ok === true, del.text);
-  check('gelöschte Notiz nicht mehr lesbar', (await call(full, 'read_note', { source_id: S, path: `${dir}/Projekte/Ziel neu.md` })).isError);
-  check('delete_note unbekannter Pfad → Fehler', (await call(full, 'delete_note', { source_id: S, path: `${dir}/gibt-es-nicht.md` })).isError);
-  check('delete_note Wurzel → abgelehnt', (await call(full, 'delete_note', { source_id: S, path: '' })).isError);
-  check('delete_note mit Lese-Token → abgelehnt', (await call(readOnly, 'delete_note', { source_id: S, path: b.data.path })).isError);
+  const del = await call(full, 'delete_page', { source_id: S, path: `${dir}/Projekte/Ziel neu.md` });
+  check('delete_page (Seite)', !del.isError && del.data.ok === true, del.text);
+  check('gelöschte Seite nicht mehr lesbar', (await call(full, 'read_page', { source_id: S, path: `${dir}/Projekte/Ziel neu.md` })).isError);
+  check('delete_page unbekannter Pfad → Fehler', (await call(full, 'delete_page', { source_id: S, path: `${dir}/gibt-es-nicht.md` })).isError);
+  check('delete_page Wurzel → abgelehnt', (await call(full, 'delete_page', { source_id: S, path: '' })).isError);
+  check('delete_page mit Lese-Token → abgelehnt', (await call(readOnly, 'delete_page', { source_id: S, path: b.data.path })).isError);
 
   // ── rights and bad input
-  const ro = await call(readOnly, 'write_note', { source_id: S, path: b.data.path, markdown: 'x', base_hash: rb3.data.hash });
-  check('Lese-Token: write_note abgelehnt', ro.isError && /Schreibrecht/.test(ro.text), ro.text);
-  check('Lese-Token: create_note / create_folder / move_note abgelehnt', (await call(readOnly, 'create_note', { source_id: S, parent: dir, title: 'nein' })).isError && (await call(readOnly, 'create_folder', { source_id: S, parent: dir, name: 'nein' })).isError && (await call(readOnly, 'move_note', { source_id: S, from: b.data.path, to: `${dir}/x.md` })).isError);
-  check('Lese-Token: lesen geht, access = read', (await call(readOnly, 'read_note', { source_id: S, path: b.data.path })).data?.access === 'read');
-  check('fehlender Parameter', /Parameter „path“ fehlt/.test((await call(full, 'read_note', { source_id: S })).text));
-  check('Pfad außerhalb der Quelle', /außerhalb/.test((await call(full, 'read_note', { source_id: S, path: '../../etc/passwd' })).text));
+  const ro = await call(readOnly, 'write_page', { source_id: S, path: b.data.path, markdown: 'x', base_hash: rb3.data.hash });
+  check('Lese-Token: write_page abgelehnt', ro.isError && /Schreibrecht/.test(ro.text), ro.text);
+  check('Lese-Token: create_page / create_folder / move_page abgelehnt', (await call(readOnly, 'create_page', { source_id: S, parent: dir, title: 'nein' })).isError && (await call(readOnly, 'create_folder', { source_id: S, parent: dir, name: 'nein' })).isError && (await call(readOnly, 'move_page', { source_id: S, from: b.data.path, to: `${dir}/x.md` })).isError);
+  check('Lese-Token: lesen geht, access = read', (await call(readOnly, 'read_page', { source_id: S, path: b.data.path })).data?.access === 'read');
+  check('fehlender Parameter', /Parameter „path“ fehlt/.test((await call(full, 'read_page', { source_id: S })).text));
+  check('Pfad außerhalb der Quelle', /außerhalb/.test((await call(full, 'read_page', { source_id: S, path: '../../etc/passwd' })).text));
   check('unbekannte Quelle', (await call(full, 'list_tree', { source_id: 'gibt-es-nicht' })).isError);
   const en = { 'accept-language': 'en-GB' };
-  check('Fehler auf Englisch (Accept-Language)', (await call(full, 'read_note', { source_id: S, path: 'gibt/es/nicht.md' }, en)).text === 'Not found (or no permission).');
-  check('Inhalt mit Accept-Language: en unverändert', (await call(full, 'read_note', { source_id: S, path: anyNote.path }, en)).data?.markdown === before.markdown);
-  check('ohne Sprachangabe Englisch (Rückfallsprache)', (await call(full, 'read_note', { source_id: S, path: 'gibt/es/nicht.md' }, { 'accept-language': '' })).text === 'Not found (or no permission).');
+  check('Fehler auf Englisch (Accept-Language)', (await call(full, 'read_page', { source_id: S, path: 'gibt/es/nicht.md' }, en)).text === 'Not found (or no permission).');
+  check('Inhalt mit Accept-Language: en unverändert', (await call(full, 'read_page', { source_id: S, path: anyNote.path }, en)).data?.markdown === before.markdown);
+  check('ohne Sprachangabe Englisch (Rückfallsprache)', (await call(full, 'read_page', { source_id: S, path: 'gibt/es/nicht.md' }, { 'accept-language': '' })).text === 'Not found (or no permission).');
 
   // ── clean-up through MCP itself, then sync. Deleting keeps non-note files (AD-025) – the test images go via the app's route.
   for (const f of uploaded) {
     const r = await fetch(`${BASE}/api/attachments/${S}/${encodeURI(f)}`, { method: 'DELETE', headers: { cookie, 'content-type': 'application/json' } });
     if (!r.ok) check(`Testbild entfernen: ${f}`, false, `${r.status}`);
   }
-  const gone = await call(full, 'delete_note', { source_id: S, path: dir });
-  check('Aufräumen: Testordner per delete_note in den Papierkorb', !gone.isError, gone.text);
+  const gone = await call(full, 'delete_page', { source_id: S, path: dir });
+  check('Aufräumen: Testordner per delete_page in den Papierkorb', !gone.isError, gone.text);
   const trash = await session('GET', `/api/trash/${S}`);
-  check('Papierkorb kennt die gelöschten Notizen', JSON.stringify(trash).includes(dir));
+  check('Papierkorb kennt die gelöschten Seiten', JSON.stringify(trash).includes(dir));
   const fin = await call(full, 'sync_source', { source_id: S });
   check('Aufräumen abgeglichen', !fin.isError && fin.data.status.pendingEdits === 0, JSON.stringify(fin.data?.result));
   check('Testordner weg', !(await call(full, 'list_tree', { source_id: S, depth: 1 })).data.some((e) => e.path === dir));
   const files = await fetch(`${BASE}/api/v1/attachments/${S}/${encodeURI(`${dir}/Quelle.md`)}`, { headers: { authorization: `Bearer ${full}` } });
   check('keine Testbilder übrig', files.status === 404 || (await files.json()).every((f) => f.size === null));
-  const after = await call(full, 'read_note', { source_id: S, path: anyNote.path });
-  check('vorhandene Notiz unverändert', after.data?.hash === before.hash);
+  const after = await call(full, 'read_page', { source_id: S, path: anyNote.path });
+  check('vorhandene Seite unverändert', after.data?.hash === before.hash);
   const log = await session('GET', '/api/activity?limit=100');
   check('Protokoll: MCP-Einträge', JSON.stringify(log).includes(`MCP: Ordner angelegt: ${dir}`) && JSON.stringify(log).includes(`MCP: Gelöscht: ${dir}`));
 } catch (e) {
   check('Ablauf', false, e.stack);
   // leave nothing behind
   for (const f of uploaded) await fetch(`${BASE}/api/attachments/${S}/${encodeURI(f)}`, { method: 'DELETE', headers: { cookie, 'content-type': 'application/json' } }).catch(() => undefined);
-  if (S && dir) await call(full, 'delete_note', { source_id: S, path: dir }).catch(() => undefined);
-  if (other && dir) await call(full, 'delete_note', { source_id: other.id, path: dir }).catch(() => undefined);
+  if (S && dir) await call(full, 'delete_page', { source_id: S, path: dir }).catch(() => undefined);
+  if (other && dir) await call(full, 'delete_page', { source_id: other.id, path: dir }).catch(() => undefined);
   if (S) await call(full, 'sync_source', { source_id: S }).catch(() => undefined);
 } finally {
   for (const t of created) await fetch(`${BASE}/api/tokens/${t}`, { method: 'DELETE', headers: { cookie, 'content-type': 'application/json' } });
