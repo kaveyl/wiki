@@ -165,6 +165,8 @@ export interface AiProposal {
   status: 'open' | 'applied' | 'rejected' | 'failed';
   result: string | null;
   createdAt: string;
+  /** Applying makes something readable for AI not cleared for private notes (AD-079). */
+  privateWarning?: 'content' | 'move';
 }
 export type AiAgentEvent =
   | { type: 'start'; mode: 'agent' | 'rag' }
@@ -320,6 +322,8 @@ export interface NoteDocument {
   readonly: boolean;
   frontmatter: Record<string, unknown>;
   access?: AccessLevel;
+  /** When the file last changed (ms); null while the server has not indexed it yet. */
+  mtime?: number | null;
 }
 
 export interface SearchHit {
@@ -909,7 +913,7 @@ export const api = {
       return list;
     }),
   status: () => request<MountStatus[]>('GET', '/api/status'),
-  syncAll: () => request('POST', '/api/sync-all'),
+  syncAll: () => request<{ ok: true; failed?: string[] }>('POST', '/api/sync-all'),
   createMount: (b: Record<string, unknown>) => request<Mount>('POST', '/api/mounts', b),
   updateMount: (id: string, b: Record<string, unknown>) => request<Mount>('PATCH', `/api/mounts/${id}`, b),
   deleteMount: (id: string) => request('DELETE', `/api/mounts/${id}`),
@@ -1109,6 +1113,7 @@ export const api = {
   tagColors: () => request<Record<string, Record<string, TagColor>>>('GET', '/api/tag-colors'),
   setTagColor: (tag: string, color: TagColor | null) => request<{ saved: string[]; skipped: string[] }>('PUT', '/api/tags/color', { tag, color }),
   renameTag: (from: string, to: string) => request<{ notes: number; skipped: number; sources: string[] }>('POST', '/api/tags/rename', { from, to }),
+  removeTag: (tag: string) => request<{ notes: number; skipped: number; sources: string[] }>('POST', '/api/tags/remove', { tag }),
   searchFull: (q: string) => request<{ hits: FullHit[] }>('GET', `/api/search/full?q=${encodeURIComponent(q)}`),
   search: (q: string, limit = 8) => request<SearchResult>('GET', `/api/search?q=${encodeURIComponent(q)}&limit=${limit}`),
 
@@ -1166,8 +1171,8 @@ export const api = {
   aiAsk: (b: { question: string; scope: AiScope; chatId?: string }) =>
     request<{ chatId: string; answer: string; sources: AiSource[]; provider: string; model: string }>('POST', '/api/ai/ask', b),
   /** The agent: events arrive while it works (NDJSON). Resolves after the last event. */
-  aiAgent: async (b: { question: string; scope: AiScope; chatId?: string; providerId?: string }, onEvent: (e: AiAgentEvent) => void) => {
-    const res = await fetch('/api/ai/agent', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', 'x-kaveyl-wiki-lang': lang }, body: JSON.stringify(b) });
+  aiAgent: async (b: { question: string; scope: AiScope; chatId?: string; providerId?: string }, onEvent: (e: AiAgentEvent) => void, signal?: AbortSignal) => {
+    const res = await fetch('/api/ai/agent', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', 'x-kaveyl-wiki-lang': lang }, body: JSON.stringify(b), signal });
     if (!res.ok || !res.body) {
       await readJson(res); // throws for a failure or a body that is not JSON
       throw new ApiError(res.status, statusMessage(res.status), {});
@@ -1195,7 +1200,7 @@ export const api = {
     request<{ enabled: boolean; instructions: string | null; memory: string | null }>('PUT', `/api/ai/memory/${mountId}`, b),
   aiChats: () => request<{ id: string; title: string; scope: AiScope; updatedAt: string }[]>('GET', '/api/ai/chats'),
   aiChat: (id: string) =>
-    request<{ id: string; title: string; scope: AiScope; messages: AiChatMessage[]; proposals: AiProposal[] }>('GET', `/api/ai/chats/${id}`),
+    request<{ id: string; title: string; scope: AiScope; messages: AiChatMessage[]; proposals: AiProposal[]; private?: boolean }>('GET', `/api/ai/chats/${id}`),
   /** One chat, or `all` (with `hours`: only those of the last hours). */
   deleteAiChat: (id: string, hours?: number) => request<{ ok: true; deleted: number }>('DELETE', `/api/ai/chats/${id}${hours ? `?hours=${hours}` : ''}`, {}),
 };

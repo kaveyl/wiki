@@ -25,7 +25,7 @@ function useTreeIcon(mountId: string, path: string, skip: boolean): string | nul
   return tree.data?.find((e) => e.path === path)?.icon ?? null;
 }
 
-function Row({ item, mountName, icon }: { item: NoteRef; mountName: string; icon?: string | null }) {
+function Row({ item, mountName, icon, chip }: { item: NoteRef; mountName: string; icon?: string | null; chip?: boolean }) {
   const treeIcon = useTreeIcon(item.mountId, item.path, icon !== undefined);
   const openNote = useWorkspace((s) => s.openNote);
   const favorite = usePersonal((s) => s.isFavorite(item.mountId, item.path));
@@ -42,7 +42,12 @@ function Row({ item, mountName, icon }: { item: NoteRef; mountName: string; icon
       <ContextTrigger asChild>
         <button
           type="button"
-          className={cx('flex min-h-7 w-full cursor-default items-center gap-1.5 rounded-md pl-6 pr-1 text-left text-tree hover:bg-hover', FOCUS_RING)}
+          className={cx(
+            chip
+              ? 'flex h-6 max-w-full shrink-0 cursor-default items-center gap-1 rounded-full bg-bg pl-1.5 pr-2.5 text-[0.75rem] font-medium text-fg shadow-[0_1px_2px_rgba(30,24,72,0.08)] hover:bg-hover dark:bg-subtle'
+              : 'flex min-h-[25px] w-full cursor-default items-center gap-1.5 rounded-lg pl-2 pr-1 text-left text-tree hover:bg-hover',
+            FOCUS_RING,
+          )}
           title={`${mountName} / ${path}`}
           onClick={(e) => open(e.ctrlKey || e.metaKey)}
           onAuxClick={(e) => e.button === 1 && open(true, true)}
@@ -53,11 +58,11 @@ function Row({ item, mountName, icon }: { item: NoteRef; mountName: string; icon
             openContextMenu(e.currentTarget);
           }}
         >
-          <EntryIcon icon={icon !== undefined ? icon : treeIcon} isDir={!!dir} />
+          {chip ? <Star className="h-3 w-3 shrink-0 fill-current text-warn" aria-hidden /> : <EntryIcon icon={icon !== undefined ? icon : treeIcon} isDir={!!dir} />}
           {/* Same folder structures recur across repos: name the source, like the KI-Freigaben list. */}
           <span className="flex-1 truncate">
             <span>{noteNameIn(mountId, path)}</span>
-            {mountName && <span className="text-fg-faint"> ({mountName})</span>}
+            {mountName && !chip && <span className="text-fg-faint"> ({mountName})</span>}
           </span>
         </button>
       </ContextTrigger>
@@ -93,16 +98,28 @@ export function unfoldSection(id: string) {
   if (collapsedSections.includes(id)) set({ collapsedSections: collapsedSections.filter((x) => x !== id) });
 }
 
-export function Section({ id, title, icon, children, extra }: { id: string; title: string; icon: ReactNode; children: ReactNode; extra?: ReactNode }) {
-  const collapsed = usePrefs((p) => p.collapsedSections.includes(id));
+/** `fixed`: the section fills a view of its own (sidebar switch „Zuletzt“, „KI-Freigaben“) – always open, a plain heading. */
+export function Section({ id, title, icon, children, extra, fixed }: { id: string; title: string; icon: ReactNode; children: ReactNode; extra?: ReactNode; fixed?: boolean }) {
+  const folded = usePrefs((p) => p.collapsedSections.includes(id));
+  const collapsed = folded && !fixed;
   const set = usePrefs((p) => p.set);
   const toggle = () => {
     const cur = usePrefs.getState().collapsedSections;
     set({ collapsedSections: collapsed ? cur.filter((x) => x !== id) : [...cur, id] });
   };
+  if (fixed)
+    return (
+      <section className="mb-1" aria-label={title}>
+        <div className="flex min-h-7 items-center gap-1.5 px-2 text-[0.6875rem] font-semibold uppercase tracking-wider text-fg-faint">
+          <span className="min-w-0 flex-1 truncate">{title}</span>
+          {extra}
+        </div>
+        {children}
+      </section>
+    );
   return (
     <div className="mb-1">
-      <div className="group flex min-h-7 cursor-default items-center gap-1 rounded-md px-1 text-tree font-semibold text-fg-muted hover:bg-hover" onClick={toggle}>
+      <div className="group flex min-h-7 cursor-default items-center gap-1 rounded-lg px-1 text-tree font-semibold text-fg-muted hover:bg-hover" onClick={toggle}>
         {/* The click reaches the row's handler; the title stays outside (filters sit next to it). */}
         <button type="button" aria-label={title} aria-expanded={!collapsed} className={cx('flex items-center gap-1 self-stretch rounded', FOCUS_RING)}>
           <ChevronRight className={cx('h-3.5 w-3.5 shrink-0 transition-transform', !collapsed && 'rotate-90')} />
@@ -116,58 +133,71 @@ export function Section({ id, title, icon, children, extra }: { id: string; titl
   );
 }
 
-export function PersonalSections({ mounts }: { mounts: Mount[] }) {
-  const { favorites, recent } = usePersonal();
+/** Favorites as small chips under the search: one click away without pushing the tree down (redesign 23.11.). */
+export function FavoriteChips({ mounts }: { mounts: Mount[] }) {
+  const { favorites } = usePersonal();
+  const trees = useQueries({ queries: mounts.map((m) => ({ queryKey: ['tree', m.id], queryFn: () => api.tree(m.id), enabled: false })) });
+  const treeOf = (id: string) => trees[mounts.findIndex((m) => m.id === id)]?.data;
+  const shown = present(favorites, mounts.map((m) => m.id), treeOf);
+  const name = (id: string) => mounts.find((m) => m.id === id)?.name ?? '';
+  if (!shown.length) return null;
+  // Two rows at most; more favorites scroll inside the strip.
+  return (
+    <div role="list" aria-label={t('Favoriten')} className="-mx-0.5 flex max-h-[3.5rem] flex-wrap gap-1 overflow-y-auto px-0.5 pb-0.5">
+      {shown.map((f) => (
+        <div role="listitem" key={`${f.mountId}:${f.path}`} className="min-w-0 max-w-full">
+          <Row item={f} mountName={name(f.mountId)} chip />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** „Neu für dich“ (AD-066): what changed in what one follows; opening a note reads it. Only when there is something. */
+export function NewForYouSection({ mounts }: { mounts: Mount[] }) {
+  const ids = mounts.map((m) => m.id);
+  const unread = (useWatches().data?.unread ?? []).filter((u) => u.kind !== 'deleted' && ids.includes(u.mountId));
+  if (!unread.length) return null;
+  return (
+    <Section id="new-for-you" title={t('Neu für dich')} icon={<Bell className="h-3.5 w-3.5" />} extra={<span className="rounded-full bg-accent px-1.5 text-[0.6875rem] text-accent-fg">{unread.length}</span>}>
+      <NewForYou mounts={mounts} />
+    </Section>
+  );
+}
+
+/** The view „Zuletzt“ of the sidebar: opened by me / changed by anyone. */
+export function RecentSection({ mounts }: { mounts: Mount[] }) {
+  const { recent } = usePersonal();
   const [mode, setMode] = useState<'opened' | 'changed'>('opened');
-  const pick = (m: 'opened' | 'changed') => {
-    setMode(m);
-    unfoldSection('recent');
-  };
-  const changed = useQuery({ queryKey: ['recent-changes'], queryFn: () => api.recent(5), enabled: mode === 'changed', refetchInterval: 30_000 });
+  const changed = useQuery({ queryKey: ['recent-changes'], queryFn: () => api.recent(15), enabled: mode === 'changed', refetchInterval: 30_000 });
   const name = (id: string) => mounts.find((m) => m.id === id)?.name ?? '';
   // Hide entries whose note is gone, judged by the trees the sidebar already loaded (no request of its own).
   const trees = useQueries({ queries: mounts.map((m) => ({ queryKey: ['tree', m.id], queryFn: () => api.tree(m.id), enabled: false })) });
   const treeOf = (id: string) => trees[mounts.findIndex((m) => m.id === id)]?.data;
-  const ids = mounts.map((m) => m.id);
-  const shownFavorites = present(favorites, ids, treeOf);
-  const shownRecent = present(recent, ids, treeOf);
-  const unread = (useWatches().data?.unread ?? []).filter((u) => u.kind !== 'deleted' && ids.includes(u.mountId));
+  const shownRecent = present(recent, mounts.map((m) => m.id), treeOf);
+  const rows = mode === 'opened' ? shownRecent.slice(0, 15) : (changed.data ?? []);
   return (
-    <>
-      {unread.length > 0 && (
-        // „Beobachten“ (AD-066): what changed in what one follows; opening a note reads it.
-        <Section id="new-for-you" title={t('Neu für dich')} icon={<Bell className="h-3.5 w-3.5" />} extra={<span className="rounded-full bg-accent px-1.5 text-[0.6875rem] text-accent-fg">{unread.length}</span>}>
-          <NewForYou mounts={mounts} />
-        </Section>
-      )}
-      {shownFavorites.length > 0 && (
-        <Section id="favorites" title={t('Favoriten')} icon={<Star className="h-3.5 w-3.5" />}>
-          {shownFavorites.map((f) => (
-            <Row key={`${f.mountId}:${f.path}`} item={f} mountName={name(f.mountId)} />
+    <Section
+      id="recent"
+      fixed
+      title={t('Zuletzt')}
+      icon={<Clock className="h-3.5 w-3.5" />}
+      extra={
+        <span className="flex text-[0.6875rem] font-normal normal-case tracking-normal">
+          {(['opened', 'changed'] as const).map((m) => (
+            // On touch the filters fill the 28 px header row (design-013); the desktop look stays.
+            <button key={m} aria-pressed={mode === m} className={cx('rounded-full px-2 [@media(hover:none)]:min-h-7', mode === m ? 'bg-accent-soft font-medium text-accent' : 'text-fg-faint hover:text-fg')} onClick={() => setMode(m)}>
+              {m === 'opened' ? t('geöffnet') : t('geändert')}
+            </button>
           ))}
-        </Section>
-      )}
-      {shownRecent.length > 0 && (
-        <Section
-          id="recent"
-          title={t('Zuletzt')}
-          icon={<Clock className="h-3.5 w-3.5" />}
-          extra={
-            <span className="flex text-[0.6875rem] font-normal" onClick={(e) => e.stopPropagation()}>
-              {(['opened', 'changed'] as const).map((m) => (
-                // On touch the filters fill the 28 px header row (design-013); the desktop look stays.
-                <button key={m} aria-pressed={mode === m} className={cx('rounded px-1.5 [@media(hover:none)]:min-h-7', mode === m ? 'bg-active text-fg' : 'text-fg-faint hover:text-fg')} onClick={() => pick(m)}>
-                  {m === 'opened' ? t('geöffnet') : t('geändert')}
-                </button>
-              ))}
-            </span>
-          }
-        >
-          {mode === 'opened'
-            ? shownRecent.slice(0, 5).map((r) => <Row key={`${r.mountId}:${r.path}`} item={r} mountName={name(r.mountId)} />)
-            : (changed.data ?? []).map((r) => <Row key={`${r.mountId}:${r.path}`} item={r} mountName={name(r.mountId)} icon={r.icon} />)}
-        </Section>
-      )}
-    </>
+        </span>
+      }
+    >
+      {mode === 'opened'
+        ? rows.map((r) => <Row key={`${r.mountId}:${r.path}`} item={r} mountName={name(r.mountId)} />)
+        : (changed.data ?? []).map((r) => <Row key={`${r.mountId}:${r.path}`} item={r} mountName={name(r.mountId)} icon={r.icon} />)}
+      {mode === 'opened' && rows.length === 0 && <p className="px-2 py-1 text-xs text-fg-faint">{t('Noch nichts geöffnet.')}</p>}
+      {mode === 'changed' && changed.data?.length === 0 && <p className="px-2 py-1 text-xs text-fg-faint">{t('Noch nichts geändert.')}</p>}
+    </Section>
   );
 }

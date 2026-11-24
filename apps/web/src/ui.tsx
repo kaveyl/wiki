@@ -58,9 +58,9 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button({ 
     <button
       ref={ref}
       className={cx(
-        'inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-accent',
-        size === 'sm' ? 'h-7 px-2 text-xs' : 'h-8 px-3 text-sm',
-        variant === 'primary' && 'bg-accent text-accent-fg hover:opacity-90',
+        'inline-flex items-center justify-center gap-1.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+        size === 'sm' ? 'h-7 px-2.5 text-xs' : 'h-8 px-3.5 text-sm',
+        variant === 'primary' && 'bg-accent-cta text-on-cta hover:opacity-90',
         variant === 'danger' && 'bg-danger text-white hover:opacity-90',
         variant === 'ghost' && (ownColour ? 'hover:bg-hover' : 'text-fg-muted hover:bg-hover hover:text-fg'),
         variant === 'default' && 'border border-line-control bg-bg text-fg hover:border-fg-faint hover:bg-hover',
@@ -80,14 +80,14 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTM
       ref={ref}
       aria-label={label}
       title={label}
-      className={cx('inline-flex h-6 w-6 items-center justify-center rounded text-fg-muted hover:bg-active hover:text-fg', className)}
+      className={cx('inline-flex h-6 w-6 items-center justify-center rounded-md text-fg-muted hover:bg-active hover:text-fg', className)}
       {...rest}
     />
   );
 });
 
 const INPUT_BOX =
-  'h-8 w-full rounded-md border border-line bg-bg px-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft';
+  'h-8 w-full rounded-lg border border-line bg-bg px-2.5 text-sm text-fg placeholder:text-fg-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...rest }, ref) {
   return (
@@ -280,13 +280,14 @@ export function Modal({
   help,
   noClose,
   returnFocus,
+  bare,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
   children: ReactNode;
-  /** 'full': almost the whole window (grids with many columns). */
-  wide?: boolean | 'xl' | 'full';
+  /** 'full': almost the whole window (grids with many columns); 'lg': 940 px (settings). */
+  wide?: boolean | 'lg' | 'xl' | 'full';
   trackInput?: boolean;
   onBack?: () => void;
   /** Anchor in the user manual: a „?“ in the title bar (and F1) opens the help there. */
@@ -294,6 +295,8 @@ export function Modal({
   noClose?: boolean;
   /** Where the focus goes on closing instead of the opener (e.g. the opener was just deleted). */
   returnFocus?: () => HTMLElement | null;
+  /** No title bar: the content shows its own headings (settings); help and × float at the top right. */
+  bare?: boolean;
 }) {
   const dirty = useRef(new Set<string>());
   const opener = useRef<HTMLElement | null>(null);
@@ -326,13 +329,13 @@ export function Modal({
   return (
     <Dialog.Root open={open} onOpenChange={(o) => (o ? onOpenChange(true) : leave(() => onOpenChange(false)))}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-[var(--scrim)] backdrop-blur-[2.5px]" />
         <Dialog.Content
           ref={content}
           className={cx(
-            'fixed left-1/2 z-50 w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden rounded-xl border border-line bg-bg shadow-pop flex flex-col focus:outline-none',
+            'fixed left-1/2 z-50 w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden rounded-[24px] bg-bg shadow-pop flex flex-col focus:outline-none',
             wide === 'full' ? 'top-[4vh] max-h-[92vh] max-w-[1400px]' : 'top-[8vh] max-h-[84vh]',
-            wide === 'xl' ? 'max-w-6xl' : wide === 'full' ? '' : wide ? 'max-w-3xl' : 'max-w-md',
+            wide === 'xl' ? 'max-w-6xl' : wide === 'lg' ? 'max-w-[940px]' : wide === 'full' ? '' : wide ? 'max-w-3xl' : 'max-w-md',
           )}
           aria-describedby={undefined}
           data-help={help}
@@ -362,13 +365,13 @@ export function Modal({
             if (trackInput && !el.closest('[data-nodirty]')) dirty.current.add('input');
           }}
         >
-          <div className="flex items-center gap-1 border-b border-line px-4 py-3">
+          <div className={cx('flex items-center gap-1', bare ? 'absolute right-3 top-3 z-10' : 'border-b border-line-soft px-5 py-3.5')}>
             {onBack && (
               <IconButton label={t('Zurück')} onClick={() => leave(onBack)} className="-ml-1.5">
                 <ArrowLeft className="h-4 w-4" />
               </IconButton>
             )}
-            <Dialog.Title className="flex-1 text-sm font-semibold">{title}</Dialog.Title>
+            <Dialog.Title className={bare ? 'sr-only' : 'flex-1 text-[0.9375rem] font-semibold tracking-tight'}>{title}</Dialog.Title>
             {help && (
               // A name without the dialog's words: tests and screen readers look for its buttons by name.
               <IconButton label={t('Hilfe zu diesem Fenster')} title={t('Hilfe (F1): {title}', { title })} onClick={() => openHelp(help)}>
@@ -385,7 +388,7 @@ export function Modal({
           </div>
           <DirtyContext.Provider value={setDirty}>
             {/* Wide dialogs switch between long and short pages: space for the scroll bar is always kept, so nothing shifts sideways. */}
-            <div className={cx('overflow-y-auto p-4', wide && '[scrollbar-gutter:stable]')}>{children}</div>
+            <div className={cx('overflow-y-auto p-5', wide && '[scrollbar-gutter:stable]')}>{children}</div>
           </DirtyContext.Provider>
         </Dialog.Content>
       </Dialog.Portal>
@@ -478,7 +481,7 @@ export function ConfirmHost() {
           role="alertdialog"
           aria-describedby={undefined}
           className={cx(
-            'fixed left-1/2 top-[22vh] z-[61] w-[calc(100vw-32px)] -translate-x-1/2 rounded-xl border border-line bg-bg p-4 shadow-pop',
+            'fixed left-1/2 top-[22vh] z-[61] w-[calc(100vw-32px)] -translate-x-1/2 rounded-[24px] bg-bg p-5 shadow-pop',
             ask?.choices ? 'max-w-md' : 'max-w-sm',
           )}
           onInteractOutside={(e) => e.preventDefault()}
@@ -594,7 +597,7 @@ export function InputHost() {
         <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/20" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed left-1/2 top-[18vh] z-[61] w-[calc(100vw-32px)] max-w-md -translate-x-1/2 rounded-xl border border-line bg-bg p-4 shadow-pop"
+          className="fixed left-1/2 top-[18vh] z-[61] w-[calc(100vw-32px)] max-w-md -translate-x-1/2 rounded-[24px] bg-bg p-5 shadow-pop"
           onInteractOutside={(e) => e.preventDefault()}
           onOpenAutoFocus={(e) => {
             // First field focused with its text selected: type to replace, arrows to edit.
@@ -664,7 +667,16 @@ export const ContextTrigger = CM.Trigger;
  * taller than the space Radix measures on the chosen side – entries wrap and the list scrolls instead.
  */
 const MENU_BOX =
-  'z-50 min-w-[min(200px,var(--radix-context-menu-content-available-width))] max-w-[var(--radix-context-menu-content-available-width)] max-h-[var(--radix-context-menu-content-available-height)] overflow-y-auto rounded-lg border border-line bg-bg p-1 text-sm shadow-pop';
+  'z-50 min-w-[min(232px,var(--radix-context-menu-content-available-width))] max-w-[var(--radix-context-menu-content-available-width)] max-h-[var(--radix-context-menu-content-available-height)] overflow-y-auto rounded-2xl bg-bg p-[7px] text-[0.78125rem] shadow-pop';
+/** One entry of a menu (context menus, dropdowns): 29 px high, rounded, the icon in a 16 px slot. */
+export const MENU_ITEM =
+  'flex min-h-[29px] cursor-default select-none items-center gap-2.5 rounded-lg px-2 py-1 outline-none data-[highlighted]:bg-hover data-[disabled]:opacity-50';
+/** A heading over a group of entries and the line between groups (dropdown menus; context menus use ContextLabel). */
+export const MENU_LABEL = 'px-2 pb-0.5 pt-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-fg-faint';
+export const MENU_SEP = 'mx-1 my-1.5 h-px bg-line-soft';
+/** A tile of the quick bar on top of a menu (icon above a short word). */
+const QUICK_TILE =
+  'flex min-w-0 flex-1 cursor-default select-none flex-col items-center justify-center gap-1 rounded-xl border border-line-soft bg-subtle px-1 pb-1.5 pt-2 text-[0.6875rem] leading-tight text-fg-muted outline-none data-[highlighted]:border-accent-soft data-[highlighted]:bg-accent-tint data-[highlighted]:text-accent data-[disabled]:opacity-50 [&>svg]:h-4 [&>svg]:w-4';
 
 export function ContextContent({ children }: { children: ReactNode }) {
   return (
@@ -678,19 +690,36 @@ export function ContextContent({ children }: { children: ReactNode }) {
 export const glueEllipsis = (text: string) => text.replace(/ …$/, '\u00a0…');
 
 /** `disabled` greys the entry out (it stays visible, `title` says why – e.g. no mail server). */
-export function ContextItem({ icon, children, onSelect, danger, shortcut, disabled, title }: { icon?: ReactNode; children: ReactNode; onSelect: () => void; danger?: boolean; shortcut?: string; disabled?: boolean; title?: string }) {
+export function ContextItem({
+  icon,
+  children,
+  onSelect,
+  danger,
+  shortcut,
+  disabled,
+  title,
+  badge,
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+  onSelect: () => void;
+  danger?: boolean;
+  shortcut?: string;
+  disabled?: boolean;
+  title?: string;
+  /** A small state pill at the end (e.g. „Aktiv“ at „KI-Freigabe …“). */
+  badge?: ReactNode;
+}) {
   return (
     <CM.Item
       onSelect={onSelect}
       disabled={disabled}
       title={title}
-      className={cx(
-        'flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover data-[disabled]:opacity-50',
-        danger ? 'text-danger' : 'text-fg',
-      )}
+      className={cx(MENU_ITEM, danger ? 'text-danger data-[highlighted]:bg-danger-soft' : 'text-fg')}
     >
-      <span className="flex h-4 w-4 items-center justify-center text-fg-muted [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+      <span className={cx('flex h-4 w-4 shrink-0 items-center justify-center [&>svg]:h-4 [&>svg]:w-4', danger ? 'text-danger' : 'text-fg-muted')}>{icon}</span>
       <span className="min-w-0 flex-1 break-words">{typeof children === 'string' ? glueEllipsis(children) : children}</span>
+      {badge && <span className="shrink-0 rounded-full bg-ok-soft px-2 py-px text-[0.6875rem] font-medium text-ok">{badge}</span>}
       {/* Never wider than the menu; left out on touch and very narrow screens, where it is of no use. */}
       {shortcut && <span className="shrink-0 whitespace-nowrap text-xs text-fg-faint max-[360px]:hidden [@media(hover:none)]:hidden">{shortcut}</span>}
     </CM.Item>
@@ -707,12 +736,14 @@ export const keepSubOpen = (e: Event) => {
 };
 
 /** A submenu in a context menu (opens on hover, tap or arrow key). */
-export function ContextSub({ icon, label, children }: { icon?: ReactNode; label: string; children: ReactNode }) {
+/** `count`: how many entries wait inside (draft: „Öffnen & Neu anlegen 4 ›“). */
+export function ContextSub({ icon, label, count, children }: { icon?: ReactNode; label: string; count?: number; children: ReactNode }) {
   return (
     <CM.Sub>
-      <CM.SubTrigger className="flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-fg outline-none data-[highlighted]:bg-hover data-[state=open]:bg-hover">
-        <span className="flex h-4 w-4 items-center justify-center text-fg-muted [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+      <CM.SubTrigger className={cx(MENU_ITEM, 'text-fg data-[state=open]:bg-hover')}>
+        <span className="flex h-4 w-4 shrink-0 items-center justify-center text-fg-muted [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
         <span className="flex-1">{label}</span>
+        {count !== undefined && <span className="text-xs tabular-nums text-fg-faint" aria-hidden>{count}</span>}
         <ChevronRight className="h-3.5 w-3.5 text-fg-faint" />
       </CM.SubTrigger>
       <CM.Portal>
@@ -725,15 +756,54 @@ export function ContextSub({ icon, label, children }: { icon?: ReactNode; label:
 }
 
 export function ContextSeparator() {
-  return <CM.Separator className="my-1 h-px bg-line" />;
+  return <CM.Separator className={MENU_SEP} />;
 }
+
+/** A heading over a group of entries in a context menu (e.g. „Export & Sicherung“). */
+export function ContextLabel({ children }: { children: ReactNode }) {
+  return <CM.Label className={MENU_LABEL}>{children}</CM.Label>;
+}
+
+/** One tile of the quick bar on top of a context menu: `label` is the full name (read out, tooltip), `short` shows. */
+export function ContextTile({ icon, label, short, onSelect, disabled, active }: { icon: ReactNode; label: string; short: string; onSelect: () => void; disabled?: boolean; active?: boolean }) {
+  return (
+    <CM.Item onSelect={onSelect} disabled={disabled} aria-label={label} title={label} className={cx(QUICK_TILE, active && 'text-accent')}>
+      {icon}
+      {/* Two lines at most (draft: „Neuer / Tab“), never cut off with „…“. */}
+      <span className="line-clamp-2 max-w-full text-center [overflow-wrap:anywhere]" aria-hidden>
+        {short}
+      </span>
+    </CM.Item>
+  );
+}
+
+/** The quick bar: the most used actions of a menu as a row of tiles (redesign 23.11.). */
+export function QuickBar({ children }: { children: ReactNode }) {
+  return <div className="mb-1.5 flex min-w-[min(19rem,calc(100vw-2.5rem))] gap-1 border-b border-line-soft pb-1.5">{children}</div>;
+}
+
+/** The same tile in a dropdown menu („⋯“ of a note). */
+export function DropdownTile({ icon, label, short, onSelect, disabled }: { icon: ReactNode; label: string; short: string; onSelect: () => void; disabled?: boolean }) {
+  return (
+    <DM.Item onSelect={onSelect} disabled={disabled} aria-label={label} title={label} className={QUICK_TILE}>
+      {icon}
+      {/* Two lines at most (draft: „Neuer / Tab“), never cut off with „…“. */}
+      <span className="line-clamp-2 max-w-full text-center [overflow-wrap:anywhere]" aria-hidden>
+        {short}
+      </span>
+    </DM.Item>
+  );
+}
+
+/** A dropdown entry that opens a submenu but looks like a tile of the quick bar. */
+export const QUICK_TILE_CLASS = QUICK_TILE;
 
 /**
  * Dropdown menus (… buttons, „Neu …“, link and AI menus) follow the same rules as context menus:
  * 8 px margin, never wider or taller than the available space; `minWidth` (px) gives way on phones.
  */
 const DROPDOWN_BOX =
-  'max-w-[var(--radix-dropdown-menu-content-available-width)] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-lg border border-line bg-bg p-1 text-sm shadow-pop';
+  'max-w-[var(--radix-dropdown-menu-content-available-width)] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-2xl bg-bg p-[7px] text-[0.8125rem] shadow-pop';
 const dropdownMin = (minWidth: number) => ({ minWidth: `min(${minWidth}px, var(--radix-dropdown-menu-content-available-width))` });
 type DropdownBoxProps = { minWidth?: number; className?: string };
 
@@ -758,7 +828,7 @@ export const DropdownSubContent = forwardRef<HTMLDivElement, ComponentPropsWitho
  * `className` carries the layer, padding and width.
  */
 const POPOVER_BOX =
-  'max-w-[var(--radix-popover-content-available-width)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-lg border border-line bg-bg shadow-pop';
+  'max-w-[var(--radix-popover-content-available-width)] max-h-[var(--radix-popover-content-available-height)] overflow-y-auto rounded-2xl bg-bg shadow-pop';
 
 export const PopoverContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<typeof Popover.Content>>(function PopoverContent({ className, ...rest }, ref) {
   return <Popover.Content ref={ref} collisionPadding={8} {...rest} className={cx(POPOVER_BOX, className)} />;

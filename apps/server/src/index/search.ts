@@ -77,12 +77,13 @@ export function search(db: DB, q: string, opts: SearchOptions = {}): SearchResul
     }
   }
 
+  // Tags count as content: „#rezept“ or „rezept“ finds notes tagged so (QA 24.11.).
   const contentRows = db
     .prepare(
       `SELECT mount_id, entry_path, title, snippet(entries_fts, 3, char(1), char(2), '…', 12) AS snip
        FROM entries_fts WHERE entries_fts MATCH ? ${mountFilter} ORDER BY rank LIMIT ?`,
     )
-    .all(`body : (${wordQuery})`, ...mountArgs, limit * 3) as { mount_id: string; entry_path: string; title: string; snip: string }[];
+    .all(`{tags body} : (${wordQuery})`, ...mountArgs, limit * 3) as { mount_id: string; entry_path: string; title: string; snip: string }[];
   const content: SearchHit[] = [];
   for (const r of contentRows) {
     if (content.length >= limit) break;

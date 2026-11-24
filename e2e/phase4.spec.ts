@@ -117,7 +117,8 @@ test('an account for an agent: start password without change, token made by the 
   // KI & APIs → Alle Tokens: standard size (AD-075, only the rights grid is wide); a token for the agent without signing in as it.
   await openSettingsPage(admin, 'Alle Tokens');
   const dialog = admin.getByRole('dialog', { name: 'Einstellungen' });
-  expect((await dialog.boundingBox())!.width).toBeLessThan(900);
+  // The settings are 940 px wide (redesign 23.11.), the rights grid takes the whole window.
+  expect((await dialog.boundingBox())!.width).toBeLessThan(960);
   const tf = dialog.getByRole('form', { name: 'Neuer Token' });
   await expect(tf.getByRole('button', { name: 'Token erstellen' })).toBeDisabled();
   await tf.getByLabel('Token für').selectOption({ label: 'Agent Claude (agent@example.test)' });

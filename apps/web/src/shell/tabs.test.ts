@@ -8,11 +8,11 @@ const shell = readFileSync(resolve(import.meta.dirname, 'Shell.tsx'), 'utf8');
 const tabBar = shell.slice(shell.indexOf('function TabBar('), shell.indexOf('\n}\n', shell.indexOf('function TabBar(')));
 
 describe('note tab bar (rest-d2)', () => {
-  it('gives the close × a target of at least 24 × 24 px (WCAG 2.5.8) inside the 32 px tab', () => {
+  it('gives the close × a target of at least 24 × 24 px (WCAG 2.5.8) inside the 34 px tab', () => {
     const close = tabBar.match(/<button\s+className=\{cx\('([^']*)'[^]*?aria-label=\{t\('Tab schließen'\)\}/);
     expect(close?.[1]).toMatch(/\bh-6\b/);
     expect(close?.[1]).toMatch(/\bw-6\b/);
-    expect(tabBar).toMatch(/'group flex h-8 /);
+    expect(tabBar).toMatch(/'group flex h-\[34px\] /);
   });
 
   it('gives the unpin button of a pinned tab the same 24 × 24 px target (rest-e1)', () => {

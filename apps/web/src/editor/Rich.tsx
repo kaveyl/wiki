@@ -8,6 +8,7 @@ import { errorText } from '../api';
 import { cx, promptDialog } from '../ui';
 import { t } from '../i18n';
 import { retryable } from '../loading';
+import { useDark } from '../theme';
 
 const loadKatex = retryable(() => Promise.all([import('katex'), import('katex/dist/katex.min.css')]).then(([m]) => m.default));
 
@@ -40,15 +41,24 @@ function diagramColors(dark: boolean): Record<string, unknown> {
   return vars;
 }
 
-const loadMermaid = retryable(() =>
-  import('mermaid').then((m) => {
-    // `strict`: no HTML labels or click handlers from diagram text (it comes from repositories). Layout `dagre`: Mermaid 12
-    // lays flowcharts out with ELK by default, which is left out of the build (licence, AD-064 – vendor/elk-stub.ts).
-    const dark = document.documentElement.classList.contains('dark');
-    m.default.initialize({ startOnLoad: false, securityLevel: 'strict', layout: 'dagre', theme: dark ? 'dark' : 'default', themeVariables: diagramColors(dark) });
-    return m.default;
-  }),
-);
+const loadMermaid = retryable(() => import('mermaid').then((m) => m.default));
+
+/**
+ * Renders with the current light/dark look (set before every diagram – the scheme can change while the app runs).
+ * `strict`: no HTML labels or click handlers from diagram text (it comes from repositories). Layout `dagre`: Mermaid 12
+ * lays flowcharts out with ELK by default, which is left out of the build (licence, AD-064 – vendor/elk-stub.ts).
+ * `suppressErrorRendering`: otherwise Mermaid leaves its error picture in <body> on a syntax error (QA 24.11.).
+ */
+async function renderMermaid(id: string, code: string, dark: boolean): Promise<string> {
+  const mermaid = await loadMermaid();
+  mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', layout: 'dagre', suppressErrorRendering: true, theme: dark ? 'dark' : 'default', themeVariables: diagramColors(dark) });
+  try {
+    return (await mermaid.render(id, code)).svg;
+  } finally {
+    // Its work area (`d<id>` at the end of <body>); gone after a success, kept by some failures while drawing.
+    document.getElementById(`d${id}`)?.remove();
+  }
+}
 
 function useKatex(latex: string, display: boolean): { html: string | null; error: string | null } {
   const [out, setOut] = useState<{ html: string | null; error: string | null }>({ html: null, error: null });
@@ -116,19 +126,19 @@ function MermaidPreview({ code }: { code: string }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const dark = useDark();
   useEffect(() => {
     let alive = true;
     const timer = setTimeout(() => {
-      void loadMermaid()
-        .then((mermaid) => mermaid.render(`mermaid-${id}-${Date.now()}`, code))
-        .then((r) => alive && (setSvg(r.svg), setError(null)))
+      renderMermaid(`mermaid-${id}-${Date.now()}`, code, dark)
+        .then((r) => alive && (setSvg(r), setError(null)))
         .catch((e: unknown) => alive && setError(errorText(e).split('\n')[0]!));
     }, 300);
     return () => {
       alive = false;
       clearTimeout(timer);
     };
-  }, [code, id]);
+  }, [code, id, dark]);
   return (
     <div className="mermaid-preview" contentEditable={false} aria-label={t('Diagramm-Vorschau')}>
       {error ? /* the diagram's own preview while typing, not a message */ <p className="text-xs text-danger">{t('Diagramm-Fehler: {error}', { error })}</p> : svg ? <div dangerouslySetInnerHTML={{ __html: svg }} /> : <p className="text-xs text-fg-faint">{t('Diagramm wird gezeichnet …')}</p>}

@@ -9,7 +9,7 @@ import { Placeholder } from '@tiptap/extensions';
 import Image from '@tiptap/extension-image';
 import { codeBlockWithPreview, MathBlockView_, MathInlineView_, taskCheckboxLabel } from './Rich';
 import { diffLines, diffText, editorExtensions, loadMarkdown, merge3, parseTags, saveMarkdown, splitFrontmatter, type PMNode } from '@kaveyl-wiki/core';
-import { Lock, LockOpen, FileCode2, PenLine, AlertTriangle, MoreHorizontal, LocateFixed, Pencil, Trash2, Check, CloudUpload, ListTree, Maximize2, Minimize2, History, Star, X, LayoutTemplate, Users, ShieldCheck, Send, Sparkles, Printer, FileDown, ChevronRight, Download } from 'lucide-react';
+import { Mail, Lock, LockOpen, Code2, PenLine, AlertTriangle, MoreHorizontal, LocateFixed, Pencil, Trash2, Check, CloudUpload, ListTree, Maximize2, Minimize2, History, Star, X, LayoutTemplate, Users, ShieldCheck, Send, Sparkles, Printer, FileDown, ChevronRight, Download } from 'lucide-react';
 import * as DM from '@radix-ui/react-dropdown-menu';
 import * as Popover from '@radix-ui/react-popover';
 import { usePersonal } from '../personal';
@@ -22,7 +22,7 @@ import { onNoteEvent, onPresence, type PresenceUser } from '../events';
 import { takeNote } from '../notePrefetch';
 import { useWorkspace } from '../store';
 import { useActions } from '../shell/actions';
-import { Button, DropdownContent, DropdownSubContent, Modal, PartLoading, PopoverContent, Spinner, confirmDialog, cx, keepSubOpen, promptDialog } from '../ui';
+import { Button, DropdownContent, DropdownSubContent, DropdownTile, MENU_ITEM, MENU_LABEL, MENU_SEP, Modal, PartLoading, PopoverContent, QUICK_TILE_CLASS, Spinner, confirmDialog, cx, keepSubOpen, promptDialog, useMediaQuery } from '../ui';
 import { DiffView } from '../shell/history';
 import { SaveAsDialog, splitPath } from '../shell/SaveAs';
 import { externalUrl, isExternal, isScriptUrl, noteCandidates, resolveHref } from '@kaveyl-wiki/core';
@@ -34,6 +34,7 @@ import { drawingContexts, drawingVersions, isDrawingSrc, openDrawing } from './D
 import { downloadExport, printNote } from './exporting';
 import { NoteLink, noteHref } from './NoteLink';
 import { BrokenLinks, localHrefs, setBrokenLinks } from './BrokenLinks';
+import { MoveBlock } from './moveBlock';
 import { TagBar } from './Tags';
 import { LinkPreview } from './LinkPreview';
 import { EmojiSuggestion } from './Emoji';
@@ -243,6 +244,8 @@ function Loaded({
 }) {
   const inEncryptedFolder = encryptedFolder !== null;
   const [saveState, setSaveState] = useState<SaveState>('saved');
+  /** When this view last wrote a change: „Bearbeitet …“ next to the tags follows it without reloading the note. */
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [sourceScroller, setSourceScroller] = useState<HTMLDivElement | null>(null);
   const [failure, setFailure] = useState<SaveFailure | null>(null);
   const [conflict, setConflict] = useState<Conflict | null>(null);
@@ -398,6 +401,7 @@ function Loaded({
         st.savedKey = snap.key;
         if (baseRaw.current !== null) baseRaw.current = snap.raw ?? saveMarkdown(loadMarkdown(baseRaw.current).source, snap.doc!);
         if (res.changed) {
+          setSavedAt(Date.now());
           st.savedSinceLeave = true;
           void qc.invalidateQueries({ queryKey: ['attachments', mount.id, note.path] });
         }
@@ -835,9 +839,9 @@ function Loaded({
         </p>
       )}
       {mode === 'rich' && note.doc ? (
-        <RichEditor mount={mount} note={note} readonly={readonly} encrypted={!!seal} onChange={changed} bind={bind} header={<TagBar mountId={mount.id} tags={tags} readonly={readonly} onChange={(next) => saveMeta({ tags: next })} />} />
+        <RichEditor mount={mount} note={note} readonly={readonly} encrypted={!!seal} onChange={changed} bind={bind} header={<TagBar mountId={mount.id} tags={tags} readonly={readonly} edited={Math.max(savedAt ?? 0, note.mtime ?? 0) || null} onChange={(next) => saveMeta({ tags: next })} />} />
       ) : (
-        <div ref={setSourceScroller} className="@container flex min-h-0 flex-1 overflow-y-auto">
+        <div ref={setSourceScroller} className="@container flex min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable_both-edges]">
           <Suspense fallback={<PartLoading className="flex-1 p-10" text={t('Markdown-Ansicht wird geladen …')} />}>
             <SourceEditor note={note} readonly={readonly} onChange={changed} bind={bind} scroller={sourceScroller} />
           </Suspense>
@@ -879,6 +883,7 @@ function RichEditor({
       NoteLink.configure({ mountId: mount.id, notePath: note.path, folderNote: mount.options.folderNote }),
       EmojiSuggestion,
       BrokenLinks,
+      MoveBlock,
     ],
     [mount.id, note.path, mount.options.folderNote],
   );
@@ -1031,15 +1036,26 @@ function RichEditor({
     editor.commands.focus('end');
   }, [editor, readonly, mount.id, note.path]);
   const { editorWidth, showToc } = usePrefs();
+  const toolbarPref = usePrefs((p) => p.toolbar);
   const headings = useHeadings(editor);
   const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
 
+  // Phones keep the strip on top; wide screens: the dock at the bottom or the floating bar on top (Darstellung).
+  const narrow = useMediaQuery('(max-width: 767px)');
+  const toolbarPlace = narrow ? 'bar' : toolbarPref;
+  const toolbar = editor && !readonly && (
+    <EditorToolbar
+      editor={editor}
+      place={toolbarPlace}
+      onAttach={() => chooseFiles(editor, qc, mount, note.path)}
+      extra={encrypted ? undefined : <AiMenuButton editor={editor} mountId={mount.id} path={note.path} pill={toolbarPlace !== 'bar'} className={toolbarPlace === 'bar' ? 'ml-1' : 'mx-1'} />}
+    />
+  );
+
   return (
-    <>
-      {editor && !readonly && (
-        <EditorToolbar editor={editor} onAttach={() => chooseFiles(editor, qc, mount, note.path)} extra={encrypted ? undefined : <AiMenuButton editor={editor} mountId={mount.id} path={note.path} className="ml-1" />} />
-      )}
-      <div ref={setScroller} className="@container flex min-h-0 flex-1 overflow-y-auto">
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      {toolbarPlace !== 'dock' && toolbar}
+      <div ref={setScroller} className="@container flex min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable_both-edges]">
         <div className="min-w-0 flex-1">
           <div
             className="mx-auto px-6 pb-[40vh] pt-8 sm:px-12"
@@ -1103,7 +1119,8 @@ function RichEditor({
           </aside>
         )}
       </div>
-    </>
+      {toolbarPlace === 'dock' && toolbar}
+    </div>
   );
 }
 
@@ -1393,10 +1410,10 @@ function NoteHeader({
     return () => ro.disconnect();
   }, [fitLabels]);
   return (
-    <div ref={headerRef} className="@container flex h-10 shrink-0 items-center gap-1 border-b border-line px-2 text-sm sm:gap-2 sm:px-3" data-print="hide">
+    <div ref={headerRef} className="@container flex h-[46px] shrink-0 items-center gap-1 border-b border-line-soft px-2 text-[0.8125rem] sm:gap-1.5 sm:px-3 md:px-[22px]" data-print="hide">
       <Popover.Root open={iconOpen} onOpenChange={setIconOpen}>
         <Popover.Trigger asChild disabled={!canWrite}>
-          <button className="flex h-7 w-7 shrink-0 items-center justify-center rounded hover:bg-hover" aria-label={t('Icon der Notiz')} title={canWrite ? t('Icon ändern') : undefined}>
+          <button className="-ml-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg hover:bg-hover" aria-label={t('Icon der Notiz')} title={canWrite ? t('Icon ändern') : undefined}>
             <EntryIcon icon={icon} isDir={false} />
           </button>
         </Popover.Trigger>
@@ -1421,7 +1438,7 @@ function NoteHeader({
           <Popover.Trigger asChild>
             <button
               type="button"
-              className="flex min-w-0 max-w-full items-center gap-1 rounded text-left text-fg-muted hover:bg-hover [@media(hover:none)]:min-h-8"
+              className="flex min-w-0 max-w-full items-center gap-1 rounded-lg px-1 text-left text-fg-muted hover:bg-hover [@media(hover:none)]:min-h-8"
               title={`${mount.name} / ${note.path}`}
               aria-label={t('Pfad der Notiz')}
             >
@@ -1438,7 +1455,7 @@ function NoteHeader({
                   )}
                 >
                   {i > 0 && <span className="text-fg-faint">/</span>}
-                  <span ref={i === crumbs.length - 1 ? nameRef : undefined} className={cx('truncate', i === crumbs.length - 1 && 'text-fg')}>
+                  <span ref={i === crumbs.length - 1 ? nameRef : undefined} className={cx('truncate', i === crumbs.length - 1 && 'font-semibold text-fg')}>
                     {c}
                   </span>
                 </span>
@@ -1461,25 +1478,21 @@ function NoteHeader({
       {encrypted && <EncryptedBadge />}
       <PresenceChip users={presence} />
       <SaveIndicator state={saveState} failure={saveFailure} onRetry={onSaveNow} />
-      <button
-        className={cx('flex h-7 w-7 min-w-6 items-center justify-center rounded hover:bg-hover', favorite ? 'text-warn' : 'text-fg-faint')}
-        aria-label={favorite ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
-        aria-pressed={favorite}
-        title={favorite ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
-        onClick={() => usePersonal.getState().toggleFavorite({ mountId: mount.id, path: note.path, title: note.title })}
-      >
-        <Star className={cx('h-4 w-4', favorite && 'fill-current')} />
-      </button>
-      {readonly && !lockable && <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-fg-muted">{t('Schreibgeschützt')}</span>}
+      {readonly && !lockable && (
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn">
+          <Lock className="h-3 w-3" /> {t('Schreibgeschützt')}
+        </span>
+      )}
       {lockable && (
-        <Button size="sm" variant="ghost" onClick={onToggleLock} title={unlocked ? t('Wieder sperren') : t('Notiz ist als schreibgeschützt markiert – zum Bearbeiten entsperren')}>
+        // Locked: a clearly coloured pill, not a quiet button – it is the only hint that the note cannot be edited (QA 24.11.).
+        <Button size="sm" variant="ghost" className={unlocked ? undefined : 'rounded-full bg-warn-soft text-warn hover:bg-warn-soft hover:opacity-90'} onClick={onToggleLock} title={unlocked ? t('Wieder sperren') : t('Notiz ist als schreibgeschützt markiert – zum Bearbeiten entsperren')}>
           {unlocked ? <LockOpen className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
           {unlocked ? t('Entsperrt') : t('Nur lesen')}
         </Button>
       )}
-      <div className="flex rounded-md border border-line p-0.5">
+      <div className="flex rounded-full border border-line-soft bg-subtle p-0.5">
         <button
-          className={cx('flex h-6 items-center gap-1 rounded px-1.5 text-xs disabled:opacity-50 @md:px-2', mode === 'rich' ? 'bg-active text-fg' : 'text-fg-muted hover:text-fg')}
+          className={cx('flex h-7 items-center gap-1.5 rounded-full px-2 text-xs font-medium disabled:opacity-50 @md:px-3', mode === 'rich' ? 'bg-bg text-accent shadow-[0_1px_2px_rgba(0,0,0,0.08)]' : 'text-fg-muted hover:text-fg')}
           aria-pressed={mode === 'rich'}
           disabled={!note.doc}
           onClick={() => mode !== 'rich' && void onMode('rich')}
@@ -1488,137 +1501,159 @@ function NoteHeader({
           <PenLine className="h-3.5 w-3.5" /> <span className="hidden @3xl:inline [[data-labels=off]_&]:hidden">{t('Editor')}</span>
         </button>
         <button
-          className={cx('flex h-6 items-center gap-1 rounded px-1.5 text-xs @md:px-2', mode === 'source' ? 'bg-active text-fg' : 'text-fg-muted hover:text-fg')}
+          className={cx('flex h-7 items-center gap-1.5 rounded-full px-2 text-xs font-medium @md:px-3', mode === 'source' ? 'bg-bg text-accent shadow-[0_1px_2px_rgba(0,0,0,0.08)]' : 'text-fg-muted hover:text-fg')}
           aria-pressed={mode === 'source'}
           onClick={() => mode !== 'source' && void onMode('source')}
           title={t('Markdown-Quelltext')}
         >
-          <FileCode2 className="h-3.5 w-3.5" /> <span className="hidden @3xl:inline [[data-labels=off]_&]:hidden">{t('Markdown')}</span>
+          <Code2 className="h-3.5 w-3.5" /> <span className="hidden @3xl:inline [[data-labels=off]_&]:hidden">{t('Markdown')}</span>
         </button>
       </div>
+      <button
+        className={cx('flex h-8 w-8 min-w-6 items-center justify-center rounded-lg hover:bg-hover', favorite ? 'text-warn' : 'text-fg-muted')}
+        aria-label={favorite ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
+        aria-pressed={favorite}
+        title={favorite ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
+        onClick={() => usePersonal.getState().toggleFavorite({ mountId: mount.id, path: note.path, title: note.title })}
+      >
+        <Star className={cx('h-4 w-4', favorite && 'fill-current')} />
+      </button>
       <ViewToggles onDownload={encrypted ? undefined : () => downloadExport(mount.id, note.path, 'md')} />
       <DM.Root>
         <DM.Trigger asChild>
-          <button className="flex h-7 w-7 min-w-6 items-center justify-center rounded text-fg-muted hover:bg-hover" aria-label={t('Weitere Aktionen')}>
+          <button className="flex h-8 w-8 min-w-6 items-center justify-center rounded-lg text-fg-muted hover:bg-hover data-[state=open]:bg-hover" aria-label={t('Weitere Aktionen')}>
             <MoreHorizontal className="h-4 w-4" />
           </button>
         </DM.Trigger>
         <DM.Portal>
-          <DropdownContent align="end" className="z-50">
-            {[
-              { icon: <LocateFixed />, label: t('Im Baum anzeigen'), run: () => revealInTree(mount.id, note.path) },
-              { icon: <History />, label: t('Versionen'), run: () => openAction({ kind: 'history', mountId: mount.id, path: note.path }) },
-              { icon: <Printer />, label: t('Drucken / als PDF …'), run: () => printNote(mount.id, note.path, encrypted) },
-              ...(encrypted
-                ? []
-                : [
-                    {
-                      icon: <FileDown />,
-                      label: t('Exportieren'),
-                      run: () => {},
-                      sub: [
-                        { label: t('HTML-Datei'), run: () => downloadExport(mount.id, note.path) },
-                        { label: t('Markdown'), run: () => downloadExport(mount.id, note.path, 'md') },
-                      ],
-                    },
-                  ]),
-              ...(aiAvailable && !encrypted && !aiInToolbar
-                ? [
-                    { icon: <Sparkles />, label: t('KI fragen …'), run: () => useAi.getState().openAsk({ kind: 'note', mountId: mount.id, path: note.path }) },
-                    { icon: <Sparkles />, label: t('KI: Zusammenfassen'), run: () => void runAiAction(aiEditor(), mount.id, note.path, 'summarize') },
-                    ...(canWrite ? [{ icon: <Sparkles />, label: t('KI: Weiterschreiben'), run: () => void runAiAction(aiEditor(), mount.id, note.path, 'continue') }] : []),
-                  ]
-                : []),
-              ...(!canWrite
-                ? []
-                : [{ icon: fmReadonly ? <LockOpen /> : <Lock />, label: fmReadonly ? t('Schreibschutz aufheben') : t('Schreibschutz setzen'), run: onToggleReadonly }]),
-              ...(!canWrite
-                ? []
-                : [
-                    {
-                      icon: <LayoutTemplate />,
-                      label: t('Als Vorlage speichern'),
-                      run: async () => {
-                        const name = (
-                          await promptDialog(t('Als Vorlage speichern'), { label: t('Name der Vorlage'), value: displayName, required: true, confirmLabel: t('Speichern'), help: 'vorlagen' })
-                        )?.trim();
-                        if (!name) return;
-                        void api
-                          .saveTemplate(mount.id, note.path, name)
-                          .then((tpl) => toast({ kind: 'ok', title: t('Vorlage „{title}“ gespeichert', { title: tpl.title }), text: `.kaveyl-wiki/templates/${tpl.name}` }))
-                          .catch((e: unknown) => toast({ kind: 'error', title: t('Vorlage nicht gespeichert'), text: errorText(e) }));
-                      },
-                    },
-                  ]),
-              ...(encrypted ? [{ icon: <Lock />, label: t('Jetzt sperren'), run: lockAll }] : []),
-              ...(canWrite && onCrypt
-                ? [encrypted ? { icon: <LockOpen />, label: t('Verschlüsselung entfernen …'), run: () => onCrypt('decrypt') } : { icon: <Lock />, label: t('Verschlüsseln …'), run: () => onCrypt('encrypt') }]
-                : []),
-              ...(note.access === 'admin'
-                ? [{ icon: <ShieldCheck />, label: t('Berechtigungen …'), run: () => openAction({ kind: 'acl', mountId: mount.id, target: 'note', path: note.path, title: displayName }) }]
-                : []),
-              // „Teilen“ (owner 28.10.): the note as a file by mail (anyone who reads it), access by e-mail („verwalten“).
-              ...(session?.user?.isGuest
-                ? []
-                : [
-                    {
-                      icon: <Send />,
-                      label: t('Teilen'),
-                      run: () => {},
-                      sub: [
-                        {
-                          label: t('Per Mail versenden …'),
-                          disabled: !session?.mail || encrypted,
-                          title: !session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : encrypted ? t('Verschlüsselte Notizen lassen sich nicht per Mail versenden') : undefined,
-                          run: () => openAction({ kind: 'mail-notes', mountId: mount.id, notes: [{ path: note.path, title: displayName }] }),
-                        },
-                        ...(note.access === 'admin'
-                          ? [{ label: t('Zugriff per E-Mail geben …'), run: () => openAction({ kind: 'share', mountId: mount.id, target: 'note', path: note.path, title: displayName }) }]
-                          : []),
-                      ],
-                    },
-                  ]),
-              ...(!canWrite
-                ? []
-                : [
-                    { icon: <Pencil />, label: t('Umbenennen / verschieben'), run: () => openAction({ kind: 'rename', mountId: mount.id, path: note.path, isDir: false }) },
-                    { icon: <Trash2 />, label: t('Löschen'), danger: true, run: () => openAction({ kind: 'delete', mountId: mount.id, path: note.path, isDir: false, title: displayName }) },
-                  ]),
-            ].map((item: { icon: ReactNode; label: string; run: () => void; danger?: boolean; sub?: { label: string; run: () => void; disabled?: boolean; title?: string }[] }) =>
-              item.sub ? (
-                // A submenu (opens on hover, tap or arrow key), like „Exportieren“ in the tree's context menu.
-                <DM.Sub key={item.label}>
-                  <DM.SubTrigger className="flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover data-[state=open]:bg-hover [&>svg]:h-4 [&>svg]:w-4">
-                    {item.icon}
-                    <span className="flex-1">{item.label}</span>
-                    <ChevronRight className="!h-3.5 !w-3.5 text-fg-faint" />
+          <DropdownContent align="end" minWidth={300} className="z-50">
+            {/* Redesign 23.11.: four tiles on top, then the document, protection and deleting. */}
+            <div className="mb-1.5 flex gap-1 border-b border-line-soft pb-1.5">
+              <DropdownTile icon={<LocateFixed />} label={t('Im Baum anzeigen')} short={t('Im Baum')} onSelect={() => revealInTree(mount.id, note.path)} />
+              <DropdownTile icon={<History />} label={t('Versionen')} short={t('Versionen')} onSelect={() => openAction({ kind: 'history', mountId: mount.id, path: note.path })} />
+              <DropdownTile icon={<Printer />} label={t('Drucken / als PDF …')} short={t('Drucken')} onSelect={() => printNote(mount.id, note.path, encrypted)} />
+              {!session?.user?.isGuest && (
+                // „Teilen“ (owner 28.10.): the note as a file by mail (anyone who reads it), access by e-mail („verwalten“).
+                <DM.Sub>
+                  <DM.SubTrigger className={cx(QUICK_TILE_CLASS, 'data-[state=open]:bg-accent-tint data-[state=open]:text-accent')} aria-label={t('Teilen')}>
+                    <Send />
+                    <span className="max-w-full truncate" aria-hidden>
+                      {t('Teilen')}
+                    </span>
                   </DM.SubTrigger>
                   <DM.Portal>
-                    <DropdownSubContent minWidth={180} className="z-50" onFocusOutside={keepSubOpen}>
-                      {item.sub.map((s) => (
-                        <DM.Item
-                          key={s.label}
-                          onSelect={s.run}
-                          disabled={s.disabled}
-                          title={s.title}
-                          className="flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 outline-none data-[disabled]:opacity-50 data-[highlighted]:bg-hover"
-                        >
-                          {s.label}
+                    <DropdownSubContent minWidth={220} className="z-50" onFocusOutside={keepSubOpen}>
+                      <DM.Item
+                        onSelect={() => openAction({ kind: 'mail-notes', mountId: mount.id, notes: [{ path: note.path, title: displayName }] })}
+                        disabled={!session?.mail || encrypted}
+                        title={!session?.mail ? t('E-Mail-Versand ist nicht eingerichtet') : encrypted ? t('Verschlüsselte Notizen lassen sich nicht per Mail versenden') : undefined}
+                        className={MENU_ITEM}
+                      >
+                        <Mail className="h-4 w-4 text-fg-muted" /> {t('Per Mail versenden …')}
+                      </DM.Item>
+                      {note.access === 'admin' && (
+                        <DM.Item onSelect={() => openAction({ kind: 'share', mountId: mount.id, target: 'note', path: note.path, title: displayName })} className={MENU_ITEM}>
+                          <Send className="h-4 w-4 text-fg-muted" /> {t('Zugriff per E-Mail geben …')}
                         </DM.Item>
-                      ))}
+                      )}
                     </DropdownSubContent>
                   </DM.Portal>
                 </DM.Sub>
-              ) : (
-                <DM.Item
-                  key={item.label}
-                  onSelect={item.run}
-                  className={cx('flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover [&>svg]:h-4 [&>svg]:w-4', item.danger && 'text-danger')}
-                >
-                  {item.icon}
-                  {item.label}
+              )}
+            </div>
+            {(!encrypted || canWrite) && <DM.Label className={MENU_LABEL}>{t('Dokument')}</DM.Label>}
+            {!encrypted && (
+              <DM.Sub>
+                <DM.SubTrigger className={cx(MENU_ITEM, 'data-[state=open]:bg-hover')}>
+                  <FileDown className="h-4 w-4 text-fg-muted" />
+                  <span className="flex-1">{t('Exportieren')}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-fg-faint" />
+                </DM.SubTrigger>
+                <DM.Portal>
+                  <DropdownSubContent minWidth={180} className="z-50" onFocusOutside={keepSubOpen}>
+                    <DM.Item onSelect={() => downloadExport(mount.id, note.path)} className={MENU_ITEM}>
+                      {t('HTML-Datei')}
+                    </DM.Item>
+                    <DM.Item onSelect={() => downloadExport(mount.id, note.path, 'md')} className={MENU_ITEM}>
+                      {t('Markdown')}
+                    </DM.Item>
+                  </DropdownSubContent>
+                </DM.Portal>
+              </DM.Sub>
+            )}
+            {canWrite && (
+              <DM.Item
+                className={MENU_ITEM}
+                onSelect={async () => {
+                  const name = (await promptDialog(t('Als Vorlage speichern'), { label: t('Name der Vorlage'), value: displayName, required: true, confirmLabel: t('Speichern'), help: 'vorlagen' }))?.trim();
+                  if (!name) return;
+                  void api
+                    .saveTemplate(mount.id, note.path, name)
+                    .then((tpl) => toast({ kind: 'ok', title: t('Vorlage „{title}“ gespeichert', { title: tpl.title }), text: `.kaveyl-wiki/templates/${tpl.name}` }))
+                    .catch((e: unknown) => toast({ kind: 'error', title: t('Vorlage nicht gespeichert'), text: errorText(e) }));
+                }}
+              >
+                <LayoutTemplate className="h-4 w-4 text-fg-muted" /> {t('Als Vorlage speichern')}
+              </DM.Item>
+            )}
+            {canWrite && (
+              // A switch: the note itself says it is read-only (front matter), for everyone.
+              <DM.CheckboxItem checked={fmReadonly} onCheckedChange={onToggleReadonly} className={MENU_ITEM} aria-label={fmReadonly ? t('Schreibschutz aufheben') : t('Schreibschutz setzen')}>
+                {fmReadonly ? <Lock className="h-4 w-4 text-fg-muted" /> : <LockOpen className="h-4 w-4 text-fg-muted" />}
+                <span className="flex-1">{t('Schreibgeschützt')}</span>
+                <span className={cx('relative h-[18px] w-8 shrink-0 rounded-full transition-colors', fmReadonly ? 'bg-accent-cta' : 'bg-[color-mix(in_srgb,var(--fg)_18%,transparent)]')} aria-hidden>
+                  <span className={cx('absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow transition-all', fmReadonly ? 'left-[16px]' : 'left-[2px]')} />
+                </span>
+              </DM.CheckboxItem>
+            )}
+            {aiAvailable && !encrypted && !aiInToolbar && (
+              <>
+                <DM.Separator className={MENU_SEP} />
+                <DM.Label className={MENU_LABEL}>{t('KI')}</DM.Label>
+                <DM.Item className={MENU_ITEM} onSelect={() => useAi.getState().openAsk({ kind: 'note', mountId: mount.id, path: note.path })}>
+                  <Sparkles className="h-4 w-4 text-fg-muted" /> {t('KI fragen …')}
                 </DM.Item>
-              ),
+                <DM.Item className={MENU_ITEM} onSelect={() => void runAiAction(aiEditor(), mount.id, note.path, 'summarize')}>
+                  <Sparkles className="h-4 w-4 text-fg-muted" /> {t('KI: Zusammenfassen')}
+                </DM.Item>
+                {canWrite && (
+                  <DM.Item className={MENU_ITEM} onSelect={() => void runAiAction(aiEditor(), mount.id, note.path, 'continue')}>
+                    <Sparkles className="h-4 w-4 text-fg-muted" /> {t('KI: Weiterschreiben')}
+                  </DM.Item>
+                )}
+              </>
+            )}
+            {(encrypted || (canWrite && onCrypt) || note.access === 'admin' || canWrite) && (
+              <>
+                <DM.Separator className={MENU_SEP} />
+                <DM.Label className={MENU_LABEL}>{t('Schutz & Verwaltung')}</DM.Label>
+              </>
+            )}
+            {encrypted && (
+              <DM.Item className={MENU_ITEM} onSelect={lockAll}>
+                <Lock className="h-4 w-4 text-fg-muted" /> {t('Jetzt sperren')}
+              </DM.Item>
+            )}
+            {canWrite && onCrypt && (
+              <DM.Item className={MENU_ITEM} onSelect={() => onCrypt(encrypted ? 'decrypt' : 'encrypt')}>
+                {encrypted ? <LockOpen className="h-4 w-4 text-fg-muted" /> : <Lock className="h-4 w-4 text-fg-muted" />} {encrypted ? t('Verschlüsselung entfernen …') : t('Verschlüsseln …')}
+              </DM.Item>
+            )}
+            {note.access === 'admin' && (
+              <DM.Item className={MENU_ITEM} onSelect={() => openAction({ kind: 'acl', mountId: mount.id, target: 'note', path: note.path, title: displayName })}>
+                <ShieldCheck className="h-4 w-4 text-fg-muted" /> {t('Berechtigungen …')}
+              </DM.Item>
+            )}
+            {canWrite && (
+              <>
+                <DM.Item className={MENU_ITEM} onSelect={() => openAction({ kind: 'rename', mountId: mount.id, path: note.path, isDir: false })}>
+                  <Pencil className="h-4 w-4 text-fg-muted" /> {t('Umbenennen / verschieben')}
+                </DM.Item>
+                <DM.Separator className={MENU_SEP} />
+                <DM.Item className={cx(MENU_ITEM, 'text-danger data-[highlighted]:bg-danger-soft')} onSelect={() => openAction({ kind: 'delete', mountId: mount.id, path: note.path, isDir: false, title: displayName })}>
+                  <Trash2 className="h-4 w-4" /> {t('Löschen')}
+                </DM.Item>
+              </>
             )}
           </DropdownContent>
         </DM.Portal>
@@ -1639,7 +1674,7 @@ function ViewToggles({ onDownload }: { onDownload?: () => void }) {
   return (
     <div className="flex items-center">
       <button
-        className={cx('flex h-7 w-7 items-center justify-center rounded hover:bg-hover', showToc ? 'text-fg' : 'text-fg-faint')}
+        className={cx('flex h-8 w-8 items-center justify-center rounded-lg', showToc ? 'bg-accent-soft text-accent' : 'text-fg-muted hover:bg-hover')}
         aria-label={t('Inhaltsverzeichnis ein-/ausblenden')}
         aria-pressed={showToc}
         title={t('Inhaltsverzeichnis ein-/ausblenden')}
@@ -1649,7 +1684,7 @@ function ViewToggles({ onDownload }: { onDownload?: () => void }) {
       </button>
       {onDownload && (
         <button
-          className="flex h-7 w-7 items-center justify-center rounded text-fg-muted hover:bg-hover hover:text-fg"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted hover:bg-hover hover:text-fg"
           aria-label={t('Herunterladen')}
           title={t('Als Markdown herunterladen (.md – mit Bildern oder Dateien als ZIP)')}
           onClick={onDownload}
@@ -1658,7 +1693,7 @@ function ViewToggles({ onDownload }: { onDownload?: () => void }) {
         </button>
       )}
       <button
-        className="flex h-7 w-7 items-center justify-center rounded text-fg-muted hover:bg-hover hover:text-fg"
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-fg-muted hover:bg-hover hover:text-fg"
         aria-label={full ? t('Normale Breite') : t('Volle Breite')}
         title={full ? t('Normale Breite (Breite in Einstellungen → Darstellung)') : t('Volle Breite')}
         onClick={() => set({ editorWidth: full ? 'normal' : 'full' })}

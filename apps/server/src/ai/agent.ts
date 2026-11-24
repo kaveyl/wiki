@@ -93,6 +93,12 @@ export interface Proposal {
   status: 'open' | 'applied' | 'rejected' | 'failed';
   result: string | null;
   createdAt: string;
+  /**
+   * Applying it makes something readable for AI not cleared for private notes (AD-079, sec-004 of the diff check 0.2.14):
+   * `content` – written by a chat that carried private content, to a place released for all AI;
+   * `move` – a note/folder released for private AI only goes where all AI may read it (the rule above stays behind).
+   */
+  privateWarning?: 'content' | 'move';
 }
 
 export type AgentEvent =
@@ -181,28 +187,48 @@ const cut = (t: string, n = MAX_TOOL_CHARS) => (t.length > n ? `${t.slice(0, n)}
 const parentOf = (p: string) => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
 
 export function createAgent(d: AgentDeps) {
-  const { providerAt, privateHint, privateGrant, keepChatPrivate, blocked, noteFor, system, auditCall } = d.assistant.core;
+  const { providerAt, privateHint, privateGrant, chatPrivate, keepChatPrivate, blocked, noteFor, system, auditCall } = d.assistant.core;
 
-  const proposalRow = (r: Record<string, unknown>): Proposal => ({
-    id: s(r.id),
-    chatId: s(r.chat_id),
-    kind: r.kind as ProposalKind,
-    mountId: s(r.mount_id),
-    mountName: d.manager.get(s(r.mount_id))?.name ?? s(r.mount_id),
-    path: s(r.path),
-    toPath: (r.to_path as string | null) ?? null,
-    title: (r.title as string | null) ?? null,
-    content: (r.content as string | null) ?? null,
-    reason: (r.reason as string | null) ?? null,
-    status: r.status as Proposal['status'],
-    result: (r.result as string | null) ?? null,
-    createdAt: s(r.created_at),
-  });
+  /** Released at `path` for AI not cleared for private notes, too (a folder is checked like a note inside it). */
+  const openToAll = (mountId: string, path: string) => {
+    const g = d.rules.grant(mountId, /\.md$/i.test(path) ? path : `${path ? `${path}/` : ''}x.md`);
+    return g.level !== 'none' && g.cloud;
+  };
+  const privateWarning = (pr: Pick<Proposal, 'kind' | 'mountId' | 'path' | 'toPath' | 'title' | 'chatId'>, runPrivate: boolean): Proposal['privateWarning'] => {
+    if (pr.kind === 'move') {
+      // A rule of its own goes along (rulesMoved); otherwise the rules at the target decide.
+      const own = d.rules.rules(pr.mountId).some((r) => !r.orphan && r.target !== 'mount' && r.path === pr.path);
+      const from = /\.md$/i.test(pr.path) ? pr.path : `${pr.path}/x.md`;
+      return !own && privateGrant(pr.mountId, from) && openToAll(pr.mountId, pr.toPath ?? '') ? 'move' : undefined;
+    }
+    const target = pr.kind === 'remember' ? d.memory.instructionsPath : targetOf(pr);
+    return openToAll(pr.mountId, target) && (runPrivate || chatPrivate(pr.chatId)) ? 'content' : undefined;
+  };
 
-  const ownProposal = (req: FastifyRequest, id: string) => {
+  const proposalRow = (r: Record<string, unknown>, runPrivate = false): Proposal => {
+    const pr: Proposal = {
+      id: s(r.id),
+      chatId: s(r.chat_id),
+      kind: r.kind as ProposalKind,
+      mountId: s(r.mount_id),
+      mountName: d.manager.get(s(r.mount_id))?.name ?? s(r.mount_id),
+      path: s(r.path),
+      toPath: (r.to_path as string | null) ?? null,
+      title: (r.title as string | null) ?? null,
+      content: (r.content as string | null) ?? null,
+      reason: (r.reason as string | null) ?? null,
+      status: r.status as Proposal['status'],
+      result: (r.result as string | null) ?? null,
+      createdAt: s(r.created_at),
+    };
+    const warn = pr.status === 'open' ? privateWarning(pr, runPrivate) : undefined;
+    return warn ? { ...pr, privateWarning: warn } : pr;
+  };
+
+  const ownProposal = (req: FastifyRequest, id: string, runPrivate = false) => {
     const row = d.db.prepare('SELECT * FROM ai_proposals WHERE id = ? AND user_id = ?').get(id, req.user!.id) as Record<string, unknown> | undefined;
     if (!row) throw new ProposalError('Vorschlag nicht gefunden', 404);
-    return proposalRow(row);
+    return proposalRow(row, runPrivate);
   };
 
   /** The path whose release/ACL a proposal needs (a folder is checked like a note inside it); a new note's file name as create() makes it. */
@@ -229,7 +255,7 @@ export function createAgent(d: AgentDeps) {
      * One question: the model works with the tools until it answers. Events stream to the
      * browser as they happen; the chat (and its proposals) is kept like an assistant chat.
      */
-    async run(req: FastifyRequest, input: { question: string; scope: Scope; chatId?: string; providerId?: string }, emit: (e: AgentEvent) => void): Promise<void> {
+    async run(req: FastifyRequest, input: { question: string; scope: Scope; chatId?: string; providerId?: string }, emit: (e: AgentEvent) => void, signal?: AbortSignal): Promise<void> {
       const question = s(input.question).trim().slice(0, 4000);
       if (!question) throw new AiAccessError('Frage fehlt');
       const scope: Scope = input.scope ?? { kind: 'all' };
@@ -320,7 +346,7 @@ export function createAgent(d: AgentDeps) {
           )
           .run(id, ensureChat(), req.user!.id, pr.kind, pr.mountId, pr.path, pr.toPath, pr.title, pr.content, pr.baseHash ?? null, pr.reason, 'open', now());
         proposals.push(id);
-        const full = ownProposal(req, id);
+        const full = ownProposal(req, id, seen.private);
         emit({ type: 'proposal', proposal: full });
         return `Vorschlag gespeichert (${id.slice(-6)}). Er wird erst ausgeführt, wenn der Benutzer ihn bestätigt.`;
       };
@@ -519,13 +545,33 @@ export function createAgent(d: AgentDeps) {
 
       let answer = '';
       let model = p.model;
+      let asked = false;
+      // „Stopp“ or the chat closed (diff check 0.2.15): nothing of this run stays – its proposals go, a chat it opened
+      // goes – but what was already sent to the provider is in the audit like any other request.
+      const opened = chatId === undefined;
+      const stopped = () => {
+        if (proposals.length) d.db.prepare(`DELETE FROM ai_proposals WHERE status = 'open' AND id IN (${proposals.map(() => '?').join(',')})`).run(...proposals);
+        // A proposal applied while the run went on stays, and with it its chat (deleting the chat would take it along).
+        if (opened && chatId) {
+          const used = d.db.prepare('SELECT 1 FROM ai_messages WHERE chat_id = ? UNION ALL SELECT 1 FROM ai_proposals WHERE chat_id = ? LIMIT 1').get(chatId, chatId);
+          if (!used) d.db.prepare('DELETE FROM ai_chats WHERE id = ?').run(chatId);
+        }
+        if (asked) {
+          const audited = steps.map((st) => (st.startsWith('Sucht „') ? 'Sucht (Suchbegriff nur im Chat)' : st));
+          auditCall(req, p, model, `Agent (${scope.kind}), abgebrochen nach ${steps.length} Schritten`, read, { ...(opened ? {} : { chatId }), steps: audited, stopped: true });
+        }
+      };
       for (let step = 0; step <= MAX_STEPS; step++) {
+        // „Stopp“ or the chat closed: no further calls to the provider, nothing is saved.
+        if (signal?.aborted) return stopped();
         const last = step === MAX_STEPS;
         if (last) messages.push({ role: 'user', content: 'Genug nachgesehen: antworte jetzt abschließend, ohne weitere Werkzeuge.' });
         let res;
+        asked = true;
         try {
-          res = await d.providers.chatTools(p, { system: system(req, task), messages, tools: TOOLS, onText: (text) => emit({ type: 'delta', text }) });
+          res = await d.providers.chatTools(p, { system: system(req, task), messages, tools: TOOLS, onText: (text) => emit({ type: 'delta', text }), signal });
         } catch (e) {
+          if (signal?.aborted) return stopped();
           // No tool calling at all: the assistant's search-based answer instead.
           if (e instanceof ToolsUnsupportedError && step === 0) {
             await emitRag();
@@ -541,6 +587,7 @@ export function createAgent(d: AgentDeps) {
         }
         messages.push({ role: 'assistant', content: res.text, toolCalls: res.toolCalls });
         for (const c of res.toolCalls) {
+          if (signal?.aborted) return stopped();
           const l = label(c);
           steps.push(l);
           emit({ type: 'step', tool: c.name, label: l });
@@ -580,13 +627,13 @@ export function createAgent(d: AgentDeps) {
 
       async function emitRag() {
         emit({ type: 'start', mode: 'rag' });
-        const res = await d.assistant.ask(req, { question, scope, chatId: input.chatId, providerId: input.providerId });
+        const res = await d.assistant.ask(req, { question, scope, chatId: input.chatId, providerId: input.providerId }, signal);
         emit({ type: 'answer', ...res, mode: 'rag' });
       }
     },
 
     proposals(req: FastifyRequest, chatId: string): Proposal[] {
-      return (d.db.prepare('SELECT * FROM ai_proposals WHERE chat_id = ? AND user_id = ? ORDER BY created_at').all(chatId, req.user!.id) as Record<string, unknown>[]).map(proposalRow);
+      return (d.db.prepare('SELECT * FROM ai_proposals WHERE chat_id = ? AND user_id = ? ORDER BY created_at').all(chatId, req.user!.id) as Record<string, unknown>[]).map((r) => proposalRow(r));
     },
 
     /** What applying would change: a diff for edits, the content for new notes. */

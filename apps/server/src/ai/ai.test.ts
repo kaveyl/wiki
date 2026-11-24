@@ -689,6 +689,45 @@ describe('AI agent (AD-026)', () => {
     expect(received.at(-1)!.body.messages[0]!.content).not.toContain('Mara');
   });
 
+  it('private AI: a proposal that would make private content readable for all AI says so on its card (sec-004, diff check 0.2.14)', async () => {
+    await provider(); // „Lokal“: private by itself
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'mount', level: 'suggest', cloud: true });
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'folder', path: 'privat', level: 'suggest', cloud: false });
+    type P = { id: string; kind: string; path: string; privateWarning?: string };
+    const proposalsOf = (events: Ev[]) => events.filter((e) => e.type === 'proposal').map((e) => e.proposal as P);
+
+    // Nothing private read: no warning, wherever it goes.
+    script = [call('propose_create_note', { sourceId: mountId, parent: 'offen', title: 'Ohne Privates', markdown: '# x' }), { content: 'Vorgeschlagen.' }];
+    expect(proposalsOf(await agent({ question: 'Leg eine Notiz an', scope: { kind: 'all' } }))[0]!.privateWarning).toBeUndefined();
+
+    script = [
+      call('read_note', { sourceId: mountId, path: 'privat/tagebuch.md' }),
+      call('propose_create_note', { sourceId: mountId, parent: 'offen', title: 'Übersicht', markdown: '# Übersicht\n\nKolibri privat.\n' }),
+      call('propose_create_note', { sourceId: mountId, parent: 'privat', title: 'Bleibt privat', markdown: '# x' }),
+      call('propose_remember', { sourceId: mountId, text: 'Kolibri privat.' }),
+      call('propose_move_note', { sourceId: mountId, from: 'privat/tagebuch.md', to: 'offen/tagebuch.md' }),
+      { content: 'Vorgeschlagen.' },
+    ];
+    const events = await agent({ question: 'Fass das Tagebuch zusammen und leg es in offen ab', scope: { kind: 'all' } });
+    const live = proposalsOf(events);
+    // Content of a private chat to a place all AI read; the memory goes to all AI; a private note moved out of its folder.
+    expect(live.map((p) => [p.kind, p.privateWarning])).toEqual([
+      ['create', 'content'],
+      ['create', undefined],
+      ['remember', 'content'],
+      ['move', 'move'],
+    ]);
+    // The same after reloading the chat (the mark of the run is stored with the answer).
+    const chatId = events.at(-1)!.chatId as string;
+    const stored = (await inject('GET', `/api/ai/chats/${chatId}`)).json().proposals as P[];
+    expect(stored.map((p) => p.privateWarning)).toEqual(['content', undefined, 'content', 'move']);
+    // A note with a rule of its own keeps it when moved: no warning; a decided proposal shows none either.
+    await inject('PUT', `/api/ai/rule/${mountId}`, { target: 'note', path: 'privat/tagebuch.md', level: 'suggest', cloud: false });
+    expect(((await inject('GET', `/api/ai/chats/${chatId}`)).json().proposals as P[])[3]!.privateWarning).toBeUndefined();
+    await inject('POST', `/api/ai/proposals/${live[0]!.id}/reject`, {});
+    expect(((await inject('GET', `/api/ai/chats/${chatId}`)).json().proposals as P[])[0]!.privateWarning).toBeUndefined();
+  });
+
   it('works the same with the Anthropic Messages API (streamed tool use and text)', async () => {
     const p = (await inject('PUT', '/api/ai/providers', { kind: 'anthropic', name: 'Claude', baseUrl: fakeUrl, model: 'claude-test', apiKey: 'sk-ant-test' })).json() as { id: string };
     await inject('PUT', '/api/ai/settings', { defaultId: p.id });

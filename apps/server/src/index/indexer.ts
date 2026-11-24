@@ -14,7 +14,7 @@ import { markdown } from '../markdown/pool.js';
 import type { DB } from '../db/db.js';
 import { contentRoot, fileFilter, isIgnoredSegment, parentOf, subpathThroughSymlink, type Mount } from '../mounts/model.js';
 
-const MAX_INDEX_BYTES = 2 * 1024 * 1024;
+export const MAX_INDEX_BYTES = 2 * 1024 * 1024;
 
 export interface Entry {
   mountId: string;

@@ -17,7 +17,8 @@ test('installable: manifest with icons, service worker, theme color', async ({ r
   const manifest = await request.get('/manifest.webmanifest');
   expect(manifest.ok()).toBe(true);
   const m = (await manifest.json()) as { name: string; display: string; icons: { src: string; purpose?: string }[] };
-  expect(m).toMatchObject({ name: 'Kaveyl Wiki', short_name: 'Kaveyl', display: 'standalone' });
+  // Home screen label = the product name (owner 17.11.: was „Kaveyl“).
+  expect(m).toMatchObject({ name: 'Kaveyl Wiki', short_name: 'Kaveyl Wiki', display: 'standalone' });
   expect(m.icons.some((i) => i.purpose === 'maskable')).toBe(true);
   for (const i of m.icons) expect((await request.get(i.src)).headers()['content-type']).toBe('image/png');
   const sw = await request.get('/sw.js');
@@ -27,6 +28,23 @@ test('installable: manifest with icons, service worker, theme color', async ({ r
   const html = await (await request.get('/')).text();
   expect(html).toContain('rel="manifest"');
   expect(html).toContain('name="theme-color"');
+});
+
+test('installed app: status and navigation bar in the page colour of the theme, not purple (owner 17.11.)', async ({ browser }) => {
+  for (const [scheme, bar] of [
+    // The sheet of the standard palettes (redesign 23.11.: classic dark, lavender light).
+    ['dark', '#1e1e23'],
+    ['light', '#ffffff'],
+  ] as const) {
+    const ctx = await browser.newContext({ colorScheme: scheme });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', bar);
+    // The same colour as the page itself.
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(bg).toBe(scheme === 'dark' ? 'rgb(30, 30, 35)' : 'rgb(255, 255, 255)');
+    await ctx.close();
+  }
 });
 
 test('phone: the sidebar is a drawer that closes when a note opens; tree actions without hover', async ({ browser }) => {
@@ -153,10 +171,14 @@ test('help, settings and the account menu sit at the top right – also with the
   await page.getByRole('button', { name: 'Anmelden' }).click();
   const sidebar = page.getByRole('complementary', { name: 'Seitenleiste' });
   await expect(sidebar).toBeVisible();
-  // Not in the sidebar header any more.
-  await expect(sidebar.getByRole('button', { name: 'Einstellungen' })).toHaveCount(0);
+  // Redesign 23.11.: settings and the colour scheme in the foot of the sidebar, help and account at the top right;
+  // with the sidebar closed, settings and colour scheme move up there.
+  await expect(sidebar.getByRole('button', { name: 'Einstellungen' })).toHaveCount(1);
+  await expect(page.locator('main').getByRole('button', { name: 'Einstellungen' })).toHaveCount(0);
   await sidebar.getByRole('button', { name: 'Seitenleiste ausblenden' }).click();
   await expect(page.getByRole('button', { name: 'Hilfe (F1)' })).toBeVisible();
+  await expect(page.locator('main').getByRole('button', { name: 'Einstellungen' })).toBeVisible();
+  await expect(page.locator('main').getByRole('button', { name: 'Farbschema wechseln' })).toBeVisible();
   await page.getByRole('button', { name: /^Konto/ }).click();
   const menu = page.getByRole('menu');
   await expect(menu).toContainText('e2e@example.test');

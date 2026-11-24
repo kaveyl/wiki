@@ -405,7 +405,7 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
 
   // Import: a .md file from the computer becomes a note in the folder.
   await tree.locator('[data-node$=":plan"]').click({ button: 'right' });
-  await admin.getByRole('menuitem', { name: 'Importieren', exact: true }).click();
+  await admin.getByRole('menuitem', { name: 'Importieren / Exportieren', exact: true }).click();
   const chooser = admin.waitForEvent('filechooser');
   await admin.getByRole('menuitem', { name: 'Markdown-Dateien …' }).click();
   await (await chooser).setFiles([
@@ -440,7 +440,7 @@ test('several notes marked in the tree: sent by mail as files, exported as one Z
 
   // From another program (docs/PLAN-IMPORT.md): a real HedgeDoc export → preview → a new folder with the report.
   await tree.locator('[data-node$=":plan"]').click({ button: 'right' });
-  await admin.getByRole('menuitem', { name: 'Importieren', exact: true }).click();
+  await admin.getByRole('menuitem', { name: 'Importieren / Exportieren', exact: true }).click();
   await admin.getByRole('menuitem', { name: 'Aus anderem Programm …' }).click();
   const imp = admin.getByRole('dialog', { name: 'Aus anderem Programm importieren' });
   const zipChooser = admin.waitForEvent('filechooser');

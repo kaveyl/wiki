@@ -3,6 +3,72 @@
 What each release changes for people who run Kaveyl Wiki. The newest release is at the top; notes under
 “Upgrade notes” need attention before updating. Installation and updating: `INSTALLATION.md`.
 
+## 0.2.15 (Beta) – 2026-11-24
+
+A new look: the sidebar and the note as two rounded cards, colour themes for light and
+dark, a floating editor toolbar. Plus removing a tag from all notes, deleting orphaned attachments from the check,
+“Insert into note” and Stop in Ask AI, moving blocks with Alt+↑/↓, and many fixes.
+
+### Added
+- AI proposals: the card warns when applying would make private content readable for AI that is not allowed for
+  private notes – a proposal from a chat that read private notes, written to a place released for all AI, or a note or
+  folder released for private AI only moved there. Applying still works.
+- **Tags:** “Manage tags” (and the tag's right-click menu) can remove a tag from every note you may edit, after a
+  question with the count; the notes stay.
+- **Check:** orphaned attachments (no note links to them) can be deleted from the check report, one by one or all of a
+  source; a file linked again meanwhile stays.
+- **Ask AI:** a Stop button while the AI works – the server stops asking the provider and saves nothing; “Copy” shows
+  “Copied” on the button.
+- Notes: a message names the file name when a new or renamed note had to be saved under another name (characters
+  like `/` or `:`, a name that exists already).
+- **Ask AI:** “Insert into note” under an answer puts it into the open note, below the paragraph with the cursor, with
+  the cited sources as links that work from there.
+- **Editor:** Alt+↑ / Alt+↓ moves the paragraph, heading, block or list item with the cursor one place up or down.
+
+### Changed
+- **New look:** the note lies as a rounded sheet on a quiet background; the sidebar has
+  a “New note” button, favourites as chips, a switch Tree | Recent | AI access and the sync state, settings and colour
+  scheme in its foot; a calmer tree with guide lines and the open branch in a box. Menus start with a bar of the most
+  used actions and group the rest; the note's “…” menu likewise. Dialogs, search (with filters All / Title / Full text),
+  settings, versions, tags and the AI chat follow the same look. The typeface Inter is now shipped with the app.
+- **Colour themes:** Settings → Appearance offers one theme for light (lavender indigo, amethyst, plum, lilac slate) and
+  one for dark (classic, night indigo, OLED black), per browser.
+- **Editor toolbar:** floats at the bottom of the note by default (the formatting row above it can be folded with “Aa”);
+  Settings → Appearance can put it on top. Phones keep the bar on top.
+- **Closer to the design:** tags in the accent colour with “Edited today, 20:38” next to them; the path to the open
+  note in the accent colour in the tree; the Markdown view has a dock of its own (front matter, line wrap, undo/redo)
+  and airier lines; the command palette groups notes and commands, shows the folder path and keys in its foot;
+  “Manage tags” picks a tag with a click and offers show notes, colour, rename and merge below; the versions dialog
+  has its list on the left with the title on top; menu tiles wrap instead of cutting words; folder menus say “Open
+  (tab / right / left)”, “Copy / cut / path” and “Delete folder”.
+- The installed app is called “Kaveyl Wiki” (was “Kaveyl”). Its status and navigation bars take the page colour of
+  the light or dark theme instead of purple. An icon added earlier may keep the old name until it is added again.
+- **Sidebar as one card:** the sidebar is one rounded card over the full height like the note beside it; only the
+  tree scrolls inside it. 24 px corners, an even 12 px gap with the resize handle in the middle, scroll bars that are
+  easier to see and stay inside the cards, a fine edge around both cards in dark mode.
+
+### Fixed
+- **Security:** the image runs on Node.js 24.22.3 (fixes CVE-2026-123828, CVE-2026-123863 … CVE-2026-123877 in Node.js
+  24.22.2).
+- Manage tags: the colour menu below the tag list opened behind the dialog.
+- Editing a nested list wrote a blank line between an item and its sub-list – the file changed where nobody had
+  changed anything, and other Markdown programs showed the list spaced out.
+- Ask AI: a double click on “Ask” (or Ctrl+Enter twice) sent the question twice.
+- Mermaid: a diagram with a syntax error left Mermaid's error picture at the bottom of the page; diagrams now follow a
+  switch between light and dark at once (lines and labels were dark on dark).
+- Editor toolbar on top: wraps into a second row instead of cutting off the last buttons (e.g. at 120 % font size).
+- AI actions (rephrase, summarise …) keep links, inline code and formulas instead of turning a link into code or a
+  formula into `\(…\)`.
+- The AI button is grey with the reason for notes the AI may not read; for read-only access it offers summarise only.
+- “Sync all” reports when it is done or what failed (in the sync overview and the command palette).
+- A note marked read-only shows a clearly coloured “Read only” in its header.
+- Instant search (Ctrl+P) finds notes by their tags too, with or without `#`.
+- Attachment names: trimming dots and dashes at the ends no longer slows down on long runs of them (CodeQL).
+- Favourites: a second tab or device still open with older lists no longer removes favourites added meanwhile when
+  it opens a note – each one only writes its own change.
+- Folders with versions: under load a save in the app could become a version “changed outside Kaveyl Wiki”; it now
+  always carries the name of the person who saved.
+
 ## 0.2.14 (Beta) – 2026-11-16
 
 Private AI: a cloud provider you trust can be allowed for private notes. Plus effort for Claude, the date by slash

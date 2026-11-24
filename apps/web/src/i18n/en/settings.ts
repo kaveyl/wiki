@@ -54,9 +54,20 @@ export default {
   '{n} Alte Konflikt-Sicherungen': '{n} old conflict backups',
   '1 Fehler': '1 error',
   '{n} Fehler': '{n} errors',
-  'Gleicht Index, Dateien und Git ab: gebrochene Links, doppelte IDs, fehlende oder verwaiste Index-Einträge, hängende Rebases. Die Prüfung ändert nichts – sie läuft zusätzlich jede Nacht um 3 Uhr. Es gibt immer nur den letzten Bericht; das Protokoll vermerkt jede Prüfung.':
-    'Compares the index, files and Git: broken links, duplicate IDs, missing or orphaned index entries, stuck rebases. The check changes nothing – it also runs every night at 3 am. Only the latest report is kept; the log records every check.',
+  'Gleicht Index, Dateien und Git ab: gebrochene Links, doppelte IDs, fehlende oder verwaiste Index-Einträge, hängende Rebases. Die Prüfung ändert nichts – sie läuft zusätzlich jede Nacht um 3 Uhr. Es gibt immer nur den letzten Bericht; das Protokoll vermerkt jede Prüfung. Verwaiste Anhänge lassen sich im Bericht löschen.':
+    'Compares the index, files and Git: broken links, duplicate IDs, missing or orphaned index entries, stuck rebases. The check changes nothing – it also runs every night at 3 am. Only the latest report is kept; the log records every check. Orphaned attachments can be deleted from the report.',
   'Jetzt prüfen': 'Check now',
+  '„{path}“ aus „{name}“ löschen?': 'Delete “{path}” from “{name}”?',
+  '{n} verwaiste Anhänge aus „{name}“ löschen?': 'Delete {n} orphaned attachments from “{name}”?',
+  'Keine Notiz verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.': 'No note links to them. They stay in the source’s Git history.',
+  'Keine Notiz verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.': 'No note links to them. The source has no Git history – deleted files are gone for good.',
+  '{n} Anhang gelöscht': '{n} attachment deleted',
+  '{n} Anhänge gelöscht': '{n} attachments deleted',
+  '{n} wird inzwischen wieder verlinkt und bleibt.': '{n} is linked again by now and stays.',
+  '{n} werden inzwischen wieder verlinkt und bleiben.': '{n} are linked again by now and stay.',
+  'Verwaiste Anhänge verlinkt keine Notiz mehr – sie lassen sich hier löschen.': 'No note links to orphaned attachments any more – they can be deleted here.',
+  'Alle verwaisten Anhänge löschen': 'Delete all orphaned attachments',
+  '„{path}“ löschen': 'Delete “{path}”',
   'Letzte Prüfung: {when}': 'Last check: {when}',
   'Keine Probleme gefunden.': 'No problems found.',
   'Prüfbericht {name}': 'Check report {name}',
@@ -1123,4 +1134,10 @@ export default {
     'For example http://192.168.1.20:8093 or https://wiki.example.org – without a path, Kaveyl Wiki adds /api/webhooks/git. Empty = the public address (Settings → Notifications → E-mail). HTTP is enough on your own network, over the internet better HTTPS; GitHub.com and GitLab.com need an address on the internet.',
   'Gespeichert. „Webhook einrichten“ bei der Verbindung stellt vorhandene Webhooks auf diese Adresse um.': 'Saved. “Set up webhook” at the connection moves existing webhooks to this address.',
   'Gespeichert – es gilt wieder die öffentliche Adresse.': 'Saved – the public address applies again.',
+  // Headings in the left column of the settings (redesign 23.11.).
+  'Quellen & Daten': 'Sources & data',
+  'Team & Zugang': 'Team & access',
+  Integrationen: 'Integrations',
+  Allgemein: 'General',
+  '{name} jetzt synchronisieren': 'Sync {name} now',
 } satisfies Dictionary;

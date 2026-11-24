@@ -1,13 +1,14 @@
 // Command palette (Ctrl+K): jump to notes and run commands from one input; plus the search page
 // with filters and operators (tag:, in:, path:, seit:, "Phrase", -Ausschluss). SEE-DOC: docs/PLAN.md §3b
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { create } from 'zustand';
 import { useQuery } from '@tanstack/react-query';
-import { CornerDownLeft, Search as SearchIcon, ListFilter, Terminal } from 'lucide-react';
+import { CornerDownLeft, Search as SearchIcon, ListFilter, Sparkles, Star, Terminal } from 'lucide-react';
 import { api, type Mount, type SearchHit } from '../api';
 import { fmtDate, t, tn } from '../i18n';
 import { useWorkspace } from '../store';
+import { usePersonal } from '../personal';
 import { Modal, cx } from '../ui';
 import { EntryIcon } from './Tree';
 import { highlight, useDebounced } from './Search';
@@ -50,6 +51,8 @@ export function CommandPalette({
 }) {
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
+  // Which hits: all, only names (titles) or only the text of notes.
+  const [only, setOnly] = useState<'all' | 'title' | 'content'>('all');
   const query = useDebounced(q.trim(), 80);
   const commandMode = q.startsWith('>');
   const notes = useQuery({
@@ -66,22 +69,27 @@ export function CommandPalette({
     if (!open) return;
     setQ('');
     setActive(0);
+    setOnly('all');
     // A menu that just closed may hand focus back to its trigger after we opened — take it back.
     const timer = setTimeout(() => input.current?.focus(), 30);
     return () => clearTimeout(timer);
   }, [open]);
 
+  // „Alle (6)“: how many notes the query finds (each once), next to the filter chip.
+  const allCount = notes.data && query ? new Set([...notes.data.notes, ...notes.data.content].map((h) => `${h.mountId}:${h.path}`)).size : null;
+  const favorites = usePersonal((s) => s.favorites);
   const items = useMemo((): Item[] => {
     const text = (commandMode ? q.slice(1) : q).trim().toLowerCase();
     const cmds = commands.filter((c) => !text || c.label.toLowerCase().includes(text) || c.keywords?.some((k) => k.startsWith(text)));
     if (commandMode) return cmds.map((command) => ({ kind: 'command', command }));
-    const hits = query && notes.data ? [...notes.data.notes, ...notes.data.content].filter((h, i, a) => a.findIndex((x) => x.mountId === h.mountId && x.path === h.path) === i) : [];
+    const found = notes.data ? (only === 'title' ? notes.data.notes : only === 'content' ? notes.data.content : [...notes.data.notes, ...notes.data.content]) : [];
+    const hits = query ? found.filter((h, i, a) => a.findIndex((x) => x.mountId === h.mountId && x.path === h.path) === i) : [];
     return [
       ...hits.slice(0, 8).map((hit): Item => ({ kind: 'note', hit })),
       ...(query ? [{ kind: 'all' } as Item] : []),
       ...cmds.slice(0, query ? 4 : 12).map((command): Item => ({ kind: 'command', command })),
     ];
-  }, [q, query, commandMode, commands, notes.data]);
+  }, [q, query, commandMode, commands, notes.data, only]);
 
   useEffect(() => setActive(0), [items.length, query]);
   useEffect(() => {
@@ -99,11 +107,11 @@ export function CommandPalette({
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30" />
-        <Dialog.Content className="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-32px)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl bg-bg shadow-pop" aria-describedby={undefined}>
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-[var(--scrim)] backdrop-blur-[2.5px]" />
+        <Dialog.Content className="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-32px)] max-w-[680px] -translate-x-1/2 overflow-hidden rounded-[24px] bg-bg shadow-pop" aria-describedby={undefined}>
           <Dialog.Title className="sr-only">{t('Befehlspalette')}</Dialog.Title>
-          <div className="flex items-center gap-2 border-b border-line px-3">
-            <SearchIcon className="h-4 w-4 text-fg-faint" />
+          <div className="flex items-center gap-2.5 border-b border-line-soft px-4">
+            <SearchIcon className="h-[18px] w-[18px] text-accent" />
             <input
               ref={input}
               autoFocus
@@ -123,18 +131,61 @@ export function CommandPalette({
               }}
               placeholder={t('Notiz suchen oder Befehl … („>“ nur Befehle)')}
               aria-label={t('Befehlspalette')}
-              className="h-12 flex-1 bg-transparent text-[0.9375rem] outline-none placeholder:text-fg-faint"
+              className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-fg-faint"
             />
+            <button type="button" onClick={onClose} className="rounded-md border border-line-soft bg-subtle px-1.5 py-0.5 text-[0.6875rem] font-semibold text-fg-muted hover:text-fg" aria-label={t('Schließen')}>
+              Esc
+            </button>
           </div>
-          <div ref={list} className="max-h-[60vh] overflow-y-auto p-1" role="listbox" aria-label={t('Ergebnisse')}>
+          {!commandMode && (
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-line-soft px-4 py-2">
+              {(
+                [
+                  ['all', t('Alle')],
+                  ['title', t('Titel')],
+                  ['content', t('Volltext')],
+                ] as const
+              ).map(([k, label]) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={only === k}
+                  onClick={() => (setOnly(k), input.current?.focus())}
+                  className={cx('h-7 rounded-full px-3 text-xs font-medium', only === k ? 'bg-accent-soft text-accent' : 'text-fg-muted hover:bg-hover hover:text-fg')}
+                >
+                  {k === 'all' && allCount !== null ? `${label} (${allCount})` : label}
+                </button>
+              ))}
+              {commands.some((c) => c.id === 'tags') && (
+                <button type="button" onClick={() => run({ kind: 'command', command: commands.find((c) => c.id === 'tags')! })} className="h-7 rounded-full px-3 text-xs font-medium text-fg-muted hover:bg-hover hover:text-fg">
+                  {t('# Tags')}
+                </button>
+              )}
+              {commands.some((c) => c.id === 'ai-ask') && (
+                <button
+                  type="button"
+                  onClick={() => run({ kind: 'command', command: commands.find((c) => c.id === 'ai-ask')! })}
+                  className="ml-auto flex h-7 items-center gap-1 rounded-full bg-accent-soft px-3 text-xs font-semibold text-accent hover:opacity-90"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> {t('KI fragen')}
+                </button>
+              )}
+            </div>
+          )}
+          <div ref={list} className="max-h-[56vh] overflow-y-auto p-2" role="listbox" aria-label={t('Ergebnisse')}>
             {!items.length && <div className="px-3 py-3 text-sm text-fg-muted">{notes.isFetching ? t('Suche …') : t('Nichts gefunden')}</div>}
             {items.map((item, i) => (
+              <Fragment key={item.kind === 'note' ? `n:${item.hit.mountId}:${item.hit.path}` : item.kind === 'all' ? 'all' : `c:${item.command.id}`}>
+              {/* Headings over the groups (draft: „Seiten in …“, „Befehle“), not choosable themselves. */}
+              {item.kind === 'note' && i === 0 && <div className="px-3 pb-1 pt-2 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-fg-faint" role="presentation">{t('Notizen')}</div>}
+              {item.kind === 'command' && items[i - 1]?.kind !== 'command' && query && !commandMode && (
+                <div className="px-3 pb-1 pt-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-fg-faint" role="presentation">{t('Befehle')}</div>
+              )}
               <div
-                key={item.kind === 'note' ? `n:${item.hit.mountId}:${item.hit.path}` : item.kind === 'all' ? 'all' : `c:${item.command.id}`}
                 role="option"
                 aria-selected={i === active}
                 data-active={i === active}
-                className={cx('flex cursor-default items-center gap-2.5 rounded-md px-2.5 py-2', i === active && 'bg-hover')}
+                className={cx('flex cursor-default items-center gap-2.5 rounded-xl px-3', item.kind === 'note' ? 'py-2.5' : 'py-2', i === active && (item.kind === 'note' ? 'bg-accent-soft' : 'bg-hover'))}
                 onMouseEnter={() => setActive(i)}
                 onClick={(e) => run(item, e.ctrlKey || e.metaKey)}
               >
@@ -142,11 +193,14 @@ export function CommandPalette({
                   <>
                     <EntryIcon icon={item.hit.icon} isDir={false} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm">{noteNameIn(item.hit.mountId, item.hit.path)}</span>
-                      <span className="block truncate text-[0.6875rem] text-fg-faint">
-                        {mountName(item.hit.mountId)} / {item.hit.path}
-                      </span>
+                      <span className={cx('block truncate text-sm font-medium', i === active && 'text-accent')}>{noteNameIn(item.hit.mountId, item.hit.path)}</span>
+                      <span className="block truncate text-xs text-fg-muted">{[mountName(item.hit.mountId), ...item.hit.path.split('/').slice(0, -1)].join(' / ')}</span>
                     </span>
+                    {favorites.some((f) => f.mountId === item.hit.mountId && f.path === item.hit.path) && (
+                      <span className="flex shrink-0 items-center gap-1 text-xs text-fg-faint">
+                        <Star className="h-3 w-3 fill-current" /> {t('Favorit')}
+                      </span>
+                    )}
                   </>
                 ) : item.kind === 'all' ? (
                   <>
@@ -160,12 +214,21 @@ export function CommandPalette({
                     {item.command.hint && <span className="text-xs text-fg-faint">{item.command.hint}</span>}
                   </>
                 )}
-                {i === active && <CornerDownLeft className="h-3.5 w-3.5 text-fg-faint" />}
+                {i === active && (
+                  <span className="rounded-md border border-line-soft bg-bg p-0.5 text-fg-muted">
+                    <CornerDownLeft className="h-3 w-3" />
+                  </span>
+                )}
               </div>
+              </Fragment>
             ))}
           </div>
-          <div className="flex items-center gap-3 border-t border-line px-3 py-1.5 text-[0.6875rem] text-fg-faint">
-            <span>{t('↑↓ wählen · Enter öffnen · Strg+Enter neuer Tab')}</span>
+          <div className="flex items-center gap-3 border-t border-line-soft bg-subtle px-4 py-2 text-[0.6875rem] text-fg-faint">
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span><Kbd>↑↓</Kbd> {t('Navigieren')}</span>
+              <span><Kbd>↵</Kbd> {t('Öffnen')}</span>
+              <span><Kbd>{t('Strg')}+↵</Kbd> {t('Neuer Tab')}</span>
+            </span>
             <span className="ml-auto flex items-center gap-1">
               <Terminal className="h-3 w-3" /> {t('„>“ nur Befehle')}
             </span>
@@ -289,4 +352,9 @@ export function SearchPage({ open, initial, onClose, mounts }: { open: boolean; 
       </div>
     </Modal>
   );
+}
+
+/** A key as a small chip in the palette's foot (draft: „↑↓ Navigieren  ↵ Öffnen“). */
+function Kbd({ children }: { children: ReactNode }) {
+  return <kbd className="mr-1 rounded border border-line-soft bg-bg px-1 py-px font-sans text-[0.625rem] font-semibold text-fg-muted">{children}</kbd>;
 }

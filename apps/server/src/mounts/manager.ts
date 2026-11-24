@@ -348,11 +348,12 @@ export class MountManager {
     for (const [p, at] of recent) if (now - at > RECENT_WRITE_MS) recent.delete(p);
     for (const p of paths) recent.set(p, now);
     this.recentWrites.set(mount.id, recent);
+    // Into the batch before indexing: indexing can take a while (Markdown in the child process), and the watcher event of
+    // this very write must find the file waiting – else it would pass for a change from outside (AD-071, E2E 24.11.).
+    if (mount.options.autoCommit) this.schedule(mount, paths, author, message);
     const change = await this.indexer.update(mount, paths);
     this.events.emit({ type: 'tree', mountId: mount.id, change });
     this.changes?.record(mount.id, change, author);
-    if (!mount.options.autoCommit) return change;
-    this.schedule(mount, paths, author, message);
     return change;
   }
 
@@ -385,7 +386,11 @@ export class MountManager {
   async commitNow(mount: Mount): Promise<SyncResult | null | undefined> {
     const repo = this.runtime(repoDir(mount, this.config.dataPath));
     const commit = this.takeBatch(mount, repo);
-    if (!commit) return undefined;
+    if (!commit) {
+      // Nothing waiting may still mean a batch the commit timer just took is running: done only once it is in.
+      await this.serial(repo, async () => undefined);
+      return undefined;
+    }
     await this.serial(repo, commit);
     return mount.type === 'remote' ? this.sync(mount) : null;
   }
@@ -754,11 +759,14 @@ export class MountManager {
     // Only what git sees as changed (an app save already committed, a folder or an ignored file is none). Its paths are
     // relative to the repository's root – the source may be a folder below it.
     const prefix = (await git(root, ['rev-parse', '--show-prefix'])).trim();
-    const status = await git(root, ['status', '--porcelain', '-z', '--untracked-files=all', '--', ...candidates], { env: { GIT_LITERAL_PATHSPECS: '1' } });
+    // In the repository's queue: an app batch taken just before (no longer pending) may still be committing – asked
+    // before it is done, git would call its files changed and they would become a version „from outside“.
+    const status = await this.serial(repo, () => git(root, ['status', '--porcelain', '-z', '--untracked-files=all', '--', ...candidates], { env: { GIT_LITERAL_PATHSPECS: '1' } }));
+    const waiting = candidates.filter((p) => repo.pendingPaths.has(p));
     const changed = [...new Set(porcelainPaths(status))]
       .filter((p) => p.startsWith(prefix))
       .map((p) => p.slice(prefix.length))
-      .filter((p) => candidates.includes(p) && !p.split('/').some(isIgnoredSegment));
+      .filter((p) => candidates.includes(p) && !waiting.includes(p) && !p.split('/').some(isIgnoredSegment));
     // Plain text put into an encrypted folder from outside never goes into the history (AD-045) – it waits for „Verschlüsseln“.
     const plain = await this.plainInEncrypted(mount, changed);
     const outside = changed.filter((p) => !plain.includes(p));

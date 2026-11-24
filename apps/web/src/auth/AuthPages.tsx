@@ -24,8 +24,8 @@ export function Logo({ className = 'h-6 w-6', detail = false }: { className?: st
   const d = detail ? LOGO_DETAIL.full : LOGO_DETAIL.small;
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <rect width="32" height="32" rx="7" className="fill-accent" />
-      <g transform={LOGO_TRANSFORM} className="stroke-accent-fg" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="32" height="32" rx="7" className="fill-accent-cta" />
+      <g transform={LOGO_TRANSFORM} className="stroke-on-cta" fill="none" strokeLinecap="round" strokeLinejoin="round">
         <path d={LOGO_FRAME} strokeWidth="1.4" />
         <path d={LOGO_STEM} strokeWidth={d.kw} strokeLinecap="butt" />
         <path d={LOGO_ARMS} strokeWidth={d.kw} />

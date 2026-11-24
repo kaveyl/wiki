@@ -3,7 +3,7 @@
 // the git history is ever rewritten. SEE-DOC: docs/PLAN.md §2.8
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { FilePen, FileText, Folder, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { FilePen, FileText, Folder, History, RotateCcw, Save, Trash2 } from 'lucide-react';
 import { api, ApiError, errorText, type TrashItem } from '../api';
 import { fmtDate, fmtDateTime, lang, t, tn } from '../i18n';
 import { noteNameIn } from '../names';
@@ -62,17 +62,32 @@ export function HistoryDialog({ mountId, path, onClose }: { mountId: string; pat
   };
 
   return (
-    <Modal help="versionen-und-papierkorb" open wide onOpenChange={(o) => !o && onClose()} title={t('Versionen')}>
-      {history.isPending && <Spinner />}
-      {history.data && !history.data.git && <p className="text-sm text-fg-muted">{t('Dieser Ordner ist kein Git-Repository – es gibt keine Versionen.')}</p>}
-      {history.data?.git && versions.length === 0 && <p className="text-sm text-fg-muted">{t('Noch keine Version committet.')}</p>}
+    <Modal help="versionen-und-papierkorb" open wide="lg" bare onOpenChange={(o) => !o && onClose()} title={t('Versionen')}>
+      {/* Like the draft: the title on top of the list on the left, the changes on the right (no title bar). */}
+      {!v && (
+        <div className="space-y-3 pr-16">
+          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+            <History className="h-[18px] w-[18px] text-accent" aria-hidden /> {t('Versionen')}
+          </h2>
+          {history.isPending && <Spinner />}
+          {history.data && !history.data.git && <p className="text-sm text-fg-muted">{t('Dieser Ordner ist kein Git-Repository – es gibt keine Versionen.')}</p>}
+          {history.data?.git && versions.length === 0 && <p className="text-sm text-fg-muted">{t('Noch keine Version committet.')}</p>}
+        </div>
+      )}
       {v && (
-        <div className="grid min-h-[50vh] grid-cols-1 gap-3 md:grid-cols-[240px_minmax(0,1fr)]">
-          <ul className="max-h-[60vh] overflow-y-auto rounded-lg border border-line" role="listbox" aria-label={t('Versionen')}>
+        <div className="-m-5 grid min-h-[60vh] grid-cols-1 md:grid-cols-[300px_minmax(0,1fr)]">
+          <div className="flex min-h-0 flex-col gap-3 border-line-soft bg-subtle p-5 md:border-r">
+          <h2 className="flex items-center gap-2 px-1 text-lg font-semibold tracking-tight">
+            <History className="h-[18px] w-[18px] text-accent" aria-hidden /> {t('Versionen')}
+          </h2>
+          <ul className="max-h-[60vh] space-y-1 overflow-y-auto" role="listbox" aria-label={t('Versionen')}>
             {versions.map((x, i) => (
               <li key={x.commit} role="option" aria-selected={i === selected}>
-                <button className={cx('block w-full px-3 py-2 text-left hover:bg-hover', i === selected && 'bg-active')} onClick={() => setSelected(i)}>
-                  <span className="block truncate text-sm">{x.subject}</span>
+                <button
+                  className={cx('block w-full rounded-xl px-3 py-2.5 text-left', i === selected ? 'bg-accent-soft ring-1 ring-inset ring-accent/40' : 'hover:bg-hover')}
+                  onClick={() => setSelected(i)}
+                >
+                  <span className="line-clamp-2 text-sm font-medium">{x.subject}</span>
                   <span className="block truncate text-xs text-fg-faint">
                     {when(x.date)} · {x.coAuthors?.length ? t('{author} mit {others}', { author: x.author, others: x.coAuthors.join(', ') }) : x.author}
                   </span>
@@ -81,25 +96,28 @@ export function HistoryDialog({ mountId, path, onClose }: { mountId: string; pat
               </li>
             ))}
           </ul>
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex gap-1 rounded-lg bg-muted p-1 text-xs">
+          </div>
+          <div className="flex min-w-0 flex-col gap-3 p-5 md:pr-6">
+            <div className="flex flex-wrap items-center gap-2 pr-16">
+              <div className="flex gap-0.5 rounded-full bg-muted p-0.5 text-xs">
                 {(
                   [
                     ['change', t('Änderungen dieser Version')],
                     ['current', t('Unterschied zur aktuellen Fassung')],
                   ] as const
                 ).map(([k, label]) => (
-                  <button key={k} className={cx('rounded-md px-2 py-1', mode === k ? 'bg-bg shadow-sm' : 'text-fg-muted')} onClick={() => setMode(k)}>
+                  <button key={k} aria-pressed={mode === k} className={cx('rounded-full px-3 py-1.5 font-medium', mode === k ? 'bg-bg text-accent shadow-sm' : 'text-fg-muted hover:text-fg')} onClick={() => setMode(k)}>
                     {label}
                   </button>
                 ))}
               </div>
-              <Button size="sm" className="ml-auto" disabled={busy} onClick={() => setSavingAs(true)}>
-                <Save className="h-3.5 w-3.5" /> {t('Speichern als …')}
-              </Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="primary" disabled={busy || selected === 0} onClick={() => void restore()}>
                 {busy ? <Spinner className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />} {t('Diese Version wiederherstellen')}
+              </Button>
+              <Button size="sm" disabled={busy} onClick={() => setSavingAs(true)}>
+                <Save className="h-3.5 w-3.5" /> {t('Speichern als …')}
               </Button>
             </div>
             <DiffView text={diff.data?.diff} loading={diff.isPending} empty={mode === 'current' ? t('Identisch mit der aktuellen Fassung.') : t('Keine inhaltliche Änderung.')} />
@@ -134,14 +152,14 @@ export function DiffView({ text, loading, empty }: { text?: string; loading: boo
   if (loading) return <Spinner />;
   if (!text) return <p className="text-sm text-fg-muted">{empty}</p>;
   return (
-    <pre className="max-h-[56vh] overflow-auto rounded-lg border border-line bg-muted p-2 font-mono text-xs leading-5" aria-label={t('Unterschiede')}>
+    <pre className="max-h-[56vh] min-h-[40vh] overflow-auto rounded-2xl border border-line-soft bg-subtle p-3 font-mono text-xs leading-5" aria-label={t('Unterschiede')}>
       {text.replace(/\n$/, '').split('\n').map((line, i) => (
         <div
           key={i}
           className={cx(
-            'whitespace-pre-wrap break-words px-1',
-            line.startsWith('+') && 'bg-[color-mix(in_srgb,var(--color-ok,#16a34a)_15%,transparent)]',
-            line.startsWith('-') && 'bg-[color-mix(in_srgb,var(--color-danger)_15%,transparent)]',
+            'whitespace-pre-wrap break-words rounded px-1.5',
+            line.startsWith('+') && 'bg-ok-soft',
+            line.startsWith('-') && 'bg-danger-soft',
             line.startsWith('@@') && 'text-fg-faint',
             line.startsWith('\\') && 'text-fg-faint',
           )}
@@ -247,7 +265,7 @@ export function TrashDialog({ mountId: initial, onClose }: { mountId: string; on
       {trash.isPending && <Spinner />}
       {data?.items.length === 0 && <p className="text-sm text-fg-muted">{t('Der Papierkorb ist leer.')}</p>}
       {!!data?.items.length && (
-        <ul className="divide-y divide-line rounded-lg border border-line" aria-label={t('Gelöschte Einträge')}>
+        <ul className="divide-y divide-line-soft rounded-2xl border border-line-soft" aria-label={t('Gelöschte Einträge')}>
           {data.items.map((d) => {
             const many = d.files.length > 1;
             const expanded = open.has(d.id);

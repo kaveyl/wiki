@@ -25,10 +25,19 @@ export function attachmentName(original: string): string {
     .normalize('NFC')
     .replace(/[\u0000-\u001f<>:"|?*#%[\]()`{}^~]+/g, '-')
     .replace(/\s+/g, '-')
-    .replace(/-{2,}/g, '-')
-    .replace(/^[.\-]+|[.\-]+$/g, '')
-    .slice(0, 100);
-  return `${stem || 'datei'}${ext ? `.${ext}` : ''}`;
+    .replace(/-{2,}/g, '-');
+  const name = trimDotsAndDashes(stem).slice(0, 100);
+  return `${name || 'datei'}${ext ? `.${ext}` : ''}`;
+}
+
+/** Without dots and dashes at both ends – a loop: `[.-]+$` takes quadratic time on „a.-.-.-…b“ (CodeQL #51). */
+function trimDotsAndDashes(s: string): string {
+  const edge = (c: string | undefined) => c === '.' || c === '-';
+  let from = 0;
+  let to = s.length;
+  while (from < to && edge(s[from])) from++;
+  while (to > from && edge(s[to - 1])) to--;
+  return s.slice(from, to);
 }
 
 export function extensionOf(name: string): string {

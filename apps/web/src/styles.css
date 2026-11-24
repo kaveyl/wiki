@@ -2,52 +2,208 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Design tokens: neutral, Notion-like surfaces with one accent. Dark mode via .dark on <html>. */
+/* Design tokens (redesign 23.11., the look of Kaveyl Notes with the lavender colours of Kaveyl Wiki): the window ground
+   (canvas) carries the sidebar, the note lies on it as a rounded white sheet. One palette for light and one for dark,
+   chosen per browser (theme.ts sets data-palette on <html>; none = the standard: lavender, classic dark). Every block
+   names its colours itself (#rrggbb or rgba) – contrast.test.ts checks text, controls and rows of every palette.
+   Dark mode via .dark on <html>.
+   Names: --bg = sheet (note, dialogs, menus), --bg-subtle = quiet strips (tab bar, settings navigation),
+   --bg-muted = fills, --canvas = window ground, --bg-raised = what floats (dock, toasts). --fg-faint is text (4.5:1);
+   --icon-faint is only for the quiet default icons in the tree. --accent-cta + --on-cta: filled buttons. */
 :root {
+  /* Chevron of quiet dropdowns (top toolbar): a mid grey that reads on light and dark sheets. */
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238882a3' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --canvas: #efedf8;
   --bg: #ffffff;
-  --bg-subtle: #f7f7f5;
-  --bg-muted: #efefec;
-  /* Light enough that --fg-muted keeps 4.5:1 on hover/active rows, also over --bg-subtle (AD-048). */
-  --bg-hover: rgba(55, 53, 47, 0.035);
-  --bg-active: rgba(55, 53, 47, 0.06);
-  --scrollbar: rgba(55, 53, 47, 0.1);
-  --fg: #2f2f2c;
-  --fg-muted: #6b6b66;
-  --fg-faint: #72716e;
-  --border: #e6e6e3;
-  --border-control: #8f8f8c;
-  --accent: #4f46e5;
+  --bg-subtle: #f7f6fc;
+  --bg-muted: #efedf8;
+  --bg-raised: #ffffff;
+  --card: #f5f3fb;
+  /* Light enough that --fg-muted keeps 4.5:1 on hover/active rows, also over --bg-subtle and --canvas (AD-048). */
+  --bg-hover: rgba(91, 70, 229, 0.065);
+  --bg-active: rgba(91, 70, 229, 0.1);
+  /* Clearly seen on every sheet like in Kaveyl Notes (owner comparison 24.11.); follows the palette's grey. */
+  --scrollbar: color-mix(in srgb, var(--fg-muted) 38%, transparent);
+  --fg: #1e1b33;
+  --fg-muted: #615c7a;
+  --fg-faint: #6c6786;
+  --icon-faint: #8882a3;
+  --border: #e2ddf1;
+  --border-soft: #ebe7f6;
+  --border-control: #88849a;
+  --accent: #5b46e5;
+  --accent-hover: #4c38d4;
   --accent-fg: #ffffff;
-  --accent-soft: rgba(79, 70, 229, 0.12);
-  --danger: #dc2626;
-  --warn: #b45309;
-  --ok: #15803d;
+  --accent-cta: #5b46e5;
+  --on-cta: #ffffff;
+  --accent-soft: #eae6ff;
+  --accent-tint: #f4f1ff;
+  --danger: #c62828;
+  --danger-soft: #fdecec;
+  --warn: #be400c;
+  --warn-soft: #fff2e8;
+  --ok: #1b7950;
+  --ok-soft: #e6f6ee;
   --mark: rgba(250, 204, 21, 0.45);
-  --code-bg: rgba(135, 131, 120, 0.15);
-  --shadow: 0 8px 30px rgba(15, 15, 15, 0.12), 0 0 0 1px rgba(15, 15, 15, 0.06);
+  --code-bg: rgba(91, 70, 229, 0.08);
+  --scrim: rgba(24, 20, 48, 0.34);
+  --shadow: 0 20px 52px -14px rgba(22, 18, 56, 0.32), 0 0 0 1px rgba(91, 70, 229, 0.12);
+  --sheet-shadow: 0 1px 2px rgba(30, 24, 72, 0.05), 0 8px 24px -10px rgba(30, 24, 72, 0.14);
+  --dock-shadow: 0 2px 6px rgba(30, 24, 72, 0.06), 0 12px 28px -10px rgba(30, 24, 72, 0.22), 0 0 0 1px rgba(91, 70, 229, 0.08);
 }
 
+/* Warm amethyst. */
+:root[data-palette='amethyst'] {
+  --canvas: #f3eefb;
+  --bg-subtle: #f9f6fd;
+  --bg-muted: #f3eefb;
+  --card: #f6f2fc;
+  --bg-hover: rgba(124, 58, 237, 0.065);
+  --bg-active: rgba(124, 58, 237, 0.1);
+  --fg: #221a35;
+  --fg-muted: #695d82;
+  --fg-faint: #72668a;
+  --icon-faint: #9184ab;
+  --border: #e5dcf4;
+  --border-soft: #eee7f8;
+  --border-control: #8b839c;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-cta: #7c3aed;
+  --accent-soft: #ede4ff;
+  --accent-tint: #f5f0ff;
+  --code-bg: rgba(124, 58, 237, 0.08);
+}
+
+/* Plum / berry. */
+:root[data-palette='plum'] {
+  --canvas: #f6eef5;
+  --bg-subtle: #fbf6fa;
+  --bg-muted: #f6eef5;
+  --card: #f8f1f7;
+  --bg-hover: rgba(134, 25, 143, 0.065);
+  --bg-active: rgba(134, 25, 143, 0.09);
+  --fg: #29192a;
+  --fg-muted: #725b74;
+  --fg-faint: #7a647b;
+  --icon-faint: #99819b;
+  --border: #e9d8e8;
+  --border-soft: #f1e5f0;
+  --border-control: #958494;
+  --accent: #86198f;
+  --accent-hover: #701a75;
+  --accent-cta: #86198f;
+  --accent-soft: #f3dff4;
+  --accent-tint: #faf0fa;
+  --warn: #c2410c;
+  --ok: #1c7c52;
+  --code-bg: rgba(134, 25, 143, 0.07);
+}
+
+/* Lilac slate: quiet and easy on the eyes. */
+:root[data-palette='slate'] {
+  --canvas: #f1f0f6;
+  --bg-subtle: #f8f7fb;
+  --bg-muted: #f1f0f6;
+  --card: #f4f3f8;
+  --bg-hover: rgba(95, 82, 153, 0.065);
+  --bg-active: rgba(95, 82, 153, 0.1);
+  --fg: #22202e;
+  --fg-muted: #656178;
+  --fg-faint: #6e6a7e;
+  --icon-faint: #8e8aa1;
+  --border: #e2e0ec;
+  --border-soft: #eceaf3;
+  --border-control: #8a8895;
+  --accent: #5f5299;
+  --accent-hover: #4e4282;
+  --accent-cta: #5f5299;
+  --accent-soft: #e9e6f3;
+  --accent-tint: #f3f1f9;
+  --warn: #c2410c;
+  --ok: #1c7c52;
+  --code-bg: rgba(95, 82, 153, 0.08);
+}
+
+/* Dark, standard „Klassisch“: neutral anthracite with lavender accents. Buttons are filled with --accent-cta
+   (white text); --accent itself is light, for text, links and what is chosen. */
 .dark {
-  --bg: #191919;
-  --bg-subtle: #202020;
-  --bg-muted: #2a2a2a;
-  --bg-hover: rgba(255, 255, 255, 0.055);
-  --bg-active: rgba(255, 255, 255, 0.09);
-  --scrollbar: rgba(255, 255, 255, 0.09);
-  --fg: #e6e6e3;
-  --fg-muted: #a3a29e;
-  --fg-faint: #888782;
-  --border: #2f2f2f;
-  --border-control: #6a6a6a;
-  --accent: #818cf8;
+  --canvas: #111114;
+  --bg: #1e1e23;
+  --bg-subtle: #17171b;
+  --bg-muted: #26262c;
+  --bg-raised: #2a2a31;
+  --card: #17171b;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(155, 140, 255, 0.14);
+  --scrollbar: color-mix(in srgb, var(--fg-muted) 35%, transparent);
+  --fg: #ededf0;
+  --fg-muted: #9e9ea9;
+  --fg-faint: #909099;
+  --icon-faint: #6f6f7b;
+  --border: #2e2e36;
+  --border-soft: #26262d;
+  --border-control: #6b6b72;
+  --accent: #9b8cff;
+  --accent-hover: #ada0ff;
   --accent-fg: #0b0b12;
-  --accent-soft: rgba(129, 140, 248, 0.16);
+  --accent-cta: #6d5ce8;
+  --on-cta: #ffffff;
+  --accent-soft: rgba(155, 140, 255, 0.16);
+  --accent-tint: rgba(155, 140, 255, 0.1);
   --danger: #f87171;
-  --warn: #fbbf24;
-  --ok: #4ade80;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+  --warn: #fb923c;
+  --warn-soft: rgba(251, 146, 60, 0.14);
+  --ok: #5cd69c;
+  --ok-soft: rgba(92, 214, 156, 0.14);
   --mark: rgba(250, 204, 21, 0.3);
   --code-bg: rgba(255, 255, 255, 0.08);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --scrim: rgba(6, 6, 10, 0.64);
+  --shadow: 0 24px 60px -14px rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --sheet-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --dock-shadow: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 36px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Night indigo: a coloured dark theme. */
+.dark[data-palette='indigo'] {
+  --canvas: #0f0e1d;
+  --bg: #1b1932;
+  --bg-subtle: #151428;
+  --bg-muted: #232040;
+  --bg-raised: #28254a;
+  --card: #211e3c;
+  --bg-active: rgba(139, 125, 255, 0.16);
+  --fg: #eeecf9;
+  --fg-muted: #a49fc2;
+  --fg-faint: #8e89aa;
+  --icon-faint: #767096;
+  --border: #2d294f;
+  --border-soft: #252242;
+  --border-control: #6b6785;
+  --accent: #8b7dff;
+  --accent-hover: #9d91ff;
+  --accent-soft: rgba(139, 125, 255, 0.18);
+  --accent-tint: rgba(139, 125, 255, 0.1);
+}
+
+/* OLED black. */
+.dark[data-palette='oled'] {
+  --canvas: #000000;
+  --bg: #141418;
+  --bg-subtle: #0c0c0f;
+  --bg-muted: #1d1d23;
+  --bg-raised: #222229;
+  --card: #0c0c0f;
+  --bg-active: rgba(165, 180, 252, 0.14);
+  --fg-faint: #868690;
+  --border: #26262e;
+  --border-soft: #1d1d24;
+  --border-control: #66666c;
+  --accent: #a5b4fc;
+  --accent-hover: #b8c4fd;
+  --accent-soft: rgba(165, 180, 252, 0.16);
+  --accent-tint: rgba(165, 180, 252, 0.1);
 }
 
 /* Sign-in pages (login, setup, reset, invitation): the brand look of the login design. The
@@ -77,8 +233,11 @@
 }
 
 @theme inline {
+  --color-canvas: var(--canvas);
   --color-bg: var(--bg);
   --color-subtle: var(--bg-subtle);
+  --color-raised: var(--bg-raised);
+  --color-card: var(--card);
   --color-muted: var(--bg-muted);
   --color-hover: var(--bg-hover);
   --color-active: var(--bg-active);
@@ -86,16 +245,27 @@
   --color-fg-muted: var(--fg-muted);
   --color-fg-faint: var(--fg-faint);
   --color-line: var(--border);
+  --color-line-soft: var(--border-soft);
+  --color-icon-faint: var(--icon-faint);
   --color-line-control: var(--border-control);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-cta: var(--accent-cta);
+  --color-on-cta: var(--on-cta);
   --color-danger: var(--danger);
   --color-warn: var(--warn);
   --color-ok: var(--ok);
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --color-danger-soft: var(--danger-soft);
+  --color-warn-soft: var(--warn-soft);
+  --color-ok-soft: var(--ok-soft);
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --shadow-pop: var(--shadow);
+  --shadow-sheet: var(--sheet-shadow);
+  --shadow-dock: var(--dock-shadow);
 }
 
 html,
@@ -111,6 +281,16 @@ html {
 }
 .text-tree {
   font-size: calc(0.8125rem * var(--fs-tree, 1));
+}
+/* Sources and folders of the first level in the sidebar tree: a touch larger (Concept A, 13.5 px). */
+.tree-l1 {
+  font-size: calc(0.84375rem * var(--fs-tree, 1));
+}
+/* Several sources in the card of the tree: a quiet line between them. */
+.mount-block + .mount-block {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-soft);
 }
 .text-code {
   font-size: calc(13px * var(--fs-mono, 1));
@@ -186,6 +366,41 @@ textarea {
   --accent-soft: color-mix(in srgb, var(--danger) 20%, transparent);
 }
 
+/* A switch (on/off) drawn from a checkbox: the box keeps its role, label and keyboard handling. */
+input.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: var(--border-control);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+input.switch::after {
+  content: '';
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left 0.15s;
+}
+input.switch:checked {
+  background: var(--accent-cta);
+}
+input.switch:checked::after {
+  left: 1.125rem;
+}
+input.switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 mark.hit {
   background: var(--mark);
   color: inherit;
@@ -238,6 +453,7 @@ mark.hit {
 .prose-note code {
   font-family: var(--font-mono);
   font-size: calc(0.86em * var(--fs-mono, 1));
+  color: var(--accent);
   background: var(--code-bg);
   border-radius: 4px;
   padding: 0.15em 0.35em;
@@ -253,6 +469,7 @@ mark.hit {
   overflow-x: auto;
 }
 .prose-note pre code {
+  color: inherit;
   background: none;
   padding: 0;
   font-size: inherit;
@@ -293,10 +510,12 @@ mark.hit {
 }
 /* GitHub alerts (> [!NOTE] …) — same colours as GitHub/Gitea. */
 .prose-note .callout {
-  --c: #0969da;
+  --c: var(--accent);
   border-left: 3px solid var(--c);
-  padding: 2px 14px;
-  margin: 0.8em 0;
+  border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--c) 7%, transparent);
+  padding: 8px 16px 10px;
+  margin: 0.9em 0;
 }
 .prose-note .callout::before {
   display: block;
@@ -314,7 +533,6 @@ mark.hit {
 .prose-note .callout[data-callout='WARNING']::before { content: var(--callout-warning, '⚠︎  Warnung'); }
 .prose-note .callout[data-callout='CAUTION'] { --c: #cf222e; }
 .prose-note .callout[data-callout='CAUTION']::before { content: var(--callout-caution, '⛔ Vorsicht'); }
-.dark .prose-note .callout { --c: #4493f8; }
 .dark .prose-note .callout[data-callout='TIP'] { --c: #3fb950; }
 .dark .prose-note .callout[data-callout='IMPORTANT'] { --c: #ab7df8; }
 .dark .prose-note .callout[data-callout='WARNING'] { --c: #d29922; }
@@ -391,7 +609,7 @@ mark.hit {
 }
 .prose-note ul[data-type='taskList'] li {
   display: flex;
-  gap: 0.5em;
+  gap: 0.65em;
   /* The box sits on the baseline of the first text line – the same for every font (line boxes of e.g. Segoe UI
      place the letters higher than those of other fonts, so an offset from the top did not fit everywhere). */
   align-items: baseline;
@@ -401,13 +619,42 @@ mark.hit {
   user-select: none;
 }
 .prose-note ul[data-type='taskList'] li > label input {
-  accent-color: var(--accent);
-  width: 0.95em;
-  height: 0.95em;
+  /* A round tick (the look of Kaveyl Notes): drawn by hand, the browser's box differs on every system. */
+  appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
   margin: 0;
+  border: 1.5px solid var(--border-control);
+  border-radius: 50%;
+  background: var(--bg);
+  cursor: pointer;
   /* Centre of the box at half the height of capitals and digits above the baseline. */
   position: relative;
-  top: 0.125em;
+  top: 0.24em;
+}
+/* Checklists breathe a little more than plain lists (draft: one tick per line with air between). */
+.prose-note ul[data-type='taskList'] > li + li {
+  margin-top: 0.45em;
+}
+.prose-note ul[data-type='taskList'] li > label input:checked {
+  background: var(--accent-cta);
+  border-color: var(--accent-cta);
+}
+.prose-note ul[data-type='taskList'] li > label input:checked::after {
+  content: '';
+  width: 0.56em;
+  height: 0.3em;
+  margin-top: -0.12em;
+  border-left: 2px solid var(--on-cta);
+  border-bottom: 2px solid var(--on-cta);
+  transform: rotate(-45deg);
+}
+.prose-note ul[data-type='taskList'] li > label input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .prose-note ul[data-type='taskList'] li[data-checked='true'] > div {
   color: var(--fg-faint);

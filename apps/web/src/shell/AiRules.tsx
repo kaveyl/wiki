@@ -11,7 +11,7 @@ import { ContextContent, ContextItem, ContextMenu, ContextSeparator, ContextTrig
 import { toast } from '../toast';
 import { noteNameIn } from '../names';
 import { useActions } from './actions';
-import { Section, unfoldSection } from './Personal';
+import { Section } from './Personal';
 import { EntryIcon, MountIcon } from './Tree';
 
 // „nur eigenes Netz“ only appears while such rules exist (AD-031); it also lists the ineffective ones.
@@ -52,7 +52,7 @@ function RuleRow({ rule, mount, kinds }: { rule: AiRule; mount: Mount | undefine
       <ContextTrigger asChild>
         <div
           role="listitem"
-          className={cx('flex min-h-7 cursor-default items-center gap-1.5 rounded-md pl-6 pr-1 text-tree hover:bg-hover', orphan && 'text-fg-faint')}
+          className={cx('flex min-h-[25px] cursor-default items-center gap-1.5 rounded-lg pl-2 pr-1 text-tree hover:bg-hover', orphan && 'text-fg-faint')}
           title={`${mount?.name ?? '?'}${rule.target === 'mount' ? '' : ` / ${rule.path}`} — ${orphan ? t('verwaist') : ruleText(rule, kinds)}`}
           onClick={show}
         >
@@ -91,6 +91,7 @@ function RuleRow({ rule, mount, kinds }: { rule: AiRule; mount: Mount | undefine
   );
 }
 
+/** The view „KI-Freigaben“ of the sidebar (admins): every AI rule, filtered by its state. */
 export function AiRulesSection({ mounts }: { mounts: Mount[] }) {
   const rules = useAiRules(true);
   const kinds = useProviderKinds();
@@ -100,7 +101,6 @@ export function AiRulesSection({ mounts }: { mounts: Mount[] }) {
   const filters = FILTERS.filter(([f]) => f !== 'local' || all.some((r) => matches('local', state(r))));
   // „lokal“ disappears with its last rule: then show everything instead of an invisible filter.
   const active: Filter = filters.some(([f]) => f === filter) ? filter : 'all';
-  if (all.length === 0) return null;
   // Order of the sources in the tree, the source itself first, then by path.
   const rank = (r: AiRule) => {
     const i = mounts.findIndex((m) => m.id === r.mountId);
@@ -112,20 +112,18 @@ export function AiRulesSection({ mounts }: { mounts: Mount[] }) {
   return (
     <Section
       id="ai-rules"
+      fixed
       title={t('KI-Freigaben')}
       icon={<Sparkles className="h-3.5 w-3.5" />}
       extra={
-        <span className="flex shrink-0 text-[0.6875rem] font-normal" onClick={(e) => e.stopPropagation()}>
+        <span className="flex shrink-0 text-[0.6875rem] font-normal normal-case tracking-normal">
           {filters.map(([f, label, hint]) => (
             <button
               key={f}
               title={hint}
               aria-pressed={active === f}
-              className={cx('shrink-0 rounded px-0.5', active === f ? 'bg-active text-fg' : 'text-fg-faint hover:text-fg')}
-              onClick={() => {
-                setFilter(f);
-                unfoldSection('ai-rules');
-              }}
+              className={cx('shrink-0 rounded-full px-1.5', active === f ? 'bg-accent-soft font-medium text-accent' : 'text-fg-faint hover:text-fg')}
+              onClick={() => setFilter(f)}
             >
               {label}
             </button>
@@ -137,7 +135,11 @@ export function AiRulesSection({ mounts }: { mounts: Mount[] }) {
         {shown.map((r) => (
           <RuleRow key={r.id} rule={r} mount={mounts.find((m) => m.id === r.mountId)} kinds={kinds} />
         ))}
-        {shown.length === 0 && <div className="flex h-7 items-center pl-6 text-xs text-fg-faint">{t('Keine passende Freigabe')}</div>}
+        {all.length === 0 ? (
+          <p className="px-2 py-1 text-xs text-fg-faint">{t('Noch keine KI-Freigaben. Rechtsklick auf eine Quelle, einen Ordner oder eine Notiz → „KI-Freigabe …“.')}</p>
+        ) : (
+          shown.length === 0 && <div className="flex h-7 items-center pl-2 text-xs text-fg-faint">{t('Keine passende Freigabe')}</div>
+        )}
       </div>
     </Section>
   );

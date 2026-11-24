@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { loadLanguage, t } from './i18n';
 import { reloadingOnce } from './loading';
 import { installMiddleClickGuard } from './middleClick';
+import '@fontsource-variable/inter';
 import './styles.css';
 
 installMiddleClickGuard();

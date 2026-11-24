@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Folder,
   FolderOpen,
+  File,
   FileArchive,
   FileText,
   Plus,
@@ -50,13 +51,15 @@ import {
   ListChecks,
   Mail,
   Upload,
+  ClipboardList,
+  ArrowDownUp,
 } from 'lucide-react';
 import { api, ApiError, errorText, type AiRule, type Entry, type Mount } from '../api';
 import { collator, t } from '../i18n';
 import { toast } from '../toast';
 import { AiMark, useAiRules } from '../ai/rules';
 import { nodeKey, useWorkspace } from '../store';
-import { ContextContent, ContextItem, ContextMenu, ContextSeparator, ContextSub, ContextTrigger, DropdownContent, IconButton, Spinner, cx } from '../ui';
+import { ContextContent, ContextItem, ContextLabel, ContextMenu, ContextSeparator, ContextSub, ContextTile, ContextTrigger, DropdownContent, IconButton, QuickBar, Spinner, cx } from '../ui';
 import { useActions } from './actions';
 import { MarkedBar, MarkedMenuItems } from './Marked';
 import { rowItem, useMarked, visibleRows, type MarkedItem } from './marked';
@@ -398,7 +401,13 @@ export function MountTree({ mount, onEditMount, mountIds, canReorder }: { mount:
     const ordered = new Set(Object.entries(orders.data ?? {}).filter(([, o]) => o.length > 0).map(([f]) => f));
     // Own AI rules here (✦), by `target:path`; orphaned note rules point nowhere.
     const ai = new Map((aiRules.data ?? []).filter((r) => r.mountId === mount.id && !r.orphan).map((r) => [`${r.target}:${r.path}`, r]));
-    return { map, folderNotes, folderIcons, ordered, encrypted: new Set(encrypted.data ?? []), all: tree.data ?? [], ai };
+    // Notes below each folder (all levels), for the counter at the folders of the first level.
+    const counts = new Map<string, number>();
+    for (const e of tree.data ?? []) {
+      if (e.kind !== 'file' || !/\.md$/i.test(e.name) || e.name === mount.options.folderNote) continue;
+      for (let at = e.parent; at; at = at.includes('/') ? at.slice(0, at.lastIndexOf('/')) : '') counts.set(at, (counts.get(at) ?? 0) + 1);
+    }
+    return { map, folderNotes, folderIcons, ordered, encrypted: new Set(encrypted.data ?? []), all: tree.data ?? [], ai, counts };
   }, [tree.data, orders.data, encrypted.data, aiRules.data, mount.id, mount.options.folderNote]);
 
   // Hoisting: a folder of this source is the root of the tree for now.
@@ -419,11 +428,11 @@ export function MountTree({ mount, onEditMount, mountIds, canReorder }: { mount:
     return Object.keys(s.expanded).some((k) => k.startsWith(prefix) && k !== nodeKey(mount.id, root) && k !== nodeKey(mount.id, ''));
   });
   return (
-    <div className="mb-1">
+    <div className="mount-block">
       <ContextMenu>
         <ContextTrigger asChild>
           <div
-            className={cx('group flex min-h-7 cursor-default items-center gap-1 rounded-md px-1 text-tree font-semibold text-fg-muted hover:bg-hover', FOCUS_RING, rootDrop && 'bg-accent-soft')}
+            className={cx('tree-l1 group flex min-h-[30px] cursor-default items-center gap-1.5 rounded-xl px-1 font-semibold text-fg hover:bg-hover', FOCUS_RING, rootDrop && 'bg-accent-soft')}
             role="treeitem"
             aria-level={1}
             aria-expanded={expanded}
@@ -631,6 +640,8 @@ interface ChildIndex {
   all: Entry[];
   /** Own AI rules (admins), by `target:path`. */
   ai: Map<string, AiRule>;
+  /** Number of notes below a folder (all levels). */
+  counts: Map<string, number>;
 }
 
 function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; depth: number; index: ChildIndex }) {
@@ -649,6 +660,10 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
   // A folder stands for its folder note: open in a tab or revealed, the folder row is the one marked (owner 15.11.).
   const noteKey = notePath ? nodeKey(mount.id, notePath) : key;
   const selected = useWorkspace((s) => s.selected === key || s.selected === noteKey);
+  // The open note lies somewhere below this folder.
+  const branch = useWorkspace((s) => isDir && !!s.selected && s.selected.startsWith(`${key}/`));
+  // The path to it in the accent colour like the draft: the open branch's head (first level) and the note's own folder.
+  const onPath = useWorkspace((s) => isDir && !!s.selected && s.selected.startsWith(`${key}/`) && (depth === 1 || s.selected.slice(0, s.selected.lastIndexOf('/')) === key));
   const reveal = useWorkspace((s) => (s.reveal?.key === key || s.reveal?.key === noteKey ? s.reveal.nonce : 0));
   // With another folder note (e.g. home.md) an index.md is a normal note named „index“ (checklist 20.10.).
   const title = isDir ? entry.name : noteName(entry.path, mount.options.folderNote);
@@ -717,8 +732,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
     } else expandAllIn(mount.id, index.all, entry.path);
   };
 
-  return (
-    <>
+  const row = (
       <ContextMenu>
         <ContextTrigger asChild>
           <div
@@ -736,12 +750,17 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             data-marked={marked ? '1' : undefined}
             tabIndex={-1}
             className={cx(
-              'group flex min-h-7 cursor-default select-none items-center gap-1 rounded-md pr-1 text-tree',
+              // Concept A of the redesign: folders of the first level 28 px, deeper folders 26 px, notes 25 px.
+              'group flex cursor-default select-none items-center gap-1 rounded-xl pl-1 pr-1',
+              isDir ? (depth === 1 ? 'tree-l1 min-h-[28px] font-semibold' : 'min-h-[26px] text-tree font-semibold') : 'min-h-[25px] text-tree font-[450]',
               FOCUS_RING,
-              marked ? 'bg-accent-soft text-fg ring-1 ring-inset ring-accent/40' : selected ? 'bg-active text-fg' : 'text-fg hover:bg-hover',
+              marked
+                ? 'bg-accent-soft text-fg ring-1 ring-inset ring-accent/40'
+                : selected
+                  ? 'bg-accent-soft font-semibold text-accent'
+                  : cx(onPath ? 'text-accent' : isDir ? 'text-fg' : 'text-fg-muted', 'hover:bg-hover', !onPath && 'hover:text-fg'),
               cut && 'opacity-50',
             )}
-            style={{ paddingLeft: depth * 14 }}
             draggable={!ro}
             onDragStart={(e) => {
               dragging = { mountId: mount.id, path: entry.path, parent: entry.parent, name: entry.name, isDir };
@@ -770,9 +789,9 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             onAuxClick={onAuxClick}
             onMouseDown={(e) => e.button === 1 && e.preventDefault()}
           >
-            {isDir ? (
+            {isDir && (
               <span
-                className="flex h-4 w-4 items-center justify-center rounded hover:bg-active"
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-active"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (e.altKey) toggleAll(expanded);
@@ -781,12 +800,16 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
               >
                 <ChevronRight className={cx('h-3.5 w-3.5 text-fg-faint transition-transform', expanded && 'rotate-90')} />
               </span>
-            ) : (
-              <span className="w-4" />
             )}
             {picking && <input type="checkbox" readOnly checked={marked} tabIndex={-1} aria-hidden="true" className="pointer-events-none mr-0.5" />}
-            <EntryIcon icon={icon} isDir={isDir} open={expanded} />
+            <EntryIcon icon={icon} isDir={isDir} open={expanded} active={selected || onPath} />
             <span className="flex-1 truncate">{title}</span>
+            {/* Number of notes below a folder of the first level; the row's buttons take its place under the pointer. */}
+            {isDir && depth === 1 && !!index.counts.get(entry.path) && (
+              <span className="shrink-0 px-1 text-[0.6875rem] font-normal tabular-nums text-fg-faint group-hover:hidden" aria-hidden>
+                {index.counts.get(entry.path)}
+              </span>
+            )}
             {isDir && (
               <RowActions
                 allOpen={allOpen}
@@ -813,90 +836,105 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             <MarkedMenuItems mount={mount} />
           ) : (
           <>
-          {notePath && (
-            <ContextItem icon={<ExternalLink />} onSelect={() => openNote(mount.id, notePath, title, { newTab: true })} shortcut={t('Mittelklick')}>
-              {t('In neuem Tab öffnen')}
-            </ContextItem>
-          )}
-          {notePath && (
-            <ContextItem icon={<Columns2 />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath, title)}>
-              {t('Rechts daneben öffnen')}
-            </ContextItem>
-          )}
-          {notePath && (
-            <ContextItem icon={<PanelLeft />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath, title, 'left')}>
-              {t('Links daneben öffnen')}
-            </ContextItem>
-          )}
-          {isDir && (
-            <ContextItem icon={<Focus />} onSelect={() => useWorkspace.getState().setHoist({ mountId: mount.id, path: entry.path })}>
-              {t('Nur diesen Ordner zeigen (Fokus)')}
-            </ContextItem>
-          )}
-          {!ro && (
+          {/* Redesign 23.11.: the most used actions as tiles on top, the rest in groups and submenus, deleting at the end. */}
+          <QuickBar>
+            {isDir ? (
+              <ContextTile icon={<Focus />} label={t('Nur diesen Ordner zeigen (Fokus)')} short={t('Fokus')} onSelect={() => useWorkspace.getState().setHoist({ mountId: mount.id, path: entry.path })} />
+            ) : (
+              <ContextTile icon={<ExternalLink />} label={t('In neuem Tab öffnen')} short={t('Neuer Tab')} onSelect={() => openNote(mount.id, notePath!, title, { newTab: true })} />
+            )}
+            {isDir ? (
+              !ro && (
+                <>
+                  <ContextTile icon={<Plus />} label={t('Neue Notiz hier')} short={t('Notiz')} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })} />
+                  <ContextTile icon={<FolderPlus />} label={t('Neuer Ordner hier')} short={t('Ordner')} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'dir' })} />
+                </>
+              )
+            ) : (
+              <>
+                <ContextTile icon={<Files />} label={t('Kopieren')} short={t('Kopieren')} onSelect={() => clip('copy', mount.id, entry.path, isDir)} />
+                {!ro && <ContextTile icon={<Scissors />} label={t('Ausschneiden')} short={t('Aussch.')} onSelect={() => clip('cut', mount.id, entry.path, isDir)} />}
+              </>
+            )}
+            {!ro && <ContextTile icon={<Pencil />} label={t('Umbenennen / verschieben')} short={t('Umben.')} onSelect={() => openAction({ kind: 'rename', mountId: mount.id, path: entry.path, isDir })} />}
+            <ContextTile
+              icon={<Star className={cx(usePersonal.getState().isFavorite(mount.id, notePath ?? entry.path) && 'fill-current')} />}
+              label={usePersonal.getState().isFavorite(mount.id, notePath ?? entry.path) ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
+              short={t('Favorit')}
+              active={usePersonal.getState().isFavorite(mount.id, notePath ?? entry.path)}
+              onSelect={() => usePersonal.getState().toggleFavorite({ mountId: mount.id, path: notePath ?? entry.path, title, dir: isDir || undefined })}
+            />
+          </QuickBar>
+          {isDir ? (
             <>
-              <ContextItem icon={<Plus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })}>
-                {isDir ? t('Neue Notiz hier') : t('Neue Notiz daneben')}
-              </ContextItem>
-              <ContextItem icon={<FolderPlus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'dir' })}>
-                {isDir ? t('Neuer Ordner hier') : t('Neuer Ordner daneben')}
-              </ContextItem>
-              <ContextSeparator />
-              <ContextItem icon={<Pencil />} onSelect={() => openAction({ kind: 'rename', mountId: mount.id, path: entry.path, isDir })}>
-                {t('Umbenennen / verschieben')}
+              {notePath && (
+                <ContextSub icon={<ExternalLink />} label={t('Öffnen (Tab / Rechts / Links)')}>
+                  <ContextItem icon={<ExternalLink />} onSelect={() => openNote(mount.id, notePath, title, { newTab: true })} shortcut={t('Mittelklick')}>
+                    {t('In neuem Tab öffnen')}
+                  </ContextItem>
+                  <ContextItem icon={<Columns2 />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath, title)}>
+                    {t('Rechts daneben öffnen')}
+                  </ContextItem>
+                  <ContextItem icon={<PanelLeft />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath, title, 'left')}>
+                    {t('Links daneben öffnen')}
+                  </ContextItem>
+                </ContextSub>
+              )}
+              <ContextSub icon={<ClipboardList />} label={t('Kopieren / Ausschneiden / Pfad')}>
+                <ContextItem icon={<Files />} onSelect={() => clip('copy', mount.id, entry.path, isDir)} shortcut={t('Strg+C')}>
+                  {t('Kopieren')}
+                </ContextItem>
+                {!ro && (
+                  <ContextItem icon={<Scissors />} onSelect={() => clip('cut', mount.id, entry.path, isDir)} shortcut={t('Strg+X')}>
+                    {t('Ausschneiden')}
+                  </ContextItem>
+                )}
+                {!ro && canPaste(clipItem, mount, parentForNew) && (
+                  <ContextItem icon={<ClipboardPaste />} onSelect={() => void pasteInto(qc, mount, parentForNew)} shortcut={t('Strg+V')}>
+                    {t('Einfügen „{name}“', { name: noteNameIn(clipItem.mountId, clipItem.path) })}
+                  </ContextItem>
+                )}
+                <ContextItem icon={<Copy />} onSelect={() => void copyWithToast(fullPath(mount.id, entry.path))}>
+                  {t('Pfad kopieren')}
+                </ContextItem>
+              </ContextSub>
+            </>
+          ) : (
+            <>
+              <ContextSub icon={<Columns2 />} label={t('Öffnen & Neu anlegen')} count={ro ? 2 : 4}>
+                <ContextLabel>{t('Öffnen')}</ContextLabel>
+                <ContextItem icon={<Columns2 />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath!, title)}>
+                  {t('Rechts daneben öffnen')}
+                </ContextItem>
+                <ContextItem icon={<PanelLeft />} onSelect={() => useWorkspace.getState().openSplit(mount.id, notePath!, title, 'left')}>
+                  {t('Links daneben öffnen')}
+                </ContextItem>
+                {!ro && (
+                  <>
+                    <ContextSeparator />
+                    <ContextLabel>{t('Daneben anlegen')}</ContextLabel>
+                    <ContextItem icon={<Plus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'file' })}>
+                      {t('Neue Notiz daneben')}
+                    </ContextItem>
+                    <ContextItem icon={<FolderPlus />} onSelect={() => openAction({ kind: 'create', mountId: mount.id, parent: parentForNew, type: 'dir' })}>
+                      {t('Neuer Ordner daneben')}
+                    </ContextItem>
+                  </>
+                )}
+              </ContextSub>
+              {!ro && canPaste(clipItem, mount, parentForNew) && (
+                <ContextItem icon={<ClipboardPaste />} onSelect={() => void pasteInto(qc, mount, parentForNew)} shortcut={t('Strg+V')}>
+                  {t('Einfügen „{name}“ daneben', { name: noteNameIn(clipItem.mountId, clipItem.path) })}
+                </ContextItem>
+              )}
+              <ContextItem icon={<Copy />} onSelect={() => void copyWithToast(fullPath(mount.id, entry.path))}>
+                {t('Pfad kopieren')}
               </ContextItem>
             </>
           )}
-          <ContextItem icon={<Files />} onSelect={() => clip('copy', mount.id, entry.path, isDir)} shortcut={t('Strg+C')}>
-            {t('Kopieren')}
-          </ContextItem>
-          {!ro && (
-            <ContextItem icon={<Scissors />} onSelect={() => clip('cut', mount.id, entry.path, isDir)} shortcut={t('Strg+X')}>
-              {t('Ausschneiden')}
-            </ContextItem>
-          )}
-          {!ro && canPaste(clipItem, mount, parentForNew) && (
-            <ContextItem icon={<ClipboardPaste />} onSelect={() => void pasteInto(qc, mount, parentForNew)} shortcut={t('Strg+V')}>
-              {isDir ? t('Einfügen „{name}“', { name: noteNameIn(clipItem.mountId, clipItem.path) }) : t('Einfügen „{name}“ daneben', { name: noteNameIn(clipItem.mountId, clipItem.path) })}
-            </ContextItem>
-          )}
-          <ContextItem icon={<Copy />} onSelect={() => void copyWithToast(fullPath(mount.id, entry.path))}>
-            {t('Pfad kopieren')}
-          </ContextItem>
           <ContextItem icon={<ListChecks />} onSelect={() => useMarked.getState().pick(mount.id, item())} shortcut={t('Strg+Klick')}>
             {t('Auswählen')}
           </ContextItem>
-          {isDir && !ro && (
-            <ContextSub icon={<Upload />} label={t('Importieren')}>
-              <ContextItem
-                icon={<FileText />}
-                disabled={inEncrypted}
-                title={inEncrypted ? t('In einen verschlüsselten Ordner lässt sich nichts importieren') : undefined}
-                onSelect={() => importMarkdown(qc, mount.id, entry.path)}
-              >
-                {t('Markdown-Dateien …')}
-              </ContextItem>
-              <ContextItem
-                icon={<FileArchive />}
-                disabled={inEncrypted}
-                title={inEncrypted ? t('In einen verschlüsselten Ordner lässt sich nichts importieren') : undefined}
-                onSelect={() => openAction({ kind: 'import', mountId: mount.id, parent: entry.path, where: `${mount.name} / ${entry.path}` })}
-              >
-                {t('Aus anderem Programm …')}
-              </ContextItem>
-            </ContextSub>
-          )}
-          {!inEncrypted && (
-            <ContextSub icon={<FileDown />} label={t('Exportieren')}>
-              <ContextItem onSelect={() => downloadExport(mount.id, entry.path)}>{isDir ? t('HTML (ZIP)') : t('HTML-Datei')}</ContextItem>
-              <ContextItem onSelect={() => downloadExport(mount.id, entry.path, 'md')}>{isDir ? t('Markdown (ZIP)') : t('Markdown')}</ContextItem>
-            </ContextSub>
-          )}
-          {isAdmin && (
-            <ContextItem icon={<History />} onSelect={() => openSettings('backup-files', { mountId: mount.id, path: entry.path })}>
-              {t('Aus Backup wiederherstellen …')}
-            </ContextItem>
-          )}
           {!ro && (siblings.length > 1 || (isDir && index.ordered.has(entry.path))) && (
             // Drag and drop does the same; this is for touch screens and the keyboard.
             <ContextSub icon={<ArrowUpDown />} label={t('Anordnen')}>
@@ -917,21 +955,66 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
               )}
             </ContextSub>
           )}
-          <ContextItem icon={<Star />} onSelect={() => usePersonal.getState().toggleFavorite({ mountId: mount.id, path: notePath ?? entry.path, title, dir: isDir || undefined })}>
-            {usePersonal.getState().isFavorite(mount.id, notePath ?? entry.path) ? t('Aus Favoriten entfernen') : t('Zu Favoriten')}
-          </ContextItem>
+          {((isDir && !ro) || !inEncrypted || isAdmin) && (
+            <>
+              <ContextSeparator />
+              <ContextLabel>{isDir ? t('Daten & Backup') : t('Export & Sicherung')}</ContextLabel>
+            </>
+          )}
+          {isDir && (!ro || !inEncrypted) && (
+            <ContextSub icon={<ArrowDownUp />} label={!ro && !inEncrypted ? t('Importieren / Exportieren') : !ro ? t('Importieren') : t('Exportieren')}>
+              {!ro && (
+                <>
+                  <ContextLabel>{t('Importieren')}</ContextLabel>
+                  <ContextItem
+                    icon={<FileText />}
+                    disabled={inEncrypted}
+                    title={inEncrypted ? t('In einen verschlüsselten Ordner lässt sich nichts importieren') : undefined}
+                    onSelect={() => importMarkdown(qc, mount.id, entry.path)}
+                  >
+                    {t('Markdown-Dateien …')}
+                  </ContextItem>
+                  <ContextItem
+                    icon={<FileArchive />}
+                    disabled={inEncrypted}
+                    title={inEncrypted ? t('In einen verschlüsselten Ordner lässt sich nichts importieren') : undefined}
+                    onSelect={() => openAction({ kind: 'import', mountId: mount.id, parent: entry.path, where: `${mount.name} / ${entry.path}` })}
+                  >
+                    {t('Aus anderem Programm …')}
+                  </ContextItem>
+                </>
+              )}
+              {!ro && !inEncrypted && <ContextSeparator />}
+              {!inEncrypted && (
+                <>
+                  <ContextLabel>{t('Exportieren')}</ContextLabel>
+                  <ContextItem icon={<FileDown />} onSelect={() => downloadExport(mount.id, entry.path)}>{t('HTML (ZIP)')}</ContextItem>
+                  <ContextItem icon={<FileDown />} onSelect={() => downloadExport(mount.id, entry.path, 'md')}>{t('Markdown (ZIP)')}</ContextItem>
+                </>
+              )}
+            </ContextSub>
+          )}
+          {!isDir && !inEncrypted && (
+            <ContextSub icon={<FileDown />} label={t('Exportieren')}>
+              <ContextItem onSelect={() => downloadExport(mount.id, entry.path)}>{t('HTML-Datei')}</ContextItem>
+              <ContextItem onSelect={() => downloadExport(mount.id, entry.path, 'md')}>{t('Markdown')}</ContextItem>
+            </ContextSub>
+          )}
+          {isAdmin && (
+            <ContextItem icon={<History />} onSelect={() => openSettings('backup-files', { mountId: mount.id, path: entry.path })}>
+              {t('Aus Backup wiederherstellen …')}
+            </ContextItem>
+          )}
+          <ContextSeparator />
+          <ContextLabel>{isDir ? t('Ordner, Schutz & KI') : t('Darstellung & Zugriff')}</ContextLabel>
+          {notePath && !ro && (
+            <ContextItem icon={<Smile />} onSelect={() => openAction({ kind: 'icon', mountId: mount.id, path: notePath, icon })}>
+              {t('Icon ändern …')}
+            </ContextItem>
+          )}
           <ContextItem icon={<Eye />} onSelect={() => openAction({ kind: 'watch', mountId: mount.id, path: entry.path, isDir, title })}>
             {watchOf(watchData, mount.id, entry.path) ? t('Beobachten ändern …') : t('Beobachten …')}
           </ContextItem>
-          {notePath && (
-            <>
-              {!ro && (
-                <ContextItem icon={<Smile />} onSelect={() => openAction({ kind: 'icon', mountId: mount.id, path: notePath, icon })}>
-                  {t('Icon ändern …')}
-                </ContextItem>
-              )}
-            </>
-          )}
           {isDir && !ro && !inEncrypted && (
             <ContextItem icon={<Lock />} onSelect={() => void cryptFolder(qc, mount, entry.path, true)}>
               {t('Ordner verschlüsseln …')}
@@ -969,7 +1052,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             </ContextSub>
           )}
           {isAdmin && (
-            <ContextItem icon={<Sparkles />} onSelect={() => openAction({ kind: 'ai-rule', mountId: mount.id, target: isDir ? 'folder' : 'note', path: entry.path, title })}>
+            <ContextItem icon={<Sparkles />} badge={aiRule ? t('Aktiv') : undefined} onSelect={() => openAction({ kind: 'ai-rule', mountId: mount.id, target: isDir ? 'folder' : 'note', path: entry.path, title })}>
               {t('KI-Freigabe …')}
             </ContextItem>
           )}
@@ -977,7 +1060,7 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
             <>
               <ContextSeparator />
               <ContextItem icon={<Trash2 />} danger onSelect={() => openAction({ kind: 'delete', mountId: mount.id, path: entry.path, isDir, title })}>
-                {t('Löschen')}
+                {isDir ? t('Ordner löschen') : t('Löschen')}
               </ContextItem>
             </>
           )}
@@ -985,7 +1068,27 @@ function Node({ mount, entry, depth, index }: { mount: Mount; entry: Entry; dept
           )}
         </ContextContent>
       </ContextMenu>
-      {isDir && expanded && (index.map.get(entry.path) ?? []).map((c) => <Node key={c.path} mount={mount} entry={c} depth={depth + 1} index={index} />)}
+  );
+  const below = isDir && expanded && (index.map.get(entry.path) ?? []).length > 0 && (
+    // The guide line on the left shows which folder the rows below belong to.
+    <div role="group" className="ml-[11px] border-l-[1.5px] border-line pl-1.5">
+      {(index.map.get(entry.path) ?? []).map((c) => (
+        <Node key={c.path} mount={mount} entry={c} depth={depth + 1} index={index} />
+      ))}
+    </div>
+  );
+  // The open branch: the folder of the first level holding the open note lies in a box of its own.
+  if (depth === 1 && isDir && branch && expanded)
+    return (
+      <div className="my-1 rounded-xl bg-card p-1 dark:bg-bg" data-branch="">
+        {row}
+        {below}
+      </div>
+    );
+  return (
+    <>
+      {row}
+      {below}
     </>
   );
 }
@@ -1019,11 +1122,21 @@ export function MountIcon({ mount }: { mount: Mount }) {
   return fallback;
 }
 
-export function EntryIcon({ icon, isDir, open }: { icon: string | null; isDir: boolean; open?: boolean }) {
+/**
+ * Icon of a note or folder in one 18 px slot (redesign 23.11.): an own icon (emoji, Lucide, picture) at full
+ * strength; without one a quiet folder or a plain sheet. `active`: the open note / its folder – in the accent.
+ */
+export function EntryIcon({ icon, isDir, open, active }: { icon: string | null; isDir: boolean; open?: boolean; active?: boolean }) {
   // Frontmatter `icon:` (see editor/icons.tsx), otherwise folder/file.
-  if (icon) return <IconGlyph icon={icon} />;
-  if (isDir) return open ? <FolderOpen className="h-4 w-4 shrink-0 text-fg-faint" /> : <Folder className="h-4 w-4 shrink-0 text-fg-faint" />;
-  return <FileText className="h-4 w-4 shrink-0 text-fg-faint" />;
+  const FolderIcon = open ? FolderOpen : Folder;
+  const glyph = icon ? (
+    <IconGlyph icon={icon} className={cx('h-[15px] w-[15px] text-[0.875rem]', active && 'text-accent')} />
+  ) : isDir ? (
+    <FolderIcon className={cx('h-[14px] w-[14px]', active ? 'text-accent' : 'text-icon-faint opacity-80 dark:opacity-100')} strokeWidth={1.55} />
+  ) : (
+    <File className={cx('h-[14px] w-[14px]', active ? 'text-accent' : 'text-icon-faint opacity-70 dark:opacity-100')} strokeWidth={1.45} />
+  );
+  return <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center">{glyph}</span>;
 }
 
 /** Source menu → Backup → „Jetzt sichern“: every active plan that includes the source (AD-038). */

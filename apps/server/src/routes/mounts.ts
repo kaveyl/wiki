@@ -165,7 +165,14 @@ export function registerMountRoutes(server: FastifyInstance, ctx: AppContext) {
   server.post('/api/sync-all', async (req) => {
     const mine = manager.list().filter((m) => atLeast(levelIn(req, m.id, '', true), 'write'));
     await manager.syncAll(mine, true);
-    return { ok: true };
+    // Sources that ended in an error or a conflict: the message after „Sync all“ names them instead of „done“
+    // (diff check 0.2.15). Their details stay in the sync overview.
+    const failed = mine
+      .filter((m) => m.type === 'remote' && !m.paused)
+      .map((m) => manager.get(m.id))
+      .filter((m): m is NonNullable<typeof m> => !!m && (m.syncStatus === 'error' || m.syncStatus === 'conflict'))
+      .map((m) => m.name);
+    return { ok: true, failed };
   });
 
   server.post<{ Params: { id: string } }>('/api/mounts/:id/sync', async (req) => {

@@ -165,15 +165,22 @@ If this is a **new server** for a Kaveyl Wiki instance that existed before, do n
 
 ![Interface](handbuch/02-oberflaeche.webp)
 
-- **Left (sidebar):** at the top next to “Kaveyl” the **sync icon**, then ✦ **Ask AI** (if set up),
-  **#** Tags and Hide sidebar; below that
-  the search, Favourites, “Recent” and every added **source** (repository or folder) as its own tree.
-  All menus, entry by entry: [Menus at a glance](#menüs-im-überblick).
-- **Top right** in the tab bar – always visible, even with the sidebar collapsed: **?** Help, the
-  **gear** (Settings), the **account menu** (person icon: your name and your e-mail address,
-  **My account …**, **Sign out**) and the **colour scheme icon** (sun, moon or screen). Each click on it
-  moves on: Light → Dark → System (follows the device); the choice stays saved in this browser. On the
-  phone, Help and Settings are also in the account menu so that the tabs have room.
+The note lies as a rounded sheet on a quiet background; the sidebar stands on the left directly on that background.
+Between them sits a narrow handle: dragging it (or sliding it with a finger, or ← → on the keyboard) changes the width
+of the sidebar.
+
+- **Left (sidebar)** from top to bottom: “Kaveyl Wiki” with ✦ **Ask AI** (if set up) and **#** Tags; the button
+  **New note** (creates it in the folder of the open note, otherwise in the first source you may write to); the
+  **search**; your **favourites** as small chips (with many, two rows to scroll); the switch **Tree | Recent | AI
+  access** (AI access for administrators only) and below it the chosen view – in the tree every added **source**
+  (repository or folder) in one shared card. At the very bottom **Add source** (administrators) and the **Trash**,
+  below them the **sync status** (green dot “In sync · 21:20”), the **gear** (Settings), the **colour scheme icon** and
+  **Hide sidebar**. All menus, entry by entry: [Menus at a glance](#menüs-im-überblick).
+- **Top right** in the tab bar – always visible, even with the sidebar collapsed: **?** Help and the **account**
+  (initial and name: your name and your e-mail address, **My account …**, **Sign out**). With the sidebar collapsed,
+  the **gear** and the **colour scheme icon** (sun, moon or screen) are here too. Each click on the colour scheme icon
+  moves on: Light → Dark → System (follows the device); the choice stays saved in this browser. On the phone, Help and
+  Settings are also in the account menu so that the tabs have room.
 - **Top:** tabs of the open notes. The middle mouse button opens in a new tab (under Favorites and
   Recent also Ctrl+click; in the tree Ctrl+click [marks](#mehrere-markieren)). Right-click a tab → **“Pin tab”**: pinned tabs move to the left,
   show a pin instead of ×, are never replaced when you open another note and stay
@@ -186,8 +193,8 @@ If this is a **new server** for a Kaveyl Wiki instance that existed before, do n
 ![Pinned tabs](handbuch/50-angeheftet.webp)
 
 ![All tabs](handbuch/tabs-alle.webp)
-- **Middle:** the editor with the formatting toolbar. **Right:** the table of contents (for
-  longer notes), can be shown and hidden.
+- **Middle:** the editor; the toolbar floats at the bottom over the note (or sits on top, see
+  [Appearance](#darstellung)). **Right:** the table of contents (for longer notes), can be shown and hidden.
 - At the top right of the note: **Editor / Markdown** (switch view), switch width
   and the **“…”** menu (Versions, Rename, Delete …).
 
@@ -226,20 +233,30 @@ note menu **“…”**. What you are not allowed to do (e.g. without write perm
 
 | Icon | Effect |
 |---|---|
-| Sync icon | Status of all sources (green = in sync, dot = waiting to be transferred, warning = please take a look, crossed-out cloud = no connection to the server); a click opens the [sync overview](#speichern-übertragen-und-synchronisieren) |
 | ✦ Ask AI | [Ask the knowledge base](#frag-die-wissensbasis) about everything shared |
-| # Tags | all tags with count and colour; a click shows the notes, right-click colours or renames |
-| Hide sidebar | as labelled |
-| Next to the search: New …, Expand/collapse all | new note/new folder; expand or collapse all sections and folders |
+| # Tags | **Manage tags:** all tags with count and colour. A click picks a tag; below it **Show notes**, **Colour**, **Rename**, **Merge** and **Delete** (after a question with the count it takes the tag off every note you may edit – the notes stay); a double-click shows the notes at once, right-click offers the same as a menu |
+| New note | new note in the folder of the open note (otherwise in the first source you may write to) |
+| Favourite chips | a click opens, right-click as under [Favourites](#notizen-finden-und-lesen) |
+| Tree \| Recent \| AI access | which view stands below; the choice belongs to your account. “Show in tree” switches to “Tree” by itself |
+| Sources: Expand/collapse all | expand or collapse all folders of all sources |
+
+### Foot of the sidebar {#fuß-der-seitenleiste}
+
+| Icon | Effect |
+|---|---|
+| Add source, Trash | as labelled (Add source for administrators only) |
+| Sync status | dot and word: green “In sync · time”, purple = waiting to be transferred or running, orange/red = please take a look, “Offline” = no connection to the server; a click opens the [sync overview](#speichern-übertragen-und-synchronisieren) |
+| Gear | [Settings](#einstellungen-im-überblick) |
+| Colour scheme | Light → Dark → System |
+| Hide sidebar | as labelled; back with the icon on the left of the tab bar |
 
 ### Top right {#oben-rechts}
 
 | Icon | Effect |
 |---|---|
 | ? Help | this manual (also **F1**) |
-| Gear | [Settings](#einstellungen-im-überblick) |
-| Account menu (person icon) | your name and your e-mail address; **My account …** opens Settings → Account; **Sign out** (asks first if something is still unsaved). On the phone also **Help / manual** and **Settings** |
-| Colour scheme | Light → Dark → System |
+| Account (initial and name) | your name and your e-mail address; **My account …** opens Settings → Account; **Sign out** (asks first if something is still unsaved). On the phone also **Help / manual** and **Settings** |
+| Gear, colour scheme | only with the sidebar collapsed (otherwise in its foot) |
 
 ### Right-clicking a source {#rechtsklick-auf-eine-quelle}
 
@@ -262,28 +279,33 @@ note menu **“…”**. What you are not allowed to do (e.g. without write perm
 
 ### Right-clicking a folder or a note {#rechtsklick-auf-einen-ordner-oder-eine-notiz}
 
+At the very top a bar with five tiles holds the most used actions, the other entries follow in groups below;
+**Delete** stands apart in red at the end.
+
+- **Tiles on a note:** **New tab** (also the middle mouse button), **Copy**, **Cut**, **Rename** (Rename / move),
+  **Favourite**.
+- **Tiles on a folder:** **Focus** (show only this folder), **Note** and **Folder** (new inside it), **Rename**,
+  **Favourite**.
+
 | Entry | Effect |
 |---|---|
-| Open in new tab, Open to the right / to the left | note in a new tab (also the middle mouse button) or in the [split view](#notizen-finden-und-lesen) |
-| Show only this folder (focus) | the sidebar shows only this folder |
-| New note / New folder | inside it (on a note: next to it) |
-| Rename / move | name and destination, also into another source; links are repaired |
-| Copy, Cut, Paste “…” | Ctrl+C / Ctrl+X / Ctrl+V in the tree |
-| Copy path | full path with the source in front (`Source/Folder/Note.md`) to the clipboard |
+| Open & create ▸ Open to the right / to the left, New note / New folder next to it | on notes: [split view](#notizen-finden-und-lesen) and something new on the same level |
+| Open (tab / right / left) ▸ In new tab, Open to the right / to the left | on folders with a folder page |
+| Copy / cut / path ▸ Copy, Cut, Paste “…”, Copy path | on folders; on notes, Paste “…” next to it and **Copy path** stand directly in the list. Ctrl+C / Ctrl+X / Ctrl+V always work in the tree. The path goes to the clipboard in full with the source in front (`Source/Folder/Note.md`) |
+| Rename / move (tile) | name and destination, also into another source; links are repaired |
 | Select | [mark several](#mehrere-markieren) – boxes before the rows, a tap marks (for tablet and phone; with a mouse: Ctrl+click) |
-| Import ▸ Markdown files … | folders only: `.md` files from your computer as notes into it ([Import Markdown](#markdown-importieren)) |
-| Import ▸ From another program … | folders only: another program’s export (ZIP) as a new subfolder ([Import from other programs](#aus-anderen-programmen-importieren)) |
-| Export ▸ HTML file, or HTML (ZIP) for a folder, Markdown, or Markdown (ZIP) for a folder | [Export](#exportieren-und-drucken) |
-| Restore from backup … | the [backups](#sicherungen) of the source, with this place selected when it opens (admins) |
 | Arrange → Move up / Move down, Sort contents alphabetically | order without dragging |
-| Add to Favourites / Remove from Favourites | star list at the top of the sidebar |
+| Import / export ▸ Markdown files …, From another program … | folders only: `.md` files from your computer as notes into it ([Import Markdown](#markdown-importieren)) or another program’s export (ZIP) as a new subfolder ([Import from other programs](#aus-anderen-programmen-importieren)) |
+| Import / export ▸ HTML (ZIP), Markdown (ZIP), or on notes Export ▸ HTML file, Markdown | [Export](#exportieren-und-drucken) |
+| Restore from backup … | the [backups](#sicherungen) of the source, with this place selected when it opens (admins) |
+| Favourite (tile) | Add to Favourites / Remove from Favourites – the chips at the top of the sidebar |
 | Change icon … | icon, emoji or custom icon |
 | Encrypt folder … / Finish encrypting folder … / Remove encryption … | [Encryption](#verschlüsselte-notizen-und-ordner) |
 | Permissions … | [Permissions](#berechtigungen) for this folder or this note |
 | Share ▸ Send by e-mail … | notes only: the note as a file to any address ([Send by e-mail](#per-mail-versenden)); greyed out without e-mail sending and for encrypted notes |
 | Share ▸ Give access by e-mail … | [share](#konten-einladungen-und-teilen-per-e-mail) the folder (with everything in it) or the note with someone (“manage”) |
-| AI access … | [AI access](#ki-freigaben) exactly here (admins) |
-| Delete | to the [Trash](#versionen-und-papierkorb), with a confirmation |
+| AI access … | [AI access](#ki-freigaben) exactly here (admins); “Active” after it: a rule of its own applies here already |
+| Delete (on folders: Delete folder) | to the [Trash](#versionen-und-papierkorb), with a confirmation |
 
 ### Note menu “…” and note header {#notiz-menü--und-kopfzeile-der-notiz}
 
@@ -291,19 +313,19 @@ In the header: the note's **icon** (a click changes it), **path** (source / fold
 shortened to “…” at the front; a click or tap shows it in full), **star** (favourite), **Editor / Markdown** (labelled
 only if there is full room for the note name next to it), **Download** (arrow down: the note as `.md`, as a ZIP when it
 uses pictures or files – see [Export](#exportieren-und-drucken); not for encrypted notes), width, table of contents
-on/off and **“…”** with:
+on/off and **“…”**. At the top of the menu stand four tiles: **In tree** (expands the tree down to the note),
+**Versions** ([Versions](#versionen-und-papierkorb) from the Git history – restore or save as a new note), **Print**
+(Print / as PDF) and **Share** (opens ▸ Send by e-mail … / Give access by e-mail …). Below them:
 
 | Entry | Effect |
 |---|---|
-| Show in tree | expands the tree down to the note |
-| Versions | [Versions](#versionen-und-papierkorb) from the Git history – restore or save as a new note |
-| Print / as PDF …, Export ▸ HTML file / Markdown | [Export](#exportieren-und-drucken) |
-| Ask AI …, AI: Summarise, AI: Continue writing | only where there is no toolbar (reading mode, Markdown view) – otherwise in the [AI button](#ki-im-editor) |
-| Make read-only / Remove read-only | `readonly: true` in the front matter |
-| Save as template | turns the note into a [template](#vorlagen) |
-| Encrypt … / Remove encryption … / Lock now | [Encryption](#verschlüsselte-notizen-und-ordner) |
-| Permissions …, Share ▸ Send by e-mail … / Give access by e-mail … | as in the right-click menu |
-| Rename / move, Delete | as in the right-click menu |
+| Document: Export ▸ HTML file / Markdown | [Export](#exportieren-und-drucken) |
+| Document: Save as template | turns the note into a [template](#vorlagen) |
+| Document: Read-only (switch) | sets or removes `readonly: true` in the front matter |
+| AI: Ask AI …, Summarise, Continue writing | only where there is no toolbar (reading mode, Markdown view) – otherwise in the [AI button](#ki-im-editor) |
+| Protection & management: Lock now, Encrypt … / Remove encryption … | [Encryption](#verschlüsselte-notizen-und-ordner) |
+| Protection & management: Permissions …, Rename / move | as in the right-click menu |
+| Delete | apart in red at the end, as in the right-click menu |
 
 ### Right-clicking a tab {#rechtsklick-auf-einen-tab}
 
@@ -313,7 +335,9 @@ Unpin tab**, **Close tab**, **Close other tabs**. The middle mouse button closes
 
 ### Command palette {#befehlspalette}
 
-**Ctrl+K** opens an input field for notes and commands; with `>` at the start, commands only: new note,
+**Ctrl+K** opens an input field for notes and commands. Below the field, **All**, **Title** (only hits in the name)
+and **Full text** (only hits in the text) choose which notes appear; **# Tags** opens the tag overview, **✦ Ask AI**
+(if set up) the [knowledge base](#frag-die-wissensbasis). With `>` at the start, commands only: new note,
 new folder, show in tree, favourite, versions, ask AI, tags, search with filters,
 sync, print, export, Trash, Settings, **Help**, Add source,
 light/dark/system, language, sidebar, table of contents, width.
@@ -390,7 +414,7 @@ Confirmations such as “Discard unsaved input?” or “… delete?” appear i
 ### Connections {#verbindungen}
 
 You manage access credentials for repositories in one place: **Settings → Sources →
-Connections** (first tab; next to it **Added sources** with the list, “Add source” and the
+Connections** (second tab; before it **Added sources** with the list, “Add source” and the
 repository trash). A connection is an account with **Gitea**, **GitHub** (github.com or
 Enterprise), **GitLab** (gitlab.com or your own instance) or **Git (generic)** (any HTTPS server,
 optionally with a username). Several connections – including several Gitea instances – are possible.
@@ -452,7 +476,8 @@ Public repositories and local folders do not need a connection.
 ## Finding and reading notes {#notizen-finden-und-lesen}
 
 - **Instant search** at the top left (Ctrl+P): results appear as you type, grouped into
-  folders, notes (title/path) and content. Right-click (on touch devices: long press) a result → “Open in new
+  folders, notes (title/path) and content; content includes the **tags** (“recipe” or “#recipe” finds notes with that
+  tag). Right-click (on touch devices: long press) a result → “Open in new
   tab”, “Open to the right/left”, “Show in tree” or “Copy path” (the path
   with the source in front; a message confirms the copy). “All results …” opens the
   search page.
@@ -483,14 +508,13 @@ Public repositories and local folders do not need a connection.
 
 - **Favourites:** the star at the top right of the note (or right-click in the tree → “Add to Favourites”;
   this also works for folders without their own folder note – clicking one shows the folder expanded
-  in the tree). Favourites are at the very top of the sidebar. Right-click an entry in
-  “Favourites” or “Recent”: open in new tab, open to the right or left, show in tree,
-  **Remove from Favourites** or “Add to Favourites”. **Recent** below it shows the most recently
-  opened notes – or, with “changed”, the most recently changed ones (also by others, from VS Code
-  or via Git). After each entry, the **source** is shown in grey in brackets – handy, because
-  Git projects often have the same folder structure (e.g. several `README` or `docs/`). Both
-  sections can be collapsed; clicking “opened” or “changed” expands “Recent”
-  automatically. The lists belong to your account and are not stored in the repository.
+  in the tree). Favourites stand as small chips below the search – always one click away, without pushing the tree
+  down. Right-click a favourite or an entry in “Recent”: open in new tab, open to the right or left, show in tree,
+  **Remove from Favourites** or “Add to Favourites”. **Recent** is a view of the sidebar (switch **Tree | Recent | AI
+  access**): the most recently opened notes – or, with “changed”, the most recently changed ones (also by others, from
+  VS Code or via Git). After each entry, the **source** is shown in grey in brackets – handy, because Git projects
+  often have the same folder structure (e.g. several `README` or `docs/`). The lists and the chosen view belong to
+  your account and are not stored in the repository.
   A note only ends up in “Recent” once it could be opened. Entries whose note no longer
   exists (deleted, renamed outside, source removed) are hidden by the sidebar.
   If a note cannot be opened, the tab offers “Search” and “Trash” (note not
@@ -520,8 +544,9 @@ Public repositories and local folders do not need a connection.
 
 ![Custom icons](handbuch/54-eigene-icons.webp)
 - **Read-only:** “…” → “Make read-only” writes `readonly: true` into the note – it
-  then opens in reading mode for everyone (“Read only” unlocks it temporarily). Remove it via
-  the same menu item.
+  then opens in reading mode for everyone; the header then shows a yellow **“Read only”** (a click unlocks it
+  temporarily). Remove it via the same menu item. If you may only read a note, the header shows a yellow
+  **“Read-only”**.
 - **Split view:** right-click a note in the tree or a search result → “Open to the
   right” or “Open to the left” (in the tab menu it is called “Show to the right/left”). The chosen note is placed next to the
   current one. If it is itself the current one (just opened with a click), the previously opened
@@ -530,9 +555,9 @@ Public repositories and local folders do not need a connection.
 
 ![Split view](handbuch/38-geteilte-ansicht.webp)
 
-- **Expanding and collapsing:** you expand and collapse Favourites, “Recent”, “AI access” and each source by clicking their
-  heading. Next to the search there is a symbol that switches depending on the state: **Collapse all**
-  as long as any folder is open, otherwise **Expand all** (all sections, all folders of all sources). Hovering over a source shows **Expand all folders
+- **Expanding and collapsing:** you expand and collapse each source by clicking its row. At the top of the card of
+  sources a button switches depending on the state: **Collapse all** as long as any folder is open, otherwise
+  **Expand all** (all folders of all sources). Hovering over a source shows **Expand all folders
   / Collapse all folders**, hovering over any folder – in any source, at any level – shows **Expand everything below
   / Collapse everything below** (one symbol that switches depending on the state; if the folder has no
   subfolders, it only expands or collapses the folder itself) and, where you may write, **+** for a
@@ -591,7 +616,11 @@ Public repositories and local folders do not need a connection.
   AI approvals set on this very note depend on it. Do not change or delete it – without it, Kaveyl Wiki only knows the
   note by its path.
   Very large notes (over 100,000 characters) appear as plain text in the Markdown view – without highlighting and
-  table of contents, so it stays smooth.
+  table of contents, so it stays smooth. The head of the card names the file, line and column; at the bottom (or on top,
+  depending on the toolbar setting) floats a bar of its own: **Front matter** jumps to the header data at the very top
+  (without one, it creates one with `tags:`), **Line wrap** switches between wrapping long lines and scrolling sideways
+  (remembered by this browser), plus Undo and Redo.
+- Next to the tags it says when the note last changed (“Edited today, 20:38”).
 
 ![Markdown view](handbuch/08-markdown-ansicht.webp)
 
@@ -605,14 +634,16 @@ Public repositories and local folders do not need a connection.
 ## Editing {#bearbeiten}
 
 Just click into the text and write – the editor shows the formatting directly (WYSIWYG).
-The **?** at the right end of the formatting toolbar opens this help; if you prefer to type Markdown
+**+ ▸ Editor help** in the toolbar (or the **?** at the end of the bar on top) opens this help; if you prefer to type Markdown
 directly, you will find all notations in the [Markdown cheat sheet](#markdown-spickzettel).
 
 ![Editor](handbuch/10-editor.webp)
 
-- **Formatting toolbar** at the top: paragraph style (headings), bold, italic, strikethrough,
-  code, link, lists, checklist, quote, code block, callout, collapsible block,
-  divider, table. When the cursor is in a table, buttons for rows/columns
+- **Toolbar:** by default a floating bar at the bottom over the note. Its lower row has **+** (insert block: numbered
+  list, quote, code block, collapsible block, divider, help), **Aa** (formatting row on/off), checklist, bullet list,
+  callout, table, attachment, **✦ AI** and undo/redo; the formatting row above it heading 1–3, bold, italic,
+  strikethrough, code, link, copy formatting and emoji. In [Appearance](#darstellung) the bar can go on top (all in one
+  row, with the paragraph style); on the phone it is always on top. When the cursor is in a table, buttons for rows/columns
   (insert above/below, left/right, delete) are added; in a code block, a choice of language
   (for syntax highlighting, including YAML, Bash, PowerShell, Dockerfile, nginx, TOML). If no
   language is set, Kaveyl Wiki detects it itself and shows “Automatic: yaml”; **“apply”**
@@ -951,7 +982,8 @@ of the sync overview shows a warning about it. This also applies if a conflict a
   itself – the overview shows “Folder with its own Git repository” and how many files are changed
   and not yet committed; you make the commit as usual in VS Code or with git. If you
   don't want that: edit the source → “Commit changes automatically”. A click opens the overview per
-  source with “Sync now”, “Sync all” and the **History**.
+  source with “Sync now”, “Sync all” and the **History**. While syncing, the icon in the button spins; afterwards a
+  message says “Sync finished” or shows the error (also from the command palette).
 
 ![Sync overview](handbuch/11-sync-uebersicht.webp)
 
@@ -966,7 +998,8 @@ Everything by **right-click** in the tree (or in the note menu “…”):
 
 - **New note / New folder** – also via the **“+”** that appears when you hover over a source or
   a folder (choice of “New note” or “New folder”). The file name is formed from the
-  title (special characters such as `:` are replaced). The field to the left of the title picks an **icon** right
+  title (special characters such as `:` are replaced, a name that exists already gets “ 2” – a message then names
+  what it was saved as). The field to the left of the title picks an **icon** right
   away (optional, the same choice as “Change icon”).
 
 ![“+” on a folder](handbuch/59-ordner-neu.webp)
@@ -1651,7 +1684,7 @@ tab you last had open. The **?** at the top right of the title bar (or **F1**) t
 
 | Area | Tabs | Who |
 |---|---|---|
-| Sources | Connections · Added sources · Webhooks | Admins |
+| Sources | Added sources · Connections · Webhooks | Admins |
 | Attachments | – | Admins |
 | Tools | Clean-up · Log · Check | Admins |
 | Backup | Targets · Schedules · Backups · Database | Admins |
@@ -1665,7 +1698,7 @@ tab you last had open. The **?** at the top right of the title bar (or **F1**) t
 
 ### Sources {#quellen}
 
-Three tabs: Connections · Added sources · Webhooks. The main button is on the left below the list: **“Add connection”** under Connections, **“Add source”**
+Three tabs: Added sources · Connections · Webhooks. The main button is on the left below the list: **“Add connection”** under Connections, **“Add source”**
 (starts the [wizard](#quellen-einbinden)) under Added sources.
 
 #### Added sources {#eingebundene-quellen}
@@ -1765,6 +1798,13 @@ notes that are **unencrypted in an encrypted folder**. The encrypted attachments
 Per source there is a collapsed row with the number per kind (“2 broken links”) – a click shows the
 entries, a click on an entry opens the note. Only the **latest** report is kept; the
 log records every check.
+
+**Deleting orphaned attachments:** in a source’s expanded report, the bin at an orphaned attachment deletes that one,
+**Delete all orphaned attachments** all of the source – each after a question. Right before deleting, Kaveyl Wiki checks
+again whether a note links to it by now; then the file stays. In a Git source the file stays in the history; in a folder
+without Git it is gone for good (the question says which case applies). A link from another source showing the same
+folder counts too. If a source has a note over 2 MB, the check reports no orphaned attachments there (such notes have no
+links in the index) and names the note in the report.
 
 ![Check](handbuch/24-fsck.webp)
 
@@ -2361,9 +2401,18 @@ a delivery: API reference, “Events for agents”. What goes where and when –
 
 ### Appearance {#darstellung}
 
-**Light / Dark / System** (follows the device), **Editor width** (Normal, Wide, Full width or a percentage of your own) and
-**Table of contents** on/off. Light/Dark applies to this device – it is quicker via the colour scheme icon at the top
-right. Width and table of contents belong to your account (the same on all devices).
+Three cards:
+
+- **Appearance:** **Light / Dark / System** (follows the device). Applies to this device – it is quicker via the colour
+  scheme icon at the bottom of the sidebar.
+- **Colour theme:** one theme for light (**Lavender indigo** as the standard, **Amethyst**, **Plum**, **Lilac slate**)
+  and one for dark (**Classic** – neutral anthracite – as the standard, **Night indigo**, **OLED black**). The colour
+  scheme decides which one applies. The colour themes also apply to this browser.
+- **Editor:** the **toolbar** – **Floating at the bottom** (the standard: a bar at the bottom edge of the note, above it
+  the formatting row with headings, bold, italic etc., which you show or hide with **Aa**) or **On top** (one bar above
+  the note; if it is too wide, e.g. with a larger font, it wraps into a second row). On the phone it is always on top. Plus **Editor width** (Normal, Wide, Full width or a percentage of your
+  own) and **Table of contents** on/off. Toolbar, width and table of contents belong to your account (the same on all
+  devices).
 
 ![Appearance](handbuch/19-einstellungen-darstellung.webp)
 
@@ -2738,8 +2787,8 @@ user is allowed to read.
 
 ### Overview of all access rules {#überblick-über-alle-freigaben}
 
-**Overview of all access rules (admins):** as soon as there is an access rule, the section **✦ AI access**
-appears in the sidebar under “Recent” (expandable/collapsible like the favourites). Each row is a
+**Overview of all access rules (admins):** the switch at the top of the sidebar shows all rules with **AI access**
+(a click on a row shows the place in the tree and switches back to “Tree”). Each row is a
 rule: source, folder or note (with the source in brackets), on the right **allowed** or **not allowed**
 (red); with private and other AI also **private AI only**. An orange **no effect** means: allowed for private AI
 only, but no provider is allowed for private notes – nobody sees it (set the tick, or Edit access → “Allowed”). At
@@ -2765,7 +2814,11 @@ toolbar – for notes you may only read, and in the Markdown view.
 
 The proposal appears in a window: for selected text **Replace** or **Insert
 below**, for Summarise **Insert at the beginning** or **Insert at the end**, for Continue writing
-**Insert at the end** – plus always **Copy** and **Discard**.
+**Insert at the end** – plus always **Copy** and **Discard**. Links, inline code and formulas are kept (the AI is
+told not to rewrite them).
+
+If the note is not shared with the AI (AI shares, `ai: false`, encrypted), the **AI** button is grey; hovering it says
+why. If the AI may only read, the menu offers only **Summarise** and **Ask AI …**.
 
 - **Summarise** delivers a few short bullet points in the language of the note. Code and tables
   are not copied out but described in one sentence; open, planned and undecided
@@ -2792,11 +2845,15 @@ Answers appear **formatted like a note** – headings, lists, tables, code with
 highlighting, formulas. The answer only shows images from Kaveyl Wiki itself; an image from another
 website appears as a link and only loads when you click it. Below every answer:
 
-- **Copy** – pasted into a Kaveyl Wiki note (Ctrl+V), the answer arrives formatted exactly the same
+- **Copy** – the button shows **“Copied”** for a moment; pasted into a Kaveyl Wiki note (Ctrl+V), the answer arrives formatted exactly the same
   (including callout boxes, formulas, tables); formatted in Word or an e-mail, as Markdown in a text
   editor.
 - **Markdown** / **Formatted** – switches the view, for example to select only part of it as Markdown
   and copy it.
+- **Insert into note** – only while a note you may edit is open: the answer goes below the paragraph (or list or
+  table) that held the cursor; without a cursor placed (at the very start of the note) at the end; cited sources come along as links that work from that note.
+  The chat closes afterwards; Ctrl+Z takes it back. If the chat drew on notes released for private AI only and other AI
+  may read the note, Kaveyl Wiki asks first.
 - **Save as note …** – choose a title (prefilled with the question) and folder; the answer becomes a
   new note, its sources are listed as links at the end. It is saved in your name, not as the AI;
   in encrypted folders this does not work (copy and paste there instead).
@@ -2809,7 +2866,9 @@ history …**, fixed below the list, deletes – as in the browser – the chats
 24 hours**, **7** or **30 days** or **all** – after a confirmation. Deleted is deleted: questions,
 answers and proposals disappear from the database, the file is overwritten in those places;
 the log only records *which notes* went to which provider, not the questions. (Only
-older database backups still contain them until these expire.) **Ctrl+Enter** sends the question. In
+older database backups still contain them until these expire.) **Ctrl+Enter** sends the question. While the AI
+works, **Stop** replaces “Ask”: it cancels, the question stays in the field, nothing is saved, and Kaveyl Wiki stops
+asking the provider. Closing the window cancels too. In
 a running chat the context stays fixed and is shown as text; **“Other context: new chat”** next to it starts a
 new chat in which you choose the context again (the previous one remains among the earlier chats). On narrow
 screens (phone) the earlier chats are shown as a selection above the chat, next to it buttons for **New chat**, for
@@ -2865,6 +2924,11 @@ change is a separate commit and can be brought back at any time via “Versions�
 only where the AI has access and you yourself may write – for a folder this applies to everything
 in it, as when moving in the tree; if the note has been changed in the meantime, Kaveyl Wiki overwrites nothing (then ask the AI again). The AI cannot
 delete.
+
+If the private AI read private notes in this chat, a proposal may contain their content. If the target is a place that AI
+without “Allow for private notes” may read as well, the card shows a yellow note – likewise when a proposal moves a note or
+folder allowed for **private AI only** to such a place. You can still apply it; the note only tells you that the content
+is no longer private afterwards.
 
 So that proposals work as normal notes, Kaveyl Wiki tidies them up: source numbers such as “[1]” from
 the chat do not end up in the note, and links that the AI writes from the root of the source
@@ -2953,6 +3017,7 @@ Bruno. Examples: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | Ctrl+S | Save and commit immediately |
 | Ctrl+B / Ctrl+I / Ctrl+E | bold / italic / code |
 | Ctrl+Z / Ctrl+Shift+Z | Undo / Redo |
+| Alt+↑ / Alt+↓ (in the editor) | move the paragraph, heading or block with the cursor one place up / down; a list or checklist item stays in its list, several selected ones move together |
 | `/` at the start of a line or after a space | Slash commands |
 | `[[` | Search for a note and link it |
 | `:` + word | Insert emoji |
@@ -3092,6 +3157,10 @@ The Welcome page shows you the way for your device right away; if Kaveyl Wiki is
 is ticked off there. You can remove the app again like any other (long-press the icon, or in the
 browser’s settings); your notes are not affected, they are on the server.
 
+The icon is called **Kaveyl Wiki**, and the status and navigation bars take the colour of the page (light or dark, as set
+under Appearance). An icon added before version 0.2.15 may still be called “Kaveyl” and show a purple bar – then remove
+the app and add it again.
+
 **Requirement: https.** Kaveyl Wiki can only be put on a device as an app if it can be reached via an `https://` address.
 Via `http://…`, most browsers create at most a bookmark icon. https is provided by the reverse proxy
 that the admin sets up (see [Reverse proxy](#reverse-proxy)).
@@ -3169,6 +3238,7 @@ package names and the licence.
 | Radix UI | dialogs, menus, context menus, pop-overs | `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-context-menu`, `@radix-ui/react-popover` | MIT |
 | Tailwind CSS | styling, colours, light/dark | `tailwindcss`, `@tailwindcss/vite` | MIT |
 | Lucide | icons in the interface and for notes | `lucide-react` | ISC |
+| Inter | Typeface of the interface and the notes | `@fontsource-variable/inter` | OFL-1.1 |
 | Vite | builds the web app | `vite`, `@vitejs/plugin-react` | MIT |
 
 **Editor and content**
@@ -3176,7 +3246,7 @@ package names and the licence.
 | Component | Used for | Packages | Licence |
 |---|---|---|---|
 | TipTap / ProseMirror | editor with visible formatting | `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-code`, `@tiptap/extension-code-block-lowlight`, `@tiptap/extension-details`, `@tiptap/extension-image`, `@tiptap/extension-list`, `@tiptap/extension-table`, `@tiptap/suggestion` | MIT |
-| CodeMirror 6 | Markdown source | `@codemirror/view`, `@codemirror/state`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
+| CodeMirror 6 | Markdown source | `@codemirror/view`, `@codemirror/state`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@lezer/highlight`, `@uiw/react-codemirror` | MIT |
 | unified / remark | reading and writing Markdown (tables, tasks, formulas, front matter) | `unified`, `remark-parse`, `remark-stringify`, `remark-gfm`, `remark-math`, `remark-frontmatter`, `mdast-util-gfm`, `mdast-util-math`, `mdast-util-frontmatter`, `mdast-util-to-markdown` | MIT |
 | lowlight / highlight.js | colours in code blocks | `lowlight` | MIT / BSD-3-Clause |
 | KaTeX | formulas | `katex` | MIT |

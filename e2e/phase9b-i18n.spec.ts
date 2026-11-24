@@ -119,7 +119,8 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await page.getByRole('button', { name: 'Anmelden' }).click();
   await expect(page.getByRole('navigation', { name: 'Quellen' }).first()).toBeVisible();
 
-  const toggle = page.locator('main').getByRole('button', { name: 'Farbschema wechseln' });
+  // In the foot of the sidebar (redesign 23.11.).
+  const toggle = page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' });
   await expect(toggle).toHaveAttribute('data-theme-state', 'system');
   await toggle.click();
   await expect(toggle).toHaveAttribute('data-theme-state', 'light');
@@ -128,7 +129,7 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await expect(toggle).toHaveAttribute('data-theme-state', 'dark');
   await expect(html(page)).toHaveClass(/\bdark\b/);
   await page.reload();
-  await expect(page.locator('main').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'dark');
+  await expect(page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'dark');
   await expect(html(page)).toHaveClass(/\bdark\b/);
   // Settings → Darstellung shows the same state (one shared store).
   await page.getByRole('button', { name: 'Einstellungen' }).first().click();
@@ -136,8 +137,8 @@ test('colour scheme switch: light → dark → system, kept after a reload', asy
   await settings.getByRole('button', { name: 'Darstellung' }).first().click();
   await expect(settings.getByRole('button', { name: 'Dunkel', exact: true })).toHaveClass(/border-accent/);
   await page.keyboard.press('Escape');
-  await page.locator('main').getByRole('button', { name: 'Farbschema wechseln' }).click();
-  await expect(page.locator('main').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'system');
+  await page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' }).click();
+  await expect(page.locator('aside').getByRole('button', { name: 'Farbschema wechseln' })).toHaveAttribute('data-theme-state', 'system');
   await expect(html(page)).not.toHaveClass(/\bdark\b/);
   await ctx.close();
 });

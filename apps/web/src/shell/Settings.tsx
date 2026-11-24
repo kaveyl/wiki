@@ -2,9 +2,9 @@
 // related pages as tabs at the top (AD-035). Every page has its help (HELP → manual).
 import { WatchingPanel } from './Watch';
 import { EventHooksPanel } from './EventHooks';
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCw, Settings2, Plus, Copy, Monitor, Sun, Moon } from 'lucide-react';
+import { RefreshCw, Settings2, Plus, Copy, Monitor, Sun, Moon, GitBranch, Paperclip, Wrench, Database, Users, ShieldCheck, Bell, Sparkles, CircleUserRound, CircleHelp } from 'lucide-react';
 import { api, errorText, type Mount } from '../api';
 import { ConnectionsPanel } from '../mounts/Connections';
 import { FsckPanel } from './Fsck';
@@ -15,7 +15,7 @@ import { AllTokensPanel, TokensPanel, UsersPanel } from './Users';
 import { CloudflarePanel, GroupsPanel } from './Access';
 import { RightsPanel } from './Rights';
 import { ProxyAuthPanel, ProxyConnections, ReverseProxyPanel } from './Proxy';
-import { useTheme, type Theme } from '../theme';
+import { DARK_PALETTES, LIGHT_PALETTES, usePalettes, useTheme, type DarkPalette, type LightPalette, type Theme } from '../theme';
 import { usePrefs, type EditorWidth } from '../prefs';
 import { Button, Field, Input, Spinner, cx, useModalDirty, fillNodes, useTabs, FormError, FormStatus, MissingHint, useRepeatCheck } from '../ui';
 import { copyWithToast } from '../clipboard';
@@ -115,6 +115,36 @@ const WIDE = new Set<Page>(['rights']);
  * Menu structure (AD-035): few main entries on the left, related pages as tabs. The labels stay German (keys for
  * lastInGroup and the e2e helpers) and are translated where they are shown.
  */
+/** The heading each area of the settings stands under (left column). */
+/** The symbol in front of each area (left column). */
+const AREA_ICON: Record<string, typeof Sun> = {
+  Quellen: GitBranch,
+  Anhänge: Paperclip,
+  Werkzeuge: Wrench,
+  Backup: Database,
+  'Benutzer & Rechte': Users,
+  'SSO & Proxy': ShieldCheck,
+  Benachrichtigungen: Bell,
+  'KI & APIs': Sparkles,
+  Darstellung: Sun,
+  Konto: CircleUserRound,
+  Hilfe: CircleHelp,
+};
+
+const SECTION: Record<string, string> = {
+  Quellen: 'Quellen & Daten',
+  Anhänge: 'Quellen & Daten',
+  Werkzeuge: 'Quellen & Daten',
+  Backup: 'Quellen & Daten',
+  'Benutzer & Rechte': 'Team & Zugang',
+  'SSO & Proxy': 'Team & Zugang',
+  Benachrichtigungen: 'Team & Zugang',
+  'KI & APIs': 'Integrationen',
+  Darstellung: 'Allgemein',
+  Konto: 'Allgemein',
+  Hilfe: 'Allgemein',
+};
+
 function groupsFor(isAdmin: boolean, isGuest: boolean): Group[] {
   const account: Group = {
     label: 'Konto',
@@ -152,8 +182,9 @@ function groupsFor(isAdmin: boolean, isGuest: boolean): Group[] {
     {
       label: 'Quellen',
       pages: [
-        ['connections', 'Verbindungen'],
+        // The sources first, then the connections they use (draft „Verbundene Quellen · Git-Verbindungen · Webhooks“).
         ['mounts', 'Eingebundene Quellen'],
+        ['connections', 'Verbindungen'],
         ['webhook', 'Webhooks'],
       ],
     },
@@ -214,7 +245,6 @@ export function SettingsBody({ open, onClose, onAddMount, onEditMount, isAdmin }
   /** Last tab per group: coming back to a group shows it again. */
   const [lastInGroup, setLastInGroup] = useState<Record<string, Page>>({});
   const group = groups.find((g) => g.pages.some(([k]) => k === page)) ?? groups[0]!;
-  const pageLabel = group.pages.find(([k]) => k === page)?.[1] ?? group.label;
   const go = (p: Page) => {
     const g = groups.find((x) => x.pages.some(([k]) => k === p));
     if (g) setLastInGroup((cur) => ({ ...cur, [g.label]: p }));
@@ -250,39 +280,62 @@ export function SettingsBody({ open, onClose, onAddMount, onEditMount, isAdmin }
   return (
     <>
       <div ref={body} className="flex flex-col gap-4 sm:flex-row">
-        <nav ref={scrollHint} className="scroll-hint flex shrink-0 gap-1 overflow-x-auto sm:w-44 sm:flex-col" aria-label={t('Bereiche')}>
-          {groups.map((g) => (
-            <button
-              key={g.label}
-              aria-current={g === group ? 'page' : undefined}
-              className={cx('shrink-0 rounded-md px-2.5 py-1.5 text-left text-sm', g === group ? 'bg-active font-medium' : 'text-fg-muted hover:bg-hover')}
-              onClick={() => setPage(lastInGroup[g.label] ?? g.pages[0]![0])}
-            >
-              {t(g.label)}
-            </button>
+        <nav
+          ref={scrollHint}
+          className="scroll-hint flex shrink-0 gap-1 overflow-x-auto max-sm:mr-16 sm:-my-5 sm:-ml-5 sm:w-[245px] sm:flex-col sm:gap-0.5 sm:border-r sm:border-line-soft sm:bg-subtle sm:px-3 sm:py-4"
+          aria-label={t('Bereiche')}
+        >
+          {/* The dialog's name, in the column as in the design (the dialog has no title bar of its own). */}
+          <span className="hidden px-2.5 pb-3 pt-1 text-lg font-semibold tracking-tight text-fg sm:block" aria-hidden>
+            {t('Einstellungen')}
+          </span>
+          {groups.map((g, i) => (
+            <Fragment key={g.label}>
+              {/* Headings over related areas (redesign 23.11.), only in the column of wide screens. */}
+              {SECTION[g.label] !== SECTION[groups[i - 1]?.label ?? ''] && (
+                <span className={cx('hidden px-2.5 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-fg-faint sm:block', i > 0 && 'pt-3')} aria-hidden>
+                  {t(SECTION[g.label] ?? '')}
+                </span>
+              )}
+              <button
+                aria-current={g === group ? 'page' : undefined}
+                className={cx(
+                  'shrink-0 rounded-lg px-2.5 py-1.5 text-left text-sm',
+                  g === group ? 'bg-accent-soft font-medium text-accent' : 'text-fg-muted hover:bg-hover hover:text-fg',
+                )}
+                onClick={() => setPage(lastInGroup[g.label] ?? g.pages[0]![0])}
+              >
+                <span className="flex items-center gap-2.5">
+                  {(() => {
+                    const Icon = AREA_ICON[g.label];
+                    return Icon ? <Icon className={cx('hidden h-4 w-4 shrink-0 sm:block', g === group ? 'text-accent' : 'text-fg-faint')} aria-hidden /> : null;
+                  })()}
+                  {t(g.label)}
+                </span>
+              </button>
+            </Fragment>
           ))}
         </nav>
         <div className="min-w-0 flex-1" data-help={HELP[page]}>
+          <h2 className="mb-3 pr-20 text-lg font-semibold tracking-tight">{t(group.label)}</h2>
           {/* The same header row on every page (tabs, or just the page name). The line is drawn behind the tabs
               instead of pulling them over it (-mb-px), which made the tab row scroll 1 px. */}
-          <div className="relative mb-4 flex items-end gap-2 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:bg-line">
+          <div className={cx('relative flex items-end gap-2', group.pages.length > 1 && 'mb-5')}>
             {group.pages.length > 1 ? (
               // One row: tabs never wrap under each other (narrow screens scroll sideways, the hidden side fades).
-              <div ref={scrollHint} {...tabs.list} aria-label={t(group.label)} className="scroll-hint flex min-w-0 flex-1 gap-1 overflow-x-auto overflow-y-hidden">
+              <div ref={scrollHint} {...tabs.list} aria-label={t(group.label)} className="scroll-hint no-scrollbar flex min-w-0 max-w-full gap-0.5 overflow-x-auto overflow-y-hidden rounded-full border border-line-soft bg-subtle p-0.5">
                 {group.pages.map(([k, label]) => (
                   <button
                     key={k}
                     {...tabs.tab(k)}
-                    className={cx('relative shrink-0 whitespace-nowrap border-b-2 px-3 py-1.5 text-sm', page === k ? 'border-accent font-medium text-fg' : 'border-transparent text-fg-muted hover:text-fg')}
+                    className={cx('relative shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm', page === k ? 'bg-bg font-medium text-accent shadow-[0_1px_2px_rgba(30,24,72,0.1)]' : 'text-fg-muted hover:text-fg')}
                   >
                     {t(label)}
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="min-w-0 flex-1">
-                <span className="relative inline-block whitespace-nowrap border-b-2 border-accent px-3 py-1.5 text-sm font-medium text-fg">{t(pageLabel)}</span>
-              </div>
+              <div className="min-w-0 flex-1" />
             )}
           </div>
           <div {...(group.pages.length > 1 ? tabs.panel : {})}>
@@ -347,21 +400,26 @@ function Sources({ onEdit, onAdd }: { onEdit: (m: Mount) => void; onAdd: () => v
   const qc = useQueryClient();
   const [syncing, setSyncing] = useState<string | null>(null);
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium">{t('Eingebundene Quellen')}</h3>
+    <div className="space-y-3 rounded-2xl bg-card p-4">
+      <h3 className="text-[0.8125rem] font-semibold">{t('Eingebundene Quellen')}</h3>
       <p className="text-sm text-fg-muted">
         {t('Repositories und Ordner, die links in der Seitenleiste erscheinen. Das Zahnrad bearbeitet eine Quelle, der Pfeil gleicht eine Git-Quelle sofort ab.')}
       </p>
-      <div className="divide-y divide-line rounded-lg border border-line">
+      <div className="space-y-2">
         {mounts.data?.map((m) => (
-          <div key={m.id} className="flex items-center gap-3 px-3 py-2.5">
+          <div key={m.id} className="flex items-center gap-3 rounded-xl border border-line-soft bg-bg px-3.5 py-3">
             <span className="flex w-4 shrink-0 justify-center text-fg-faint">
               <MountIcon mount={m} />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 text-sm font-medium">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 {m.name}
                 <MountKind mount={m} />
+                {m.type === 'remote' && m.syncStatus === 'ok' && (
+                  <span className="rounded-full bg-ok-soft px-2 py-px text-[0.6875rem] font-medium text-ok">
+                    {m.syncedAt ? t('Synchron · {time}', { time: new Date(m.syncedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) }) : t('Synchron')}
+                  </span>
+                )}
                 {m.paused && <span className="rounded bg-muted px-1.5 text-[0.6875rem] font-normal text-fg-muted">{t('pausiert')}</span>}
                 {m.options.readonly && <span className="rounded bg-muted px-1.5 text-[0.6875rem] font-normal text-fg-muted">{t('nur lesen')}</span>}
               </div>
@@ -385,8 +443,9 @@ function Sources({ onEdit, onAdd }: { onEdit: (m: Mount) => void; onAdd: () => v
             {m.type === 'remote' && (
               <Button
                 size="sm"
-                variant="ghost"
+                className="rounded-full"
                 title={t('Jetzt synchronisieren')}
+                aria-label={t('{name} jetzt synchronisieren', { name: m.name })}
                 disabled={syncing === m.id}
                 onClick={async () => {
                   setSyncing(m.id);
@@ -395,15 +454,15 @@ function Sources({ onEdit, onAdd }: { onEdit: (m: Mount) => void; onAdd: () => v
                   setSyncing(null);
                 }}
               >
-                {syncing === m.id ? <Spinner className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                {syncing === m.id ? <Spinner className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />} {t('Sync')}
               </Button>
             )}
-            <Button size="sm" variant="ghost" title={t('Bearbeiten')} aria-label={t('{name} bearbeiten', { name: m.name })} onClick={() => onEdit(m)}>
+            <Button size="sm" className="rounded-full" title={t('Bearbeiten')} aria-label={t('{name} bearbeiten', { name: m.name })} onClick={() => onEdit(m)}>
               <Settings2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         ))}
-        {mounts.data?.length === 0 && <div className="p-4 text-sm text-fg-muted">{t('Noch keine Quelle eingebunden.')}</div>}
+        {mounts.data?.length === 0 && <div className="rounded-xl border border-dashed border-line p-4 text-sm text-fg-muted">{t('Noch keine Quelle eingebunden.')}</div>}
       </div>
       <Button size="sm" variant="primary" onClick={onAdd}>
         <Plus className="h-3.5 w-3.5" /> {t('Quelle einbinden')}
@@ -722,26 +781,118 @@ function CopyRow({ label, value, secret }: { label: string; value: string; secre
   );
 }
 
+/** A group of settings on a quiet card (redesign 23.11.). */
+function SetCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-3 rounded-2xl bg-card p-4" aria-label={title}>
+      <h3 className="text-[0.8125rem] font-semibold">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+/** Colours of the palettes for their swatch (window ground, sheet, accent – as in styles.css). */
+const SWATCH: Record<LightPalette | DarkPalette, [string, string, string]> = {
+  lavender: ['#efedf8', '#ffffff', '#5b46e5'],
+  amethyst: ['#f3eefb', '#ffffff', '#7c3aed'],
+  plum: ['#f6eef5', '#ffffff', '#86198f'],
+  slate: ['#f1f0f6', '#ffffff', '#5f5299'],
+  classic: ['#111114', '#1e1e23', '#9b8cff'],
+  indigo: ['#0f0e1d', '#1b1932', '#8b7dff'],
+  oled: ['#000000', '#141418', '#a5b4fc'],
+};
+const PALETTE_NAME: Record<LightPalette | DarkPalette, string> = {
+  lavender: t('Lavendel-Indigo'),
+  amethyst: t('Amethyst'),
+  plum: t('Pflaume'),
+  slate: t('Flieder-Schiefer'),
+  classic: t('Klassisch'),
+  indigo: t('Nacht-Indigo'),
+  oled: t('OLED-Schwarz'),
+};
+
+function PaletteTiles<P extends LightPalette | DarkPalette>({ all, value, onPick, label }: { all: readonly P[]; value: P; onPick: (p: P) => void; label: string }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-x-6 gap-y-3">
+      {all.map((p, i) => {
+        const [canvas, sheet, accent] = SWATCH[p];
+        return (
+          <button
+            key={p}
+            aria-pressed={value === p}
+            title={i === 0 ? t('{name} (Standard)', { name: PALETTE_NAME[p] }) : PALETTE_NAME[p]}
+            className="flex w-20 flex-col items-center gap-1.5 rounded-xl py-1 text-xs hover:bg-hover"
+            onClick={() => onPick(p)}
+          >
+            {/* The window ground as ring, the sheet inside, the accent as dot (redesign 23.11.). */}
+            <span
+              className={cx('flex h-10 w-10 items-center justify-center rounded-full', value === p ? 'ring-2 ring-accent ring-offset-2 ring-offset-card' : 'ring-1 ring-line-control')}
+              style={{ background: sheet, boxShadow: `inset 0 0 0 4px ${canvas}` }}
+              aria-hidden
+            >
+              <span className="h-4 w-4 rounded-full" style={{ background: accent }} />
+            </span>
+            <span className={cx('text-center leading-tight', value === p ? 'font-semibold text-fg' : 'text-fg-muted')}>{PALETTE_NAME[p]}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Appearance() {
   const [theme, setTheme] = useTheme();
+  const palettes = usePalettes();
+  const { toolbar, set } = usePrefs();
   const options: [Theme, string, React.ReactNode][] = [
     ['system', t('System'), <Monitor key="s" className="h-4 w-4" />],
     ['light', t('Hell'), <Sun key="l" className="h-4 w-4" />],
     ['dark', t('Dunkel'), <Moon key="d" className="h-4 w-4" />],
   ];
   return (
-    <div className="space-y-2">
-      <div className="text-xs font-medium text-fg-muted">{t('Farbschema')}</div>
-      <div className="flex gap-2">
-        {options.map(([k, label, icon]) => (
-          <button key={k} aria-pressed={theme === k} className={cx('flex flex-1 items-center justify-center gap-2 rounded-lg border py-3 text-sm', theme === k ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')} onClick={() => setTheme(k)}>
-            {icon}
-            {label}
-          </button>
-        ))}
-      </div>
-      <p className="text-xs text-fg-faint">{t('„System“ folgt automatisch der Einstellung deines Betriebssystems.')}</p>
-      <EditorWidthSetting />
+    <div className="space-y-4">
+      <SetCard title={t('Erscheinungsbild')}>
+        <div className="text-xs font-medium text-fg-muted">{t('Farbschema')}</div>
+        <div className="flex gap-2">
+          {options.map(([k, label, icon]) => (
+            <button key={k} aria-pressed={theme === k} className={cx('flex flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border py-3 text-sm', theme === k ? 'border-accent bg-accent-soft font-medium text-accent ring-1 ring-accent' : 'border-line-control hover:border-fg-faint hover:bg-hover')} onClick={() => setTheme(k)}>
+              {icon}
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-fg-faint">{t('„System“ folgt automatisch der Einstellung deines Betriebssystems.')}</p>
+      </SetCard>
+      <SetCard title={t('Farbthema')}>
+        <div className="text-xs font-medium text-fg-muted">{t('Hell')}</div>
+        <PaletteTiles all={LIGHT_PALETTES} value={palettes.light} onPick={palettes.setLight} label={t('Farbthema hell')} />
+        <div className="pt-1 text-xs font-medium text-fg-muted">{t('Dunkel')}</div>
+        <PaletteTiles all={DARK_PALETTES} value={palettes.dark} onPick={palettes.setDark} label={t('Farbthema dunkel')} />
+        <p className="text-xs text-fg-faint">{t('Gilt für diesen Browser. Je ein Thema für hell und dunkel – umgeschaltet wird mit dem Farbschema.')}</p>
+      </SetCard>
+      <SetCard title={t('Editor')}>
+        <div className="text-xs font-medium text-fg-muted">{t('Werkzeugleiste')}</div>
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ['dock', t('Schwebend unten'), t('Leiste am unteren Rand, Formatzeile mit „Aa“ ein- und ausblenden')],
+              ['top', t('Oben'), t('Eine Leiste über der Notiz')],
+            ] as const
+          ).map(([k, label, hint]) => (
+            <button
+              key={k}
+              aria-pressed={toolbar === k}
+              className={cx('rounded-xl border px-3 py-2 text-left text-sm', toolbar === k ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')}
+              onClick={() => set({ toolbar: k })}
+            >
+              <span className="block font-medium">{label}</span>
+              <span className="block text-[0.6875rem] text-fg-faint">{hint}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-fg-faint">{t('Auf dem Handy steht die Werkzeugleiste immer oben.')}</p>
+        <EditorWidthSetting />
+      </SetCard>
     </div>
   );
 }
@@ -756,14 +907,14 @@ function EditorWidthSetting() {
     ['full', t('Volle Breite'), t('nutzt den ganzen Bereich')],
   ];
   return (
-    <div className="space-y-2 pt-4">
+    <div className="space-y-2 pt-2">
       <div className="text-xs font-medium text-fg-muted">{t('Editorbreite')}</div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {options.map(([k, label, hint]) => (
           <button
             key={String(k)}
             aria-pressed={editorWidth === k}
-            className={cx('rounded-lg border px-2 py-2 text-left text-sm', editorWidth === k ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')}
+            className={cx('rounded-xl border px-2 py-2 text-left text-sm', editorWidth === k ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')}
             onClick={() => set({ editorWidth: k })}
           >
             <span className="block">{label}</span>
@@ -772,7 +923,7 @@ function EditorWidthSetting() {
         ))}
         <button
           aria-pressed={custom}
-          className={cx('rounded-lg border px-2 py-2 text-left text-sm', custom ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')}
+          className={cx('rounded-xl border px-2 py-2 text-left text-sm', custom ? 'border-accent bg-accent-soft' : 'border-line-control hover:border-fg-faint hover:bg-hover')}
           onClick={() => set({ editorWidth: pct })}
         >
           <span className="block">{t('Eigene')}</span>
@@ -799,9 +950,9 @@ function EditorWidthSetting() {
         </label>
       )}
       <p className="text-xs text-fg-faint">{t('Prozentwerte skalieren mit dem Fenster. Schnell umschalten: Symbol ⤢ oben rechts in jeder Notiz.')}</p>
-      <label className="flex items-center gap-2 pt-2 text-sm">
-        <input type="checkbox" className="accent-[var(--accent)]" checked={showToc} onChange={(e) => set({ showToc: e.target.checked })} />
-        {t('Inhaltsverzeichnis rechts neben der Notiz anzeigen (ab 2 Überschriften, wenn genug Platz ist)')}
+      <label className="flex items-center gap-3 border-t border-line-soft pt-3 text-sm">
+        <span className="flex-1">{t('Inhaltsverzeichnis rechts neben der Notiz anzeigen (ab 2 Überschriften, wenn genug Platz ist)')}</span>
+        <input type="checkbox" role="switch" className="switch" checked={showToc} onChange={(e) => set({ showToc: e.target.checked })} />
       </label>
     </div>
   );

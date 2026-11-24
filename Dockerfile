@@ -2,7 +2,7 @@
 # Multi-stage build: install + build web and server, then a small runtime with git and only
 # the native modules the server bundle keeps external (better-sqlite3, @parcel/watcher).
 
-FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS build
+FROM node:24-bookworm-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530 AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
@@ -28,7 +28,7 @@ COPY scripts/runtime-lock.mjs scripts/
 RUN npm run build \
  && node scripts/runtime-lock.mjs /src/runtime better-sqlite3 @parcel/watcher
 
-FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS runtime
+FROM node:24-bookworm-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530 AS runtime
 ARG KAVEYL_WIKI_VERSION=dev
 ARG BUILD_DATE=
 # No source URL on purpose: the image may be passed on (AD-043).

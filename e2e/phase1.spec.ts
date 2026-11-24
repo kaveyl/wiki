@@ -212,7 +212,7 @@ test('instant search with grouping, new tab and reveal in tree', async () => {
   await expect(page.locator('[data-tab]')).toHaveCount(tabsBefore + 1);
   await hit.click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Im Baum anzeigen' }).click();
-  await expect(page.locator('[data-node$=":plan/roadmap.md"]')).toHaveClass(/bg-active/);
+  await expect(page.locator('[data-node$=":plan/roadmap.md"]')).toHaveAttribute('aria-selected', 'true');
 });
 
 test('reloads a clean editor when the file changes on disk', async () => {
@@ -600,6 +600,9 @@ test('resolves a real sync conflict on the Gitea test branch in the three-way di
 
 test('runs the consistency check from the settings and lists problems per source', async () => {
   writeFileSync(join(NOTES, 'kaputt.md'), '# Kaputt\n\n[Nirgendwo](gibts/nicht.md)\n');
+  // An attachment no note links to (QA 24.11.: such files could not be deleted from the app).
+  mkdirSync(join(NOTES, 'assets'), { recursive: true });
+  writeFileSync(join(NOTES, 'assets', 'verwaist-qa.png'), 'kein Bild');
   await expect(page.locator('aside nav[aria-label="Quellen"]').getByText('kaputt', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Einstellungen' }).click();
   await openSettingsPage(page, 'Prüfung');
@@ -611,6 +614,14 @@ test('runs the consistency check from the settings and lists problems per source
   await notizen.getByRole('button', { name: /Notizen/ }).click();
   await expect(notizen).toContainText('„gibts/nicht.md“ führt ins Leere');
   await shot(page, '24-fsck');
+  // Orphaned attachments: deleted from the report after a question that says what happens.
+  await expect(notizen).toContainText('assets/verwaist-qa.png');
+  await notizen.getByRole('button', { name: '„assets/verwaist-qa.png“ löschen' }).click();
+  const ask = page.getByRole('alertdialog');
+  await expect(ask).toContainText('„assets/verwaist-qa.png“ aus „Notizen“ löschen?');
+  await ask.getByRole('button', { name: 'Löschen', exact: true }).click();
+  await expect.poll(() => existsSync(join(NOTES, 'assets', 'verwaist-qa.png')), { timeout: 10_000 }).toBe(false);
+  await expect(notizen).not.toContainText('assets/verwaist-qa.png');
   await notizen.getByRole('button', { name: 'kaputt.md' }).click();
   await expect(page.locator('.prose-note h1', { hasText: 'Kaputt' })).toBeVisible();
 });

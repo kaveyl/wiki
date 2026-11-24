@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as DM from '@radix-ui/react-dropdown-menu';
 import type { Editor } from '@tiptap/react';
-import { ArrowRight, Brain, Check, Columns2, Copy, Plus, ExternalLink, FileCode2, FilePen, FilePlus, History, ListChecks, Lock, MessageCircleQuestion, PanelTop, Sparkles, Trash2, X } from 'lucide-react';
+import { Selection } from '@tiptap/pm/state';
+import { ArrowRight, Brain, Check, TextCursorInput, Columns2, Copy, Plus, ExternalLink, FileCode2, FilePen, FilePlus, History, ListChecks, Lock, MessageCircleQuestion, PanelTop, Send, Sparkles, Square, Trash2, X } from 'lucide-react';
 import { loadMarkdown, saveMarkdown, type PMNode } from '@kaveyl-wiki/core';
 import { MarkdownView } from '../editor/MarkdownView';
 import { api, errorText, type AiAction, type AiChatMessage, type AiProposal, type AiScope, type AiSource } from '../api';
@@ -14,9 +15,21 @@ import { DiffView } from '../shell/history';
 import { useWorkspace } from '../store';
 import { fullPath, noteName, noteNameIn } from '../names';
 import { copyRich, copyWithToast } from '../clipboard';
-import { useActions } from '../shell/actions';
+import { answerWithSources, useActions } from '../shell/actions';
 import { useAi, useAiAvailable, type Suggestion } from './aiStore';
 import { Button, ContextContent, ContextItem, ContextMenu, ContextSeparator, ContextTrigger, DropdownContent, Modal, Spinner, cx, confirmDialog, promptDialog } from '../ui';
+
+
+/** „Kopiert ✓“ on the button for a moment – the toast alone is easy to miss next to a dialog (QA 24.11.). */
+function useCopied(): [boolean, () => void] {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  return [copied, () => setCopied(true)];
+}
 
 export const ACTION_LABEL: Record<AiAction, string> = {
   rewrite: t('Umformulieren'),
@@ -202,19 +215,53 @@ export function AiSuggestionDialog() {
 }
 
 /** „KI“ button with the actions, for the selection menu and the toolbar. */
-export function AiMenuButton({ editor, mountId, path, className }: { editor: Editor; mountId: string; path: string; className?: string }) {
+/** `pill`: the filled „✦ KI“ button of the editor dock. */
+export function AiMenuButton({ editor, mountId, path, className, pill }: { editor: Editor; mountId: string; path: string; className?: string; pill?: boolean }) {
   const available = useAiAvailable();
+  // What the AI may do with this note (AI shares, `ai: false`, encryption): a blocked note shows the button greyed out
+  // with the reason instead of a menu whose every entry ends in „not allowed“ (QA 24.11.).
+  const status = useQuery({ queryKey: ['ai-status', mountId, path], queryFn: () => api.aiStatus(mountId, path), staleTime: 30_000, enabled: available });
   if (!available) return null;
-  const actions: AiAction[] = editor.state.selection.empty ? ['continue', 'summarize'] : ['rewrite', 'shorten', 'expand', 'grammar', 'translate', 'custom'];
+  const read = status.data?.read ?? true;
+  const suggest = status.data?.suggest ?? true;
+  const actions: AiAction[] = (editor.state.selection.empty ? (['continue', 'summarize'] as AiAction[]) : (['rewrite', 'shorten', 'expand', 'grammar', 'translate', 'custom'] as AiAction[])).filter(
+    (a) => suggest || (read && a === 'summarize'),
+  );
+  if (!read)
+    return (
+      <button
+        type="button"
+        disabled
+        className={cx(
+          pill ? 'flex h-8 shrink-0 cursor-not-allowed items-center gap-1.5 rounded-full bg-muted px-3.5 text-[0.8125rem] font-semibold text-fg-faint' : 'flex h-7 cursor-not-allowed items-center gap-1 rounded-lg px-1.5 text-[0.8125rem] text-fg-faint',
+          className,
+        )}
+        aria-label={t('KI')}
+        title={t('Für diese Notiz ist die KI nicht freigegeben')}
+      >
+        <Sparkles className="h-4 w-4" /> {t('KI')}
+      </button>
+    );
   return (
     <DM.Root>
       <DM.Trigger asChild>
-        <button className={cx('flex h-7 items-center gap-1 rounded px-1.5 text-[0.8125rem] text-accent hover:bg-hover', className)} aria-label={t('KI')} title={t('KI-Assistent')} onMouseDown={(e) => e.preventDefault()}>
+        <button
+          className={cx(
+            pill
+              ? 'flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-accent-cta px-3.5 text-[0.8125rem] font-semibold text-on-cta hover:opacity-90'
+              : 'flex h-7 items-center gap-1 rounded-lg px-1.5 text-[0.8125rem] text-accent hover:bg-hover',
+            className,
+          )}
+          aria-label={t('KI')}
+          title={t('KI-Assistent')}
+          onMouseDown={(e) => e.preventDefault()}
+        >
           <Sparkles className="h-4 w-4" /> {t('KI')}
         </button>
       </DM.Trigger>
       <DM.Portal>
         <DropdownContent align="start" sideOffset={4} className="z-50">
+          {actions.length === 0 && <div className="px-2 py-1.5 text-xs text-fg-muted">{t('Für diese Notiz darf die KI nur lesen, nichts vorschlagen.')}</div>}
           {actions.map((a) => (
             <DM.Item key={a} onSelect={() => void runAiAction(editor, mountId, path, a)} className="cursor-default rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover">
               {ACTION_LABEL[a]}
@@ -255,6 +302,9 @@ export function AiAskDialog() {
   const [chatId, setChatId] = useState<string | undefined>(undefined);
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
+  const stopRef = useRef<AbortController | null>(null);
+  // Closing the chat while it works stops the run too.
+  useEffect(() => () => stopRef.current?.abort(), []);
   const [live, setLive] = useState<{ question: string; steps: string[]; proposals: AiProposal[]; text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const chats = useQuery({ queryKey: ['ai-chats'], queryFn: api.aiChats, enabled: !!ask });
@@ -296,7 +346,11 @@ export function AiAskDialog() {
   };
   /** One question to the agent; `providerId` = „Ask with <private AI>“ (AD-079), otherwise the server picks. */
   const run = async (q: string, providerId?: string) => {
-    if (!q || busy) return;
+    // The running request in a ref, not only `busy`: two submits before React draws again (a double click, Strg+Enter
+    // twice) both saw busy = false and sent the question twice (QA 24.11., aborted requests in the network list).
+    if (!q || busy || stopRef.current) return;
+    const ctl = new AbortController();
+    stopRef.current = ctl;
     setBusy(true);
     setError(null);
     setLive({ question: q, steps: [], proposals: [], text: '' });
@@ -310,7 +364,7 @@ export function AiAskDialog() {
         else if (ev.type === 'proposal') setLive((l) => l && { ...l, proposals: [...l.proposals, ev.proposal] });
         else if (ev.type === 'answer') done = ev.chatId;
         else if (ev.type === 'error') failed = ev.error;
-      });
+      }, ctl.signal);
       if (failed) setError(failed);
       if (done) {
         const id: string = done;
@@ -324,12 +378,15 @@ export function AiAskDialog() {
         void qc.invalidateQueries({ queryKey: ['ai-chats'] });
       }
     } catch (err) {
-      setError(errorText(err));
+      // „Stopp“: the question stays in the field, nothing was saved.
+      if (!ctl.signal.aborted) setError(errorText(err));
     } finally {
+      stopRef.current = null;
       setBusy(false);
       setLive(null);
     }
   };
+  const stop = () => stopRef.current?.abort();
   const messages = chatId ? (chat.data?.messages ?? []) : [];
   const proposals = chat.data?.proposals ?? [];
   const refresh = () => void qc.invalidateQueries({ queryKey: ['ai-chat', chatId] });
@@ -343,14 +400,14 @@ export function AiAskDialog() {
     <Modal help="frag-die-wissensbasis" open onOpenChange={(o) => !o && close()} title={t('Frag die Wissensbasis')} wide="xl">
       <div className="flex h-[66vh] gap-4 text-sm">
         {/* Fixed head and foot, only the list scrolls: nothing slides under the buttons. */}
-        <aside className="hidden w-52 shrink-0 flex-col gap-2 border-r border-line pr-3 md:flex" aria-label={t('Frühere Chats')}>
-          <Button size="sm" className="justify-start" onClick={() => setChatId(undefined)}>
+        <aside className="-my-5 -ml-5 hidden w-60 shrink-0 flex-col gap-2 border-r border-line-soft bg-subtle p-3 md:flex" aria-label={t('Frühere Chats')}>
+          <Button size="sm" variant="primary" className="h-8 rounded-full" onClick={() => setChatId(undefined)}>
             <Plus className="h-3.5 w-3.5" /> {t('Neuer Chat')}
           </Button>
           <div className="-mr-1 min-h-0 flex-1 space-y-0.5 overflow-y-auto pr-1">
             {(chats.data ?? []).map((c) => (
-              <div key={c.id} className={cx('group flex items-center rounded-md', c.id === chatId ? 'bg-active' : 'hover:bg-hover')}>
-                <button className="min-w-0 flex-1 truncate px-2 py-1 text-left" title={c.title} onClick={() => (setChatId(c.id), setScope(c.scope))}>
+              <div key={c.id} className={cx('group flex items-center rounded-lg', c.id === chatId ? 'bg-accent-soft text-accent' : 'hover:bg-hover')}>
+                <button className="min-w-0 flex-1 truncate px-2.5 py-1.5 text-left" title={c.title} onClick={() => (setChatId(c.id), setScope(c.scope))}>
                   {c.title}
                 </button>
                 <button
@@ -400,7 +457,7 @@ export function AiAskDialog() {
             {/* A chat keeps its scope (it comes back with the chat): shown as text, a new chat changes it (owner 21.10.). */}
             {chatId || busy ? (
               <>
-                <span className="min-w-0 truncate font-medium" data-testid="ai-scope">
+                <span className="min-w-0 truncate rounded-full bg-accent-tint px-3 py-1 font-medium text-accent" data-testid="ai-scope">
                   {scopeText(scope)}
                 </span>
                 {chatId && !busy && (
@@ -411,7 +468,7 @@ export function AiAskDialog() {
               </>
             ) : (
               <select
-                className="h-8 min-w-0 rounded-md border border-line bg-bg px-2"
+                className="h-8 min-w-0 rounded-full border border-line bg-accent-tint px-3 font-medium text-accent"
                 aria-label={t('Bezug')}
                 value={JSON.stringify(scope)}
                 onChange={(e) => setScope(JSON.parse(e.target.value) as AiScope)}
@@ -448,14 +505,15 @@ export function AiAskDialog() {
                 proposals={proposals.filter((p) => m.meta.proposals?.includes(p.id))}
                 onChanged={refresh}
                 onClose={close}
+                privateChat={!!chat.data?.private}
                 // Only under the newest answer: the same question once more, with the AI that may see private notes.
                 onAskWith={i === messages.length - 1 && messages[i - 1]?.role === 'user' && !busy ? (id) => void run(messages[i - 1]!.content, id) : undefined}
               />
             ))}
             {live && (
               <>
-                <div className="ml-10 rounded-lg bg-muted p-2.5 whitespace-pre-wrap">{live.question}</div>
-                <div className="mr-4 space-y-1.5 rounded-lg border border-line p-2.5" aria-label={t('KI arbeitet')}>
+                <div className="ml-auto max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-accent-cta px-4 py-2.5 text-on-cta">{live.question}</div>
+                <div className="mr-4 space-y-1.5 rounded-2xl border border-line-soft bg-card p-4" aria-label={t('KI arbeitet')}>
                   {live.steps.map((st, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs text-fg-muted">
                       <Check className="h-3.5 w-3.5 text-ok" /> {st}
@@ -484,9 +542,9 @@ export function AiAskDialog() {
               {error}
             </p>
           )}
-          <form className="mt-2 flex gap-2" onSubmit={submit}>
+          <form className="mt-3 flex items-end gap-2 rounded-[22px] border border-line bg-bg p-1.5 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent-soft" onSubmit={submit}>
             <textarea
-              className="min-h-[44px] flex-1 resize-y rounded-md border border-line bg-bg p-2 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
+              className="min-h-[40px] flex-1 resize-y bg-transparent px-3 py-2 focus:outline-none"
               placeholder={t('Frage oder Auftrag … (Strg+Enter sendet)')}
               aria-label={t('Frage')}
               value={question}
@@ -497,9 +555,25 @@ export function AiAskDialog() {
               autoFocus
               data-autofocus
             />
-            <Button variant="primary" disabled={busy || !question.trim()}>
-              {t('Fragen')}
-            </Button>
+            {busy ? (
+              // Own key and no default action: React would otherwise reuse this <button> as the submit button „Fragen“
+              // while the click is still running, and the browser would send the question again right away.
+              <Button
+                key="stop"
+                type="button"
+                className="h-9 rounded-full px-4"
+                onClick={(e) => {
+                  e.preventDefault();
+                  stop();
+                }}
+              >
+                <Square className="h-3.5 w-3.5" /> {t('Stopp')}
+              </Button>
+            ) : (
+              <Button key="ask" variant="primary" className="h-9 rounded-full px-4" disabled={!question.trim()}>
+                <Send className="h-3.5 w-3.5" /> {t('Fragen')}
+              </Button>
+            )}
           </form>
         </div>
       </div>
@@ -563,7 +637,10 @@ function Message({
   onChanged,
   onClose,
   onAskWith,
+  privateChat = false,
 }: {
+  /** The chat holds content of notes released for private AI only (AD-079). */
+  privateChat?: boolean;
   message: AiChatMessage;
   /** „Ask with <private AI>“ under an answer that left private notes out (AD-079). */
   onAskWith?: (providerId: string) => void;
@@ -577,8 +654,10 @@ function Message({
   const steps = m.meta.steps ?? [];
   const [raw, setRaw] = useState(false);
   const view = useRef<Editor | null>(null);
+  const [copied, setCopied] = useCopied();
   const copy = () => {
     const ok = copyRich(view.current?.getHTML() ?? '', m.content);
+    if (ok) setCopied();
     toast(
       ok
         ? { kind: 'ok', title: t('Antwort kopiert'), text: t('In eine Notiz einfügen: formatiert; in einen Texteditor: als Markdown.') }
@@ -594,8 +673,41 @@ function Message({
       ...(scope.kind === 'note' || scope.kind === 'folder' ? { mountId: scope.mountId, folder: scope.kind === 'folder' ? scope.path : scope.path.split('/').slice(0, -1).join('/') } : scope.kind === 'source' ? { mountId: scope.mountId, folder: '' } : {}),
       onSaved: onClose,
     });
+  // „In Notiz einfügen“ (owner 24.11.): into the open note where its cursor was; never placed (start of the note) → at
+  // the end. The sources come along as links that work from that note, like when saving the answer as a note.
+  const current = useAi((x) => x.current);
+  const qc = useQueryClient();
+  const target = current && current.editor.isEditable && !current.editor.isDestroyed ? current : null;
+  const insert = async () => {
+    if (!target) return;
+    const { editor, mountId, path } = target;
+    // Like the proposal card (AD-079): content from private notes into a note any AI may read – say so first.
+    if (privateChat) {
+      const st = await api.aiStatus(mountId, path).catch(() => null);
+      const openToAll = !st || (st.grant.level !== 'none' && st.grant.cloud);
+      if (
+        openToAll &&
+        !(await confirmDialog(t('Diese Antwort kann Inhalt aus privaten Notizen enthalten. In „{name}“ können ihn danach auch KIs lesen, die nicht für private Notizen zugelassen sind.', { name: noteNameIn(mountId, path) }), {
+          confirmLabel: t('Trotzdem einfügen'),
+        }))
+      )
+        return;
+      if (editor.isDestroyed || !editor.isEditable) return;
+    }
+    const mounts = qc.getQueryData<{ id: string; name: string }[]>(['mounts']) ?? [];
+    const md = answerWithSources(m.content, m.sources, mountId, path.split('/').slice(0, -1).join('/'), (id) => mounts.find((x) => x.id === id)?.name ?? id);
+    const blocks = (loadMarkdown(md).doc.content ?? []) as unknown[];
+    const { selection, doc } = editor.state;
+    // Below the block (paragraph, whole list, table …) that holds the cursor: the answer never splits a sentence. The
+    // cursor still where opening the note put it (very start, never placed): at the end instead.
+    const { $to } = selection;
+    const at = selection.eq(Selection.atStart(doc)) ? doc.content.size : $to.depth >= 1 ? $to.after(1) : $to.pos;
+    editor.chain().focus().insertContentAt(at, blocks).run();
+    toast({ kind: 'ok', title: t('In die Notiz eingefügt'), text: noteNameIn(mountId, path) });
+    onClose();
+  };
   return (
-    <div className={cx('rounded-lg p-2.5', m.role === 'user' ? 'ml-10 bg-muted' : 'mr-4 border border-line')}>
+    <div className={cx('rounded-2xl', m.role === 'user' ? 'ml-auto w-fit max-w-[85%] rounded-br-md bg-accent-cta px-4 py-2.5 text-on-cta' : 'mr-4 border border-line-soft bg-card p-4')}>
       {m.role === 'assistant' && steps.length > 0 && (
         <details className="mb-2 text-xs text-fg-muted">
           <summary className="flex cursor-pointer items-center gap-1.5">
@@ -620,11 +732,16 @@ function Message({
       {m.role === 'assistant' && (
         <div className="mt-1.5 flex flex-wrap gap-1" aria-label={t('Antwort verwenden')}>
           <Button size="sm" variant="ghost" onClick={copy} title={t('Formatiert kopieren (in Texteditoren kommt Markdown an)')}>
-            <Copy className="h-3.5 w-3.5" /> {t('Kopieren')}
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? t('Kopiert') : t('Kopieren')}
           </Button>
           <Button size="sm" variant="ghost" onClick={() => setRaw((r) => !r)} aria-pressed={raw}>
             <FileCode2 className="h-3.5 w-3.5" /> {raw ? t('Formatiert') : 'Markdown'}
           </Button>
+          {target && (
+            <Button size="sm" variant="ghost" onClick={() => void insert()} title={t('Unter dem Absatz mit der Schreibmarke in „{name}“ einfügen', { name: noteNameIn(target.mountId, target.path) })}>
+              <TextCursorInput className="h-3.5 w-3.5" /> {t('In Notiz einfügen')}
+            </Button>
+          )}
           <Button size="sm" variant="ghost" onClick={save}>
             <FilePlus className="h-3.5 w-3.5" /> {t('Als Notiz speichern …')}
           </Button>
@@ -733,6 +850,13 @@ function ProposalCard({ proposal, onChanged, onClose }: { proposal: AiProposal; 
         <div className="min-w-0 flex-1">
           <div className="break-words font-medium">{title}</div>
           {p.reason && <div className="text-xs text-fg-muted">{p.reason}</div>}
+          {p.status === 'open' && p.privateWarning && (
+            <div className="mt-1 text-xs text-warn" role="note">
+              {p.privateWarning === 'move'
+                ? t('Achtung: Das ist nur für private KI freigegeben. Am Ziel können es nach dem Verschieben auch KIs lesen, die nicht für private Notizen zugelassen sind.')
+                : t('Achtung: Dieser Vorschlag kann Inhalt aus privaten Notizen enthalten. Am Ziel können ihn nach dem Übernehmen auch KIs lesen, die nicht für private Notizen zugelassen sind.')}
+            </div>
+          )}
         </div>
         {p.status === 'open' ? (
           <div className="flex shrink-0 gap-1">

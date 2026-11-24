@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 const css = readFileSync(resolve(import.meta.dirname, 'styles.css'), 'utf8');
 
 function block(selector: string): Record<string, string> {
-  const esc = selector.replace(/[.*]/g, (c) => '\\' + c);
+  const esc = selector.replace(/[.*[\]()]/g, (c) => '\\' + c);
   const m = css.match(new RegExp('(?:^|\\n)' + esc + '\\s*\\{([^}]*)\\}'));
   if (!m?.[1]) throw new Error(`no block ${selector}`);
   return Object.fromEntries([...m[1].matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map((x) => [x[1] ?? '', (x[2] ?? '').trim()]));
@@ -14,12 +14,25 @@ function block(selector: string): Record<string, string> {
 
 const root = block(':root');
 const dark = { ...root, ...block('.dark') };
+/** Every palette (Einstellungen → Darstellung → Farbthema) over the standard of its scheme (theme.ts). */
+const palettes = {
+  amethyst: { ...root, ...block(":root[data-palette='amethyst']") },
+  plum: { ...root, ...block(":root[data-palette='plum']") },
+  slate: { ...root, ...block(":root[data-palette='slate']") },
+  'dark indigo': { ...dark, ...block(".dark[data-palette='indigo']") },
+  'dark oled': { ...dark, ...block(".dark[data-palette='oled']") },
+};
 const schemes = {
   light: root,
   dark,
+  ...palettes,
   'auth light': { ...root, ...block('.auth') },
   'auth dark': { ...dark, ...block('.auth'), ...block('.dark .auth') },
 };
+type Scheme = keyof typeof schemes;
+/** The surfaces text and controls stand on in the app: sheet, quiet strips and the window ground. */
+const APP = ['bg', 'bg-subtle', 'canvas'];
+const inApp = (name: Scheme) => !name.startsWith('auth');
 
 function luminance(hex: string | undefined): number {
   const m = hex?.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
@@ -48,15 +61,10 @@ function over(top: string | undefined, base: string | undefined): string {
 
 describe('colour tokens (styles.css)', () => {
   // Page and sidebar in the app; on the sign-in pages faint text only appears inside inputs (bg).
-  const textBgs: Record<keyof typeof schemes, string[]> = {
-    light: ['bg', 'bg-subtle'],
-    dark: ['bg', 'bg-subtle'],
-    'auth light': ['bg'],
-    'auth dark': ['bg'],
-  };
+  const textBgs = (name: Scheme): string[] => (inApp(name) ? APP : ['bg']);
   for (const [name, tokens] of Object.entries(schemes) as [keyof typeof schemes, Record<string, string>][]) {
     for (const fg of ['fg', 'fg-muted', 'fg-faint']) {
-      for (const bg of textBgs[name]) {
+      for (const bg of textBgs(name)) {
         it(`${name}: text --${fg} on --${bg} reaches 4.5:1 (design-002)`, () => {
           expect(contrast(tokens[fg], tokens[bg])).toBeGreaterThanOrEqual(4.5);
         });
@@ -66,14 +74,9 @@ describe('colour tokens (styles.css)', () => {
 
   // Fields and default buttons show their shape only through the border (WCAG 1.4.11: 3:1 against
   // the surroundings). Plain separators keep the faint --border.
-  const controlBgs: Record<keyof typeof schemes, string[]> = {
-    light: ['bg', 'bg-subtle'],
-    dark: ['bg', 'bg-subtle'],
-    'auth light': ['bg', 'auth-card'],
-    'auth dark': ['bg', 'auth-card'],
-  };
+  const controlBgs = (name: Scheme): string[] => (inApp(name) ? APP : ['bg', 'auth-card']);
   for (const [name, tokens] of Object.entries(schemes) as [keyof typeof schemes, Record<string, string>][]) {
-    for (const bg of controlBgs[name]) {
+    for (const bg of controlBgs(name)) {
       it(`${name}: control border --border-control on --${bg} reaches 3:1 (design-003)`, () => {
         expect(contrast(tokens['border-control'], tokens[bg])).toBeGreaterThanOrEqual(3);
       });
@@ -100,7 +103,7 @@ describe('colour tokens (styles.css)', () => {
     }
   });
   for (const [name, tokens] of Object.entries(schemes) as [keyof typeof schemes, Record<string, string>][]) {
-    for (const bg of controlBgs[name]) {
+    for (const bg of controlBgs(name)) {
       it(`${name}: invalid field border --danger on --${bg} reaches 3:1 (design-012)`, () => {
         expect(contrast(tokens['danger'], tokens[bg])).toBeGreaterThanOrEqual(3);
       });
@@ -149,7 +152,7 @@ describe('colour tokens (styles.css)', () => {
       // Only tiles that are controls themselves (border-line-control); radio cards keep the faint border.
       if (!/\bborder-line-control\b/.test(cls) || !/\bhover:bg-hover\b/.test(cls)) return [];
       const token = colour[cls.match(/\bhover:border-([\w-]+)/)?.[1] ?? cls.match(/(?:^|\s)border-([\w-]+)/)?.[1] ?? ''];
-      return (['light', 'dark'] as const).flatMap((name) =>
+      return (Object.keys(schemes) as Scheme[]).filter(inApp).flatMap((name) =>
         ['bg', 'bg-subtle'].flatMap((bg) => {
           const tokens = schemes[name];
           const ratio = contrast(tokens[token ?? ''], over(tokens['bg-hover'], tokens[bg]));
@@ -162,15 +165,10 @@ describe('colour tokens (styles.css)', () => {
 
   // Hover and selection rows (tree, lists, menu entries, search hits): grey helper text there switches from
   // --fg-faint to --fg-muted, which keeps 4.5:1 on the hover/active tint over page and sidebar (AD-048).
-  const rowBgs: Record<keyof typeof schemes, string[]> = {
-    light: ['bg', 'bg-subtle'],
-    dark: ['bg', 'bg-subtle'],
-    'auth light': ['bg', 'auth-card'],
-    'auth dark': ['bg', 'auth-card'],
-  };
+  const rowBgs = (name: Scheme): string[] => (inApp(name) ? APP : ['bg', 'auth-card']);
   for (const [name, tokens] of Object.entries(schemes) as [keyof typeof schemes, Record<string, string>][]) {
     for (const surface of ['bg-hover', 'bg-active']) {
-      for (const bg of rowBgs[name]) {
+      for (const bg of rowBgs(name)) {
         it(`${name}: text --fg-muted on --${surface} over --${bg} reaches 4.5:1 (AD-048)`, () => {
           expect(contrast(tokens['fg-muted'], over(tokens[surface], tokens[bg]))).toBeGreaterThanOrEqual(4.5);
         });
@@ -205,7 +203,7 @@ describe('colour tokens (styles.css)', () => {
     const weak = controls.flatMap(({ at, cls }) => {
       const surface = / hover:bg-active /.test(cls) ? 'bg-active' : 'bg-hover';
       const token = colour[cls.match(/ hover:border-([\w-]+) /)?.[1] ?? 'line-control'];
-      return (['light', 'dark'] as const).flatMap((name) =>
+      return (Object.keys(schemes) as Scheme[]).filter(inApp).flatMap((name) =>
         ['bg', 'bg-subtle'].flatMap((bg) => {
           const tokens = schemes[name];
           const ratio = contrast(tokens[token ?? ''], over(tokens[surface], tokens[bg]));

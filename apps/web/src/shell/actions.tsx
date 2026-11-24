@@ -122,6 +122,23 @@ function useRun(onDone: () => void) {
   return { busy, error, run };
 }
 
+/**
+ * A name that does not work as a file name is changed by the server without asking (characters like „/“ or „:“ become
+ * „ - “, an existing name gets „ 2“, long names are shortened): say so instead of leaving it to be noticed in the tree (QA 24.11.).
+ */
+export function nameChangedHint(asked: string, finalPath: string, isDir = false) {
+  const got = ((isDir ? finalPath : finalPath.replace(/\.md$/i, '')).split('/').pop() ?? '').normalize('NFC');
+  const want = (isDir ? asked : asked.replace(/\.md$/i, '')).trim().normalize('NFC');
+  if (!got || got === want) return;
+  const taken = got.startsWith(`${want} `) && /^\d+$/.test(got.slice(want.length + 1));
+  const text = /[/\\:*?"<>|]/.test(want)
+    ? t('Zeichen wie / : * ? " < > | gehen in Dateinamen nicht und wurden ersetzt.')
+    : taken
+      ? t('Diesen Namen gab es im Ordner schon.')
+      : t('Der Name wurde für die Datei angepasst.');
+  toast({ kind: 'ok', title: t('Gespeichert als „{name}“', { name: got }), text });
+}
+
 function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'create' }>; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [template, setTemplate] = useState('');
@@ -137,6 +154,7 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
     e.preventDefault();
     void run(async () => {
       const { path } = await api.createNote(action.mountId, action.parent, title.trim(), action.type, { template: template || undefined, icon: icon ?? undefined });
+      nameChangedHint(title, path, action.type === 'dir');
       await qc.invalidateQueries({ queryKey: ['tree', action.mountId] });
       const notePath = action.type === 'dir' ? `${path}/index.md` : path;
       focusWhenOpened(action.mountId, notePath);
@@ -211,6 +229,16 @@ function CreateDialog({ action, onClose }: { action: Extract<Action, { kind: 'cr
   );
 }
 
+/**
+ * An AI answer with the sources it cites, for a note in `folder` of `mountId`: a source there becomes a link that works
+ * from that folder, one of another source its name with the place. Saving as a note and inserting into one use it.
+ */
+export function answerWithSources(markdown: string, sources: AiSource[], mountId: string, folder: string, mountName: (id: string) => string): string {
+  const cited = sources.filter((src) => markdown.includes(`[${src.n}]`));
+  const list = cited.map((src) => `${src.n}. ${src.mountId === mountId ? `[${noteNameIn(src.mountId, src.path)}](${relLink(folder, src.path)})` : `${noteNameIn(src.mountId, src.path)} (${mountName(src.mountId)} / ${src.path})`}`);
+  return list.length ? `${markdown.trim()}\n\n**${t('Quellen')}:**\n\n${list.join('\n')}` : markdown.trim();
+}
+
 /** Link from a note in `folder` to `path` (both relative to the same source). */
 function relLink(folder: string, path: string): string {
   const from = folder ? folder.split('/') : [];
@@ -240,11 +268,10 @@ function SaveAnswerDialog({ action, onClose }: { action: Extract<Action, { kind:
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!current || !title.trim()) return;
-    const cited = action.sources.filter((src) => action.markdown.includes(`[${src.n}]`));
-    const list = cited.map((src) => `${src.n}. ${src.mountId === current.mountId ? `[${noteNameIn(src.mountId, src.path)}](${relLink(current.folder, src.path)})` : `${noteNameIn(src.mountId, src.path)} (${mountName(src.mountId)} / ${src.path})`}`);
-    const body = list.length ? `${action.markdown.trim()}\n\n**Quellen:**\n\n${list.join('\n')}` : action.markdown.trim();
+    const body = answerWithSources(action.markdown, action.sources, current.mountId, current.folder, mountName);
     void run(async () => {
       const { path } = await api.createNote(current.mountId, current.folder, title.trim(), 'file', { body });
+      nameChangedHint(title, path);
       await qc.invalidateQueries({ queryKey: ['tree', current.mountId] });
       action.onSaved?.();
       openNote(current.mountId, path, title.trim());
@@ -321,6 +348,7 @@ function RenameDialog({ action, onClose }: { action: Extract<Action, { kind: 're
     void run(async () => {
       const res = await api.moveNote(action.mountId, action.path, target, otherMount ? dest.mountId : undefined);
       moved(action.mountId, action.path, res.path, res.mountId);
+      nameChangedHint(cleanName, res.path, action.isDir);
       await Promise.all([
         qc.invalidateQueries({ queryKey: ['tree', action.mountId] }),
         qc.invalidateQueries({ queryKey: ['tree', res.mountId] }),

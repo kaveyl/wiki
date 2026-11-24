@@ -195,6 +195,35 @@ export function registerLibraryRoutes(server: FastifyInstance, ctx: AppContext) 
     return { notes: count, skipped, sources };
   });
 
+  /**
+   * Removes a tag from every note the user may change (QA 24.11.); its color goes too where the user may
+   * change the source's settings. Notes without write access keep it.
+   */
+  server.post<{ Body: { tag?: string } }>('/api/tags/remove', async (req) => {
+    const tag = String(req.body?.tag ?? '').trim().replace(/^#/, '');
+    if (!tag) throw new PathError('Bitte einen Tag angeben');
+    const { active, tags } = tagIndex(req);
+    const entry = tags.get(tagKey(tag));
+    let count = 0;
+    let skipped = 0;
+    const sources: string[] = [];
+    for (const [mountId, paths] of entry?.byMount ?? []) {
+      const m = active.get(mountId)!;
+      const writable = m.options.readonly ? [] : paths.filter((p) => atLeast(levelIn(req, m.id, p, false), 'write'));
+      skipped += paths.length - writable.length;
+      if (!writable.length) continue;
+      const changed = await notes.removeTag(m, writable, tag, author(req));
+      count += changed.length;
+      if (changed.length) sources.push(m.name);
+      if (writable.length === paths.length && atLeast(levelIn(req, m.id, '', true), 'write')) {
+        const colors = await readTagColors(m, config.dataPath);
+        if (colors[tagKey(tag)]) await writeTagColors(manager, config.dataPath, m, { [tagKey(tag)]: null }, author(req), `Tag-Farbe #${tagKey(tag)} entfernt (Kaveyl Wiki)`);
+      }
+      audit(req, 'tag-removed', `Tag #${tag} aus ${changed.length} Notiz(en) entfernt`, { mount: mountRef(m) });
+    }
+    return { notes: count, skipped, sources };
+  });
+
   server.get<{ Querystring: { q?: string; limit?: string } }>('/api/search/full', async (req) => {
     const mounts = manager.list().filter((m) => !m.paused && mountVisible(req, m.id)).map((m) => ({ id: m.id, name: m.name }));
     const limit = Math.min(200, Number(req.query.limit ?? 100) || 100);

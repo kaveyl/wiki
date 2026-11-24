@@ -1,7 +1,7 @@
 // Workspace layout: sidebar (search, mount trees) + tab bar + note view.
 import { Suspense, useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { Settings, LogOut, Plus, X, ChevronDown, FileText, PanelLeftClose, PanelLeft, FilePlus, RefreshCw, Sun, Moon, Monitor, ListTree, Maximize2, ListFilter, LocateFixed, History, FolderPlus, Hash, Star, Columns2, Pin, PinOff, ChevronsUpDown, ChevronsDownUp, Sparkles, Trash2, Printer, FileDown, CircleHelp, CircleUserRound, Languages, UserRoundCog, ArrowUpCircle, ShieldAlert } from 'lucide-react';
+import { Settings, LogOut, Plus, X, ChevronDown, FileText, PanelLeftClose, PanelLeft, FilePlus, RefreshCw, Sun, Moon, Monitor, ListTree, Maximize2, ListFilter, LocateFixed, History, FolderPlus, Hash, Star, Columns2, Pin, PinOff, ChevronsUpDown, ChevronsDownUp, Sparkles, Trash2, Printer, FileDown, CircleHelp, Languages, UserRoundCog, ArrowUpCircle, ShieldAlert } from 'lucide-react';
 import * as DM from '@radix-ui/react-dropdown-menu';
 import { api, ApiError, type Entry, type Mount, type User } from '../api';
 import { useServerEvents } from '../events';
@@ -9,8 +9,8 @@ import { Logo } from '../auth/AuthPages';
 import { PRODUCT_SHORT } from '../logo';
 import { MountWizard } from '../mounts/MountWizard';
 import { nodeKey, restoreWorkspace, useWorkspace, type SavedWorkspace, type Tab } from '../store';
-import { usePrefs } from '../prefs';
-import { Button, ConfirmHost, InputHost, ContextContent, ContextItem, ContextMenu, ContextTrigger, DropdownContent, IconButton, Modal, PartLoading, confirmDialog, cx, glueEllipsis, useMediaQuery } from '../ui';
+import { usePrefs, type SidebarView } from '../prefs';
+import { Button, ConfirmHost, InputHost, ContextContent, ContextItem, ContextMenu, ContextTrigger, DropdownContent, IconButton, Modal, PartLoading, confirmDialog, cx, glueEllipsis, useMediaQuery, useTabs } from '../ui';
 import { countUnsaved, discardUnsaved, useUnsaved } from '../unsaved';
 import { ActionDialogs } from './actions';
 import { PassphraseHost } from '../editor/Passphrase';
@@ -20,7 +20,7 @@ import { isSealed } from '../editor/sealed';
 import { SearchBox, type SearchHandle } from './Search';
 import { CommandPalette, SearchPage, useSearchPage, type Command } from './Palette';
 import { TagBrowser } from '../editor/Tags';
-import { PersonalSections } from './Personal';
+import { FavoriteChips, NewForYouSection, RecentSection } from './Personal';
 import { AiRulesSection } from './AiRules';
 import { usePersonal } from '../personal';
 import { useActions } from './actions';
@@ -36,7 +36,7 @@ import { helpAnchorInFront, helpTarget, openHelp, useHelp } from '../help/help';
 import { MountTree, SourcesTree, expandAllIn } from './Tree';
 import { treeClipboardKeys } from './noteClipboard';
 import { useAi, useAiAvailable } from '../ai/aiStore';
-import { SyncStatus } from './SyncStatus';
+import { SyncStatus, syncAllWithMessage } from './SyncStatus';
 import { Toaster } from '../toast';
 import { noteName, noteNameIn } from '../names';
 import { scrollHint } from '../scrollHint';
@@ -212,6 +212,8 @@ export function Shell({ user }: { user: User }) {
       clearTimeout(settingsTimer);
       stop();
       dropPrefetchedNotes();
+      // Signed out (or another account next): no pending write of these lists goes out any more (sec-g05).
+      usePersonal.getState().stop();
     };
   }, []);
 
@@ -332,7 +334,10 @@ export function Shell({ user }: { user: User }) {
       label: t('Alle Quellen synchronisieren'),
       icon: <RefreshCw />,
       keywords: ['sync', 'pull', 'push', 'abgleichen'],
-      run: () => void api.syncAll().then(() => toast({ kind: 'ok', title: t('Synchronisation angestoßen') })),
+      run: () => {
+        toast({ kind: 'ok', title: t('Alle Quellen werden synchronisiert …') });
+        void syncAllWithMessage().then(() => qc.invalidateQueries({ queryKey: ['mounts'] }));
+      },
     },
     ...(active
       ? [
@@ -363,59 +368,124 @@ export function Shell({ user }: { user: User }) {
     { id: 'width', label: prefs.editorWidth === 'full' ? t('Normale Breite') : t('Volle Breite'), icon: <Maximize2 />, keywords: ['breite', 'width', 'voll', 'full'], run: () => prefs.set({ editorWidth: prefs.editorWidth === 'full' ? 'normal' : 'full' }) },
   ];
 
+  // „Neue Notiz“ at the top of the sidebar: in the source of the open note (its folder), else the first writable source.
+  const newNote = commands.find((c) => c.id === 'new-note');
+  const view = prefs.sidebarView === 'ai' && !user.isAdmin ? 'tree' : prefs.sidebarView;
+  const views: [SidebarView, string][] = [
+    ['tree', t('Baum')],
+    ['recent', t('Zuletzt')],
+    ...(user.isAdmin ? [['ai', t('KI-Freigaben')] as [SidebarView, string]] : []),
+  ];
+  // „Im Baum anzeigen“ from anywhere (menu, palette, AI shares): the sidebar shows the tree again.
+  const revealed = useWorkspace((s) => s.reveal?.nonce ?? 0);
+  useEffect(() => {
+    if (revealed && usePrefs.getState().sidebarView !== 'tree') usePrefs.getState().set({ sidebarView: 'tree' });
+  }, [revealed]);
+  const viewTabs = useTabs(
+    views.map(([v]) => v),
+    view,
+    (v) => prefs.set({ sidebarView: v }),
+  );
+
   return (
-    <div className="flex h-full overflow-hidden">
-      {!collapsed && mobile && <div className="fixed inset-0 z-30 bg-black/30" aria-hidden="true" onClick={() => setCollapsed(true)} />}
+    <div className="flex h-full overflow-hidden bg-canvas md:p-2.5">
+      {!collapsed && mobile && <div className="fixed inset-0 z-30 bg-[var(--scrim)]" aria-hidden="true" onClick={() => setCollapsed(true)} />}
       {!collapsed && (
+        // One rounded card over the full height like the note beside it (owner comparison with Kaveyl Notes, 24.11.):
+        // head and foot stay, only the tree scrolls – inside the card, so its corners never turn square.
         <aside
-          className={cx('flex shrink-0 flex-col border-r border-line bg-subtle', mobile && 'fixed inset-y-0 left-0 z-40 w-[min(88vw,340px)] shadow-pop')}
+          className={cx(
+            'flex shrink-0 flex-col overflow-hidden bg-bg shadow-sheet dark:bg-subtle',
+            mobile ? 'fixed inset-y-0 left-0 z-40 w-[min(88vw,340px)] rounded-r-[24px] shadow-pop' : 'rounded-[24px]',
+          )}
           style={mobile ? undefined : { width: sidebarWidth }}
           aria-label={t('Seitenleiste')}
         >
-          <div className="flex h-11 items-center gap-2 px-3">
-            <Logo />
-            <span className="text-sm font-semibold">{PRODUCT_SHORT}</span>
-            <span className="flex-1">
-              <SyncStatus isAdmin={user.isAdmin} />
+          <div className="flex shrink-0 flex-col gap-2.5 px-3 pb-2 pt-3">
+          <div className="flex h-8 items-center gap-2 pl-0.5">
+            <Logo className="h-[25px] w-[25px] shrink-0" />
+            <span className="min-w-0 flex-1 truncate text-[0.95rem] tracking-tight">
+              <span className="font-semibold">{PRODUCT_SHORT}</span> <span className="font-normal text-fg-muted">Wiki</span>
             </span>
             {aiAvailable && (
-              <IconButton label={t('KI fragen')} onClick={() => useAi.getState().openAsk({ kind: 'all' })}>
+              <IconButton label={t('KI fragen')} className="h-7 w-7 rounded-lg bg-accent-soft text-accent hover:bg-accent-soft hover:text-accent" onClick={() => useAi.getState().openAsk({ kind: 'all' })}>
                 <Sparkles className="h-4 w-4" />
               </IconButton>
             )}
-            <IconButton label={t('Tags')} onClick={() => searchPage.openTags()}>
+            <IconButton label={t('Tags')} className="h-7 w-7 rounded-lg" onClick={() => searchPage.openTags()}>
               <Hash className="h-4 w-4" />
             </IconButton>
-            <IconButton label={t('Seitenleiste ausblenden')} onClick={() => setCollapsed(true)}>
-              <PanelLeftClose className="h-4 w-4" />
-            </IconButton>
+            {mobile && (
+              <IconButton label={t('Seitenleiste ausblenden')} className="h-7 w-7 rounded-lg" onClick={() => setCollapsed(true)}>
+                <PanelLeftClose className="h-4 w-4" />
+              </IconButton>
+            )}
           </div>
-          <div className="flex items-center gap-0.5 px-3 pb-2">
-            <div className="min-w-0 flex-1">
-              <SearchBox ref={search} mounts={mountList} onSearchPage={(q) => searchPage.open(q)} />
+          <div className="flex flex-col gap-2">
+            {newNote && (
+              <button
+                type="button"
+                className="flex h-[35px] w-full items-center justify-center gap-1.5 rounded-full bg-accent-cta text-sm font-semibold text-on-cta shadow-[0_6px_16px_-8px_var(--accent-cta)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                title={t('Neue Notiz in „{where}“', { where: newNote.hint ?? '' })}
+                onClick={newNote.run}
+              >
+                <Plus className="h-4 w-4" /> {t('Neue Notiz')}
+              </button>
+            )}
+            <SearchBox ref={search} mounts={mountList} onSearchPage={(q) => searchPage.open(q)} />
+          </div>
+          <FavoriteChips mounts={mountList} />
+          {mountList.length > 0 && (
+            <div {...viewTabs.list} aria-label={t('Ansicht der Seitenleiste')} className="flex rounded-xl bg-[color-mix(in_srgb,var(--fg)_6%,transparent)] p-0.5">
+              {views.map(([v, label]) => (
+                <button
+                  key={v}
+                  {...viewTabs.tab(v)}
+                  className={cx(
+                    'h-[25px] min-w-0 flex-1 truncate rounded-[10px] px-1.5 text-[0.75rem] font-medium',
+                    view === v ? 'bg-bg text-accent shadow-[0_1px_2px_rgba(0,0,0,0.08)]' : 'text-fg-muted hover:text-fg',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            {/* One toggle like at every source: something open → close everything, else open everything. */}
-            <IconButton label={anyOpen ? t('Alles zuklappen') : t('Alles aufklappen')} onClick={() => (anyOpen ? collapseEverything() : expandEverything(qc, mountList))}>
-              {anyOpen ? <ChevronsDownUp className="h-4 w-4" /> : <ChevronsUpDown className="h-4 w-4" />}
-            </IconButton>
+          )}
           </div>
-          <div className="flex-1 overflow-y-auto px-2 pb-4 [scrollbar-gutter:stable]">
-            <PersonalSections mounts={mountList} />
-            {user.isAdmin && <AiRulesSection mounts={mountList} />}
-            <nav aria-label={t('Quellen')} tabIndex={-1} className="outline-none" onKeyDown={(e) => treeClipboardKeys(e, qc)}>
-              <SourcesTree>
-                {mountList.filter((m) => !hoist || !mountById.has(hoist.mountId) || m.id === hoist.mountId).map((m) => (
-                  <MountTree
-                    key={m.id}
-                    mount={m}
-                    onEditMount={(mount) => setWizard({ open: true, edit: mount })}
-                    mountIds={mountList.map((x) => x.id)}
-                    canReorder={user.isAdmin && !hoist}
-                  />
-                ))}
-              </SourcesTree>
+          <div {...viewTabs.panel} className="min-h-0 flex-1 overflow-y-auto pb-2 pl-2 pr-0.5 [scrollbar-gutter:stable]">
+            <NewForYouSection mounts={mountList} />
+            {view === 'recent' && <RecentSection mounts={mountList} />}
+            {view === 'ai' && <AiRulesSection mounts={mountList} />}
+            <nav aria-label={t('Quellen')} tabIndex={-1} className={cx('outline-none', view !== 'tree' && 'hidden')} onKeyDown={(e) => treeClipboardKeys(e, qc)}>
+              {mountList.length > 0 && (
+                <div>
+                  <div className="flex h-7 items-center gap-1 pl-2 pr-0.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-fg-faint">
+                    <span className="flex-1">{t('Quellen')}</span>
+                    {/* One toggle like at every source: something open → close everything, else open everything. */}
+                    <button
+                      type="button"
+                      className="flex h-6 items-center gap-1 rounded-md px-1.5 text-[0.6875rem] font-medium normal-case tracking-normal text-fg-muted hover:bg-hover hover:text-fg"
+                      onClick={() => (anyOpen ? collapseEverything() : expandEverything(qc, mountList))}
+                    >
+                      {anyOpen ? <ChevronsDownUp className="h-3.5 w-3.5" /> : <ChevronsUpDown className="h-3.5 w-3.5" />}
+                      {anyOpen ? t('Alles zuklappen') : t('Alles aufklappen')}
+                    </button>
+                  </div>
+                  <SourcesTree>
+                    {mountList.filter((m) => !hoist || !mountById.has(hoist.mountId) || m.id === hoist.mountId).map((m) => (
+                      <MountTree
+                        key={m.id}
+                        mount={m}
+                        onEditMount={(mount) => setWizard({ open: true, edit: mount })}
+                        mountIds={mountList.map((x) => x.id)}
+                        canReorder={user.isAdmin && !hoist}
+                      />
+                    ))}
+                  </SourcesTree>
+                </div>
+              )}
               {mounts.data && mountList.length === 0 && (
-                <div className="mx-1 mt-4 rounded-lg border border-dashed border-line px-4 py-5 text-center text-sm text-fg-muted">
+                <div className="mx-1 mt-4 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-sm text-fg-muted">
                   {/* Users and guests see the same words as their welcome page: a source exists, it is just not shared yet. */}
                   <p className="mb-1 text-fg">{user.isAdmin ? t('Noch keine Quelle eingebunden.') : t('Auf eine Freigabe warten')}</p>
                   <p className={cx('text-xs', user.isAdmin && 'mb-4')}>
@@ -433,7 +503,7 @@ export function Shell({ user }: { user: User }) {
                 </div>
               )}
               {mounts.isError && !mounts.data && (
-                <div role="alert" className="mx-1 mt-4 rounded-lg border border-dashed border-line px-4 py-5 text-center text-sm text-fg-muted">
+                <div role="alert" className="mx-1 mt-4 rounded-2xl border border-dashed border-line px-4 py-5 text-center text-sm text-fg-muted">
                   <p className="mb-1 text-fg">{t('Die Quellen konnten nicht geladen werden.')}</p>
                   <p className="mb-4 text-xs">{mounts.error instanceof ApiError ? mounts.error.message : t('Server nicht erreichbar')}</p>
                   <Button size="sm" disabled={mounts.isFetching} onClick={() => void mounts.refetch()}>
@@ -443,31 +513,47 @@ export function Shell({ user }: { user: User }) {
               )}
             </nav>
           </div>
-          {mountList.length > 0 && (
-            <div className="flex h-9 items-center border-t border-line pr-2">
-              {user.isAdmin ? (
-                <button className="flex h-full flex-1 items-center gap-2 px-4 text-sm text-fg-muted hover:bg-hover hover:text-fg" onClick={() => setWizard({ open: true, edit: null })}>
-                  <Plus className="h-4 w-4" /> {t('Quelle einbinden')}
-                </button>
-              ) : (
-                <span className="flex-1" />
-              )}
-              <IconButton label={t('Papierkorb')} onClick={openTrash}>
-                <Trash2 className="h-4 w-4" />
+          <div className="shrink-0 border-t border-line px-2 pb-1.5 pt-1">
+            {mountList.length > 0 && (
+              <div className="flex h-8 items-center">
+                {user.isAdmin ? (
+                  <button className="flex h-full flex-1 items-center gap-2 rounded-lg px-2 text-[0.8125rem] text-fg-muted hover:bg-hover hover:text-fg" onClick={() => setWizard({ open: true, edit: null })}>
+                    <Plus className="h-4 w-4" /> {t('Quelle einbinden')}
+                  </button>
+                ) : (
+                  <span className="flex-1" />
+                )}
+                <IconButton label={t('Papierkorb')} className="h-7 w-7 rounded-lg" onClick={openTrash}>
+                  <Trash2 className="h-4 w-4" />
+                </IconButton>
+              </div>
+            )}
+            <div className="flex h-8 items-center gap-0.5">
+              <span className="min-w-0 flex-1">
+                <SyncStatus isAdmin={user.isAdmin} labelled />
+              </span>
+              <IconButton label={t('Einstellungen')} className="h-7 w-7 rounded-lg" onClick={() => setSettingsOpen(true)}>
+                <Settings className="h-4 w-4" />
               </IconButton>
+              <ThemeToggle className="h-7 w-7 rounded-lg" />
+              {!mobile && (
+                <IconButton label={t('Seitenleiste ausblenden')} className="h-7 w-7 rounded-lg" onClick={() => setCollapsed(true)}>
+                  <PanelLeftClose className="h-4 w-4" />
+                </IconButton>
+              )}
             </div>
-          )}
+          </div>
         </aside>
       )}
       {!collapsed && !mobile && <Resizer />}
-      <main className="flex min-w-0 flex-1 flex-col">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-bg md:rounded-[24px] md:pb-2.5 md:shadow-sheet">
         <TabBar
           tabs={tabs}
           activeId={activeId}
           collapsed={collapsed}
           onExpand={() => setCollapsed(false)}
           folderNote={(id) => mountById.get(id)?.options.folderNote}
-          appButtons={<AppButtons user={user} compact={mobile} onSettings={() => setSettingsOpen(true)} onSignOut={() => void signOut()} />}
+          appButtons={<AppButtons user={user} compact={mobile} withSettings={collapsed} onSettings={() => setSettingsOpen(true)} onSignOut={() => void signOut()} />}
         />
         <div className="relative min-h-0 flex-1">
           {tabs.map((tab) => {
@@ -506,7 +592,7 @@ export function Shell({ user }: { user: User }) {
       <HelpDialog />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} mounts={mountList} onSearchPage={(q) => searchPage.open(q)} />
       <SearchPage open={searchPage.isOpen} initial={searchPage.q} onClose={searchPage.close} mounts={mountList} />
-      <Modal open={searchPage.tagsOpen} onOpenChange={(o) => searchPage.openTags(o)} title={t('Tags')} wide>
+      <Modal open={searchPage.tagsOpen} onOpenChange={(o) => searchPage.openTags(o)} title={t('Tags verwalten')} wide="lg">
         <TagBrowser onPick={(tag) => searchPage.open(`tag:${/\s/.test(tag) ? `"${tag}"` : tag}`)} />
       </Modal>
       {settingsUsed && (
@@ -519,8 +605,9 @@ export function Shell({ user }: { user: User }) {
             useSettingsNav.setState({ request: null, wide: false });
           }}
           title={t('Einstellungen')}
+          bare
           help={settingsHelp ?? undefined}
-          wide={settingsWide ? 'full' : true}
+          wide={settingsWide ? 'full' : 'lg'}
         >
           <Suspense fallback={<PartLoading big className="min-h-40" />}>
             <SettingsBody
@@ -557,7 +644,10 @@ function Resizer() {
     e.preventDefault();
     const el = e.currentTarget;
     el.setPointerCapture(e.pointerId);
-    const move = (ev: globalThis.PointerEvent) => setWidth(ev.clientX);
+    // By the distance moved, not the pointer position: the sidebar does not start at the window's edge (frame).
+    const from = e.clientX;
+    const was = width;
+    const move = (ev: globalThis.PointerEvent) => setWidth(was + ev.clientX - from);
     const up = () => {
       el.removeEventListener('pointermove', move);
       el.removeEventListener('pointerup', up);
@@ -575,10 +665,10 @@ function Resizer() {
     e.preventDefault();
     setWidth(width + step);
   };
-  // The visible line stays 4 px; the invisible strip around it is wide enough for a finger.
+  // A 12 px gutter between sidebar and sheet with a small pill in the middle; the strip is wide enough for a finger.
   return (
     <div
-      className="relative z-10 w-1 shrink-0 cursor-col-resize touch-none hover:bg-accent-soft focus-visible:bg-accent-soft focus-visible:outline-none"
+      className="group relative z-10 flex w-3 shrink-0 cursor-col-resize touch-none items-center justify-center focus-visible:outline-none"
       onPointerDown={onDown}
       onKeyDown={onKey}
       tabIndex={0}
@@ -589,7 +679,8 @@ function Resizer() {
       aria-valuemin={200}
       aria-valuemax={560}
     >
-      <div className="absolute inset-y-0 -left-2 -right-2" aria-hidden="true" />
+      <div className="absolute inset-y-0 -left-1.5 -right-1.5" aria-hidden="true" />
+      <span className="h-11 w-1.5 rounded-full bg-[var(--scrollbar)] transition-colors group-hover:bg-accent group-active:bg-accent group-focus-visible:bg-accent" aria-hidden="true" />
     </div>
   );
 }
@@ -643,10 +734,10 @@ function TabBar({
     bar.current?.querySelector<HTMLElement>(':scope > [data-active-tab]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [activeId, tabs.length]);
   return (
-    <div className="flex h-9 shrink-0 items-end border-b border-line bg-subtle pl-1" data-print="hide">
+    <div className="flex h-[42px] shrink-0 items-end bg-bg pl-1.5 md:bg-subtle" data-print="hide">
       <div ref={barRef} className="scroll-hint no-scrollbar flex min-w-0 flex-1 items-end gap-0.5 self-stretch overflow-x-auto">
       {collapsed && (
-        <IconButton label={t('Seitenleiste einblenden')} className="mb-1.5 mr-1" onClick={onExpand}>
+        <IconButton label={t('Seitenleiste einblenden')} className="mb-2 mr-1 h-7 w-7 rounded-lg" onClick={onExpand}>
           <PanelLeft className="h-4 w-4" />
         </IconButton>
       )}
@@ -655,11 +746,11 @@ function TabBar({
           <ContextTrigger asChild>
             <div
               className={cx(
-                'group flex h-8 shrink cursor-default items-center gap-1.5 rounded-t-md border border-b-0 px-2.5 text-[0.8125rem]',
+                'group flex h-[34px] shrink cursor-default items-center gap-1.5 rounded-t-[10px] px-3 text-[0.8125rem]',
                 tab.pinned ? 'max-w-[160px]' : 'max-w-[220px]',
                 // Narrowest: still a few letters of the name next to icon and close button (Dev check 16.11.).
                 tab.id === activeId ? 'min-w-44' : 'min-w-32',
-                tab.id === activeId ? 'border-line bg-bg text-fg' : tab.id === splitId ? 'border-line bg-bg text-fg-muted' : 'border-transparent text-fg-muted hover:bg-hover',
+                tab.id === activeId ? 'bg-bg font-medium text-fg md:bg-bg' : tab.id === splitId ? 'bg-bg text-fg-muted' : 'text-fg-muted hover:bg-hover hover:text-fg',
               )}
               onClick={() => activate(tab.id)}
               onAuxClick={(e) => e.button === 1 && !tab.pinned && closeTab(tab.id)}
@@ -669,7 +760,13 @@ function TabBar({
               data-active-tab={tab.id === activeId ? '' : undefined}
               data-pinned={tab.pinned ? '' : undefined}
             >
-              {tab.id === splitId ? <Columns2 className="h-3.5 w-3.5 shrink-0 text-fg-faint" /> : <FileText className="h-3.5 w-3.5 shrink-0 text-fg-faint" />}
+              {tab.id === activeId ? (
+                <span className="mx-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+              ) : tab.id === splitId ? (
+                <Columns2 className="h-3.5 w-3.5 shrink-0 text-icon-faint" />
+              ) : (
+                <FileText className="h-3.5 w-3.5 shrink-0 text-icon-faint" />
+              )}
               <span className="truncate">{noteName(tab.path, folderNote(tab.mountId))}</span>
               {tab.pinned ? (
                 <button
@@ -727,10 +824,11 @@ function TabBar({
       ))}
       </div>
       {overflow && <AllTabs tabs={tabs} activeId={activeId} folderNote={folderNote} />}
-      {/* Always visible, also with the sidebar closed and on phones: help, settings, account – and the colour scheme. */}
-      <div className="flex shrink-0 items-center gap-0.5 self-stretch border-l border-line px-1.5">{appButtons}</div>
-      <div className="flex shrink-0 items-center self-stretch border-l border-line px-1.5">
-        <ThemeToggle className="h-7 w-7" />
+      {/* Always visible, also with the sidebar closed and on phones: help and account; settings and the colour scheme
+          here only while the sidebar (whose foot holds them) is closed. */}
+      <div className="flex shrink-0 items-center gap-1 self-stretch px-2">
+        {appButtons}
+        {collapsed && <ThemeToggle className="h-7 w-7 rounded-lg" />}
       </div>
     </div>
   );
@@ -791,7 +889,7 @@ function AllTabs({ tabs, activeId, folderNote }: { tabs: Tab[]; activeId: string
  * Help, settings and the account menu at the top right (owner 21.10.: the sidebar header was full). `compact` (phones):
  * only the account menu, with help and settings in it – the tabs keep their room.
  */
-function AppButtons({ user, compact, onSettings, onSignOut }: { user: User; compact: boolean; onSettings: () => void; onSignOut: () => void }) {
+function AppButtons({ user, compact, withSettings, onSettings, onSignOut }: { user: User; compact: boolean; withSettings: boolean; onSettings: () => void; onSignOut: () => void }) {
   const item = 'flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 outline-none data-[highlighted]:bg-hover [&>svg]:h-4 [&>svg]:w-4';
   const update = useUpdateMenuEntry(compact && user.isAdmin);
   return (
@@ -799,19 +897,30 @@ function AppButtons({ user, compact, onSettings, onSignOut }: { user: User; comp
       {!compact && (
         <>
           <UpdateBadge isAdmin={user.isAdmin} />
-          <IconButton label={t('Hilfe (F1)')} className="h-7 w-7" onClick={() => openHelp()}>
+          <IconButton label={t('Hilfe (F1)')} className="h-7 w-7 rounded-lg" onClick={() => openHelp()}>
             <CircleHelp className="h-4 w-4" />
           </IconButton>
-          <IconButton label={t('Einstellungen')} className="h-7 w-7" onClick={onSettings}>
-            <Settings className="h-4 w-4" />
-          </IconButton>
+          {/* With the sidebar open, settings sit in its foot. */}
+          {withSettings && (
+            <IconButton label={t('Einstellungen')} className="h-7 w-7 rounded-lg" onClick={onSettings}>
+              <Settings className="h-4 w-4" />
+            </IconButton>
+          )}
         </>
       )}
       <DM.Root modal={false}>
         <DM.Trigger asChild>
-          <IconButton label={t('Konto ({name})', { name: user.displayName })} className="h-7 w-7">
-            <CircleUserRound className="h-4 w-4" />
-          </IconButton>
+          <button
+            type="button"
+            aria-label={t('Konto ({name})', { name: user.displayName })}
+            title={t('Konto ({name})', { name: user.displayName })}
+            className={cx('flex h-7 items-center gap-1.5 rounded-full text-[0.8125rem] font-medium text-fg hover:bg-hover data-[state=open]:bg-hover', compact ? 'w-7 justify-center' : 'border border-line-soft bg-bg py-0.5 pl-0.5 pr-2.5')}
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[0.6875rem] font-semibold uppercase text-accent" aria-hidden>
+              {initial(user.displayName)}
+            </span>
+            {!compact && <span className="max-w-[9rem] truncate">{user.displayName}</span>}
+          </button>
         </DM.Trigger>
         <DM.Portal>
           <DropdownContent align="end" sideOffset={4} minWidth={220} className="z-50">
@@ -854,6 +963,9 @@ function AppButtons({ user, compact, onSettings, onSignOut }: { user: User; comp
     </>
   );
 }
+
+/** First letter of a name for the account chip (a person's initial, not a picture). */
+const initial = (name: string) => [...name.trim()][0] ?? '?';
 
 function EmptyState({ onSearch }: { onSearch: () => void }) {
   return (

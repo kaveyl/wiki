@@ -1,11 +1,12 @@
 // Settings → Werkzeuge → Prüfung: the consistency report (index vs. disk vs. git, links, ids).
-// Read-only — it shows problems, it does not fix them. SEE-DOC: docs/PLAN.md §2.8
+// The check itself changes nothing; only orphaned attachments can be deleted from here (QA 24.11.). SEE-DOC: docs/PLAN.md §2.8
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, ChevronRight, ShieldCheck } from 'lucide-react';
-import { api, type FsckIssue } from '../api';
+import { CheckCircle2, ChevronRight, ShieldCheck, Trash2 } from 'lucide-react';
+import { api, errorText, type FsckIssue } from '../api';
+import { toast } from '../toast';
 import { useWorkspace } from '../store';
-import { Button, Spinner, cx } from '../ui';
+import { Button, Spinner, confirmDialog, cx } from '../ui';
 import { fmtDateTime, t, tn } from '../i18n';
 
 const LABELS: Record<FsckIssue['kind'], string> = {
@@ -53,12 +54,49 @@ export function FsckPanel({ onOpenNote }: { onOpenNote: () => void }) {
       setBusy(false);
     }
   };
+  const mounts = useQuery({ queryKey: ['mounts'], queryFn: api.mounts });
+  /**
+   * Deletes attachments no note links to (checked again on the server right before: one linked since stays).
+   * In a Git source the file stays in the history; in a plain folder it is gone.
+   */
+  const removeOrphans = async (mountId: string, name: string, paths: string[]) => {
+    const git = mounts.data?.find((x) => x.id === mountId)?.git ?? false;
+    const question =
+      paths.length === 1
+        ? t('„{path}“ aus „{name}“ löschen?', { path: paths[0]!, name })
+        : t('{n} verwaiste Anhänge aus „{name}“ löschen?', { n: paths.length, name });
+    const after = git ? t('Keine Notiz verlinkt sie. Im Git-Verlauf der Quelle bleiben sie erhalten.') : t('Keine Notiz verlinkt sie. Die Quelle hat keinen Git-Verlauf – gelöschte Dateien sind endgültig weg.');
+    if (!(await confirmDialog(`${question} ${after}`, { confirmLabel: t('Löschen'), danger: true }))) return;
+    setBusy(true);
+    let removed = 0;
+    let kept = 0;
+    const failed: string[] = [];
+    for (const p of paths) {
+      try {
+        const r = await api.deleteAttachment(mountId, p, '');
+        if (r.kept) kept++;
+        else removed++;
+      } catch (e) {
+        failed.push(`${p}: ${errorText(e)}`);
+      }
+    }
+    try {
+      qc.setQueryData(['fsck'], await api.runFsck());
+    } finally {
+      setBusy(false);
+    }
+    toast({
+      kind: failed.length ? 'error' : kept ? 'warn' : 'ok',
+      title: tn(removed, '{n} Anhang gelöscht', '{n} Anhänge gelöscht'),
+      text: [kept ? tn(kept, '{n} wird inzwischen wieder verlinkt und bleibt.', '{n} werden inzwischen wieder verlinkt und bleiben.') : '', ...failed].filter(Boolean).join('\n') || undefined,
+    });
+  };
   const total = report.data?.mounts.reduce((n, m) => n + m.issues.length, 0) ?? 0;
   return (
     <div className="space-y-3 text-sm">
       <p className="text-fg-muted">
         {t(
-          'Gleicht Index, Dateien und Git ab: gebrochene Links, doppelte IDs, fehlende oder verwaiste Index-Einträge, hängende Rebases. Die Prüfung ändert nichts – sie läuft zusätzlich jede Nacht um 3 Uhr. Es gibt immer nur den letzten Bericht; das Protokoll vermerkt jede Prüfung.',
+          'Gleicht Index, Dateien und Git ab: gebrochene Links, doppelte IDs, fehlende oder verwaiste Index-Einträge, hängende Rebases. Die Prüfung ändert nichts – sie läuft zusätzlich jede Nacht um 3 Uhr. Es gibt immer nur den letzten Bericht; das Protokoll vermerkt jede Prüfung. Verwaiste Anhänge lassen sich im Bericht löschen.',
         )}
       </p>
       <div className="flex items-center gap-3">
@@ -89,6 +127,20 @@ export function FsckPanel({ onOpenNote }: { onOpenNote: () => void }) {
                   <span className="font-medium">{m.name}</span>
                   <span className={cx('ml-auto text-xs', m.issues.length ? 'text-warn' : 'text-ok')}>{m.issues.length ? summary(m.issues) : t('keine Auffälligkeiten')}</span>
                 </button>
+                {isOpen && m.issues.some((i) => i.kind === 'orphaned-attachment') && (
+                  <div className="flex items-center gap-2 border-t border-line bg-subtle/40 px-3 py-2 pl-8">
+                    <span className="flex-1 text-xs text-fg-muted">{t('Verwaiste Anhänge verlinkt keine Notiz mehr – sie lassen sich hier löschen.')}</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-danger"
+                      disabled={busy}
+                      onClick={() => void removeOrphans(m.mountId, m.name, m.issues.filter((i) => i.kind === 'orphaned-attachment').map((i) => i.path))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> {t('Alle verwaisten Anhänge löschen')}
+                    </Button>
+                  </div>
+                )}
                 {isOpen && (
                   <ul className="divide-y divide-line border-t border-line bg-subtle/40">
                     {m.issues.map((i, n) => (
@@ -106,6 +158,17 @@ export function FsckPanel({ onOpenNote }: { onOpenNote: () => void }) {
                           </button>
                         ) : (
                           <span>{i.path}</span>
+                        )}
+                        {i.kind === 'orphaned-attachment' && (
+                          <button
+                            className="ml-2 rounded p-0.5 align-middle text-fg-faint hover:bg-hover hover:text-danger disabled:opacity-50"
+                            disabled={busy}
+                            aria-label={t('„{path}“ löschen', { path: i.path })}
+                            title={t('Löschen')}
+                            onClick={() => void removeOrphans(m.mountId, m.name, [i.path])}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         )}
                         <span className="block text-xs text-fg-muted">{i.detail}</span>
                       </li>

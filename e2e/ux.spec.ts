@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { waitIndexed } from './indexed';
 import { openSettingsPage } from './settings-nav';
 import { shot } from './shots';
+import { subItem } from './menus';
 
 const NOTES = resolve(import.meta.dirname, '../.local/e2e/projekte/notizen');
 const read = (name: string) => (existsSync(join(NOTES, name)) ? readFileSync(join(NOTES, name), 'utf8') : '');
@@ -77,7 +78,7 @@ test('favorites: a folder without folder note, context menu in the favorites lis
   const aside = page.locator('aside');
   await tree().getByText('plan', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Zu Favoriten' }).click();
-  const favs = aside.locator('div.mb-1', { has: page.getByText('Favoriten', { exact: true }) });
+  const favs = aside.getByRole('list', { name: 'Favoriten' });
   const row = favs.locator('[title="Notizen / plan"]');
   await expect(row).toBeVisible();
   // Clicking shows the folder unfolded in the tree (there is nothing to open).
@@ -250,11 +251,12 @@ test('copy, cut and paste notes in the tree (menu and Ctrl+C/V), also into anoth
   await tree().getByText('trilium', { exact: true }).first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: /^Kopieren/ }).click();
   await tree().getByText('plan', { exact: true }).first().click({ button: 'right' });
-  await page.getByRole('menuitem', { name: /^Einfügen „trilium“/ }).click();
+  // At a folder the clipboard entries sit in „Kopieren / Ausschneiden / Pfad“ (redesign 23.11.).
+  await subItem(page, 'Kopieren / Ausschneiden / Pfad', /^Einfügen „trilium“/);
   await expect.poll(() => read('plan/trilium.md'), { timeout: 10_000 }).toContain('Erster Absatz über Hierarchien.');
   expect(read('trilium.md')).toContain('Erster Absatz über Hierarchien.');
   // The file is there before the server answers; wait until the app shows the copy, so the next click is not undone.
-  await expect(tree().locator('[data-node$=":plan/trilium.md"]').first()).toHaveClass(/bg-active/, { timeout: 15_000 });
+  await expect(tree().locator('[data-node$=":plan/trilium.md"]').first()).toHaveAttribute('aria-selected', 'true', { timeout: 15_000 });
   // Keyboard: select the note in the tree, Ctrl+C, Ctrl+V → copy next to it (the top-level one,
   // not the copy in "plan" if that folder is open).
   await tree().locator('[data-node$=":trilium.md"]').first().click();
@@ -330,7 +332,7 @@ test('expand and collapse: everything, per source and per folder; "+" makes note
 test('trash: a deleted folder comes back from the sidebar trash; emptying asks first', async () => {
   const del = async () => {
     await tree().locator('[data-node]', { hasText: 'Unterordner' }).first().click({ button: 'right' });
-    await page.getByRole('menuitem', { name: 'Löschen', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Ordner löschen', exact: true }).click();
     await expect(page.getByRole('dialog')).toContainText('Papierkorb');
     await page.getByRole('dialog').getByRole('button', { name: 'Löschen', exact: true }).click();
     await expect.poll(() => existsSync(join(NOTES, 'plan/Unterordner'))).toBe(false);
@@ -721,13 +723,13 @@ test('sidebar width: the divider follows a finger (folding phone, open), the mou
   const divider = touch.getByRole('separator', { name: 'Breite der Seitenleiste' });
   const width = async () => (await aside.boundingBox())!.width;
   const start = await width();
-  // Real touch events through CDP: the finger lands 6 px beside the 4 px line (the wider grip) and moves right.
+  // Real touch events through CDP: the finger lands 4 px beside the 12 px gutter (the wider grip) and moves right.
   const box = (await divider.boundingBox())!;
   const y = box.y + 300;
   const cdp = await ctx.newCDPSession(touch);
   const finger = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number) =>
     cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
-  let x = box.x + box.width + 6;
+  let x = box.x + box.width + 4;
   await finger('touchStart', x);
   for (let i = 0; i < 8; i++) await finger('touchMove', (x += 10));
   await finger('touchEnd', x);

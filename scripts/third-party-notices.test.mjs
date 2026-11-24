@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { notices, packages } from './third-party-notices.mjs';
 
 /** Permissive or weak-copyleft licences compatible with the AGPL-3.0 (SPDX ids). */
-const ALLOWED = new Set(['MIT', 'MIT-0', 'ISC', '0BSD', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', 'BlueOak-1.0.0', 'CC0-1.0', 'Zlib', 'Unlicense', 'MPL-2.0', 'Python-2.0', 'CC-BY-4.0']);
+const ALLOWED = new Set(['MIT', 'MIT-0', 'ISC', '0BSD', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', 'BlueOak-1.0.0', 'CC0-1.0', 'Zlib', 'Unlicense', 'MPL-2.0', 'Python-2.0', 'CC-BY-4.0', 'OFL-1.1']);
+// OFL-1.1 only for fonts (Inter, redesign 23.11., AD-080 – as in Kaveyl Notes, owner approval there 2026-11-01; to be confirmed here).
 
 /** An SPDX expression is fine when one alternative (OR) consists only of allowed licences (AND). */
 export function compatible(expr) {

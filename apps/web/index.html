@@ -5,19 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Kaveyl</title>
+    <title>Kaveyl Wiki</title>
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Kaveyl" />
+    <meta name="apple-mobile-web-app-title" content="Kaveyl Wiki" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script>
       // Apply the theme before first paint (no flash). SEE: src/theme.ts
       try {
         const t = localStorage.getItem('kaveyl-wiki.theme') || 'system';
         const dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        const bar = { lavender: '#ffffff', amethyst: '#ffffff', plum: '#ffffff', slate: '#ffffff', classic: '#1e1e23', indigo: '#1b1932', oled: '#141418' };
+        let p = localStorage.getItem(dark ? 'kaveyl-wiki.palette-dark' : 'kaveyl-wiki.palette-light');
+        if (!bar[p] || (dark ? ['lavender', 'amethyst', 'plum', 'slate'] : ['classic', 'indigo', 'oled']).includes(p)) p = dark ? 'classic' : 'lavender';
         document.documentElement.classList.toggle('dark', dark);
+        if (p !== 'classic' && p !== 'lavender') document.documentElement.setAttribute('data-palette', p);
+        document.querySelector('meta[name="theme-color"]').content = bar[p];
       } catch {}
     </script>
   </head>

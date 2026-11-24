@@ -78,6 +78,19 @@ function itemsOf(item: PMNode, listType: string): PMNode[] {
 
 const same = (a: PMNode[], b: PMNode[]) => a.length === b.length && a.every((n, i) => n === b[i]);
 
+/**
+ * A block that may follow the text of a list item without a blank line: a nested list that can interrupt a paragraph –
+ * a bullet list, or numbers starting at 1, whose first item has text (an empty `-` under text would turn that text into
+ * a heading, diff check 0.2.15). A task item always has text (`[ ]`).
+ */
+function tightAfterText(block: PMNode): boolean {
+  const lists = block.type === 'bulletList' || block.type === 'taskList' || (block.type === 'orderedList' && ((block.attrs?.start as number | undefined) ?? 1) === 1);
+  if (!lists) return false;
+  if (block.type === 'taskList') return true;
+  const first = block.content?.[0]?.content?.[0];
+  return first?.type === 'paragraph' && !!first.content?.some((c) => c.type !== 'text' || !!c.text?.trim());
+}
+
 function blockToMdast(node: PMNode): RootContent {
   const content = node.content ?? [];
   switch (node.type) {
@@ -113,8 +126,11 @@ function blockToMdast(node: PMNode): RootContent {
         children: content.map(
           (item): ListItem => ({
             type: 'listItem',
-            // Several blocks in one item need blank lines, or following paragraphs merge lazily.
-            spread: (item.content?.length ?? 0) > 1,
+            // Several blocks in one item need blank lines, or following paragraphs merge lazily – except a nested
+            // list right after the text (and nothing else): it may follow without one (a bullet list, or numbers starting at 1, which
+            // CommonMark lets interrupt a paragraph). The blank line made every edit in a nested list change the file
+            // and loosened the list elsewhere (found 24.11.).
+            spread: (item.content?.length ?? 0) > 1 && !(item.content!.length === 2 && tightAfterText(item.content![1]!)),
             checked: item.type === 'taskItem' ? item.attrs?.checked === true : null,
             children: (item.content ?? []).map(blockToMdast) as BlockContent[],
           }),

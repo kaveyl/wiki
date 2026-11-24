@@ -68,6 +68,8 @@ export interface NoteDocument {
   /** UI read-only mode (mount option or `readonly: true` in frontmatter). */
   readonly: boolean;
   frontmatter: Record<string, unknown>;
+  /** When the file last changed (ms, from the index); null while not indexed yet. */
+  mtime: number | null;
 }
 
 /** How long an editor's save to a just-moved path still lands at the new place. */
@@ -110,6 +112,7 @@ export class NoteService {
       title: meta.title,
       readonly: mount.options.readonly || meta.readonly,
       frontmatter: meta.frontmatter,
+      mtime: this.indexer.get(mount.id, rel)?.mtime ?? null,
     };
   }
 
@@ -189,6 +192,7 @@ export class NoteService {
     const current = await this.readRaw(mount, rel);
     if (current === null) throw new NotFoundError(rel);
     if (sha1(current) !== baseHash) throw new ConflictError(sha1(current), current);
+    if (await this.plainInEncrypted(mount, rel, current)) throw new ForbiddenError('Verschlüsselte Notiz: Klartext wird nicht gespeichert');
     const fm = readFrontmatter(splitFrontmatter(current).frontmatter);
     const keys: Record<string, FrontmatterValue> = {};
     if (changes.tags) {
@@ -215,12 +219,43 @@ export class NoteService {
       const rel = this.notePath(mount, path);
       const done = await this.locked(mount, rel, async () => {
         const current = await this.readRaw(mount, rel);
-        if (current === null) return false;
+        if (current === null || (await this.plainInEncrypted(mount, rel, current))) return false;
         const fm = readFrontmatter(splitFrontmatter(current).frontmatter);
         const tags = parseTags(fm.tags);
         if (!tags.some((t) => tagKey(t) === tagKey(from))) return false;
         const next = renameInTags(tags, from, target);
         const res = await this.writeIfChanged(mount, rel, current, setFrontmatterKeys(current, { tags: Array.isArray(fm.tags) ? next : next.join(', ') }), author, `docs: Tag #${from} → #${target} (Kaveyl Wiki)`);
+        return res.changed;
+      });
+      if (done) changed.push(rel);
+    }
+    return changed;
+  }
+
+  /**
+   * A note in plain text inside an encrypted folder (came in from outside, or a folder encryption stopped halfway):
+   * changing its tags or icon would commit the plain text again – it is left alone until it is encrypted (AD-045,
+   * diff check 0.2.15).
+   */
+  private async plainInEncrypted(mount: Mount, rel: string, current: string): Promise<boolean> {
+    return !isEncryptedNote(current) && (await inEncryptedFolder(mount, this.dataPath, rel));
+  }
+
+  /** Takes a tag out of these notes (the notes stay); the last tag removes the `tags` line. Returns the changed paths. */
+  async removeTag(mount: Mount, paths: string[], tag: string, author: Author): Promise<string[]> {
+    this.assertWritable(mount);
+    const changed: string[] = [];
+    for (const path of paths) {
+      const rel = this.notePath(mount, path);
+      const done = await this.locked(mount, rel, async () => {
+        const current = await this.readRaw(mount, rel);
+        if (current === null || (await this.plainInEncrypted(mount, rel, current))) return false;
+        const fm = readFrontmatter(splitFrontmatter(current).frontmatter);
+        const tags = parseTags(fm.tags);
+        const rest = tags.filter((t) => tagKey(t) !== tagKey(tag));
+        if (rest.length === tags.length) return false;
+        const value = rest.length ? (Array.isArray(fm.tags) ? rest : rest.join(', ')) : undefined;
+        const res = await this.writeIfChanged(mount, rel, current, setFrontmatterKeys(current, { tags: value }), author, `docs: Tag #${tag} entfernt (Kaveyl Wiki)`);
         return res.changed;
       });
       if (done) changed.push(rel);

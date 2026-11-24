@@ -1,7 +1,7 @@
-// The menu on every tag (AD-040; right-click, long press on touch): show notes, color, rename/merge.
+// The menu on every tag (AD-040; right-click, long press on touch): show notes, color, rename/merge, remove.
 import type { ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, Hash, Palette, PenLine } from 'lucide-react';
+import { Check, Hash, Palette, PenLine, Trash2 } from 'lucide-react';
 import { TAG_COLORS, TAG_COLOR_NAMES, tagKey, type TagColor } from '@kaveyl-wiki/core';
 import { TAG_DOT } from './tagStyle';
 import { api, errorText } from '../api';
@@ -12,8 +12,8 @@ import { confirmDialog, ContextContent, ContextItem, ContextMenu, ContextSeparat
 
 const searchFor = (tag: string) => `tag:${/\s/.test(tag) ? `"${tag}"` : tag}`;
 
-/** Right-click (long press) menu of a tag; `color`: its current color (checked in the list). */
-export function TagMenu({ tag, color, children }: { tag: string; color: TagColor | null; children: ReactNode }) {
+/** What can be done with a tag: colour, rename (or merge into another), show its notes – for the menu and the tag list. */
+export function useTagActions(tag: string) {
   const qc = useQueryClient();
   const openSearch = useSearchPage((s) => s.open);
   const refresh = () => Promise.all(['tags', 'tag-colors', 'note', 'search-full'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
@@ -26,13 +26,14 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
       toast({ kind: 'error', title: t('Farbe nicht gespeichert'), text: errorText(e) });
     }
   };
-  const rename = async () => {
+  /** `merge`: asked for the tag to merge into (empty field, existing tags offered) instead of a new name. */
+  const rename = async (merge = false) => {
     const all = await qc.fetchQuery({ queryKey: ['tags'], queryFn: api.tags, staleTime: 5_000 });
     const mine = all.find((x) => tagKey(x.tag) === tagKey(tag));
     const to = (
-      await promptDialog(t('#{tag} umbenennen', { tag }), {
-        label: t('Neuer Name'),
-        value: tag,
+      await promptDialog(merge ? t('#{tag} zusammenführen', { tag }) : t('#{tag} umbenennen', { tag }), {
+        label: merge ? t('Mit Tag') : t('Neuer Name'),
+        value: merge ? '' : tag,
         suggestions: all.filter((x) => tagKey(x.tag) !== tagKey(tag)).map((x) => x.tag),
         hint: tn(
           mine?.count ?? 0,
@@ -40,7 +41,7 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
           'Ändert {n} Notizen mit #{tag}, die du bearbeiten darfst. Gibt es den neuen Namen schon, werden beide Tags zusammengeführt.',
           { tag },
         ),
-        confirmLabel: t('Umbenennen'),
+        confirmLabel: merge ? t('Zusammenführen') : t('Umbenennen'),
         required: true,
       })
     )
@@ -75,11 +76,40 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
       toast({ kind: 'error', title: t('Umbenennen fehlgeschlagen'), text: errorText(e) });
     }
   };
+  /** Takes the tag out of every note the user may change (QA 24.11.) – the notes stay. */
+  const remove = async () => {
+    const all = await qc.fetchQuery({ queryKey: ['tags'], queryFn: api.tags, staleTime: 5_000 });
+    const count = all.find((x) => tagKey(x.tag) === tagKey(tag))?.count ?? 0;
+    const ok = await confirmDialog(
+      tn(count, '#{tag} aus {n} Notiz entfernen? Die Notiz selbst bleibt, auch ihre anderen Tags.', '#{tag} aus {n} Notizen entfernen? Die Notizen selbst bleiben, auch ihre anderen Tags.', { tag }),
+      { confirmLabel: t('Tag entfernen'), danger: true },
+    );
+    if (!ok) return;
+    try {
+      const r = await api.removeTag(tag);
+      await refresh();
+      toast({
+        kind: r.skipped ? 'warn' : 'ok',
+        title: t('#{tag} entfernt', { tag }),
+        text: r.skipped
+          ? tn(r.notes, '{n} Notiz geändert, {skipped} ohne Schreibrecht unverändert.', '{n} Notizen geändert, {skipped} ohne Schreibrecht unverändert.', { skipped: r.skipped })
+          : tn(r.notes, '{n} Notiz geändert.', '{n} Notizen geändert.'),
+      });
+    } catch (e) {
+      toast({ kind: 'error', title: t('Tag nicht entfernt'), text: errorText(e) });
+    }
+  };
+  return { setColor, rename, remove, show: () => openSearch(searchFor(tag)) };
+}
+
+/** Right-click (long press) menu of a tag; `color`: its current color (checked in the list). */
+export function TagMenu({ tag, color, children }: { tag: string; color: TagColor | null; children: ReactNode }) {
+  const { setColor, rename, remove, show } = useTagActions(tag);
   return (
     <ContextMenu>
       <ContextTrigger asChild>{children}</ContextTrigger>
       <ContextContent>
-        <ContextItem icon={<Hash />} onSelect={() => openSearch(searchFor(tag))}>
+        <ContextItem icon={<Hash />} onSelect={show}>
           {t('Notizen mit #{tag} zeigen', { tag })}
         </ContextItem>
         <ContextSub icon={<Palette />} label={t('Farbe')}>
@@ -100,6 +130,9 @@ export function TagMenu({ tag, color, children }: { tag: string; color: TagColor
         <ContextSeparator />
         <ContextItem icon={<PenLine />} onSelect={() => void rename()}>
           {t('Umbenennen / zusammenführen …')}
+        </ContextItem>
+        <ContextItem icon={<Trash2 />} danger onSelect={() => void remove()}>
+          {t('Aus allen Notizen entfernen …')}
         </ContextItem>
       </ContextContent>
     </ContextMenu>

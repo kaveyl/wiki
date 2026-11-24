@@ -181,6 +181,13 @@ describe('search', () => {
   it('filters by mount', () => {
     expect(search(db, 'lium', { mountIds: [] }).notes).toEqual([]);
   });
+
+  it('finds notes by their tags, with or without # (QA 24.11.)', async () => {
+    write('projekte/rezept.md', '---\ntags: [sauerteig-brot]\n---\n# Roggen\n\nMehl und Wasser.\n');
+    await indexer.rebuild(mount);
+    expect(search(db, '#sauerteig-brot').content.map((h) => h.path)).toEqual(['projekte/rezept.md']);
+    expect(search(db, 'sauerteig').content.map((h) => h.path)).toEqual(['projekte/rezept.md']);
+  });
 });
 
 describe('paths', () => {

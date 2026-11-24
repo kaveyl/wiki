@@ -5,6 +5,7 @@ import { lstat, rm, rmdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { PathError, absPath, cleanRelPath } from '../mounts/model.js';
 import { NotFoundError } from '../notes/service.js';
+import { largeNoteNear, linkedOnDisk } from '../index/fsck.js';
 import { AttachmentError, BLOCKLIST_KEY, DEFAULT_BLOCKED, isAttachmentPath, listAttachments, normalizeBlocklist, replaceAttachment, storeAttachment, UPLOAD_HARD_LIMIT } from '../notes/attachments.js';
 import type { AppContext } from './context.js';
 
@@ -45,7 +46,11 @@ export function registerAttachmentRoutes(server: FastifyInstance, ctx: AppContex
     if (!(await lstat(abs).catch(() => null))?.isFile()) throw new NotFoundError(rel);
     if (req.query.unlessLinkedBy !== undefined) {
       const self = cleanRelPath(req.query.unlessLinkedBy);
-      if (indexer.allLinks(mount.id).some((l) => l.target === rel && l.src !== self)) return { ok: true, kept: true };
+      // Also a link from another source showing the same folder keeps it (deleting orphans from the check, diff check 0.2.15).
+      if (linkedOnDisk(manager.list(), indexer, config.dataPath, { mountId: mount.id, path: self }).has(abs)) return { ok: true, kept: true };
+      // From the check (no note of its own, `?unlessLinkedBy=`): a note too large for the index may show it – kept, like
+      // the check no longer reports it (a report from before the update could still list it).
+      if (!self && largeNoteNear(manager.list(), mount, indexer, config.dataPath)) return { ok: true, kept: true };
     }
     await rm(abs);
     // An assets/ folder left empty goes too (Git keeps no empty folders anyway).

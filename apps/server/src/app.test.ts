@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { execFileSync } from 'node:child_process';
@@ -1708,6 +1708,33 @@ describe('tag colors and renaming (AD-040)', () => {
     // No color left → the key goes; the rest of the file stays.
     expect((await color({ tag: 'belege', color: null })).json()).toEqual({ saved: ['Wiki'], skipped: [] });
     expect(readFileSync(join(wiki, '.kaveyl-wiki.yml'), 'utf8')).toBe('# eigene Einstellungen\norder:\n  - docs\n');
+
+    // Removing a tag everywhere (QA 24.11.): the notes stay, the last tag takes the line with it, the color goes.
+    const remove = (tag: string, c = cookie) => app.server.inject({ method: 'POST', url: '/api/tags/remove', payload: JSON.stringify({ tag }), headers: { 'content-type': 'application/json', cookie: c } });
+    expect((await color({ tag: 'belege', color: 'green' })).json()).toEqual({ saved: ['Wiki'], skipped: [] });
+    expect((await remove('belege', maria)).json()).toEqual({ notes: 0, skipped: 2, sources: [] });
+    expect((await remove('')).statusCode).toBe(400);
+    expect((await remove('#Belege')).json()).toEqual({ notes: 2, skipped: 0, sources: ['Wiki'] });
+    expect(readFileSync(join(wiki, 'docs', 'a.md'), 'utf8')).toBe('---\ntags: büro\n---\n# A\n');
+    expect(readFileSync(join(wiki, 'docs', 'b.md'), 'utf8')).toBe('# B\n');
+    expect(readFileSync(join(wiki, '.kaveyl-wiki.yml'), 'utf8')).toBe('# eigene Einstellungen\norder:\n  - docs\n');
+    await expect.poll(async () => ((await get('/api/tags')) as { tag: string }[]).map((t) => t.tag), { timeout: 5000 }).toEqual(['büro']);
+  });
+
+  it('leaves a plain note in an encrypted folder alone: removing or renaming a tag would commit its text (diff check 0.2.15)', async () => {
+    const wiki = join(root, 'projekte', 'wiki');
+    mkdirSync(join(wiki, 'tresor'));
+    const plain = '---\ntags: [geheim, lohn]\n---\n# Lohn\n\nKlartext von außen.\n';
+    writeFileSync(join(wiki, 'tresor', 'lohn.md'), plain);
+    writeFileSync(join(wiki, 'docs', 'offen.md'), '---\ntags: [geheim]\n---\n# Offen\n');
+    const { id } = await createLocalMount();
+    expect((await app.server.inject({ method: 'PUT', url: `/api/encrypted/${id}`, ...json({ folder: 'tresor', encrypted: true }) })).statusCode).toBe(200);
+    expect((await app.server.inject({ method: 'POST', url: '/api/tags/rename', ...json({ from: 'lohn', to: 'gehalt' }) })).json()).toMatchObject({ notes: 0 });
+    expect((await app.server.inject({ method: 'POST', url: '/api/tags/remove', ...json({ tag: 'geheim' }) })).json()).toMatchObject({ notes: 1 });
+    expect(readFileSync(join(wiki, 'tresor', 'lohn.md'), 'utf8')).toBe(plain);
+    expect(readFileSync(join(wiki, 'docs', 'offen.md'), 'utf8')).toBe('# Offen\n');
+    const hash = createHash('sha1').update(plain).digest('hex');
+    expect((await app.server.inject({ method: 'PUT', url: `/api/meta/${id}/tresor/lohn.md`, ...json({ tags: [], baseHash: hash }) })).statusCode).toBe(403);
   });
 });
 
@@ -1891,6 +1918,35 @@ describe('attachments', () => {
       return issues.filter((i) => i.kind === 'orphaned-attachment').map((i) => i.path);
     };
     await expect.poll(orphans, { timeout: 5000 }).toEqual(['docs/assets/fehlt-nicht.svg', 'docs/assets/verwaist.pdf']);
+  });
+
+  it('an attachment linked from another source showing the same folder, or only from a note too large for the index, is not orphaned (diff check 0.2.15)', async () => {
+    const wiki = join(root, 'projekte', 'wiki');
+    mkdirSync(join(wiki, 'docs', 'assets'), { recursive: true });
+    for (const f of ['oben.png', 'riesig.png', 'weg.png']) writeFileSync(join(wiki, 'docs', 'assets', f), 'x');
+    writeFileSync(join(wiki, 'top.md'), '# Oben\n\n![](docs/assets/oben.png)\n');
+    await createLocalMount();
+    const docs = (await app.server.inject({ method: 'POST', url: '/api/mounts', ...json({ type: 'local', source: join(wiki, 'docs'), name: 'Docs' }) })).json() as { id: string };
+    const issues = async (kind: string) => {
+      const res = await app.server.inject({ method: 'POST', url: '/api/admin/fsck', ...json({}) });
+      const mounts = (res.json() as { mounts: { name: string; issues: { kind: string; path: string }[] }[] }).mounts;
+      return mounts.find((m) => m.name === 'Docs')!.issues.filter((i) => i.kind === kind).map((i) => i.path);
+    };
+    await expect.poll(() => issues('orphaned-attachment'), { timeout: 5000 }).toEqual(['assets/riesig.png', 'assets/weg.png']);
+    // A note too large for the index: this source reports no orphans then, and says why.
+    writeFileSync(join(wiki, 'docs', 'gross.md'), `# Groß\n\n![](assets/riesig.png)\n\n${'Langer Text. '.repeat(170_000)}\n`);
+    await expect.poll(() => issues('orphaned-attachment'), { timeout: 5000 }).toEqual([]);
+    expect(await issues('error')).toEqual(['gross.md']);
+    // Deleting from an older report keeps it too; the outer source (same folder) does not report it either.
+    const kept = await app.server.inject({ method: 'DELETE', url: `/api/attachments/${docs.id}/assets/riesig.png?unlessLinkedBy=`, ...json({}) });
+    expect(kept.json()).toEqual({ ok: true, kept: true });
+    const res = await app.server.inject({ method: 'POST', url: '/api/admin/fsck', ...json({}) });
+    const outer = (res.json() as { mounts: { name: string; issues: { kind: string; path: string }[] }[] }).mounts.find((m) => m.name === 'Wiki')!;
+    expect(outer.issues.filter((i) => i.kind === 'orphaned-attachment')).toEqual([]);
+    // Deleting from the check keeps a file another source links to.
+    const del = await app.server.inject({ method: 'DELETE', url: `/api/attachments/${docs.id}/assets/oben.png?unlessLinkedBy=`, ...json({}) });
+    expect(del.json()).toEqual({ ok: true, kept: true });
+    expect(existsSync(join(wiki, 'docs', 'assets', 'oben.png'))).toBe(true);
   });
 
   it('encrypted notes: only encrypted uploads, files listed from disk, shared files kept, fsck knows .age files', async () => {

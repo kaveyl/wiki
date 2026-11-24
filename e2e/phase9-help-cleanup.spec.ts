@@ -313,7 +313,9 @@ test('help: the manual inside Kaveyl Wiki – chapters, search, links, from the 
 
   // From the editor toolbar and the command palette.
   await tree().getByText('roadmap', { exact: true }).first().click();
-  await page.getByRole('button', { name: /Hilfe zum Editor/ }).first().click();
+  // The dock (redesign 23.11.): „+“ → „Editor-Hilfe“.
+  await page.getByRole('button', { name: 'Block einfügen' }).filter({ visible: true }).click();
+  await page.getByRole('menuitem', { name: 'Editor-Hilfe' }).click();
   await expect(help().getByRole('heading', { name: 'Bearbeiten', exact: true })).toBeVisible();
   await closeAll();
   await page.keyboard.press('Control+k');
@@ -342,7 +344,7 @@ test('settings menu: main entries with tabs; notifications by e-mail and Pushove
   await expect(settings().getByRole('tablist', { name: 'Werkzeuge' }).getByRole('tab')).toHaveText(['Aufräumen', 'Protokoll', 'Prüfung']);
   // Tabs stay in one row (Webhooks next to Eingebundene Quellen, not below).
   await openSettings('Verbindungen');
-  await expect(settings().getByRole('tablist', { name: 'Quellen' }).getByRole('tab')).toHaveText(['Verbindungen', 'Eingebundene Quellen', 'Webhooks']);
+  await expect(settings().getByRole('tablist', { name: 'Quellen' }).getByRole('tab')).toHaveText(['Eingebundene Quellen', 'Verbindungen', 'Webhooks']);
   const top = async (name: string) => (await settings().getByRole('tab', { name, exact: true }).boundingBox())!.y;
   expect(await top('Webhooks')).toBe(await top('Verbindungen'));
   // The help stays in one place on every page (title bar, with or without tabs), and the tab row has nothing to scroll

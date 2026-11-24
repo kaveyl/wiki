@@ -37,12 +37,15 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Plus,
 } from 'lucide-react';
 import { openHelp } from '../help/help';
 import { openLightbox } from './images';
 import { CALLOUT_LABELS } from './callouts';
 import { CALLOUT_KINDS, normalizeLinkInput } from '@kaveyl-wiki/core';
-import { cx, promptDialog } from '../ui';
+import * as DM from '@radix-ui/react-dropdown-menu';
+import { DropdownContent, cx, promptDialog } from '../ui';
+import { usePrefs } from '../prefs';
 import { CODE_LANGUAGES, detectLanguage } from './highlight';
 import { isDrawingSrc, openDrawing } from './Drawing';
 import { t } from '../i18n';
@@ -137,8 +140,8 @@ function Btn({ label, active, disabled, onClick, children }: { label: string; ac
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={cx(
-        'flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-hover hover:text-fg disabled:opacity-35 disabled:hover:bg-transparent [&>svg]:h-4 [&>svg]:w-4',
-        active && 'bg-active text-fg',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-fg-muted hover:bg-hover hover:text-fg disabled:opacity-35 disabled:hover:bg-transparent [&>svg]:h-4 [&>svg]:w-4',
+        active && 'bg-accent-soft text-accent hover:bg-accent-soft hover:text-accent',
       )}
     >
       {children}
@@ -146,37 +149,70 @@ function Btn({ label, active, disabled, onClick, children }: { label: string; ac
   );
 }
 
-const Sep = () => <span className="mx-1 h-5 w-px shrink-0 bg-line" />;
+const Sep = () => <span className="mx-1 h-5 w-px shrink-0 bg-line" aria-hidden />;
 
-export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onAttach?: () => void; extra?: ReactNode }) {
+/**
+ * Where the formatting tools sit (Einstellungen → Darstellung → Werkzeugleiste): `dock` floats at the bottom of the
+ * note (two rows: the formatting row above can be folded with „Aa“), `top` is a floating bar above the note, `bar`
+ * the full-width strip of narrow screens (phones keep it, the dock would clash with the on-screen keyboard).
+ */
+export type ToolbarPlace = 'dock' | 'top' | 'bar';
+
+export function EditorToolbar({ editor, onAttach, extra, place = 'bar' }: { editor: Editor; onAttach?: () => void; extra?: ReactNode; place?: ToolbarPlace }) {
   const s = useActive(editor);
   const c = () => editor.chain().focus();
-  return (
-    <div ref={scrollHint} className="scroll-hint flex h-10 shrink-0 items-center gap-0.5 overflow-x-auto border-b border-line px-3" role="toolbar" aria-label={t('Formatierung')}>
+  const formatRow = usePrefs((p) => p.formatRow);
+  const undoRedo = (
+    <>
       <Btn label={t('Rückgängig (Strg+Z)')} disabled={!s.canUndo} onClick={() => c().undo().run()}>
         <Undo2 />
       </Btn>
       <Btn label={t('Wiederholen (Strg+Umschalt+Z)')} disabled={!s.canRedo} onClick={() => c().redo().run()}>
         <Redo2 />
       </Btn>
-      <Sep />
-      <select
-        aria-label={t('Absatzformat')}
-        className="h-7 shrink-0 rounded border border-line bg-bg px-1.5 text-xs text-fg"
-        value={s.block}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (v === 'p') c().setParagraph().run();
-          else c().setHeading({ level: Number(v.slice(1)) as 1 | 2 | 3 }).run();
-        }}
-      >
-        <option value="p">{t('Text')}</option>
-        <option value="h1">{t('Überschrift 1')}</option>
-        <option value="h2">{t('Überschrift 2')}</option>
-        <option value="h3">{t('Überschrift 3')}</option>
-        {s.block === 'hx' && <option value="hx">{t('Überschrift 4–6')}</option>}
-      </select>
-      <Sep />
+    </>
+  );
+  // In the top pill a quiet dropdown without a frame (draft „Überschrift 1 ⌄“); the narrow bar keeps the plain one.
+  const blockSelect = (
+    <select
+      aria-label={t('Absatzformat')}
+      className={cx(
+        'h-7 shrink-0 text-xs text-fg',
+        place === 'top'
+          ? 'cursor-pointer appearance-none rounded-full bg-transparent bg-[length:12px] bg-[right_8px_center] bg-no-repeat pl-3 pr-7 font-medium hover:bg-hover [background-image:var(--select-chevron)]'
+          : 'rounded-lg border border-line bg-bg px-1.5',
+      )}
+      value={s.block}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === 'p') c().setParagraph().run();
+        else c().setHeading({ level: Number(v.slice(1)) as 1 | 2 | 3 }).run();
+      }}
+    >
+      <option value="p">{t('Text')}</option>
+      <option value="h1">{t('Überschrift 1')}</option>
+      <option value="h2">{t('Überschrift 2')}</option>
+      <option value="h3">{t('Überschrift 3')}</option>
+      {s.block === 'hx' && <option value="hx">{t('Überschrift 4–6')}</option>}
+    </select>
+  );
+  const headings = (
+    <>
+      {(
+        [
+          [1, t('Überschrift 1'), <Heading1 key="1" />],
+          [2, t('Überschrift 2'), <Heading2 key="2" />],
+          [3, t('Überschrift 3'), <Heading3 key="3" />],
+        ] as const
+      ).map(([level, label, icon]) => (
+        <Btn key={level} label={label} active={s.block === `h${level}`} disabled={!editor.can().toggleHeading({ level })} onClick={() => c().toggleHeading({ level }).run()}>
+          {icon}
+        </Btn>
+      ))}
+    </>
+  );
+  const marks = (
+    <>
       <Btn label={t('Fett (Strg+B)')} active={s.bold} onClick={() => c().toggleBold().run()}>
         <Bold />
       </Btn>
@@ -194,7 +230,10 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
       </Btn>
       <FormatPainter editor={editor} />
       <EmojiButton editor={editor} />
-      <Sep />
+    </>
+  );
+  const lists = (
+    <>
       <Btn label={t('Aufzählung')} active={s.bullet} onClick={() => c().toggleBulletList().run()}>
         <List />
       </Btn>
@@ -204,36 +243,57 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
       <Btn label={t('Checkliste')} active={s.task} onClick={() => c().toggleTaskList().run()}>
         <ListChecks />
       </Btn>
-      <Sep />
-      <Btn label={t('Zitat')} active={s.quote} onClick={() => c().toggleBlockquote().run()}>
-        <Quote />
-      </Btn>
-      <Btn label={t('Codeblock')} active={s.codeBlock} onClick={() => c().toggleCodeBlock().run()}>
-        <Code2 />
-      </Btn>
-      <Btn label={t('Hinweis-Box (Callout)')} active={!!s.callout} onClick={() => (s.callout ? c().lift('callout').run() : c().wrapIn('callout', { kind: 'NOTE' }).run())}>
-        <MessageSquareWarning />
-      </Btn>
-      <Btn label={t('Aufklappbarer Block')} active={s.details} onClick={() => (s.details ? c().unsetDetails().run() : c().setDetails().run())}>
-        <ChevronsDownUp />
-      </Btn>
-      {onAttach && (
-        <Btn label={t('Datei oder Bild anhängen (auch per Ziehen oder Einfügen)')} onClick={onAttach}>
-          <Paperclip />
-        </Btn>
-      )}
-      <Btn label={t('Trennlinie')} onClick={() => c().setHorizontalRule().run()}>
-        <Minus />
-      </Btn>
-      <Btn label={t('Tabelle einfügen')} active={s.table} onClick={() => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
-        <Table />
-      </Btn>
+    </>
+  );
+  const quote = (
+    <Btn label={t('Zitat')} active={s.quote} onClick={() => c().toggleBlockquote().run()}>
+      <Quote />
+    </Btn>
+  );
+  const codeBlock = (
+    <Btn label={t('Codeblock')} active={s.codeBlock} onClick={() => c().toggleCodeBlock().run()}>
+      <Code2 />
+    </Btn>
+  );
+  const callout = (
+    <Btn label={t('Hinweis-Box (Callout)')} active={!!s.callout} onClick={() => (s.callout ? c().lift('callout').run() : c().wrapIn('callout', { kind: 'NOTE' }).run())}>
+      <MessageSquareWarning />
+    </Btn>
+  );
+  const details = (
+    <Btn label={t('Aufklappbarer Block')} active={s.details} onClick={() => (s.details ? c().unsetDetails().run() : c().setDetails().run())}>
+      <ChevronsDownUp />
+    </Btn>
+  );
+  const attach = onAttach && (
+    <Btn label={t('Datei oder Bild anhängen (auch per Ziehen oder Einfügen)')} onClick={onAttach}>
+      <Paperclip />
+    </Btn>
+  );
+  const rule = (
+    <Btn label={t('Trennlinie')} onClick={() => c().setHorizontalRule().run()}>
+      <Minus />
+    </Btn>
+  );
+  const table = (
+    <Btn label={t('Tabelle einfügen')} active={s.table} onClick={() => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+      <Table />
+    </Btn>
+  );
+  const help = (
+    <Btn label={t('Hilfe zum Editor und Markdown-Spickzettel (F1: Handbuch)')} onClick={() => openHelp('bearbeiten')}>
+      <CircleHelp />
+    </Btn>
+  );
+  // Controls for what the cursor is in: code block, callout, table.
+  const contextual = (
+    <>
       {s.codeBlock && (
         <>
           <Sep />
           <select
             aria-label={t('Sprache des Codeblocks')}
-            className="h-7 shrink-0 rounded border border-line bg-bg px-1.5 text-xs text-fg"
+            className="h-7 shrink-0 rounded-lg border border-line bg-bg px-1.5 text-xs text-fg"
             value={s.language}
             onChange={(e) => c().updateAttributes('codeBlock', { language: e.target.value || null }).run()}
           >
@@ -248,7 +308,7 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
           {s.detected && (
             <button
               type="button"
-              className="h-7 shrink-0 rounded px-1.5 text-xs text-accent hover:bg-hover"
+              className="h-7 shrink-0 rounded-lg px-1.5 text-xs text-accent hover:bg-hover"
               title={t('„{language}“ in die Datei schreiben – dann färben auch Gitea und VS Code', { language: s.detected })}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => c().updateAttributes('codeBlock', { language: s.detected }).run()}
@@ -263,7 +323,7 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
           <Sep />
           <select
             aria-label={t('Art der Hinweis-Box')}
-            className="h-7 shrink-0 rounded border border-line bg-bg px-1.5 text-xs text-fg"
+            className="h-7 shrink-0 rounded-lg border border-line bg-bg px-1.5 text-xs text-fg"
             value={s.callout}
             onChange={(e) => c().updateAttributes('callout', { kind: e.target.value }).run()}
           >
@@ -278,22 +338,22 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
       {s.table && (
         <>
           <Sep />
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().addRowBefore().run()} className="h-7 shrink-0 rounded px-1.5 text-xs text-fg-muted hover:bg-hover" title={t('Zeile darüber einfügen')}>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().addRowBefore().run()} className="h-7 shrink-0 rounded-lg px-1.5 text-xs text-fg-muted hover:bg-hover" title={t('Zeile darüber einfügen')}>
             {t('+ Zeile oben')}
           </button>
           <Btn label={t('Zeile darunter einfügen')} onClick={() => c().addRowAfter().run()}>
             <Rows3 />
           </Btn>
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().addColumnBefore().run()} className="h-7 shrink-0 rounded px-1.5 text-xs text-fg-muted hover:bg-hover" title={t('Spalte links einfügen')}>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().addColumnBefore().run()} className="h-7 shrink-0 rounded-lg px-1.5 text-xs text-fg-muted hover:bg-hover" title={t('Spalte links einfügen')}>
             {t('+ Spalte links')}
           </button>
           <Btn label={t('Spalte rechts einfügen')} onClick={() => c().addColumnAfter().run()}>
             <Columns3 />
           </Btn>
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().deleteRow().run()} className="h-7 shrink-0 rounded px-1.5 text-xs text-fg-muted hover:bg-hover">
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().deleteRow().run()} className="h-7 shrink-0 rounded-lg px-1.5 text-xs text-fg-muted hover:bg-hover">
             {t('− Zeile')}
           </button>
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().deleteColumn().run()} className="h-7 shrink-0 rounded px-1.5 text-xs text-fg-muted hover:bg-hover">
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => c().deleteColumn().run()} className="h-7 shrink-0 rounded-lg px-1.5 text-xs text-fg-muted hover:bg-hover">
             {t('− Spalte')}
           </button>
           <Btn label={t('Tabelle löschen')} onClick={() => c().deleteTable().run()}>
@@ -301,12 +361,149 @@ export function EditorToolbar({ editor, onAttach, extra }: { editor: Editor; onA
           </Btn>
         </>
       )}
+    </>
+  );
+
+  if (place === 'dock') {
+    const upper = formatRow || s.codeBlock || !!s.callout || s.table;
+    return (
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex flex-col items-center gap-2 px-4"
+        role="toolbar"
+        aria-label={t('Formatierung')}
+        data-print="hide"
+        data-dock=""
+      >
+        {upper && (
+          <div ref={scrollHint} className="scroll-hint no-scrollbar pointer-events-auto flex h-11 max-w-full items-center gap-0.5 overflow-x-auto rounded-full bg-raised px-2 shadow-dock">
+            {formatRow && (
+              <>
+                {headings}
+                <Sep />
+                {marks}
+              </>
+            )}
+            {contextual}
+          </div>
+        )}
+        <div ref={scrollHint} className="scroll-hint no-scrollbar pointer-events-auto flex h-12 max-w-full items-center gap-0.5 overflow-x-auto rounded-full bg-raised px-2 shadow-dock">
+          <InsertMenu editor={editor} active={s} />
+          <button
+            type="button"
+            aria-label={t('Formatzeile ein-/ausblenden')}
+            aria-pressed={formatRow}
+            title={t('Formatzeile ein-/ausblenden')}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => usePrefs.getState().set({ formatRow: !formatRow })}
+            className={cx('flex h-8 shrink-0 items-center rounded-full px-2.5 text-[0.8125rem] font-semibold', formatRow ? 'bg-accent-soft text-accent' : 'text-fg-muted hover:bg-hover hover:text-fg')}
+          >
+            Aa
+          </button>
+          <Sep />
+          <Btn label={t('Checkliste')} active={s.task} onClick={() => c().toggleTaskList().run()}>
+            <ListChecks />
+          </Btn>
+          <Btn label={t('Aufzählung')} active={s.bullet} onClick={() => c().toggleBulletList().run()}>
+            <List />
+          </Btn>
+          {callout}
+          {table}
+          {attach}
+          {extra && (
+            <>
+              <Sep />
+              {extra}
+            </>
+          )}
+          <Sep />
+          {undoRedo}
+        </div>
+      </div>
+    );
+  }
+
+  const row = (
+    <>
+      {undoRedo}
+      <Sep />
+      {blockSelect}
+      <Sep />
+      {marks}
+      <Sep />
+      {lists}
+      <Sep />
+      {quote}
+      {codeBlock}
+      {callout}
+      {details}
+      {attach}
+      {rule}
+      {table}
+      {contextual}
       {extra}
+    </>
+  );
+  if (place === 'top')
+    return (
+      <div className="flex shrink-0 justify-center px-6 pb-1 pt-3" data-print="hide">
+        {/* Wraps instead of scrolling (QA 24.11.: at 120 % the last buttons were cut off with no visible way to reach them). */}
+        <div className="flex min-h-11 max-w-full flex-wrap items-center justify-center gap-0.5 rounded-[22px] bg-raised px-2 py-1 shadow-dock" role="toolbar" aria-label={t('Formatierung')}>
+          {row}
+          <span className="shrink-0 whitespace-nowrap pl-2 pr-1 text-[0.6875rem] text-fg-faint">{t('„/“ für weitere Befehle')}</span>
+          {help}
+        </div>
+      </div>
+    );
+  return (
+    <div ref={scrollHint} className="scroll-hint flex h-10 shrink-0 items-center gap-0.5 overflow-x-auto border-b border-line-soft px-3" role="toolbar" aria-label={t('Formatierung')}>
+      {row}
       <span className="ml-auto shrink-0 pl-3 text-[0.6875rem] text-fg-faint">{t('„/“ für weitere Befehle')}</span>
-      <Btn label={t('Hilfe zum Editor und Markdown-Spickzettel (F1: Handbuch)')} onClick={() => openHelp('bearbeiten')}>
-        <CircleHelp />
-      </Btn>
+      {help}
     </div>
+  );
+}
+
+/** „+“ in the dock: the blocks that do not have a button of their own there, the help and the hint on „/“. */
+function InsertMenu({ editor, active: s }: { editor: Editor; active: ReturnType<typeof useActive> }) {
+  const c = () => editor.chain().focus();
+  const item = 'flex cursor-default select-none items-center gap-2.5 rounded-lg px-2 py-1.5 text-[0.8125rem] outline-none data-[highlighted]:bg-hover [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-fg-muted';
+  const entries: [string, ReactNode, () => void, boolean?][] = [
+    [t('Nummerierte Liste'), <ListOrdered key="o" />, () => c().toggleOrderedList().run(), s.ordered],
+    [t('Zitat'), <Quote key="q" />, () => c().toggleBlockquote().run(), s.quote],
+    [t('Codeblock'), <Code2 key="c" />, () => c().toggleCodeBlock().run(), s.codeBlock],
+    [t('Aufklappbarer Block'), <ChevronsDownUp key="d" />, () => (s.details ? c().unsetDetails().run() : c().setDetails().run()), s.details],
+    [t('Trennlinie'), <Minus key="m" />, () => c().setHorizontalRule().run()],
+  ];
+  return (
+    <DM.Root modal={false}>
+      <DM.Trigger asChild>
+        <button
+          type="button"
+          aria-label={t('Block einfügen')}
+          title={t('Block einfügen')}
+          onMouseDown={(e) => e.preventDefault()}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-fg-muted hover:bg-hover hover:text-fg data-[state=open]:bg-hover [&>svg]:h-[18px] [&>svg]:w-[18px]"
+        >
+          <Plus />
+        </button>
+      </DM.Trigger>
+      <DM.Portal>
+        <DropdownContent side="top" align="start" sideOffset={10} minWidth={220} className="z-50" onCloseAutoFocus={(e) => e.preventDefault()}>
+          {entries.map(([label, icon, run, on]) => (
+            <DM.Item key={label} className={cx(item, on && 'text-accent')} onSelect={run}>
+              {icon}
+              <span className="flex-1">{label}</span>
+            </DM.Item>
+          ))}
+          <DM.Separator className="my-1 h-px bg-line" />
+          <DM.Item className={item} onSelect={() => openHelp('bearbeiten')}>
+            <CircleHelp />
+            <span className="flex-1">{t('Editor-Hilfe')}</span>
+          </DM.Item>
+          <div className="px-2 pb-1 pt-1.5 text-[0.6875rem] text-fg-faint">{t('„/“ für weitere Befehle')}</div>
+        </DropdownContent>
+      </DM.Portal>
+    </DM.Root>
   );
 }
 

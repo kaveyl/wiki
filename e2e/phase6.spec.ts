@@ -98,7 +98,8 @@ test('export: HTML or Markdown from one „Exportieren“ submenu (note, folder)
 
   const exportFromTree = async (name: string, item: string) => {
     await tree().getByText(name, { exact: true }).first().click({ button: 'right' });
-    await page.getByRole('menuitem', { name: 'Exportieren' }).click();
+    // Folders: one submenu „Importieren / Exportieren“ (redesign 23.11.), notes: „Exportieren“.
+    await page.getByRole('menuitem', { name: /^(Importieren \/ )?Exportieren$/ }).click();
     const [d] = await Promise.all([page.waitForEvent('download'), page.getByRole('menuitem', { name: item, exact: true }).click()]);
     return d;
   };
@@ -107,7 +108,7 @@ test('export: HTML or Markdown from one „Exportieren“ submenu (note, folder)
   expect(readFileSync((await zip.path())!).subarray(0, 2).toString()).toBe('PK');
   // Moving from one submenu to the next closes the first: never two open at once.
   await tree().getByText('plan', { exact: true }).first().click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Exportieren' }).hover();
+  await page.getByRole('menuitem', { name: 'Importieren / Exportieren' }).hover();
   await expect(page.getByRole('menuitem', { name: 'Markdown (ZIP)' })).toBeVisible();
   // One jump of the pointer still counts as „on the way into the open submenu“ (Radix' grace area);
   // a person keeps moving – so does the test, a moment later, inside „Anordnen“.

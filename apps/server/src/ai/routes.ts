@@ -135,16 +135,20 @@ export function registerAi(server: FastifyInstance, d: AiRouteDeps) {
     reply.raw.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-store', 'x-accel-buffering': 'no' });
     // The stream bypasses the onSend hook: step labels and errors in the interface's language here (AD-046).
     const lang = requestLang(req);
+    // „Stopp“ in the chat aborts the request: the agent then stops asking the provider (QA 24.11.).
+    const stop = new AbortController();
+    reply.raw.on('close', () => !reply.raw.writableEnded && stop.abort());
     const send = (e: AgentEvent | { type: 'error'; error: string; status: number }) => {
+      if (stop.signal.aborted) return;
       const out = e.type === 'step' ? { ...e, label: translateMessage(lang, e.label) } : e.type === 'error' ? { ...e, error: translateMessage(lang, e.error) } : e;
       reply.raw.write(`${JSON.stringify(out)}\n`);
     };
     try {
-      await d.agent.run(req, req.body, send);
+      await d.agent.run(req, req.body, send, stop.signal);
     } catch (e) {
       // Internal texts stay in the log (audit sec2-003).
       const pub = publicError(e);
-      if (!pub) req.log.error(e);
+      if (!pub && !stop.signal.aborted) req.log.error(e);
       send({ type: 'error', error: pub?.message ?? 'Interner Fehler', status: pub?.status ?? 500 });
     }
     reply.raw.end();

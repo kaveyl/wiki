@@ -22,7 +22,16 @@ export interface Prefs {
   language?: Lang;
   /** Admins: the release whose hint at the top right was closed (AD-062); the next release shows again. */
   dismissedUpdate?: string;
+  /** What the sidebar shows below the favorites: the sources, the recent notes or the AI shares (admins). */
+  sidebarView: SidebarView;
+  /** Where the formatting tools of the editor sit on wide screens: a floating dock at the bottom or a bar on top. */
+  toolbar: ToolbarPlace;
+  /** The upper row of the dock (headings, bold, italic …) is shown. */
+  formatRow: boolean;
 }
+
+export type SidebarView = 'tree' | 'recent' | 'ai';
+export type ToolbarPlace = 'dock' | 'top';
 
 export interface FontScale {
   ui: number;
@@ -34,7 +43,17 @@ export const FONT_DEFAULT: FontScale = { ui: 100, tree: 100, doc: 100, mono: 100
 export const FONT_MIN = 80;
 export const FONT_MAX = 150;
 
-const DEFAULTS: Prefs = { editorWidth: 'normal', showToc: true, collapsedSections: [], autoLockMin: 15, fontScale: FONT_DEFAULT, hideWelcome: false };
+const DEFAULTS: Prefs = {
+  editorWidth: 'normal',
+  showToc: true,
+  collapsedSections: [],
+  autoLockMin: 15,
+  fontScale: FONT_DEFAULT,
+  hideWelcome: false,
+  sidebarView: 'tree',
+  toolbar: 'dock',
+  formatRow: true,
+};
 
 /** Applies the font sizes at once (CSS variables on <html>, see styles.css): the whole app is the preview. */
 export function applyFontScale(f: Partial<FontScale> | undefined) {
@@ -55,8 +74,8 @@ interface PrefsStore extends Prefs {
 }
 
 const stored = (p: Prefs) => {
-  const { editorWidth, showToc, collapsedSections, autoLockMin, fontScale, hideWelcome, language, dismissedUpdate } = p;
-  return { editorWidth, showToc, collapsedSections, autoLockMin, fontScale, hideWelcome, language, dismissedUpdate };
+  const { editorWidth, showToc, collapsedSections, autoLockMin, fontScale, hideWelcome, language, dismissedUpdate, sidebarView, toolbar, formatRow } = p;
+  return { editorWidth, showToc, collapsedSections, autoLockMin, fontScale, hideWelcome, language, dismissedUpdate, sidebarView, toolbar, formatRow };
 };
 
 let timer: ReturnType<typeof setTimeout> | undefined;

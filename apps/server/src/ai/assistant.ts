@@ -77,6 +77,10 @@ const STOP = new Set(
   ),
 );
 
+/** Markdown the actions must not rewrite into something else (links stay clickable, formulas stay formulas). */
+export const KEEP_MARKDOWN =
+  'Markdown-Formatierung bleibt erhalten: Links bleiben Links in der Form [Text](Ziel) mit unverändertem Ziel (keine Umwandlung in Code oder reinen Text), Inline-Code bleibt in Backticks (enthält der Code selbst einen Backtick, umschließe ihn mit doppelten Backticks), Formeln bleiben in $…$ bzw. $$…$$ (nie \\(…\\) oder \\[…\\]), Fett, Kursiv, Durchgestrichen und Emoji bleiben, wie sie sind.';
+
 const PROMPTS: Record<Exclude<AiAction, 'custom'>, string> = {
   rewrite: 'Formuliere den Text klarer und flüssiger um. Inhalt, Ton und Sprache bleiben gleich.',
   shorten: 'Kürze den Text deutlich, ohne wichtige Aussagen zu verlieren.',
@@ -174,13 +178,15 @@ export function createAssistant(d: AssistantDeps) {
    * becomes the private one; asked for by name, or without a private AI, it is refused.
    */
   const keepChatPrivate = (req: FastifyRequest, p: ProviderConfig, chatId: string | undefined, explicit: boolean): ProviderConfig => {
-    if (!chatId || isPrivate(p)) return p;
-    const hit = d.db.prepare("SELECT 1 FROM ai_messages WHERE chat_id = ? AND json_extract(meta_json, '$.privateContent') = 1 LIMIT 1").get(chatId);
-    if (!hit && !legacyPrivate(chatId)) return p;
+    if (!chatId || isPrivate(p) || !chatPrivate(chatId)) return p;
     const priv = explicit ? null : privateProvider(req);
     if (!priv) throw new AiAccessError(`Dieser Chat enthält Inhalte aus privaten Notizen und geht nur an eine private KI – für ${p.name} einen neuen Chat beginnen.`);
     return priv;
   };
+
+  /** The chat carried content released for private AI only (its own mark, or from before the mark). */
+  const chatPrivate = (chatId: string): boolean =>
+    !!d.db.prepare("SELECT 1 FROM ai_messages WHERE chat_id = ? AND json_extract(meta_json, '$.privateContent') = 1 LIMIT 1").get(chatId) || legacyPrivate(chatId);
 
   /**
    * Answers from before the mark (0.2.13 and older, diff check 0.2.14): a provider that is private now may have read notes
@@ -290,7 +296,7 @@ export function createAssistant(d: AssistantDeps) {
   return {
     personal,
     /** The same gates for the agent (AD-026): one place decides what the AI may see and do. */
-    core: { providerFor, providerAt, privateProvider, privateHint, privateGrant, keepChatPrivate, blocked, noteFor, system, auditCall },
+    core: { providerFor, providerAt, privateProvider, privateHint, privateGrant, chatPrivate, keepChatPrivate, blocked, noteFor, system, auditCall },
 
     /** Which AI level/cloud flag applies here, and whether the current provider may use it (for the UI). */
     async status(req: FastifyRequest, mountId: string, path: string) {
@@ -332,6 +338,8 @@ export function createAssistant(d: AssistantDeps) {
       } else if (input.action === 'translate') {
         task = `${PROMPTS.translate} Zielsprache: ${input.language?.trim() || 'Englisch'}. Gib nur die Übersetzung aus.`;
       } else task = `${PROMPTS[input.action]} Gib nur das Ergebnis aus.`;
+      // QA 24.11.: „Umformulieren“ machte aus einem Notiz-Link Inline-Code, die Zusammenfassung aus $…$ \(…\).
+      task += `\n${KEEP_MARKDOWN}`;
       const res = await d.providers.chat(p, { system: system(req, task), messages: [{ role: 'user', content: text }], temperature: input.action === 'custom' ? 0.3 : 0.1 });
       auditCall(req, p, res.model, `Aktion „${input.action}“`, [{ mountId: mount.id, path: note.path, hash: note.hash }]);
       let out = res.text.trim();
@@ -344,7 +352,7 @@ export function createAssistant(d: AssistantDeps) {
     },
 
     /** „Frag die Wissensbasis“: answer with numbered sources; kept as a chat of the user. */
-    async ask(req: FastifyRequest, input: { question: string; scope: Scope; chatId?: string; providerId?: string }) {
+    async ask(req: FastifyRequest, input: { question: string; scope: Scope; chatId?: string; providerId?: string }, signal?: AbortSignal) {
       const question = String(input.question ?? '').trim().slice(0, 4000);
       if (!question) throw new AiAccessError('Frage fehlt');
       const scope = input.scope ?? { kind: 'all' };
@@ -381,7 +389,14 @@ export function createAssistant(d: AssistantDeps) {
           ? 'Beantworte die Frage frei aus deinem Allgemeinwissen – Wiki-Inhalte stehen dir hier nicht zur Verfügung. Sag offen, wenn du dir unsicher bist oder dein Wissen veraltet sein kann, und erfinde keine Quellen, Links oder Zitate. Fragt der Benutzer nach seinen eigenen Notizen oder Daten, sag, dass du im Bezug „Allgemein“ keinen Zugriff darauf hast und er einen anderen Bezug wählen kann. Antworte in der Sprache der Frage.'
           : `Beantworte die Frage anhand der nummerierten Quellen aus dem Wiki. Belege Aussagen mit [1], [2] … Steht die Antwort nicht in den Quellen, sag das ehrlich und rate nicht. ${GROUNDING} Antworte in der Sprache der Frage.`;
       const content = context ? `Quellen:\n\n${context}\n\n---\n\nFrage: ${question}` : scope.kind === 'general' ? question : `Es wurden keine freigegebenen Notizen zu dieser Frage gefunden.\n\nFrage: ${question}`;
-      const res = await d.providers.chat(p, { system: system(req, task), messages: [...history, { role: 'user', content }], maxTokens: 2048, temperature: scope.kind === 'general' ? 0.3 : 0.1 });
+      let res;
+      try {
+        res = await d.providers.chat(p, { system: system(req, task), messages: [...history, { role: 'user', content }], maxTokens: 2048, temperature: scope.kind === 'general' ? 0.3 : 0.1, signal });
+      } catch (e) {
+        // „Stopp“: the notes were sent already – in the audit like any other request (diff check 0.2.15, sec-g02).
+        if (signal?.aborted) auditCall(req, p, p.model, `Frage (${scope.kind}), abgebrochen`, picked.map((n) => ({ mountId: n.mountId, path: n.path, hash: n.hash })), { stopped: true });
+        throw e;
+      }
       const sources = citedSources(res.text, searched);
 
       const t = now();
@@ -433,7 +448,9 @@ export function createAssistant(d: AssistantDeps) {
         meta_json: string;
         created_at: string;
       }[]).map((m) => ({ role: m.role, content: m.content, sources: JSON.parse(m.sources_json) as Source[], meta: JSON.parse(m.meta_json) as Record<string, string>, createdAt: m.created_at }));
-      return { id: chat.id, title: chat.title, scope: JSON.parse(chat.scope_json) as Scope, messages };
+      // `private`: the chat holds content released for private AI only – „Insert into note“ warns before it lands in a
+      // note other AI may read (diff check 0.2.15, like the proposal card).
+      return { id: chat.id, title: chat.title, scope: JSON.parse(chat.scope_json) as Scope, messages, private: chatPrivate(chat.id) };
     },
 
     /**

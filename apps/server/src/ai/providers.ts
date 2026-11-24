@@ -105,6 +105,9 @@ export const DEFAULTS: Record<ProviderKind, { baseUrl: string; model: string; cl
   openai: { baseUrl: 'http://localhost:1234', model: '', cloud: false },
 };
 
+/** The provider's time limit, and the caller's stop (the person closed the chat or pressed „Stopp“). */
+const withTimeout = (signal: AbortSignal | null | undefined, ms: number) => (signal ? AbortSignal.any([signal, AbortSignal.timeout(ms)]) : AbortSignal.timeout(ms));
+
 export class AiProviderError extends Error {
   constructor(
     message: string,
@@ -126,6 +129,8 @@ export interface ChatRequest {
   messages: ChatMessage[];
   maxTokens?: number;
   temperature?: number;
+  /** „Stopp“ in the chat: the request to the provider ends (agent without tools → search-based answer). */
+  signal?: AbortSignal;
 }
 
 /**
@@ -303,7 +308,7 @@ export class Providers {
   private async call(url: string, init: RequestInit, timeoutMs = 120_000): Promise<unknown> {
     let res: Response;
     try {
-      res = await this.fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+      res = await this.fetchImpl(url, { ...init, signal: withTimeout(init.signal, timeoutMs) });
     } catch (e) {
       throw new AiProviderError(`Anbieter nicht erreichbar: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -332,7 +337,7 @@ export class Providers {
   private async callStream(url: string, init: RequestInit, onSse: (data: string, event: string | null) => void, timeoutMs = 180_000): Promise<unknown> {
     let res: Response;
     try {
-      res = await this.fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
+      res = await this.fetchImpl(url, { ...init, signal: withTimeout(init.signal, timeoutMs) });
     } catch (e) {
       throw new AiProviderError(`Anbieter nicht erreichbar: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -393,6 +398,7 @@ export class Providers {
           method: 'POST',
           headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
           body: JSON.stringify({ model: p.model, system: req.system, messages: req.messages, ...anthropicBody(p) }),
+          signal: req.signal,
         },
         ANTHROPIC_TIMEOUT_MS,
       )) as {
@@ -415,6 +421,7 @@ export class Providers {
     if ((p.kind === 'openrouter' || p.kind === 'ollama-cloud' || (p.kind === 'openai' && p.cloud)) && !key) throw new AiProviderError(`Für „${p.name}“ fehlt der API-Key`);
     const j = (await this.call(`${openaiBase(p)}/chat/completions`, {
       method: 'POST',
+      signal: req.signal,
       headers: { 'content-type': 'application/json', ...(key ? { authorization: `Bearer ${key}` } : {}), ...(p.kind === 'openrouter' ? { 'x-title': 'Kaveyl Wiki' } : {}) },
       body: JSON.stringify({
         model: p.model,
@@ -433,7 +440,7 @@ export class Providers {
    */
   async chatTools(
     p: ProviderConfig,
-    req: { system: string; messages: AgentMessage[]; tools: ToolDef[]; maxTokens?: number; onText?: (delta: string) => void },
+    req: { system: string; messages: AgentMessage[]; tools: ToolDef[]; maxTokens?: number; onText?: (delta: string) => void; signal?: AbortSignal },
   ): Promise<ToolChatResult> {
     const res = await this.chatToolsRaw(p, req);
     return { ...res, text: plainText(res.text), toolCalls: res.toolCalls.map((c) => ({ ...c, args: plainArgs(c.args) as Record<string, unknown> })) };
@@ -441,7 +448,7 @@ export class Providers {
 
   private async chatToolsRaw(
     p: ProviderConfig,
-    req: { system: string; messages: AgentMessage[]; tools: ToolDef[]; maxTokens?: number; onText?: (delta: string) => void },
+    req: { system: string; messages: AgentMessage[]; tools: ToolDef[]; maxTokens?: number; onText?: (delta: string) => void; signal?: AbortSignal },
   ): Promise<ToolChatResult> {
     if (!p.model) throw new AiProviderError(`Für „${p.name}“ ist kein Modell eingestellt`);
     const key = this.key(p);
@@ -471,6 +478,7 @@ export class Providers {
       type Block = { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown>; json?: string };
       const streamed: { blocks: Block[]; model?: string; stop_reason?: string | null; usage: { input_tokens?: number; output_tokens?: number } } = { blocks: [], usage: {} };
       const init = {
+        signal: req.signal,
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({
@@ -560,6 +568,7 @@ export class Providers {
     ];
     type OaiCall = { index?: number; id?: string; function?: { name?: string; arguments?: string | Record<string, unknown> } };
     const init = {
+      signal: req.signal,
       method: 'POST',
       headers: { 'content-type': 'application/json', ...(key ? { authorization: `Bearer ${key}` } : {}), ...(p.kind === 'openrouter' ? { 'x-title': 'Kaveyl Wiki' } : {}) },
       body: JSON.stringify({

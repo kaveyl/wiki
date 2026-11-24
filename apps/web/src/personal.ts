@@ -22,6 +22,8 @@ interface Personal {
   /** Keeps references valid after a move/rename or delete. */
   moved(mountId: string, from: string, to: string, toMountId?: string): void;
   removed(mountId: string, path: string): void;
+  /** The workspace closes (signing out): pending writes and retries end here. */
+  stop(): void;
 }
 
 const same = (a: { mountId: string; path: string }, mountId: string, path: string) => a.mountId === mountId && a.path === path;
@@ -45,9 +47,44 @@ export function present(refs: NoteRef[], mountIds: string[], treeOf: (mountId: s
 /** Saved refs plus those added before loading finished (each once, local first). */
 const merge = (local: NoteRef[], saved: NoteRef[]) => [...local, ...saved.filter((r) => !local.some((l) => same(l, r.mountId, r.path)))];
 
+/**
+ * Three-way merge before writing: only what this tab changed since it last read (`base`) goes onto what is stored now.
+ * Another tab open with older lists must not write them over newer ones (a favorite added there would vanish).
+ */
+export function rebase(base: NoteRef[], local: NoteRef[], stored: NoteRef[]): NoteRef[] {
+  const has = (list: NoteRef[], r: NoteRef) => list.some((x) => same(x, r.mountId, r.path));
+  return [...local.filter((l) => !has(base, l) || has(stored, l)), ...stored.filter((s) => !has(local, s) && !has(base, s))];
+}
+
 export const usePersonal = create<Personal>((set, get) => {
   /** Changed before the saved state arrived: merged into it on load, not written over it. */
   let early = false;
+  /** The lists as last read from or written to the server: what this tab changed is the difference to them. */
+  let base: { favorites: NoteRef[]; recent: NoteRef[] } = { favorites: [], recent: [] };
+  /** Counts sign-ins (load): a write or retry of the previous account never reaches the next one (code check G1). */
+  let session = 0;
+  /** Failed writes in a row: retried a few times with a growing pause, not for ever. */
+  let failures = 0;
+  const write = async () => {
+    const mine = session;
+    let stored: { favorites?: NoteRef[]; recent?: NoteRef[] } | null = null;
+    try {
+      stored = await api.getState<{ favorites?: NoteRef[]; recent?: NoteRef[] }>('personal');
+    } catch {
+      // Not readable: write this tab's lists as they are (as before) rather than lose its change.
+    }
+    if (mine !== session) return;
+    const now = get();
+    const favorites = stored ? rebase(base.favorites, now.favorites, stored.favorites ?? []) : now.favorites;
+    const recent = (stored ? rebase(base.recent, now.recent, stored.recent ?? []) : now.recent).slice(0, 20);
+    set({ favorites, recent });
+    await api.putState('personal', { favorites, recent });
+    // Only what reached the server is the new base: after a failed write, this tab's additions are still „its own“
+    // and go out with the next attempt instead of being taken for removed elsewhere (diff check 0.2.15).
+    base = { favorites, recent };
+  };
+  /** One write at a time: two overlapping ones would each rebase on a base the other one changes. */
+  let writing: Promise<void> = Promise.resolve();
   const persist = () => {
     if (!get().loaded) {
       early = true;
@@ -55,8 +92,17 @@ export const usePersonal = create<Personal>((set, get) => {
     }
     clearTimeout(timer);
     timer = setTimeout(() => {
-      const { favorites, recent } = get();
-      void api.putState('personal', { favorites, recent }).catch(() => undefined);
+      writing = writing
+        .then(write)
+        .then(() => void (failures = 0))
+        .catch((e: unknown) => {
+          // Signed out or refused (4xx): retrying cannot help. Otherwise a few more tries (5 s, 10 s … up to a minute);
+          // the next change starts over.
+          const status = (e as { status?: number }).status ?? 0;
+          if ((status >= 400 && status < 500) || ++failures > 5) return void (failures = 0);
+          clearTimeout(timer);
+          timer = setTimeout(persist, Math.min(60_000, 5_000 * 2 ** (failures - 1)));
+        });
     }, 500);
   };
   const fetchSaved = async () => {
@@ -72,6 +118,7 @@ export const usePersonal = create<Personal>((set, get) => {
     }
     wait = 0;
     const local = get();
+    base = { favorites: s?.favorites ?? [], recent: s?.recent ?? [] };
     set({ favorites: merge(local.favorites, s?.favorites ?? []), recent: merge(local.recent, s?.recent ?? []).slice(0, 20), loaded: true });
     if (early) {
       early = false;
@@ -85,8 +132,17 @@ export const usePersonal = create<Personal>((set, get) => {
     async load() {
       // A fresh start (also after switching accounts): nothing of the previous user's lists.
       early = false;
+      session++;
+      failures = 0;
+      clearTimeout(timer);
       set({ favorites: [], recent: [], loaded: false });
       await fetchSaved();
+    },
+    stop() {
+      session++;
+      failures = 0;
+      clearTimeout(timer);
+      clearTimeout(retry);
     },
     isFavorite: (mountId, path) => get().favorites.some((f) => same(f, mountId, path)),
     toggleFavorite(ref) {

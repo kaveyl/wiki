@@ -3,9 +3,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { shot } from './shots';
+import { waitIndexed } from './indexed';
+import { sidebarView } from './menus';
 import { openSettingsPage } from './settings-nav';
 
 const NOTES = resolve(import.meta.dirname, '../.local/e2e/projekte/notizen');
@@ -17,11 +19,19 @@ let page: Page;
 let fake: Server;
 let fakeUrl: string;
 const prompts: string[] = [];
+const slow = { calls: 0, closed: false };
 
 /** The agent's model (AD-026): looks things up with tools like a real one would, then answers. */
 function agentStep(messages: { role: string; content: string | null }[], res: import('node:http').ServerResponse) {
   prompts.push(JSON.stringify(messages));
   const user = messages.filter((m) => m.role === 'user').at(-1)!.content ?? '';
+  // „Stopp“ (QA 24.11.): a model that takes long; the test aborts it and checks that the server stops waiting.
+  if (user.includes('Langsame Frage')) {
+    slow.calls++;
+    res.on('close', () => (slow.closed = !res.writableEnded));
+    setTimeout(() => !res.writableEnded && res.end(JSON.stringify({ model: 'test-modell', choices: [{ message: { content: 'Zu spät.' } }] })), 30_000);
+    return;
+  }
   const last = messages.at(-1)!;
   const lastTool = last.role === 'tool' ? (last.content ?? '') : null;
   const n = messages.filter((m) => m.role === 'tool').length;
@@ -90,11 +100,11 @@ test('admin sets up a provider; without a release the AI sees nothing', async ()
   // Not released yet: the action fails with a clear reason, nothing went to the provider.
   await tree().getByText('roadmap', { exact: true }).first().click();
   await page.locator('.prose-note').filter({ visible: true }).getByText('Siehe').click();
-  await page.getByRole('toolbar', { name: 'Formatierung' }).filter({ visible: true }).getByRole('button', { name: 'KI' }).click();
-  await page.getByRole('menuitem', { name: 'Zusammenfassen' }).click();
-  await expect(page.getByRole('alert')).toContainText('nicht für die KI freigegeben');
+  // The AI button is grey with the reason instead of a menu whose actions all fail (QA 24.11.).
+  const ai = page.getByRole('toolbar', { name: 'Formatierung' }).filter({ visible: true }).getByRole('button', { name: 'KI' });
+  await expect(ai).toBeDisabled();
+  await expect(ai).toHaveAttribute('title', 'Für diese Notiz ist die KI nicht freigegeben');
   expect(prompts).toHaveLength(0);
-  await page.getByRole('button', { name: 'Verwerfen' }).click();
 });
 
 test('release a folder, rewrite a selection as a suggestion, replace it', async () => {
@@ -146,21 +156,22 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   await expect(ask.getByLabel('Bezug').locator('option:checked')).toHaveText('Dieser Ordner (plan)');
   await page.keyboard.press('Escape');
   await expect(ask).toHaveCount(0);
+  // The overview is a view of the sidebar of its own (redesign 23.11.).
+  await sidebarView(page, 'KI-Freigaben');
   await expect(rules.getByRole('listitem')).toHaveCount(1);
   await expect(rules.getByRole('listitem').first()).toContainText('plan (Notizen)');
   // Block the whole source: second row, ✦ at the source.
+  await sidebarView(page, 'Baum');
   await mountRow.click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'KI-Freigabe …' }).click();
   await page.getByRole('radio', { name: 'Nicht freigegeben' }).check();
   await page.getByRole('button', { name: 'Speichern' }).click();
-  await expect(rules.getByRole('listitem')).toHaveCount(2);
   await expect(mountRow.getByRole('button', { name: 'KI-Freigabe: nicht freigegeben' })).toBeVisible();
+  await sidebarView(page, 'KI-Freigaben');
+  await expect(rules.getByRole('listitem')).toHaveCount(2);
   await shot(page, '69-ki-freigaben');
   // Filters.
-  const section = page.locator('aside').getByText('KI-Freigaben', { exact: true }).locator('..');
-  // A filter on the collapsed section unfolds it again.
-  await section.getByText('KI-Freigaben', { exact: true }).click();
-  await expect(rules).toHaveCount(0);
+  const section = page.locator('aside').getByRole('region', { name: 'KI-Freigaben' });
   await section.getByRole('button', { name: 'gesperrt' }).click();
   await expect(rules.getByRole('listitem')).toHaveCount(1);
   await expect(rules.getByRole('listitem').first()).toContainText('Notizen');
@@ -174,13 +185,15 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   await rules.getByRole('listitem').filter({ hasText: 'nicht freigegeben' }).click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Freigabe entfernen' }).click();
   await expect(rules.getByRole('listitem')).toHaveCount(1);
-  await expect(mountRow.getByRole('button', { name: /KI-Freigabe/ })).toHaveCount(0);
-  // A click shows the folder in the tree.
+  // A click shows the folder in the tree – the sidebar switches to it.
   await rules.getByRole('listitem').first().click();
-  await expect(tree().locator('[data-node].bg-active')).toContainText('plan');
+  await expect(page.locator('aside').getByRole('tab', { name: 'Baum', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(tree().locator('[data-node][aria-selected="true"]')).toContainText('plan');
+  await expect(mountRow.getByRole('button', { name: /KI-Freigabe/ })).toHaveCount(0);
   // A cloud provider besides the local one: the folder released while there was none stays in the own network.
   const cloud = (await (await page.request.put('/api/ai/providers', { data: { kind: 'ollama-cloud', name: 'Wolke', apiKey: 'test-key' } })).json()) as { id: string };
   await page.reload();
+  await sidebarView(page, 'KI-Freigaben');
   await expect(rules.getByRole('listitem').first()).toContainText('nur private KI');
   await rules.getByRole('listitem').first().click({ button: 'right' });
   await page.getByRole('menuitem', { name: 'Freigabe bearbeiten …' }).click();
@@ -190,12 +203,9 @@ test('overview „KI-Freigaben“ lists every rule, ✦ marks it in the tree', a
   await dialog.getByRole('button', { name: 'Abbrechen' }).click();
   expect((await page.request.delete(`/api/ai/providers/${cloud.id}`, { data: {} })).ok()).toBe(true);
   await page.reload();
+  await sidebarView(page, 'KI-Freigaben');
   await expect(rules.getByRole('listitem').first()).toContainText('freigegeben');
-  // „Alles zu-/aufklappen“ next to the search includes this section (one toggle, like at each source).
-  await page.locator('aside').getByRole('button', { name: 'Alles zuklappen' }).click();
-  await expect(rules).toHaveCount(0);
-  await page.locator('aside').getByRole('button', { name: 'Alles aufklappen' }).click();
-  await expect(rules.getByRole('listitem').first()).toBeVisible();
+  await sidebarView(page, 'Baum');
 });
 
 test('ask the knowledge base: answer with a source that opens the note', async () => {
@@ -238,6 +248,28 @@ test('ask the knowledge base: answer with a source that opens the note', async (
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
+test('„Stopp“ ends a running question: the server stops asking the provider, nothing is saved (QA 24.11.)', async () => {
+  await page.locator('aside').getByRole('button', { name: 'KI fragen' }).click();
+  const ask = page.getByRole('dialog', { name: 'Frag die Wissensbasis' });
+  await ask.getByRole('button', { name: 'Neuer Chat' }).click();
+  await ask.getByRole('textbox', { name: 'Frage' }).fill('Langsame Frage zur Roadmap');
+  await ask.getByRole('button', { name: 'Fragen' }).click();
+  await expect(ask.getByText('Die KI denkt nach …')).toBeVisible();
+  await expect.poll(() => slow.calls, { timeout: 10_000 }).toBe(1);
+  await ask.getByRole('button', { name: 'Stopp' }).click();
+  await expect(ask.getByRole('button', { name: 'Fragen' })).toBeVisible();
+  await expect(ask.getByRole('textbox', { name: 'Frage' })).toHaveValue('Langsame Frage zur Roadmap');
+  await expect(ask.getByText('Die KI denkt nach …')).toHaveCount(0);
+  // The server dropped its request to the provider and did not go on.
+  await expect.poll(() => slow.closed, { timeout: 10_000 }).toBe(true);
+  await page.waitForTimeout(500);
+  expect(slow.calls).toBe(1);
+  await expect(page.getByLabel('Frühere Chats').getByText('Langsame Frage zur Roadmap')).toHaveCount(0);
+  await ask.getByRole('textbox', { name: 'Frage' }).fill('');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
 test('"KI fragen …" also in the editor\'s KI menu, with this note as the scope', async () => {
   await tree().getByText('roadmap', { exact: true }).first().click();
   await page.locator('.prose-note').filter({ visible: true }).getByText('Siehe').click();
@@ -247,8 +279,40 @@ test('"KI fragen …" also in the editor\'s KI menu, with this note as the scope
   const dialog = page.getByRole('dialog', { name: 'Frag die Wissensbasis' });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByLabel('Bezug').locator('option:checked')).toHaveText('Diese Notiz (roadmap)');
-  await page.keyboard.press('Escape');
+  // „In Notiz einfügen“ (owner 24.11.): below the paragraph with the cursor, the cited source as a link from this note.
+  await dialog.getByRole('textbox', { name: 'Frage' }).fill('Worauf verweist die Roadmap hier?');
+  await dialog.getByRole('button', { name: 'Fragen' }).click();
+  await expect(dialog.getByText('Die Roadmap verweist auf Trilium [1].')).toBeVisible();
+  await dialog.getByRole('button', { name: 'In Notiz einfügen' }).click();
   await expect(dialog).toHaveCount(0);
+  const editor = page.locator('.prose-note').filter({ visible: true });
+  await expect(editor.getByText('Die Roadmap verweist auf Trilium [1].')).toBeVisible();
+  await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toMatch(/Siehe[^\n]*\n\nDie Roadmap verweist auf Trilium \\\[1]\.\n\n\*\*Quellen:\*\*\n\n1\. \[roadmap\]\(roadmap\.md\)/);
+  // One step back takes it out again.
+  await page.keyboard.press('Control+z');
+  await expect(editor.getByText('Die Roadmap verweist auf Trilium [1].')).toHaveCount(0);
+  await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).not.toContain('Trilium \\[1]');
+});
+
+test('Alt+↑/↓ moves a list item inside its list and a paragraph past its neighbour (owner 24.11.)', async () => {
+  writeFileSync(join(NOTES, 'plan/Reihenfolge.md'), '# Reihenfolge\n\nErster Absatz\n\nZweiter Absatz\n\n- eins\n- zwei\n- drei\n');
+  await waitIndexed(page, 'Notizen', ['plan/Reihenfolge.md']);
+  await tree().getByText('Reihenfolge', { exact: true }).first().click();
+  const editor = page.locator('.prose-note').filter({ visible: true });
+  // A moment after each click: the editor takes the clicked place over on mouse-up, a key at once would still move
+  // the block where the cursor was before.
+  await editor.getByText('drei').click();
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Alt+ArrowUp');
+  await page.keyboard.press('Alt+ArrowUp');
+  await editor.getByText('Zweiter Absatz').click();
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Alt+ArrowUp');
+  await expect.poll(() => read('plan/Reihenfolge.md'), { timeout: 10_000 }).toBe('# Reihenfolge\n\nZweiter Absatz\n\nErster Absatz\n\n- drei\n- eins\n- zwei\n');
+  // The cursor moved along: typing goes on in the moved paragraph.
+  await page.keyboard.press('End');
+  await page.keyboard.type('!');
+  await expect.poll(() => read('plan/Reihenfolge.md'), { timeout: 10_000 }).toContain('Zweiter Absatz!\n\nErster');
 });
 
 test('"Weiterschreiben" finishes a broken-off sentence in the same paragraph, placeholders are pointed out', async () => {
@@ -313,6 +377,7 @@ test('chats: answers formatted like a note, a general question has a hint, the h
   const tools = dialog.getByLabel('Antwort verwenden').last();
   await tools.getByRole('button', { name: 'Kopieren' }).click();
   await expect(page.getByText('Antwort kopiert')).toBeVisible();
+  await expect(tools.getByRole('button', { name: 'Kopiert' })).toBeVisible();
   await tools.getByRole('button', { name: 'Markdown' }).click();
   await expect(dialog.getByLabel('Antwort als Markdown').last()).toBeVisible();
   await tools.getByRole('button', { name: 'Formatiert' }).click();

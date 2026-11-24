@@ -4,7 +4,8 @@ import { useState, useSyncExternalStore } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { onlineManager, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, RefreshCw, AlertTriangle, AlertOctagon, GitBranch, FolderGit2, HardDrive, CircleDot, CloudOff } from 'lucide-react';
-import { api, type MountStatus } from '../api';
+import { api, errorText, type MountStatus } from '../api';
+import { toast } from '../toast';
 import { fmtAgo, t, tn } from '../i18n';
 import { Button, PopoverContent, Spinner, cx } from '../ui';
 import { useActions } from './actions';
@@ -13,6 +14,20 @@ import { connectionLost, useConnection } from '../connection';
 type Level = 'ok' | 'busy' | 'info' | 'warn' | 'error';
 
 const relTime = (iso: string | null): string => (iso ? fmtAgo(iso) : t('noch nie'));
+
+/**
+ * „Sync all“ with its result as a message: done, or which sources ended in an error or a conflict (their details are in
+ * the sync overview) – the request itself succeeds either way (diff check 0.2.15).
+ */
+export async function syncAllWithMessage(): Promise<void> {
+  try {
+    const { failed = [] } = await api.syncAll();
+    if (!failed.length) toast({ kind: 'ok', title: t('Synchronisation abgeschlossen') });
+    else toast({ kind: 'error', title: tn(failed.length, 'Synchronisation: {n} Quelle mit Problem', 'Synchronisation: {n} Quellen mit Problem'), text: `${failed.join(', ')} – ${t('Details in der Sync-Übersicht')}` });
+  } catch (e) {
+    toast({ kind: 'error', title: t('Synchronisation fehlgeschlagen'), text: errorText(e) });
+  }
+}
 
 /** Human-readable state of one source: level + lines. */
 export function describe(m: MountStatus): { level: Level; lines: string[] } {
@@ -116,7 +131,8 @@ function OverallIcon({ level, lost }: { level: Level; lost: boolean }) {
 const subscribeOnline = (cb: () => void) => onlineManager.subscribe(cb);
 const isOnline = () => onlineManager.isOnline();
 
-export function SyncStatus({ isAdmin = false }: { isAdmin?: boolean }) {
+/** `labelled`: a coloured dot and the state in words (foot of the sidebar), else only the symbol. */
+export function SyncStatus({ isAdmin = false, labelled = false }: { isAdmin?: boolean; labelled?: boolean }) {
   const [open, setOpen] = useState(false);
   const openAction = useActions((s) => s.open);
   const qc = useQueryClient();
@@ -139,10 +155,23 @@ export function SyncStatus({ isAdmin = false }: { isAdmin?: boolean }) {
       : overall === 'busy'
         ? t('Synchronisiert …')
         : t('Alle Quellen synchron');
+  // The last sync of any repository, as a time of day next to the word („Synchron · 21:20“).
+  const last = items.map((i) => i.m.syncedAt).filter((x): x is string => !!x).sort().at(-1);
+  const short = lost
+    ? t('Offline')
+    : overall === 'error' || overall === 'warn'
+      ? label
+      : overall === 'busy'
+        ? t('Synchronisiert …')
+        : last
+          ? t('Synchron · {time}', { time: new Date(last).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) })
+          : t('Synchron');
+  const dot = lost || overall === 'warn' ? 'bg-warn' : overall === 'error' ? 'bg-danger' : overall === 'busy' || overall === 'info' ? 'bg-accent' : 'bg-ok';
 
   const run = async (key: string, fn: () => Promise<unknown>) => {
     setBusy(key);
-    await fn().catch(() => undefined);
+    // Result as a message too (QA 24.11.); what each source reports stays in the list below.
+    await (key === 'all' ? syncAllWithMessage() : fn().catch((e: unknown) => toast({ kind: 'error', title: t('Synchronisation fehlgeschlagen'), text: errorText(e) })));
     await qc.invalidateQueries({ queryKey: ['status'] });
     await qc.invalidateQueries({ queryKey: ['mounts'] });
     setBusy(null);
@@ -154,10 +183,17 @@ export function SyncStatus({ isAdmin = false }: { isAdmin?: boolean }) {
         {lost ? label : ''}
       </span>
       <Popover.Trigger asChild>
-        <button className="flex h-6 items-center gap-1 rounded px-1 text-fg-muted hover:bg-active hover:text-fg" aria-label={t('Sync-Status: {label}', { label })} title={label}>
-          <OverallIcon level={overall} lost={lost} />
-          {/* a count in the button's name, not a message */ !lost && problems > 0 && <span className="text-xs font-semibold text-danger">{problems}</span>}
-        </button>
+        {labelled ? (
+          <button className="flex h-7 min-w-0 items-center gap-1.5 rounded-full px-2 text-xs text-fg-muted hover:bg-hover hover:text-fg" aria-label={t('Sync-Status: {label}', { label })} title={label}>
+            <span className={cx('h-2 w-2 shrink-0 rounded-full', dot, overall === 'busy' && 'animate-pulse')} aria-hidden />
+            <span className="truncate">{short}</span>
+          </button>
+        ) : (
+          <button className="flex h-6 items-center gap-1 rounded px-1 text-fg-muted hover:bg-active hover:text-fg" aria-label={t('Sync-Status: {label}', { label })} title={label}>
+            <OverallIcon level={overall} lost={lost} />
+            {/* a count in the button's name, not a message */ !lost && problems > 0 && <span className="text-xs font-semibold text-danger">{problems}</span>}
+          </button>
+        )}
       </Popover.Trigger>
       <Popover.Portal>
         <PopoverContent align="start" sideOffset={6} className="z-50 w-[min(420px,calc(100vw-24px))]">

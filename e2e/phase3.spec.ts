@@ -4,6 +4,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { shot } from './shots';
+import { waitIndexed } from './indexed';
+import { sidebarView, subItem } from './menus';
 
 const E2E_DIR = resolve(import.meta.dirname, '../.local/e2e');
 const NOTES = join(E2E_DIR, 'projekte/notizen');
@@ -159,7 +161,8 @@ test('slash menu: filters across spaces, Enter without a match is a line break, 
   await page.keyboard.press('Control+End');
   await page.keyboard.press('Enter');
   await page.keyboard.type('/Überschrift 2');
-  await expect(page.getByRole('button', { name: /Überschrift 2/ })).toBeVisible();
+  // The entry of the slash menu (the dock has a button „Überschrift 2“ of its own).
+  await expect(page.getByRole('button', { name: /^Überschrift 2 / })).toBeVisible();
   await page.keyboard.press('Enter');
   await page.keyboard.type('Zwischentitel');
   await expect.poll(() => read('bausteine.md'), { timeout: 10_000 }).toContain('## Zwischentitel');
@@ -250,7 +253,9 @@ test('tags: add and remove in the note, browse all tags, filter by tag', async (
   await page.getByRole('button', { name: 'Tags', exact: true }).click();
   const tagsDialog = page.getByRole('dialog', { name: 'Tags' });
   await expect(tagsDialog.getByRole('button', { name: /ideen/ })).toBeVisible();
+  // A click picks the tag (its actions in the bar below, redesign 24.11.); „Notizen zeigen“ opens the search.
   await tagsDialog.getByRole('button', { name: /ideen/ }).click();
+  await tagsDialog.getByRole('button', { name: 'Notizen zeigen' }).click();
   const search = page.getByRole('dialog', { name: 'Suche' });
   await expect(search.getByLabel('Suchanfrage')).toHaveValue('tag:ideen');
   await expect(search.getByRole('button', { name: /^trilium/ })).toBeVisible();
@@ -287,8 +292,35 @@ test('colored tags: right-click → Farbe, saved in .kaveyl-wiki.yml; rename mer
   await expect(tagsDialog.getByRole('button', { name: /ideen/ })).toHaveCount(0);
   await expect(tagsDialog.getByRole('button', { name: /pkm/ })).toHaveAttribute('data-tag-color', 'red');
   await shot(page, '118-tag-liste');
+  // The colour menu of the bar below the list opens above the dialog (QA 24.11.: it was hidden behind it).
+  await tagsDialog.getByRole('button', { name: /pkm/ }).click();
+  await tagsDialog.getByRole('button', { name: 'Farbe', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Grün', exact: true }).click();
+  await expect.poll(() => read('.kaveyl-wiki.yml'), { timeout: 10_000 }).toContain('tagColors:\n  pkm: green\n');
+  await tagsDialog.getByRole('button', { name: 'Farbe', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Rot', exact: true }).click();
+  await expect.poll(() => read('.kaveyl-wiki.yml'), { timeout: 10_000 }).toContain('tagColors:\n  pkm: red\n');
+  await expect(page.getByRole('menu')).toHaveCount(0);
   await page.keyboard.press('Escape');
+  await expect(tagsDialog).toHaveCount(0);
   await expect(bar.locator('[data-tag-color]', { hasText: 'pkm' })).toHaveAttribute('data-tag-color', 'red');
+});
+
+test('a tag can be removed from all notes; the notes stay (QA 24.11.)', async () => {
+  writeFileSync(join(NOTES, 'wegtag-a.md'), '---\ntags: [wegdamit, bleibt]\n---\n# A\n');
+  writeFileSync(join(NOTES, 'wegtag-b.md'), '---\ntags: wegdamit\n---\n# B\n');
+  await waitIndexed(page, 'Notizen', ['wegtag-a.md', 'wegtag-b.md']);
+  await page.getByRole('button', { name: 'Tags', exact: true }).click();
+  const tagsDialog = page.getByRole('dialog', { name: 'Tags' });
+  await tagsDialog.getByRole('button', { name: /wegdamit/ }).click();
+  await tagsDialog.getByRole('button', { name: 'Löschen', exact: true }).click();
+  const ask = page.getByRole('alertdialog');
+  await expect(ask).toContainText('#wegdamit aus 2 Notizen entfernen? Die Notizen selbst bleiben, auch ihre anderen Tags.');
+  await ask.getByRole('button', { name: 'Tag entfernen' }).click();
+  await expect.poll(() => read('wegtag-b.md'), { timeout: 10_000 }).toBe('# B\n');
+  expect(read('wegtag-a.md')).toBe('---\ntags: [bleibt]\n---\n# A\n');
+  await expect(tagsDialog.getByRole('button', { name: /wegdamit/ })).toHaveCount(0);
+  await page.keyboard.press('Escape');
 });
 
 test('hovering a note link shows a preview card', async () => {
@@ -307,30 +339,29 @@ test('favorites, recently opened and recently changed in the sidebar', async () 
   await openNote('Detailseite');
   await page.getByRole('button', { name: 'Zu Favoriten' }).filter({ visible: true }).click();
   const aside = page.locator('aside');
-  await expect(aside.getByText('Favoriten')).toBeVisible();
+  // Favorites as chips under the search (redesign 23.11.).
+  const favs = aside.getByRole('list', { name: 'Favoriten' });
+  await expect(favs.getByText('Detailseite', { exact: true })).toBeVisible();
   await openNote('kolibri');
-  await expect(aside.getByText('Zuletzt')).toBeVisible();
-  await aside.getByRole('button', { name: 'geändert' }).click();
+  await sidebarView(page, 'Zuletzt');
+  const recent = aside.getByRole('region', { name: 'Zuletzt' });
+  await recent.getByRole('button', { name: 'geändert' }).click();
   writeFileSync(join(NOTES, 'frisch.md'), '# Frisch geändert\n');
-  await expect(aside.getByText('frisch', { exact: true }).first()).toBeVisible({ timeout: 40_000 });
-  await aside.getByRole('button', { name: 'geöffnet' }).click();
-  // Favorites survive a reload (stored per user on the server).
-  await page.reload();
-  await expect(aside.getByText('Favoriten')).toBeVisible();
-  const favs = aside.locator('div', { has: page.getByText('Favoriten', { exact: true }) }).first();
-  await expect(favs.getByText('Detailseite', { exact: true }).first()).toBeVisible();
+  await expect(recent.getByText('frisch', { exact: true }).first()).toBeVisible({ timeout: 40_000 });
+  await recent.getByRole('button', { name: 'geöffnet' }).click();
+  await expect(recent.getByText('kolibri', { exact: true })).toBeVisible();
   // Rows name their source: the same folder structure often recurs across repos.
-  await expect(favs.locator('[title^="Notizen / "]').first()).toContainText('(Notizen)');
-  // Picking „geändert“ on the collapsed „Zuletzt“ section unfolds it again.
-  const recent = aside.locator('div.mb-1', { has: page.getByText('Zuletzt', { exact: true }) });
-  await recent.getByText('Zuletzt', { exact: true }).click();
-  await expect(recent.getByText('kolibri', { exact: true })).toBeHidden();
+  await expect(recent.locator('[title^="Notizen / "]').first()).toContainText('(Notizen)');
+  // Favorites and the chosen view survive a reload (stored per user on the server).
+  await page.reload();
+  await expect(favs.getByText('Detailseite', { exact: true })).toBeVisible();
+  await expect(favs.locator('[title^="Notizen / "]').first()).toBeVisible();
+  await expect(aside.getByRole('tab', { name: 'Zuletzt', exact: true })).toHaveAttribute('aria-selected', 'true');
   await recent.getByRole('button', { name: 'geändert' }).click();
   await expect(recent.getByText('frisch', { exact: true }).first()).toBeVisible();
   await recent.getByRole('button', { name: 'geöffnet' }).click();
-  // Favoriten and Zuletzt in view – the sidebar may have scrolled with the tree.
-  await aside.getByText('Favoriten', { exact: true }).scrollIntoViewIfNeeded();
   await shot(page, '37-favoriten');
+  await sidebarView(page, 'Baum');
 });
 
 test('icon from the note header and write protection toggle', async () => {
@@ -339,16 +370,18 @@ test('icon from the note header and write protection toggle', async () => {
   await page.getByRole('button', { name: 'Symbol rocket' }).click();
   await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toContain('icon: lucide:rocket');
   // The own icon also shows under „Zuletzt · geöffnet“, which only remembers the path (owner 2026-10-16).
-  const recent = page.locator('aside div.mb-1', { has: page.getByText('Zuletzt', { exact: true }) });
+  await sidebarView(page, 'Zuletzt');
+  const recent = page.locator('aside').getByRole('region', { name: 'Zuletzt' });
   await recent.getByRole('button', { name: 'geöffnet' }).click();
   await expect(recent.locator('[title$=" / plan/roadmap.md"] svg.lucide-rocket')).toBeVisible();
+  await sidebarView(page, 'Baum');
   await page.getByRole('button', { name: 'Weitere Aktionen' }).filter({ visible: true }).click();
-  await page.getByRole('menuitem', { name: 'Schreibschutz setzen' }).click();
+  await page.getByRole('menuitemcheckbox', { name: 'Schreibschutz setzen' }).click();
   await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).toContain('readonly: true');
   await expect(page.getByRole('button', { name: /Nur lesen/ }).filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('toolbar', { name: 'Formatierung' }).filter({ visible: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Weitere Aktionen' }).filter({ visible: true }).click();
-  await page.getByRole('menuitem', { name: 'Schreibschutz aufheben' }).click();
+  await page.getByRole('menuitemcheckbox', { name: 'Schreibschutz aufheben' }).click();
   await expect.poll(() => read('plan/roadmap.md'), { timeout: 10_000 }).not.toContain('readonly');
   await expect(page.getByRole('toolbar', { name: 'Formatierung' }).filter({ visible: true })).toBeVisible();
 });
@@ -356,7 +389,7 @@ test('icon from the note header and write protection toggle', async () => {
 test('split view: a second note on the right or left, swap and close', async () => {
   await openNote('kolibri');
   await tree().getByText('roadmap', { exact: true }).first().click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Rechts daneben öffnen' }).click();
+  await subItem(page, 'Öffnen & Neu anlegen', 'Rechts daneben öffnen');
   const editors = page.locator('.prose-note').filter({ visible: true });
   await expect(editors).toHaveCount(2);
   await expect(editors.nth(0).getByRole('heading', { name: 'Kolibri' })).toBeVisible();
@@ -384,7 +417,7 @@ test('split view: a second note on the right or left, swap and close', async () 
   await openNote('roadmap');
   await expect(editors).toHaveCount(1);
   await tree().getByText('roadmap', { exact: true }).first().click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Rechts daneben öffnen' }).click();
+  await subItem(page, 'Öffnen & Neu anlegen', 'Rechts daneben öffnen');
   await expect(editors).toHaveCount(2);
   await expect.poll(halves).toEqual(['Kolibri', 'Roadmap']);
   await page.getByRole('button', { name: 'Geteilte Ansicht schließen' }).click();
@@ -392,7 +425,7 @@ test('split view: a second note on the right or left, swap and close', async () 
   // "Links daneben öffnen" puts the chosen note on the left, the current one on the right.
   await openNote('kolibri');
   await tree().getByText('roadmap', { exact: true }).first().click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Links daneben öffnen' }).click();
+  await subItem(page, 'Öffnen & Neu anlegen', 'Links daneben öffnen');
   await expect(editors).toHaveCount(2);
   await expect.poll(halves).toEqual(['Roadmap', 'Kolibri']);
   await page.getByRole('button', { name: 'Geteilte Ansicht schließen' }).click();
@@ -487,6 +520,13 @@ test('renders KaTeX math and a Mermaid diagram; opening never changes the file',
   await edit.getByLabel('LaTeX').fill('a^2 + b^2 = c^2');
   await edit.getByRole('button', { name: 'Übernehmen' }).click();
   await expect.poll(() => read('formeln.md'), { timeout: 10_000 }).toContain('$$\na^2 + b^2 = c^2\n$$');
+  // A diagram with a syntax error shows its error in the block only – Mermaid's own error picture used to stay
+  // at the bottom of the page (QA 24.11.).
+  writeFileSync(join(NOTES, 'kaputtes-diagramm.md'), '# Kaputt\n\n```mermaid\nflowchart LR\n  A --> ((( kaputt\n```\n');
+  await openNote('kaputtes-diagramm');
+  await expect(editor().locator('.mermaid-preview')).toContainText('Diagramm-Fehler', { timeout: 15_000 });
+  await expect(page.locator('body > [id^="dmermaid"]')).toHaveCount(0);
+  await expect(page.locator('body > svg, body > div > svg[aria-roledescription="error"]')).toHaveCount(0);
 });
 
 test('drag & drop in the tree: into a folder and manual order (.kaveyl-wiki.yml)', async () => {

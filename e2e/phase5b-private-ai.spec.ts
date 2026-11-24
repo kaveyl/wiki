@@ -4,6 +4,7 @@
 // Owner 16.11.: switching „Bearbeiten“ between providers kept the first one's fields – and the security rule must hold
 // end to end: private notes never reach the non-private AI, also not through the chat history.
 import { expect, test, type Page } from '@playwright/test';
+import { sidebarView } from './menus';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -239,8 +240,11 @@ test('releases: „nur private KI“ is offered and shown; the overview filter �
     await dialog.getByRole('button', { name: 'Speichern', exact: true }).click();
     await expect(dialog).toHaveCount(0);
   }
+  // The overview is a view of the sidebar of its own (redesign 23.11.).
+  await sidebarView(page, 'KI-Freigaben');
   const rules = page.getByRole('list', { name: 'KI-Freigaben' });
   await expect(rules.getByRole('listitem').filter({ hasText: 'e2e-privat' })).toContainText('nur private KI');
+  await sidebarView(page, 'Baum');
 });
 
 test('a private note goes to the private AI from the editor; the cloud AI never gets it', async () => {

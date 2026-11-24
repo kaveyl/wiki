@@ -93,7 +93,7 @@ test('a new folder deleted at once: the question names no note, the trash has it
   const row = page.locator(`aside [data-node="${id}:test"]`);
   await row.scrollIntoViewIfNeeded();
   await row.click({ button: 'right' });
-  await page.getByRole('menuitem', { name: 'Löschen', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Ordner löschen', exact: true }).click();
   const ask = page.getByRole('dialog', { name: 'Ordner löschen' });
   await expect(ask).toContainText('test wirklich löschen?');
   await ask.getByRole('button', { name: 'Löschen', exact: true }).click();

@@ -167,6 +167,32 @@ describe('loadMarkdown/saveMarkdown', () => {
   });
 });
 
+describe('lists: nested lists', () => {
+  const edit = (md: string, from: string, to: string) => {
+    const l = loadMarkdown(md);
+    return saveMarkdown(l.source, JSON.parse(JSON.stringify(l.doc).replace(`"${from}"`, `"${to}"`)) as PMNode);
+  };
+  it('an edit in a nested list adds no blank line before it (found 24.11.)', () => {
+    expect(edit('- a\n  - x\n  - y\n- b\n', 'x', 'xx')).toBe('- a\n  - xx\n  - y\n- b\n');
+    expect(edit('- [ ] a\n  - [x] x\n', 'x', 'xx')).toBe('- [ ] a\n  - [x] xx\n');
+    expect(edit('1. a\n   1. x\n', 'x', 'xx')).toBe('1. a\n   1. xx\n');
+  });
+  it('keeps the blank line where the nested list could not follow the text directly', () => {
+    // Numbers not starting at 1 cannot interrupt a paragraph; a second paragraph would merge lazily.
+    expect(edit('- a\n\n  3. x\n', 'x', 'xx')).toBe('- a\n\n  3. xx\n');
+    expect(edit('- a\n\n  b\n', 'b', 'bb')).toBe('- a\n\n  bb\n');
+    // A first sub-item without text of its own (empty, only spaces, only a deeper list): right under the text, its `-`
+    // would turn the text into a heading – the blank line stays (code check 0.2.15, G5).
+    const p = (text: string): PMNode => ({ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] });
+    for (const first of [[], [p('')], [p(' ')], [{ type: 'orderedList', attrs: { start: 1 }, content: [{ type: 'listItem', content: [p('x')] }] }]] as PMNode[][]) {
+      const item: PMNode = { type: 'listItem', content: [p('a'), { type: 'bulletList', content: [{ type: 'listItem', content: first }] }] };
+      const out = blockToMarkdown({ type: 'bulletList', content: [item] });
+      expect(out.startsWith('- a\n\n'), out).toBe(true);
+      expect(JSON.stringify(loadMarkdown(out).doc)).not.toContain('"heading"');
+    }
+  });
+});
+
 describe('lists: empty items', () => {
   const p = (text?: string): PMNode => ({ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] });
   const task = (text?: string, ...more: PMNode[]): PMNode => ({ type: 'taskItem', attrs: { checked: false }, content: [p(text), ...more] });

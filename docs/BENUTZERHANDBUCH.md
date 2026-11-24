@@ -166,15 +166,24 @@ unter [Auf einem neuen Server](#auf-einem-neuen-server).
 
 ![Oberfläche](handbuch/02-oberflaeche.webp)
 
-- **Links (Seitenleiste):** oben neben „Kaveyl“ das **Sync-Symbol**, dann ✦ **KI fragen** (wenn eingerichtet),
-  **#** Tags und Seitenleiste ausblenden; darunter
-  die Suche, Favoriten, „Zuletzt“ und jede eingebundene **Quelle** (Repository oder Ordner) als eigener Baum.
-  Alle Menüs Eintrag für Eintrag: [Menüs im Überblick](#menüs-im-überblick).
-- **Oben rechts** in der Tab-Leiste – immer sichtbar, auch bei eingeklappter Seitenleiste: **?** Hilfe, das
-  **Zahnrad** (Einstellungen), das **Konto-Menü** (Personen-Symbol: dein Name und deine E-Mail-Adresse,
-  **Mein Konto …**, **Abmelden**) und das **Farbschema-Symbol** (Sonne, Mond oder Bildschirm). Jeder Klick darauf
-  schaltet weiter: Hell → Dunkel → System (folgt dem Gerät); die Wahl bleibt in diesem Browser gespeichert. Auf dem
-  Handy stehen Hilfe und Einstellungen mit im Konto-Menü, damit die Tabs Platz haben.
+Die Notiz liegt als abgerundetes Blatt auf einem ruhigen Hintergrund; die Seitenleiste steht links direkt auf diesem
+Hintergrund. Zwischen beiden sitzt ein schmaler Griff: Ziehen (oder mit dem Finger schieben, mit der Tastatur ← →)
+ändert die Breite der Seitenleiste.
+
+- **Links (Seitenleiste)** von oben nach unten: „Kaveyl Wiki“ mit ✦ **KI fragen** (wenn eingerichtet) und **#** Tags;
+  der Knopf **Neue Notiz** (legt sie im Ordner der offenen Notiz an, sonst in der ersten Quelle, in die du schreiben
+  darfst); die **Suche**; deine **Favoriten** als kleine Chips (bei vielen in zwei Zeilen zum Scrollen); der Umschalter
+  **Baum | Zuletzt | KI-Freigaben** (KI-Freigaben nur für Administratoren) und darunter die gewählte Ansicht – im Baum
+  jede eingebundene **Quelle** (Repository oder Ordner) in einer gemeinsamen Karte. Ganz unten **Quelle einbinden**
+  (Administratoren) und der **Papierkorb**, darunter der **Sync-Status** (grüner Punkt „Synchron · 21:20“), das
+  **Zahnrad** (Einstellungen), das **Farbschema-Symbol** und **Seitenleiste ausblenden**. Alle Menüs Eintrag für
+  Eintrag: [Menüs im Überblick](#menüs-im-überblick).
+- **Oben rechts** in der Tab-Leiste – immer sichtbar, auch bei eingeklappter Seitenleiste: **?** Hilfe und das
+  **Konto** (Anfangsbuchstabe und Name: dein Name und deine E-Mail-Adresse, **Mein Konto …**, **Abmelden**). Ist die
+  Seitenleiste eingeklappt, stehen hier zusätzlich das **Zahnrad** und das **Farbschema-Symbol** (Sonne, Mond oder
+  Bildschirm). Jeder Klick auf das Farbschema-Symbol schaltet weiter: Hell → Dunkel → System (folgt dem Gerät); die
+  Wahl bleibt in diesem Browser gespeichert. Auf dem Handy stehen Hilfe und Einstellungen mit im Konto-Menü, damit die
+  Tabs Platz haben.
 - **Oben:** Tabs der geöffneten Notizen. Die mittlere Maustaste öffnet in einem neuen Tab (unter Favoriten und
   Zuletzt auch Strg+Klick; im Baum [markiert](#mehrere-markieren) Strg+Klick). Rechtsklick auf einen Tab → **„Tab anheften“**: angeheftete Tabs rücken nach links,
   zeigen eine Stecknadel statt ×, werden beim Öffnen einer anderen Notiz nie ersetzt und bleiben
@@ -187,8 +196,8 @@ unter [Auf einem neuen Server](#auf-einem-neuen-server).
 ![Angeheftete Tabs](handbuch/50-angeheftet.webp)
 
 ![Alle Tabs](handbuch/tabs-alle.webp)
-- **Mitte:** der Editor mit Formatierungsleiste. **Rechts** das Inhaltsverzeichnis (bei
-  längeren Notizen), ein- und ausblendbar.
+- **Mitte:** der Editor; die Werkzeugleiste schwebt unten über der Notiz (oder steht oben, siehe
+  [Darstellung](#darstellung)). **Rechts** das Inhaltsverzeichnis (bei längeren Notizen), ein- und ausblendbar.
 - Oben rechts in der Notiz: **Editor / Markdown** (Ansicht umschalten), Breite umschalten
   und das Menü **„…“** (Versionen, Umbenennen, Löschen …).
 
@@ -227,20 +236,30 @@ Notiz-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersche
 
 | Symbol | Wirkung |
 |---|---|
-| Sync-Symbol | Zustand aller Quellen (grün = synchron, Punkt = wartet auf Übertragung, Warnung = bitte ansehen, durchgestrichene Wolke = keine Verbindung zum Server); ein Klick öffnet die [Sync-Übersicht](#speichern-übertragen-und-synchronisieren) |
 | ✦ KI fragen | [Frag die Wissensbasis](#frag-die-wissensbasis) über alles Freigegebene |
-| # Tags | alle Tags mit Anzahl und Farbe; ein Klick zeigt die Notizen, Rechtsklick färbt oder benennt um |
-| Seitenleiste ausblenden | wie beschriftet |
-| Neben der Suche: Neu …, Alles auf-/zuklappen | neue Notiz/neuer Ordner; alle Rubriken und Ordner auf- oder zuklappen |
+| # Tags | **Tags verwalten:** alle Tags mit Anzahl und Farbe. Ein Klick wählt ein Tag, darunter stehen **Notizen zeigen**, **Farbe**, **Umbenennen**, **Zusammenführen** und **Löschen** (nimmt das Tag nach einer Rückfrage mit der Anzahl aus allen Notizen, die du bearbeiten darfst – die Notizen bleiben); ein Doppelklick zeigt die Notizen gleich, Rechtsklick öffnet dieselben Befehle als Menü |
+| Neue Notiz | neue Notiz im Ordner der offenen Notiz (sonst in der ersten beschreibbaren Quelle) |
+| Favoriten-Chips | ein Klick öffnet, Rechtsklick wie unter [Favoriten](#notizen-finden-und-lesen) |
+| Baum \| Zuletzt \| KI-Freigaben | welche Ansicht darunter steht; die Wahl gilt für dein Konto. „Im Baum anzeigen“ schaltet von selbst auf „Baum“ |
+| Quellen: Alles auf-/zuklappen | alle Ordner aller Quellen auf- oder zuklappen |
+
+### Fuß der Seitenleiste
+
+| Symbol | Wirkung |
+|---|---|
+| Quelle einbinden, Papierkorb | wie beschriftet (Quelle einbinden nur für Administratoren) |
+| Sync-Status | Punkt und Wort: grün „Synchron · Uhrzeit“, lila = wartet auf Übertragung oder läuft, orange/rot = bitte ansehen, „Offline“ = keine Verbindung zum Server; ein Klick öffnet die [Sync-Übersicht](#speichern-übertragen-und-synchronisieren) |
+| Zahnrad | [Einstellungen](#einstellungen-im-überblick) |
+| Farbschema | Hell → Dunkel → System |
+| Seitenleiste ausblenden | wie beschriftet; zurück mit dem Symbol links in der Tab-Leiste |
 
 ### Oben rechts
 
 | Symbol | Wirkung |
 |---|---|
 | ? Hilfe | dieses Handbuch (auch **F1**) |
-| Zahnrad | [Einstellungen](#einstellungen-im-überblick) |
-| Konto-Menü (Personen-Symbol) | dein Name und deine E-Mail-Adresse; **Mein Konto …** öffnet Einstellungen → Konto; **Abmelden** (fragt vorher, wenn noch etwas ungespeichert ist). Auf dem Handy zusätzlich **Hilfe / Handbuch** und **Einstellungen** |
-| Farbschema | Hell → Dunkel → System |
+| Konto (Anfangsbuchstabe und Name) | dein Name und deine E-Mail-Adresse; **Mein Konto …** öffnet Einstellungen → Konto; **Abmelden** (fragt vorher, wenn noch etwas ungespeichert ist). Auf dem Handy zusätzlich **Hilfe / Handbuch** und **Einstellungen** |
+| Zahnrad, Farbschema | nur bei eingeklappter Seitenleiste (sonst in ihrem Fuß) |
 
 ### Rechtsklick auf eine Quelle
 
@@ -263,28 +282,33 @@ Notiz-Menü **„…“**. Was du nicht darfst (z. B. ohne Schreibrecht), ersche
 
 ### Rechtsklick auf einen Ordner oder eine Notiz
 
+Ganz oben steht eine Leiste mit fünf Kacheln für das Häufigste, darunter folgen die übrigen Einträge in Gruppen;
+**Löschen** steht rot abgesetzt am Ende.
+
+- **Kacheln an einer Notiz:** **Neuer Tab** (auch mittlere Maustaste), **Kopieren**, **Ausschneiden**, **Umbenennen**
+  (Umbenennen / verschieben), **Favorit**.
+- **Kacheln an einem Ordner:** **Fokus** (nur diesen Ordner zeigen), **Notiz** und **Ordner** (neu darin),
+  **Umbenennen**, **Favorit**.
+
 | Eintrag | Wirkung |
 |---|---|
-| In neuem Tab öffnen, Rechts / Links daneben öffnen | Notiz in neuem Tab (auch mittlere Maustaste) oder in der [geteilten Ansicht](#notizen-finden-und-lesen) |
-| Nur diesen Ordner zeigen (Fokus) | Seitenleiste zeigt nur diesen Ordner |
-| Neue Notiz / Neuer Ordner | darin (an einer Notiz: daneben) |
-| Umbenennen / verschieben | Name und Ziel, auch in eine andere Quelle; Links werden repariert |
-| Kopieren, Ausschneiden, Einfügen „…“ | Strg+C / Strg+X / Strg+V im Baum |
-| Pfad kopieren | vollständiger Pfad mit der Quelle vorne (`Quelle/Ordner/Notiz.md`) in die Zwischenablage |
+| Öffnen & Neu anlegen ▸ Rechts / Links daneben öffnen, Neue Notiz / Neuer Ordner daneben | an Notizen: [geteilte Ansicht](#notizen-finden-und-lesen) und Neues auf derselben Ebene |
+| Öffnen (Tab / Rechts / Links) ▸ In neuem Tab, Rechts / Links daneben öffnen | an Ordnern mit Ordnerseite |
+| Kopieren / Ausschneiden / Pfad ▸ Kopieren, Ausschneiden, Einfügen „…“, Pfad kopieren | an Ordnern; an Notizen stehen Einfügen „…“ daneben und **Pfad kopieren** direkt in der Liste. Strg+C / Strg+X / Strg+V gehen im Baum immer. Der Pfad kommt vollständig mit der Quelle vorne (`Quelle/Ordner/Notiz.md`) in die Zwischenablage |
+| Umbenennen / verschieben (Kachel) | Name und Ziel, auch in eine andere Quelle; Links werden repariert |
 | Auswählen | [mehrere markieren](#mehrere-markieren) – Kästchen vor den Zeilen, ein Tippen markiert (für Tablet und Handy; mit der Maus: Strg+Klick) |
-| Importieren ▸ Markdown-Dateien … | nur an Ordnern: `.md`-Dateien vom Computer als Notizen hinein ([Markdown importieren](#markdown-importieren)) |
-| Importieren ▸ Aus anderem Programm … | nur an Ordnern: Export eines anderen Programms (ZIP) als neuer Unterordner ([Aus anderen Programmen importieren](#aus-anderen-programmen-importieren)) |
-| Exportieren ▸ HTML-Datei bzw. HTML (ZIP) beim Ordner, Markdown bzw. Markdown (ZIP) beim Ordner | [Export](#exportieren-und-drucken) |
-| Aus Backup wiederherstellen … | die [Sicherungen](#sicherungen) der Quelle, beim Öffnen ist diese Stelle ausgewählt (Admins) |
 | Anordnen → Nach oben / Nach unten, Inhalt alphabetisch sortieren | Reihenfolge ohne Ziehen |
-| Zu Favoriten / Aus Favoriten entfernen | Stern-Liste oben in der Seitenleiste |
+| Importieren / Exportieren ▸ Markdown-Dateien …, Aus anderem Programm … | nur an Ordnern: `.md`-Dateien vom Computer als Notizen hinein ([Markdown importieren](#markdown-importieren)) bzw. Export eines anderen Programms (ZIP) als neuer Unterordner ([Aus anderen Programmen importieren](#aus-anderen-programmen-importieren)) |
+| Importieren / Exportieren ▸ HTML (ZIP), Markdown (ZIP) bzw. an Notizen Exportieren ▸ HTML-Datei, Markdown | [Export](#exportieren-und-drucken) |
+| Aus Backup wiederherstellen … | die [Sicherungen](#sicherungen) der Quelle, beim Öffnen ist diese Stelle ausgewählt (Admins) |
+| Favorit (Kachel) | Zu Favoriten / Aus Favoriten entfernen – die Chips oben in der Seitenleiste |
 | Icon ändern … | Symbol, Emoji oder eigenes Icon |
 | Ordner verschlüsseln … / Ordner fertig verschlüsseln … / Verschlüsselung aufheben … | [Verschlüsselung](#verschlüsselte-notizen-und-ordner) |
 | Berechtigungen … | [Rechte](#berechtigungen) für diesen Ordner bzw. diese Notiz |
 | Teilen ▸ Per Mail versenden … | nur an Notizen: die Notiz als Datei an eine beliebige Adresse ([Per Mail versenden](#per-mail-versenden)); ausgegraut ohne E-Mail-Versand und bei verschlüsselten Notizen |
 | Teilen ▸ Zugriff per E-Mail geben … | Ordner (mit allem darin) bzw. Notiz mit jemandem [teilen](#konten-einladungen-und-teilen-per-e-mail) („verwalten“) |
-| KI-Freigabe … | [KI-Freigabe](#ki-freigaben) genau hier (Admins) |
-| Löschen | in den [Papierkorb](#versionen-und-papierkorb), mit Rückfrage |
+| KI-Freigabe … | [KI-Freigabe](#ki-freigaben) genau hier (Admins); „Aktiv“ dahinter: hier gilt schon eine eigene Regel |
+| Löschen (an Ordnern: Ordner löschen) | in den [Papierkorb](#versionen-und-papierkorb), mit Rückfrage |
 
 ### Notiz-Menü „…“ und Kopfzeile der Notiz
 
@@ -292,19 +316,20 @@ In der Kopfzeile: **Icon** der Notiz (Klick ändert es), **Pfad** (Quelle / Ordn
 vorne zu „…“ gekürzt; ein Klick oder Antippen zeigt ihn ganz), **Stern** (Favorit), **Editor / Markdown** (beschriftet
 nur, wenn der Notizname daneben ganz Platz hat), **Herunterladen** (Pfeil nach unten: die Notiz als `.md`, mit Bildern
 oder Dateien als ZIP – siehe [Export](#exportieren-und-drucken); nicht bei verschlüsselten Notizen), Breite,
-Inhaltsverzeichnis ein/aus und **„…“** mit:
+Inhaltsverzeichnis ein/aus und **„…“**. Oben im Menü stehen vier Kacheln: **Im Baum** (klappt den Baum bis zur Notiz
+auf), **Versionen** ([Versionen](#versionen-und-papierkorb) aus der Git-Historie – wiederherstellen oder als neue Notiz
+speichern), **Drucken** (Drucken / als PDF) und **Teilen** (öffnet ▸ Per Mail versenden … / Zugriff per E-Mail
+geben …). Darunter:
 
 | Eintrag | Wirkung |
 |---|---|
-| Im Baum anzeigen | klappt den Baum bis zur Notiz auf |
-| Versionen | [Versionen](#versionen-und-papierkorb) aus der Git-Historie – wiederherstellen oder als neue Notiz speichern |
-| Drucken / als PDF …, Exportieren ▸ HTML-Datei / Markdown | [Export](#exportieren-und-drucken) |
-| KI fragen …, KI: Zusammenfassen, KI: Weiterschreiben | nur wo es keine Werkzeugleiste gibt (Lesemodus, Markdown-Ansicht) – sonst im [KI-Knopf](#ki-im-editor) |
-| Schreibschutz setzen / aufheben | `readonly: true` im Frontmatter |
-| Als Vorlage speichern | macht die Notiz zur [Vorlage](#vorlagen) |
-| Verschlüsseln … / Verschlüsselung entfernen … / Jetzt sperren | [Verschlüsselung](#verschlüsselte-notizen-und-ordner) |
-| Berechtigungen …, Teilen ▸ Per Mail versenden … / Zugriff per E-Mail geben … | wie im Rechtsklick-Menü |
-| Umbenennen / verschieben, Löschen | wie im Rechtsklick-Menü |
+| Dokument: Exportieren ▸ HTML-Datei / Markdown | [Export](#exportieren-und-drucken) |
+| Dokument: Als Vorlage speichern | macht die Notiz zur [Vorlage](#vorlagen) |
+| Dokument: Schreibgeschützt (Schalter) | setzt bzw. entfernt `readonly: true` im Frontmatter |
+| KI: KI fragen …, Zusammenfassen, Weiterschreiben | nur wo es keine Werkzeugleiste gibt (Lesemodus, Markdown-Ansicht) – sonst im [KI-Knopf](#ki-im-editor) |
+| Schutz & Verwaltung: Jetzt sperren, Verschlüsseln … / Verschlüsselung entfernen … | [Verschlüsselung](#verschlüsselte-notizen-und-ordner) |
+| Schutz & Verwaltung: Berechtigungen …, Umbenennen / verschieben | wie im Rechtsklick-Menü |
+| Löschen | rot abgesetzt am Ende, wie im Rechtsklick-Menü |
 
 ### Rechtsklick auf einen Tab
 
@@ -314,7 +339,9 @@ listet der Knopf **„Alle Tabs (n)“** rechts in der Leiste alle offenen.
 
 ### Befehlspalette
 
-**Strg+K** öffnet ein Eingabefeld für Notizen und Befehle; mit `>` am Anfang nur Befehle: neue Notiz,
+**Strg+K** öffnet ein Eingabefeld für Notizen und Befehle. Unter dem Feld wählen **Alle**, **Titel** (nur
+Treffer im Namen) und **Volltext** (nur Treffer im Text), welche Notizen erscheinen; **# Tags** öffnet die Tag-Übersicht,
+**✦ KI fragen** (wenn eingerichtet) die [Wissensbasis](#frag-die-wissensbasis). Mit `>` am Anfang nur Befehle: neue Notiz,
 neuer Ordner, im Baum anzeigen, Favorit, Versionen, KI fragen, Tags, Suche mit Filtern,
 synchronisieren, drucken, exportieren, Papierkorb, Einstellungen, **Hilfe**, Quelle einbinden,
 hell/dunkel/System, Sprache, Seitenleiste, Inhaltsverzeichnis, Breite.
@@ -391,7 +418,7 @@ Rückfragen wie „Ungespeicherte Eingaben verwerfen?“ oder „… löschen?�
 ### Verbindungen
 
 Zugangsdaten für Repositories verwaltest du an einer Stelle: **Einstellungen → Quellen →
-Verbindungen** (erster Reiter; daneben **Eingebundene Quellen** mit Liste, „Quelle einbinden“ und
+Verbindungen** (zweiter Reiter; davor **Eingebundene Quellen** mit Liste, „Quelle einbinden“ und
 Repository-Papierkorb). Eine Verbindung ist ein Konto bei **Gitea**, **GitHub** (github.com oder
 Enterprise), **GitLab** (gitlab.com oder eigene Instanz) oder **Git allgemein** (jeder HTTPS-Server,
 optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanzen – sind möglich.
@@ -454,7 +481,8 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 ## Notizen finden und lesen
 
 - **Sofort-Suche** links oben (Strg+P): Ergebnisse erscheinen beim Tippen, gruppiert nach
-  Ordnern, Notizen (Titel/Pfad) und Inhalt. Rechtsklick (auf Touch-Geräten: lange drücken) auf einen Treffer → „In neuem Tab
+  Ordnern, Notizen (Titel/Pfad) und Inhalt; zum Inhalt zählen auch die **Tags** („rezept“ oder „#rezept“ findet
+  Notizen mit diesem Tag). Rechtsklick (auf Touch-Geräten: lange drücken) auf einen Treffer → „In neuem Tab
   öffnen“, „Rechts/Links daneben öffnen“, „Im Baum anzeigen“ oder „Pfad kopieren“ (der Pfad
   mit der Quelle vorne; eine Meldung bestätigt das Kopieren). „Alle Ergebnisse …“ öffnet die
   Such-Seite.
@@ -485,14 +513,13 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 - **Favoriten:** Stern oben rechts in der Notiz (oder Rechtsklick im Baum → „Zu Favoriten“,
   das geht auch für Ordner ohne eigene Ordnernotiz – ein Klick darauf zeigt den Ordner aufgeklappt
-  im Baum). Favoriten stehen ganz oben in der Seitenleiste. Rechtsklick auf einen Eintrag in
-  „Favoriten“ oder „Zuletzt“: in neuem Tab, rechts oder links daneben öffnen, im Baum anzeigen,
-  **Aus Favoriten entfernen** bzw. „Zu Favoriten“. **Zuletzt** zeigt darunter die zuletzt
-  geöffneten Notizen – oder mit „geändert“ die zuletzt geänderten (auch von anderen, aus VS Code
-  oder per Git). Hinter jedem Eintrag steht grau in Klammern die **Quelle** – praktisch, weil
-  Git-Projekte oft dieselbe Ordnerstruktur haben (z. B. mehrere `README` oder `docs/`). Beide
-  Abschnitte lassen sich einklappen; ein Klick auf „geöffnet“ oder „geändert“ klappt „Zuletzt“
-  dabei automatisch auf. Die Listen gehören zu deinem Konto und liegen nicht im Repository.
+  im Baum). Favoriten stehen als kleine Chips unter der Suche – immer mit einem Klick erreichbar, ohne den Baum nach
+  unten zu schieben. Rechtsklick auf einen Favoriten oder einen Eintrag in „Zuletzt“: in neuem Tab, rechts oder links
+  daneben öffnen, im Baum anzeigen, **Aus Favoriten entfernen** bzw. „Zu Favoriten“. **Zuletzt** ist eine Ansicht der
+  Seitenleiste (Umschalter **Baum | Zuletzt | KI-Freigaben**): die zuletzt geöffneten Notizen – oder mit „geändert“ die
+  zuletzt geänderten (auch von anderen, aus VS Code oder per Git). Hinter jedem Eintrag steht grau in Klammern die
+  **Quelle** – praktisch, weil Git-Projekte oft dieselbe Ordnerstruktur haben (z. B. mehrere `README` oder `docs/`).
+  Listen und gewählte Ansicht gehören zu deinem Konto und liegen nicht im Repository.
   In „Zuletzt“ landet eine Notiz erst, wenn sie sich öffnen ließ. Einträge, deren Notiz es nicht
   mehr gibt (gelöscht, außerhalb umbenannt, Quelle ausgehängt), blendet die Seitenleiste aus.
   Lässt sich eine Notiz nicht öffnen, bietet der Tab „Suchen“ und „Papierkorb“ (Notiz nicht
@@ -522,8 +549,9 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 ![Eigene Icons](handbuch/54-eigene-icons.webp)
 - **Schreibschutz:** „…“ → „Schreibschutz setzen“ schreibt `readonly: true` in die Notiz – sie
-  öffnet dann für alle im Lesemodus („Nur lesen“ entsperrt sie vorübergehend). Aufheben über
-  denselben Menüpunkt.
+  öffnet dann für alle im Lesemodus; oben in der Kopfzeile steht dann gelb **„Nur lesen“** (ein Klick entsperrt sie
+  vorübergehend). Aufheben über denselben Menüpunkt. Darfst du eine Notiz nur lesen, steht dort gelb
+  **„Schreibgeschützt“**.
 - **Geteilte Ansicht:** Rechtsklick auf eine Notiz im Baum oder einen Suchtreffer → „Rechts daneben
   öffnen“ oder „Links daneben öffnen“ (im Tab-Menü heißt es „Rechts/Links daneben anzeigen“). Die gewählte Notiz kommt neben die
   aktuelle. Ist sie selbst die aktuelle (gerade per Klick geöffnet), kommt die zuvor geöffnete
@@ -532,9 +560,9 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 
 ![Geteilte Ansicht](handbuch/38-geteilte-ansicht.webp)
 
-- **Auf- und Zuklappen:** Favoriten, „Zuletzt“, „KI-Freigaben“ und jede Quelle klappst du per Klick auf ihre
-  Überschrift ein und aus. Neben der Suche ein Symbol, das je nach Zustand umschaltet: **Alles zuklappen**,
-  solange irgendein Ordner offen ist, sonst **Alles aufklappen** (alle Rubriken, alle Ordner aller Quellen). Beim Überfahren einer Quelle erscheint **Alle Ordner
+- **Auf- und Zuklappen:** Jede Quelle klappst du per Klick auf ihre Zeile ein und aus. Oben in der Karte der Quellen
+  ein Knopf, der je nach Zustand umschaltet: **Alles zuklappen**, solange irgendein Ordner offen ist, sonst **Alles
+  aufklappen** (alle Ordner aller Quellen). Beim Überfahren einer Quelle erscheint **Alle Ordner
   aufklappen / zuklappen**, beim Überfahren jedes Ordners – in jeder Quelle, auf jeder Ebene – **Alles darunter
   aufklappen / zuklappen** (ein Symbol, das je nach Zustand umschaltet; hat der Ordner keine
   Unterordner, klappt es nur ihn selbst auf oder zu) und, wo du schreiben darfst, **+** für eine
@@ -593,7 +621,11 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
   umbenannt oder verschoben wird, und Rechte oder KI-Freigaben, die direkt auf dieser Notiz liegen, hängen daran.
   Nicht ändern oder löschen – fehlt sie, merkt sich Kaveyl Wiki die Notiz nur noch über ihren Pfad.
   Sehr große Notizen (über 100 000 Zeichen) zeigt die Markdown-Ansicht als reinen Text – ohne Hervorhebung und
-  Inhaltsverzeichnis, damit sie flüssig bleibt.
+  Inhaltsverzeichnis, damit sie flüssig bleibt. Der Kopf der Karte nennt Datei, Zeile und Spalte; unten (bzw. oben,
+  je nach Einstellung der Werkzeugleiste) schwebt eine eigene Leiste: **Frontmatter** springt zu den Kopfdaten ganz
+  oben (fehlen sie, legt der Knopf sie mit `tags:` an), **Zeilenumbruch** schaltet zwischen Umbrechen und seitlichem
+  Scrollen langer Zeilen (merkt sich dieser Browser), dazu Rückgängig und Wiederholen.
+- Neben den Tags steht, wann die Notiz zuletzt geändert wurde („Bearbeitet heute, 20:38“).
 
 ![Markdown-Ansicht](handbuch/08-markdown-ansicht.webp)
 
@@ -607,14 +639,17 @@ optional mit Benutzername). Mehrere Verbindungen – auch mehrere Gitea-Instanze
 ## Bearbeiten
 
 Einfach in den Text klicken und schreiben – der Editor zeigt die Formatierung direkt (WYSIWYG).
-Das **?** am rechten Ende der Formatierungsleiste öffnet diese Hilfe; wer lieber direkt Markdown
-tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#markdown-spickzettel).
+**+ ▸ Editor-Hilfe** in der Werkzeugleiste (bzw. das **?** am Ende der Leiste oben) öffnet diese Hilfe; wer lieber
+direkt Markdown tippt, findet alle Schreibweisen im [Markdown-Spickzettel](#markdown-spickzettel).
 
 ![Editor](handbuch/10-editor.webp)
 
-- **Formatierungsleiste** oben: Absatzformat (Überschriften), fett, kursiv, durchgestrichen,
-  Code, Link, Listen, Checkliste, Zitat, Codeblock, Hinweis-Box, aufklappbarer Block,
-  Trennlinie, Tabelle. Steht der Cursor in einer Tabelle, kommen Knöpfe für Zeilen/Spalten
+- **Werkzeugleiste:** Standard ist eine schwebende Leiste unten über der Notiz. Die untere Reihe hat **+** (Block
+  einfügen: nummerierte Liste, Zitat, Codeblock, aufklappbarer Block, Trennlinie, Hilfe), **Aa** (Formatzeile ein/aus),
+  Checkliste, Aufzählung, Hinweis-Box, Tabelle, Anhang, **✦ KI** und Rückgängig/Wiederholen; die Formatzeile darüber
+  Überschrift 1–3, fett, kursiv, durchgestrichen, Code, Link, Format übertragen und Emoji. In
+  [Darstellung](#darstellung) lässt sich die Leiste nach oben stellen (alles in einer Zeile, mit Absatzformat); auf dem
+  Handy steht sie immer oben. Steht der Cursor in einer Tabelle, kommen Knöpfe für Zeilen/Spalten
   (oben/unten, links/rechts einfügen, löschen) dazu; im Codeblock eine Auswahl der Sprache
   (für die Farbhervorhebung, u. a. YAML, Bash, PowerShell, Dockerfile, nginx, TOML). Ist keine
   Sprache gesetzt, erkennt Kaveyl Wiki sie selbst und zeigt „Automatisch: yaml“; **„übernehmen“**
@@ -955,7 +990,9 @@ der Sync-Übersicht steht dazu eine Warnung. Das gilt auch, wenn dabei ein Konfl
   selbst – die Übersicht zeigt „Ordner mit eigenem Git-Repository“ und wie viele Dateien geändert
   und noch nicht committet sind; den Commit machst du wie gewohnt in VS Code oder per git. Wer das
   nicht will: Quelle bearbeiten → „Änderungen automatisch committen“. Klick öffnet die Übersicht pro
-  Quelle mit „Jetzt synchronisieren“, „Alle synchronisieren“ und dem **Verlauf**.
+  Quelle mit „Jetzt synchronisieren“, „Alle synchronisieren“ und dem **Verlauf**. Während der Abgleich läuft, dreht
+  sich das Symbol im Knopf; danach meldet eine Nachricht „Synchronisation abgeschlossen“ oder den Fehler (auch über
+  die Befehlspalette).
 
 ![Sync-Übersicht](handbuch/11-sync-uebersicht.webp)
 
@@ -970,7 +1007,8 @@ Alles per **Rechtsklick** im Baum (oder im Notiz-Menü „…“):
 
 - **Neue Notiz / Neuer Ordner** – auch über das **„+“**, das beim Überfahren einer Quelle oder
   eines Ordners erscheint (Auswahl „Neue Notiz“ oder „Neuer Ordner“). Der Dateiname wird aus dem
-  Titel gebildet (Sonderzeichen wie `:` werden ersetzt). Das Feld links neben dem Titel wählt gleich ein
+  Titel gebildet (Sonderzeichen wie `:` werden ersetzt, ein schon vorhandener Name bekommt „ 2“ – eine Meldung nennt
+  dann den Namen, unter dem gespeichert wurde). Das Feld links neben dem Titel wählt gleich ein
   **Icon** (freiwillig, dieselbe Auswahl wie bei „Icon ändern“).
 
 ![„+“ an einem Ordner](handbuch/59-ordner-neu.webp)
@@ -1670,7 +1708,7 @@ Reiter du zuletzt offen hattest. Das **?** oben rechts in der Titelleiste (oder 
 
 | Bereich | Reiter | Wer |
 |---|---|---|
-| Quellen | Verbindungen · Eingebundene Quellen · Webhooks | Admins |
+| Quellen | Eingebundene Quellen · Verbindungen · Webhooks | Admins |
 | Anhänge | – | Admins |
 | Werkzeuge | Aufräumen · Protokoll · Prüfung | Admins |
 | Backup | Ziele · Zeitpläne · Sicherungen · Datenbank | Admins |
@@ -1684,7 +1722,7 @@ Reiter du zuletzt offen hattest. Das **?** oben rechts in der Titelleiste (oder 
 
 ### Quellen
 
-Drei Reiter: Verbindungen · Eingebundene Quellen · Webhooks. Der Hauptknopf steht links unter der Liste: **„Verbindung hinzufügen“** bei den Verbindungen, **„Quelle einbinden“**
+Drei Reiter: Eingebundene Quellen · Verbindungen · Webhooks. Der Hauptknopf steht links unter der Liste: **„Verbindung hinzufügen“** bei den Verbindungen, **„Quelle einbinden“**
 (startet den [Assistenten](#quellen-einbinden)) bei den eingebundenen Quellen.
 
 #### Eingebundene Quellen
@@ -1785,6 +1823,13 @@ Notizen, die **unverschlüsselt in einem verschlüsselten Ordner** liegen. Die v
 Pro Quelle eine zugeklappte Zeile mit der Anzahl je Art („2 Gebrochene Links“) – ein Klick zeigt die
 Einträge, ein Klick auf einen Eintrag öffnet die Notiz. Es gibt nur den **letzten** Bericht; das
 Protokoll vermerkt jede Prüfung.
+
+**Verwaiste Anhänge löschen:** Im aufgeklappten Bericht einer Quelle löscht der Papierkorb an einem verwaisten Anhang
+diesen einen, **Alle verwaisten Anhänge löschen** alle der Quelle – jeweils nach einer Rückfrage. Kurz vor dem Löschen
+prüft Kaveyl Wiki noch einmal, ob inzwischen eine Notiz darauf verlinkt; dann bleibt die Datei. Liegt die Quelle in Git,
+bleibt die Datei im Verlauf erhalten; in einem Ordner ohne Git ist sie endgültig weg (die Rückfrage sagt, welcher Fall
+vorliegt). Ein Link aus einer anderen Quelle, die denselben Ordner zeigt, zählt mit. Hat eine Quelle eine Notiz über 2 MB,
+meldet die Prüfung dort keine verwaisten Anhänge (solche Notizen haben keine Links im Index) und nennt die Notiz im Bericht.
 
 ![Prüfung](handbuch/24-fsck.webp)
 
@@ -2388,9 +2433,18 @@ im Protokoll). Aufbau der Lieferung: API-Referenz, „Ereignisse für Agenten“
 
 ### Darstellung
 
-**Hell / Dunkel / System** (folgt dem Gerät), **Editorbreite** (Normal, Breit, Voll oder eigener Prozentwert) und
-**Inhaltsverzeichnis** an/aus. Hell/Dunkel gilt für dieses Gerät – schneller geht es über das Farbschema-Symbol oben
-rechts. Breite und Inhaltsverzeichnis gehören zu deinem Konto (auf allen Geräten gleich).
+Drei Karten:
+
+- **Erscheinungsbild:** **Hell / Dunkel / System** (folgt dem Gerät). Gilt für dieses Gerät – schneller geht es über
+  das Farbschema-Symbol unten in der Seitenleiste.
+- **Farbthema:** je ein Thema für hell (**Lavendel-Indigo** als Standard, **Amethyst**, **Pflaume**,
+  **Flieder-Schiefer**) und für dunkel (**Klassisch** – neutrales Anthrazit – als Standard, **Nacht-Indigo**,
+  **OLED-Schwarz**). Welches gerade gilt, entscheidet das Farbschema. Auch die Farbthemen gelten für diesen Browser.
+- **Editor:** die **Werkzeugleiste** – **Schwebend unten** (Standard: eine Leiste am unteren Rand der Notiz, darüber
+  die Formatzeile mit Überschriften, fett, kursiv usw., die du mit **Aa** ein- und ausblendest) oder **Oben** (eine
+  Leiste über der Notiz; ist sie zu breit, etwa bei größerer Schrift, bricht sie in eine zweite Zeile um). Auf dem Handy steht sie immer oben. Dazu **Editorbreite** (Normal, Breit, Voll oder eigener
+  Prozentwert) und **Inhaltsverzeichnis** an/aus. Werkzeugleiste, Breite und Inhaltsverzeichnis gehören zu deinem Konto
+  (auf allen Geräten gleich).
 
 ![Darstellung](handbuch/19-einstellungen-darstellung.webp)
 
@@ -2766,8 +2820,8 @@ Benutzer lesen darf.
 
 ### Überblick über alle Freigaben
 
-**Überblick über alle Freigaben (Admins):** Sobald es eine Freigabe gibt, steht in der Seitenleiste
-unter „Zuletzt“ der Abschnitt **✦ KI-Freigaben** (auf-/zuklappbar wie die Favoriten). Jede Zeile ist eine
+**Überblick über alle Freigaben (Admins):** Der Umschalter oben in der Seitenleiste zeigt mit **KI-Freigaben** alle
+Regeln (ein Klick auf eine Zeile zeigt die Stelle im Baum und schaltet dabei zurück auf „Baum“). Jede Zeile ist eine
 Regel: Quelle, Ordner oder Notiz (die Quelle in Klammern), rechts **freigegeben** oder **nicht freigegeben**
 (rot); mit privater und anderer KI auch **nur private KI**. Orange **wirkt nicht** heißt: nur für private KI
 freigegeben, aber kein Anbieter ist für private Notizen zugelassen – niemand sieht es (Häkchen setzen oder Freigabe
@@ -2793,7 +2847,11 @@ Werkzeugleiste gibt – bei Notizen, die du nur lesen darfst, und in der Markdow
 
 Der Vorschlag erscheint in einem Fenster: bei markiertem Text **Ersetzen** oder **Darunter
 einfügen**, bei Zusammenfassen **Am Anfang einfügen** oder **Am Ende einfügen**, bei Weiterschreiben
-**Am Ende einfügen** – dazu immer **Kopieren** und **Verwerfen**.
+**Am Ende einfügen** – dazu immer **Kopieren** und **Verwerfen**. Links, Inline-Code und Formeln bleiben dabei
+erhalten (die KI ist angewiesen, sie nicht umzuschreiben).
+
+Ist die Notiz für die KI nicht freigegeben (KI-Freigaben, `ai: false`, verschlüsselt), ist der **KI**-Knopf grau; beim
+Darüberfahren steht der Grund. Darf die KI nur lesen, bietet das Menü nur **Zusammenfassen** und **KI fragen …**.
 
 - **Zusammenfassen** liefert wenige kurze Stichpunkte in der Sprache der Notiz. Code und Tabellen
   werden nicht abgeschrieben, sondern in einem Satz beschrieben; Offenes, Geplantes und nicht
@@ -2820,11 +2878,15 @@ Antworten erscheinen **formatiert wie eine Notiz** – Überschriften, Listen, T
 Hervorhebung, Formeln. Bilder zeigt die Antwort nur aus Kaveyl Wiki selbst; ein Bild von einer anderen
 Webseite erscheint als Link und lädt erst, wenn du ihn anklickst. Unter jeder Antwort:
 
-- **Kopieren** – in eine Kaveyl-Wiki-Notiz eingefügt (Strg+V) kommt die Antwort genau so formatiert an
+- **Kopieren** – der Knopf zeigt kurz **„Kopiert“**; in eine Kaveyl-Wiki-Notiz eingefügt (Strg+V) kommt die Antwort genau so formatiert an
   (auch Hinweiskästen, Formeln, Tabellen); in Word oder eine Mail formatiert, in einen Texteditor als
   Markdown.
 - **Markdown** / **Formatiert** – schaltet die Ansicht um, etwa um nur einen Teil als Markdown zu markieren
   und zu kopieren.
+- **In Notiz einfügen** – nur wenn gerade eine Notiz offen ist, die du bearbeiten darfst: die Antwort kommt unter den
+  Absatz (bzw. die Liste oder Tabelle), in dem die Schreibmarke stand; ohne gesetzte Schreibmarke (ganz am Anfang der Notiz) ans Ende; zitierte Quellen
+  kommen als Links mit, die von dieser Notiz aus stimmen. Danach schließt sich der Chat; Strg+Z nimmt es zurück. Stützt sich der Chat
+  auf Notizen, die nur für private KI freigegeben sind, und dürfen die Notiz auch andere KIs lesen, fragt Kaveyl Wiki vorher nach.
 - **Als Notiz speichern …** – Titel (vorbelegt mit der Frage) und Ordner wählen; die Antwort wird eine
   neue Notiz, ihre Quellen stehen als Links am Ende. Gespeichert wird in deinem Namen, nicht als KI;
   in verschlüsselten Ordnern geht das nicht (dort kopieren und einfügen).
@@ -2837,7 +2899,9 @@ löschen …** fest unter der Liste löscht wie im Browser die Chats der **letzt
 24 Stunden**, **7** oder **30 Tage** oder **alle** – nach einer Rückfrage. Gelöscht ist gelöscht: Fragen,
 Antworten und Vorschläge verschwinden aus der Datenbank, die Datei wird an den Stellen überschrieben;
 das Protokoll hält nur fest, *welche Notizen* an welchen Anbieter gingen, nicht die Fragen. (Nur
-ältere Datenbank-Sicherungen enthalten sie noch, bis diese ablaufen.) **Strg+Enter** sendet die Frage. In
+ältere Datenbank-Sicherungen enthalten sie noch, bis diese ablaufen.) **Strg+Enter** sendet die Frage. Solange
+die KI arbeitet, steht statt „Fragen“ **Stopp**: Es bricht ab, die Frage bleibt im Feld, gespeichert wird nichts, und
+Kaveyl Wiki fragt den Anbieter nicht weiter. Das Schließen des Fensters bricht ebenso ab. In
 einem laufenden Chat bleibt der Bezug fest und steht als Text da; **„Anderer Bezug: neuer Chat“** daneben beginnt einen
 neuen Chat, in dem du den Bezug wieder wählst (der bisherige bleibt unter den früheren Chats). Auf schmalen
 Bildschirmen (Handy) stehen die früheren Chats als Auswahl über dem Chat, daneben Knöpfe für **Neuer Chat**, zum
@@ -2895,6 +2959,11 @@ dem Autor **„Kaveyl Wiki KI (im Auftrag von dir)“** und einer Commit-Nachric
 nur, wo die KI freigegeben ist und du selbst schreiben darfst – bei einem Ordner gilt das für alles
 darin, wie beim Verschieben im Baum; wurde die Notiz inzwischen geändert, überschreibt Kaveyl Wiki nichts (dann die KI neu fragen). Löschen kann die KI
 nicht.
+
+Hat die private KI in diesem Chat private Notizen gelesen, kann ein Vorschlag deren Inhalt enthalten. Liegt das Ziel an
+einem Ort, den auch KIs ohne „Für private Notizen zulassen“ lesen dürfen, zeigt die Karte einen gelben Hinweis – ebenso, wenn
+ein Vorschlag eine Notiz oder einen Ordner mit „Freigegeben – nur private KI“ an so einen Ort verschiebt. Übernehmen geht
+trotzdem; der Hinweis sagt nur, dass der Inhalt danach nicht mehr privat ist.
 
 Damit Vorschläge als normale Notizen taugen, räumt Kaveyl Wiki sie auf: Quellen-Nummern wie „[1]“ aus
 dem Chat landen nicht in der Notiz, und Links, die die KI ab der Quellenwurzel schreibt
@@ -2983,6 +3052,7 @@ Bruno. Beispiele: `GET /api/v1/sources`, `GET /api/v1/search?q=wort`,
 | Strg+S | Sofort speichern und übertragen |
 | Strg+B / Strg+I / Strg+E | fett / kursiv / Code |
 | Strg+Z / Strg+Umschalt+Z | Rückgängig / Wiederholen |
+| Alt+↑ / Alt+↓ (im Editor) | Absatz, Überschrift oder Block mit der Schreibmarke eine Stelle nach oben / unten schieben; ein Listen- oder Checklistenpunkt bleibt in seiner Liste, mehrere markierte wandern zusammen |
 | `/` am Zeilenanfang oder nach einem Leerzeichen | Slash-Befehle |
 | `[[` | Notiz suchen und verlinken |
 | `:` + Wort | Emoji einfügen |
@@ -3124,6 +3194,10 @@ Die Willkommensseite zeigt dir den Weg für dein Gerät gleich mit; läuft Kavey
 dort abgehakt. Wieder entfernen lässt sich die App wie jede andere (lange auf das Symbol drücken bzw. in den
 Einstellungen des Browsers); deine Notizen bleiben davon unberührt, sie liegen auf dem Server.
 
+Das Symbol heißt **Kaveyl Wiki**, Status- und Navigationsleiste haben die Farbe der Seite (hell oder dunkel, wie unter
+Darstellung eingestellt). Ein Symbol, das vor Version 0.2.15 abgelegt wurde, kann noch „Kaveyl“ heißen und eine lila Leiste
+zeigen – dann die App entfernen und neu ablegen.
+
 **Voraussetzung: https.** Als App ablegen lässt sich Kaveyl Wiki nur, wenn es über eine `https://`-Adresse erreichbar
 ist. Über `http://…` legen die meisten Browser höchstens ein Lesezeichen-Symbol an. Für https sorgt der Reverse-Proxy,
 den der Admin einrichtet (siehe [Reverse-Proxy](#reverse-proxy)).
@@ -3203,6 +3277,7 @@ Paketnamen und die Lizenz.
 | Radix UI | Dialoge, Menüs, Kontextmenüs, Aufklapp-Fenster | `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-context-menu`, `@radix-ui/react-popover` | MIT |
 | Tailwind CSS | Gestaltung, Farben, Hell/Dunkel | `tailwindcss`, `@tailwindcss/vite` | MIT |
 | Lucide | Symbole in der Oberfläche und für Notizen | `lucide-react` | ISC |
+| Inter | Schrift der Oberfläche und der Notizen | `@fontsource-variable/inter` | OFL-1.1 |
 | Vite | baut die Web-App | `vite`, `@vitejs/plugin-react` | MIT |
 
 **Editor und Inhalte**
@@ -3210,7 +3285,7 @@ Paketnamen und die Lizenz.
 | Komponente | Wofür | Pakete | Lizenz |
 |---|---|---|---|
 | TipTap / ProseMirror | Editor mit sichtbarer Formatierung | `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extensions`, `@tiptap/extension-code`, `@tiptap/extension-code-block-lowlight`, `@tiptap/extension-details`, `@tiptap/extension-image`, `@tiptap/extension-list`, `@tiptap/extension-table`, `@tiptap/suggestion` | MIT |
-| CodeMirror 6 | Markdown-Quelltext | `@codemirror/view`, `@codemirror/state`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@uiw/react-codemirror` | MIT |
+| CodeMirror 6 | Markdown-Quelltext | `@codemirror/view`, `@codemirror/state`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/lang-markdown`, `@codemirror/language-data`, `@lezer/highlight`, `@uiw/react-codemirror` | MIT |
 | unified / remark | Markdown lesen und schreiben (Tabellen, Aufgaben, Formeln, Frontmatter) | `unified`, `remark-parse`, `remark-stringify`, `remark-gfm`, `remark-math`, `remark-frontmatter`, `mdast-util-gfm`, `mdast-util-math`, `mdast-util-frontmatter`, `mdast-util-to-markdown` | MIT |
 | lowlight / highlight.js | Farben in Codeblöcken | `lowlight` | MIT / BSD-3-Clause |
 | KaTeX | Formeln | `katex` | MIT |

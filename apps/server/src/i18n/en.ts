@@ -699,6 +699,8 @@ export default {
   'Im Index, aber nicht mehr auf der Platte': 'In the index, but no longer on disk',
   'Notiz liegt unverschlüsselt in einem verschlüsselten Ordner – öffnen und „Verschlüsseln“ wählen': 'Note is unencrypted in an encrypted folder – open it and choose “Encrypt”',
   'Anhang wird von keiner Notiz mehr verlinkt': 'Attachment is no longer linked from any note',
+  'Notiz ist größer als 2 MB und hat keine Links im Index – verwaiste Anhänge werden für diese Quelle nicht gemeldet':
+    'Note is larger than 2 MB and has no links in the index – orphaned attachments are not reported for this source',
   'Bild auf „{target}“ führt ins Leere': 'Image “{target}” leads nowhere',
   'Link auf „{target}“ führt ins Leere': 'Link to “{target}” leads nowhere',
   'Rebase hängt im Repository ({dir})': 'Rebase is stuck in the repository ({dir})',
@@ -711,6 +713,8 @@ export default {
   '– {where}: Notiz liegt unverschlüsselt in einem verschlüsselten Ordner – öffnen und „Verschlüsseln“ wählen':
     '– {where}: Note is unencrypted in an encrypted folder – open it and choose “Encrypt”',
   '– {where}: Anhang wird von keiner Notiz mehr verlinkt': '– {where}: Attachment is no longer linked from any note',
+  '– {where}: Notiz ist größer als 2 MB und hat keine Links im Index – verwaiste Anhänge werden für diese Quelle nicht gemeldet':
+    '– {where}: Note is larger than 2 MB and has no links in the index – orphaned attachments are not reported for this source',
   '– {where}: Bild auf „{target}“ führt ins Leere': '– {where}: Image “{target}” leads nowhere',
   '– {where}: Link auf „{target}“ führt ins Leere': '– {where}: Link to “{target}” leads nowhere',
   '– {where}: Rebase hängt im Repository ({dir})': '– {where}: Rebase is stuck in the repository ({dir})',

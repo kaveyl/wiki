@@ -94,7 +94,7 @@ export const SearchBox = forwardRef<SearchHandle, { mounts: Mount[]; onSearchPag
   let index = -1;
   return (
     <div ref={box} className="relative">
-      <div className="flex h-8 items-center gap-2 rounded-md border border-line bg-bg px-2 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent-soft">
+      <div className="flex h-8 items-center gap-2 rounded-xl border border-line-soft bg-subtle px-2.5 dark:bg-bg focus-within:border-accent focus-within:ring-2 focus-within:ring-accent-soft">
         <SearchIcon className="h-3.5 w-3.5 shrink-0 text-fg-faint" />
         <input
           ref={input}
@@ -114,7 +114,7 @@ export const SearchBox = forwardRef<SearchHandle, { mounts: Mount[]; onSearchPag
         </kbd>
       </div>
       {open && query && (
-        <div className="absolute left-0 top-9 z-30 w-[min(460px,calc(100vw-24px))] overflow-hidden rounded-lg border border-line bg-bg shadow-pop">
+        <div className="absolute left-0 top-9 z-30 w-[min(460px,calc(100vw-24px))] overflow-hidden rounded-2xl bg-bg shadow-pop">
           <div className="max-h-[70vh] overflow-y-auto py-1">
             {groups.length === 0 && <div className="px-3 py-3 text-sm text-fg-muted">{result.isFetching ? t('Suche …') : t('Keine Treffer')}</div>}
             {groups.map((g) => (

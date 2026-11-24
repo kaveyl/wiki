@@ -33,7 +33,7 @@ export const TAG_DOT: Record<TagColor, string> = {
   pink: 'bg-pink-400',
   slate: 'bg-slate-500',
 };
-export const tagChipClass = (color: TagColor | null | undefined) => (color ? TAG_CHIP[color] : 'bg-muted text-fg-muted');
+export const tagChipClass = (color: TagColor | null | undefined) => (color ? TAG_CHIP[color] : 'bg-accent-soft text-accent');
 
 /** The color of a tag in a source (null: none). Without a source: the one of the tag list. */
 export function useTagColors() {
